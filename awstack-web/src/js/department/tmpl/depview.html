@@ -1,0 +1,235 @@
+<div class="department">
+	<div class="tab-title" ng-class="{'hide-title':!ADMIN}">
+		<button type="button"  ng-show="ADMIN"  data-toggle="modal" ng-click="createDep()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{'aws.depart.new_depart'|translate}}</button>
+	</div>
+	<div class="page-inner">
+		<div class="box">
+			<div class="col-4">
+				<div class="title">{{'aws.depart.instanceDetail'|translate}}</div>
+				<div class="panels clearfix">
+			        <div class="pie-wrap" >
+			        <div class=" pie" chart-pie panel='depViewInsPieChart.panels'></div>
+			        </div>
+			        <div class="pie-legend">
+			          <dl class="dl-horizontal">
+			            <dt>{{'aws.quota.totalQuota'|translate}}：</dt>
+			            <dd><span class="total">{{insData.total}}</span></dd>
+			          </dl>
+			          <dl class="dl-horizontal" ng-repeat="legend in depViewInsPieChart.panels.data">
+			            <dt><i style="background-color:{{depViewInsPieChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+			            <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?depViewInsPieChart.panels.colors[$index]:'inherit'}>{{legend.value}}</span></dd>
+			          </dl>
+			        </div>
+		      	</div>
+			</div>
+			<div class="col-8 quotaInfo" ng-class="{'seg3':!L3}" >
+				<div class="title">{{'aws.depart.quotaDetail'|translate}}</div>
+				<ul ng-if="showpie" class="clearfix">
+					<li ng-repeat ="quota in quotas">
+						<progress-bar  progress-value="quota" bar-type="'width'" ></progress-bar>
+					</li>
+				</ul>
+			</div>          
+		</div>
+		 
+		<div class="table-action">
+			<button class="new-project btn btn-primary " ng-click="updateProject('new')"><i class="icon-aw-add-to2"></i>{{'aws.project.newproject' | translate}}</button>
+			<button ng-click="updateProject('edit',editData)" ng-disabled="isDisabled" class="btn btn-info" ><i class="icon-aw-modify"></i>{{'aws.action.edit' | translate}}</button>
+			<button type="button" data-toggle="modal" ng-click="del(checkedItems)" ng-disabled="delisDisabled" class="btn btn-warning" > <i class="icon-aw-delete"></i>{{'aws.action.del' | translate}}</button>
+			<button type="button" ng-disabled="isDisabled" data-toggle="modal" ng-click="allocateUser('allocateUser',editData)" class="btn btn-info"><i class="icon-aw-adjust"></i>{{'aws.depart.allocateUser'|translate}}</button>
+			<div class="search-box">
+				<form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+					<button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+					<input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search' | translate}}" />
+				</form>
+			</div> 
+		</div>
+		<div class="table-content">
+			<empty-tip empty-type="loadData"></empty-tip>
+			<table ng-table="tableParams" class="table" show-filter="false">
+				<colgroup>
+					<col width="10%" />
+					<col width="40%" />
+					<col width="50%" />
+				</colgroup>
+				<tr ng-repeat="item in $data">
+					<td header="'headerCheckbox.html'">
+						<label class="checkbox">
+							<input type="checkbox" name="r" ng-model="checkboxes.items[item.projectUid]" value="{{item.projectUid}}" />
+							<i class="iconfont"></i>
+						</label>
+					</td>
+					<td data-title="'aws.project.table.pro_name' | translate" sortable="'name'"><a  ng-click="gotoCvm(item.name,item.projectUid,item.domainUid)">{{item.name}}</a></td>
+					<td data-title="'aws.project.table.pro_desc' | translate" sortable="'description'"><span title="{{item.description}}" class="des des-lg">{{item.description}}</span></td>	
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+		<i class="iconfont"></i>
+	</label>
+</script>
+<script type="text/ng-template" id="creatProject.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+			<h3 class="modal-title">{{projectTitle}}</h3>
+		</div>
+		<div class="modal-body">
+			<form name="projectName" novalidate>
+				<div class="control-group">
+					<label class="control-label">{{'aws.project.newProject.pro_name' | translate}}：</label>
+					<div class="controls">
+						<input type="text" name="name" class="form-controls"  title="{{notEditTip}}" ng-disabled="notEditName" placeholder="{{'aws.project.proName' | translate}}" ng-model="project.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" repeat-nums required />
+							<span class="error-messages error" ng-if="interactedName(projectName.name)" ng-messages="projectName.name.$error" >
+								<div ng-message="required" class="error">{{'aws.errors.required'|translate}}</div>
+								<div ng-message="pattern" class="error">{{'aws.errors.noSpecial'|translate}}</div>
+								<div ng-message="maxlength" >{{'aws.errors.maxlength'|translate}}</div>
+								<div ng-message="repeatNums" >{{'aws.errors.noRepeatProName'|translate}}</div>
+							</span> 
+
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">{{'aws.project.newProject.pro_desc' | translate}}：</label>
+					<div class="controls">
+						<textarea class="form-controls" name="desc" ng-maxlength="256" ng-model="project.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}"></textarea>
+						<span class="error-messages error" ng-if="interactedName(projectName.desc)" ng-messages="projectName.desc.$error" >
+							<div ng-message="maxlength" >{{'aws.errors.maxlength256'|translate}}</div>
+						</span> 
+					</div>
+				</div>
+				<!-- <div class="control-group">
+					<label class="control-label"><strong>{{'aws.project.quota' | translate}}</strong></label>
+					<div class="controls">
+					</div>
+				</div> -->
+				<span class="form-title">{{'aws.project.quota' | translate}}</span>
+				<div ng-if='!getDepConfig' class="marginLeft">{{'aws.project.quotafail'|translate}}<span class='redPointer' ng-click='getCanEditQuota()'>{{'aws.project.retry'|translate}}</span></div>
+				<div  ng-repeat="quota in canEditQuotas" class="control-row" ng-if="showQuota">
+					<div class="control-group control-item-inner">
+						<label class="control-label" title="{{'aws.quota.'+quota.name | translate}}">{{'aws.quota.'+quota.name | translate}}： </label>
+						<div class="controls">
+							<input class="pro-quota-input form-control" type="text" name="{{quota.name}}" ng-model="quota.hardLimit" ng-pattern="/^([1-9][0-9]*)$/" availquota required/>
+							<!-- <span class="error-messages error" ng-if="interactedName(projectName[quota.name])" ng-messages="projectName[quota.name].$error" > -->
+							<span class="error-messages error" ng-messages="projectName[quota.name].$error" >
+								<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+								<div ng-message="pattern">{{'aws.errors.atleast'|translate}}</div>
+								<div ng-message="availquota">{{'aws.quota.errorMessage.insufficient'|translate}}</div>
+							</span>
+						</div>
+					</div>
+					<div class="clear" ng-if="$odd"></div>
+				</div>
+				<div class="clear"></div>
+			</form>
+		</div>
+		<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-disabled = "!getDepConfig" ng-click="confirmPro()">{{'aws.action.ok' | translate}}</button>
+			<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="createDep.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" ng-click="$dismiss()">×</button>
+			<h3 class="modal-title">{{'aws.depart.new_depart' | translate}}</h3>
+		</div>
+		<div class="modal-body">
+			<form action="" name="createDepForm" novalidate>
+				<div class="control-group">
+					<label class="control-label ">{{'aws.depart.newDepart.dep_name' | translate}}：</label>
+					<div class="controls" >
+						<input type="text" name="name" class="form-controls"  placeholder="{{'aws.org.upOrg.name_tip' | translate}}" ng-model="domain.name" repeatname ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+						<div class="error-messages error" ng-if="interacted(createDepForm.name)" ng-messages="createDepForm.name.$error" >
+							<div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+							<div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.noSpecial'|translate}}</div>
+							<div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+							<div ng-message="repeatname">{{'aws.errors.noRepeatDepName'|translate}}</div>	
+						</div>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">{{'aws.depart.newDepart.pro_desc' | translate}}：</label>
+					<div class="controls">
+						<textarea class="form-controls" name="description" ng-model="domain.description" ng-maxlength="256" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}"></textarea>
+						<div class="error-messages error" ng-if="interacted(createDepForm.description)" ng-messages="createDepForm.description.$error" >
+							<div ng-message="maxlength">{{'aws.errors.maxlength256'|translate}}</div>
+						</div>
+					</div>
+				</div>
+				<!-- <div class="control-group">
+					<label class="control-label "><strong>{{'aws.depart.quota'|translate}}</strong></label>
+					<div class="controls">
+					</div>
+				</div> -->
+				<span class="form-title">{{'aws.depart.quota' | translate}}</span>
+				<div ng-if='!getDepConfig' class="marginLeft">{{'aws.project.quotafail'|translate}}<span class='redPointer' ng-click='getCanEditQuota()'>{{'aws.project.retry'|translate}}</span></div>
+				<div  ng-repeat="quota in canEditQuotas" class="control-row">
+					<div class="control-group control-item-inner">
+						<label class="control-label" title="{{'aws.quota.'+quota.name | translate}}">{{'aws.quota.'+quota.name | translate}}：</label>
+						<div class="controls">
+							<input class="form-control" type="text" name="{{quota.name}}" ng-model="quota.hardLimit"  ng-pattern="/^([1-9][0-9]*)$/"  availquota1 required/>
+							<div class="error" ng-if="interacted(createDepForm[quota.name])" ng-messages="createDepForm[quota.name].$error">
+								<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+								<div ng-message="pattern">{{'aws.errors.atleast'|translate}}</div>
+								<div ng-message="availquota1">{{'aws.common.unreasonable'|translate}}</div>
+								<!-- availquota1="canEditQuotas[k]"<div ng-message="availquota1">{{'aws.quota.errorMessage.insufficient'|translate}}{{availQuotaError1}}</div> -->
+							</div>  
+						</div> 
+					</div>
+					<div class="clear" ng-if="$odd"></div>
+				</div>
+				<div class="clear"></div>
+			</form>
+		</div>
+		<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-disabled='!getDepConfig' ng-click="confirmDep()">{{'aws.instances.addinstances.ok'|translate}}</button>
+			<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+		</div>
+	</div>
+</script> 
+<script type="text/ng-template" id="allocateUser.html">
+	<div class="roleToUser-modal modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+			<h3 class="modal-title">{{'aws.depart.allocateUser'|translate}}</h3>
+		</div>
+		<div class="modal-body">
+			<div class="left-select-table">
+				<h5>{{'aws.depart.noAllocate'|translate}}</h5>
+				<div class="table-responsive">
+					<ul ng-repeat="user in users" align="center" border="0" cellpadding="0" cellspacing="0">
+						<li class="dropdown">
+							<button ng-click="selectUserToProject(user)"><i class="icon-aw-check-square"></i></button>
+							<span title="{{user.name}}">{{user.name}}</span>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="btnGroup">
+			</div>
+			<div class="right-select-table">
+				<h5>{{'aws.depart.allocatedUser'|translate}}</h5>
+				<div class="table-responsive">
+					<ul ng-repeat="havedUser in havedUsers" align="center" border="0" cellpadding="0" cellspacing="0">
+						<li class="dropdown">
+							<button ng-click="removeUserFromProject(havedUser)"><i class="icon-aw-indeterminate"></i></button>
+							<span title="{{havedUser.name}}">{{havedUser.name}}</span>													
+							<div class="select-role" ng-dropdown-multiselect=""  select-radio="'true'"  options="roles" selected-model="havedUser.roleidlist" extra-settings="example5settings" translation-texts="example5customTexts"></div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-click="$close()">{{"aws.action.ok"|translate}}</button>
+			<button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+		</div>
+	</div>
+</script>

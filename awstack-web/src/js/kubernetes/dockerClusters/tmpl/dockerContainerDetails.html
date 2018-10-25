@@ -1,0 +1,95 @@
+<div ng-controller="dockerContainerDetailCtrl">
+    <uib-tabset active="0" justified="true" >
+        <uib-tab index="0" heading='{{"aws.k8s.dockerClusters.containerEnvs"|translate}}'>
+            <div class="table-content">
+            <table ng-table="envsTable" class="table" show-filter="false">
+                <tr ng-repeat="env in envs">
+                <td data-title="'aws.k8s.dockerClusters.containerEnvName'|translate" sortable="'name'">
+                    <span>{{env.name}}</span>
+                </td>
+                <td data-title="'aws.k8s.dockerClusters.containerEnvValue'|translate" sortable="'value'">
+                    <span>{{env.value}}</span>
+                </td>
+                </tr>
+            </table>
+            </div>
+        </uib-tab>
+        <uib-tab index="1" heading='{{"aws.k8s.dockerClusters.containerPorts"|translate}}'>
+            <div class="table-content">
+            <table ng-table="portsTable" class="table" show-filter="false">
+                <tr ng-repeat="port in ports">
+                <td data-title="'aws.k8s.dockerClusters.containerPortName'|translate" sortable="'name'">
+                    <span>{{port.name || "None"}}</span>
+                </td>
+                <td data-title="'aws.k8s.dockerClusters.containerContainerPort'|translate"
+                    sortable="'containerPort'">
+                    <span>{{port.containerPort}}</span>
+                </td>
+                <td data-title="'aws.k8s.dockerClusters.containerHostPort'|translate"
+                    sortable="'hostPort'">
+                    <span>{{port.hostPort || "None"}}</span>
+                </td>
+                <td data-title="'aws.k8s.dockerClusters.containerPortProtocol'|translate" sortable="'protocol'">
+                    <span>{{port.protocol}}</span>
+                </td>
+                </tr>
+            </table>
+            </div>
+        </uib-tab>
+        <uib-tab index="2" heading='{{"aws.k8s.dockerClusters.containerVolumes"|translate}}'>
+            <div class="table-content">
+            <table ng-table="volumesTable" class="table" show-filter="false">
+                <tr ng-repeat="volume in volumes">
+                <td data-title="'aws.k8s.dockerClusters.containerVolumeName'|translate" sortable="'name'">
+                    <span>{{volume.name}}</span>
+                </td>
+                <td data-title="'aws.k8s.dockerClusters.containerVolumeMountPath'|translate" sortable="'mountPath'">
+                    <span>{{volume.mountPath}}</span>
+                </td>
+                <td data-title="'aws.k8s.dockerClusters.containerVolumeReadOnly'|translate" sortable="'readOnly'">
+                    <span>{{volume.readOnly ? "只读" : "读写"}}</span>
+                </td>
+                </tr>
+            </table>
+            </div>
+        </uib-tab>
+        <uib-tab index="3" heading='{{"aws.k8s.dockerClusters.containerLogs"|translate}}' select="getLogs()"
+                    ng-disabled="!ready">
+            <div class="table-action">
+                <div type="button" class="btn btn-renovat right-ports" ng-click="refreshLogs()">
+                    <i class="icon-aw-refresh"></i>
+                </div>
+            </div>
+            <style type="text/css">
+            pre {
+                height: auto;
+                max-height: 600px;
+                overflow: auto;
+                background-color: #eeeeee;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                word-break: normal;
+            }
+            </style>
+            <div>
+            <pre>{{containerLogs}}</pre>
+            </div>
+        </uib-tab>
+        <uib-tab index="4" heading='{{"aws.k8s.dockerClusters.containerAdvisors"|translate}}'
+                 select="setMonitorFlag(true)" deselect="setMonitorFlag(false)">
+            <div ng-if="startMonitor">
+            <div ng-controller="containerMonitorCtrl" class="container-monitor">
+                <ng-echarts class="echarts"
+                            ec-config="cpuConfig"
+                            ec-option="cpuOption">
+                </ng-echarts>
+                <ng-echarts class="echarts"
+                            ec-config="memoryConfig"
+                            ec-option="memoryOption">
+                </ng-echarts>
+            </div>
+            </div>
+        </uib-tab>
+    </uib-tabset>
+</div>
+

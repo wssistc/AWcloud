@@ -1,0 +1,165 @@
+<div id="main">
+  <div class="container">
+    <div class="infor-box">
+      <form name="detailForm">
+        
+      
+      <!-- 表格 start -->
+      <table class="table border">
+        <thead>
+          <tr>
+            <th>{{'aws.register.info.hostName'|translate}}</th>
+            <!-- <th>{{'aws.register.info.area'|translate}}</th> -->
+            <th>{{'aws.register.info.ManagementNetwork'|translate}}</th>
+            <th>{{'aws.register.info.cpu'|translate}}</th>
+            <th>{{'aws.register.info.mem'|translate}}</th>
+            <th>SSD <span ng-if="fourModule.checkedList[0].hostInfoMap.ssdUnits">({{fourModule.checkedList[0].hostInfoMap.ssdUnit}})</span></th>
+            <th>SATA <span ng-if="fourModule.checkedList[0].hostInfoMap.sataUnits">({{fourModule.checkedList[0].hostInfoMap.sataUnit}})</span></th>
+            <th ng-if="faultdomainShow">{{'aws.register.info.fault'|translate}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in fourModule.checkedList">
+            <td class="col-2">
+              <span>{{item.hostName}}</span>
+            </td>
+            <!-- <td>{{item.regionName}}</td> -->
+            <td>{{item.hostInfoMap.ip}}</td>
+            <td>{{item.hostInfoMap.cpu.ht}}</td>
+            <td>{{item.hostInfoMap.mem | unitFilter | number:1}}</td>
+            <td>{{item.hostInfoMap.ssdAll}}{{item.hostInfoMap.ssdUnit}}</td>
+            <td>{{item.hostInfoMap.sataAll}}{{item.hostInfoMap.sataUnit}}</td>
+            <td  ng-if="faultdomainShow">{{item.hostInfoMap.fault_domain}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="table border">
+        <caption>{{'aws.register.info.netSetting'|translate}}</caption>
+        <thead>
+          <tr>
+            <th>{{'aws.register.info.type'|translate}}</th>
+            <th>CIDR</th>
+            <th>{{'aws.register.info.IPaddresses'|translate}}</th>
+            <th ng-if="haVlan.neutron_type=='vlan'">VLAN标签</th>
+            <th ng-if="haVlan.neutron_type=='vxlan'">VXLAN标签</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in fourModule.usedList">
+            <td>{{'aws.register.info.'+item.name|translate}}</td>
+            <td>{{item.cidr}}</td>
+            <td><span ng-repeat="ip in item.iprange">{{ip.start}}-{{ip.end}}<i ng-if="!$last">,</i></span></td>
+            <td>{{item.vlan}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pool-size">
+        <!-- <div class="form-group">
+          <label class="control-label">{{'aws.register.info.ceph_nova_pool_size'|translate}}</label>
+          <div class="control-item">
+            <input type="text" class="form-control" ng-model="fourModule.ceph_nova_pool_size" name="ceph_nova_pool_size" max="fourModule.nodeList" min="fourModule.backupMin" backup-check required />
+            <div ng-if="detailForm.ceph_nova_pool_size.$invalid">
+                <span class="help-block" ng-if="detailForm.ceph_nova_pool_size.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                <span class="help-block" ng-if="!detailForm.ceph_nova_pool_size.$error.required && detailForm.ceph_nova_pool_size.$error.backupCheck">请输入大于{{fourModule.backupMin}}且小于{{fourModule.nodeList}}的正整数</span>
+            </div>
+          </div>
+        </div> -->
+        <div ng-if="patternSelected=='hyper'">
+          <div class="form-group">
+            <label class="control-label">存储副本数:</label>
+            <div class="control-item">
+              <ui-select ng-model="fourModule.storagesize_selected">
+                <ui-select-match placeholder="请选择存储副本数">{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="data in storagesizeType | filter:{name:$select.search}">
+                  <div ng-bind-html="data.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <!-- <div class="form-group">
+            <label class="control-label">存储副本数</label>
+            <div class="control-item">
+              <input type="text" class="form-control" ng-model="fourModule.ceph_glance_pool_size" name="ceph_glance_pool_size" max="fourModule.nodeList" min="fourModule.backupMin" backup-check required ng-disabled="true"/>
+              <div ng-if="detailForm.ceph_glance_pool_size.$invalid  && detailForm.ceph_glance_pool_size.$dirty">
+                  <span class="help-block" ng-if="detailForm.ceph_glance_pool_size.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                  <span class="help-block" ng-if="!detailForm.ceph_glance_pool_size.$error.required && detailForm.ceph_glance_pool_size.$error.backupCheck">请输入大于{{fourModule.backupMin}}且小于{{fourModule.nodeList}}的正整数</span>
+              </div>
+            </div>
+          </div> -->
+          <!-- <div class="form-group">
+            <label class="control-label">{{'aws.register.info.ceph_cinder_pool_size'|translate}}</label>
+            <div class="control-item">
+              <input type="text" class="form-control" ng-model="fourModule.ceph_cinder_pool_size" name="ceph_cinder_pool_size" max="fourModule.nodeList" min="fourModule.backupMin" backup-check required ng-disabled="true"/>
+              <div ng-if="detailForm.ceph_cinder_pool_size.$invalid  && detailForm.ceph_cinder_pool_size.$dirty">
+                  <span class="help-block" ng-if="detailForm.ceph_cinder_pool_size.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                  <span class="help-block" ng-if="!detailForm.ceph_cinder_pool_size.$error.required && detailForm.ceph_cinder_pool_size.$error.backupCheck">请输入大于{{fourModule.backupMin}}且小于{{fourModule.nodeList}}的正整数</span>
+              </div>
+            </div>
+          </div> -->
+        </div>
+        <div class="form-ntp-group">
+          <label class="control-label">NTP服务器</label>
+          <div class="control-item">
+            <input type="text" class="form-control" ng-model="fourModule.ntp_servers" ng-disabled="true"/>
+          </div>
+        </div>
+      </div>
+      <table class="table">
+        <caption>{{'aws.register.info.areaConf'|translate}}</caption>
+        <tfoot>
+          <tr>
+            <td>{{'aws.register.info.area'|translate}}： {{fourModule.regionName}} </td>
+        </tfoot>
+      </table>
+      <!-- <table class="table">
+        <caption>{{'aws.register.info.EAdministrator'|translate}}</caption>
+        <tfoot>
+          <tr>
+            <td>{{'aws.register.info.account'|translate}}： {{fourModule.username}} </td>
+            <td>{{'aws.register.info.passwd'|translate}}:
+              <input type="password" readonly ng-model="fourModule.password" class="inline-block form-control" />
+            </td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+        </tfoot>
+      </table> -->
+      
+      <br>
+      <br>
+      <div class="tip-center" ng-if="fourModule.glanceSize">
+        两节点部署，存储副本数不能大于2！
+      </div>
+      <div class="text-center">
+        <a ng-click="fourModule.prev()" class="btn btn-default">{{'aws.register.info.last'|translate}}</a>
+        <button class="btn btn-next" ng-click="fourModule.completeFour()" ng-disabled="fourModuleDisabled" type="button">{{'aws.register.info.deployment'|translate}}</button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+<script type="text/ng-template" id="netTestTips.html">
+  <div class="modal-smallest-size netest-modal">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title"></h3>
+      </div>
+      <div class="modal-body">
+        <div class="netest-tip">
+          正在网络检查中，请稍后再点击开始部署。
+        </div>
+      </div>
+      <div class="modal-footer">
+      <button class="btn " type="button" ng-click="$dismiss()">关闭</button>
+      </div>
+  </div>
+</script>

@@ -1,0 +1,205 @@
+<div class="page-inner">
+    <div class="table-action" ng-show="!editPage">
+        <!-- <button type="button" ng-click="updateRole('new')" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{'aws.role.new_role' | translate}}</button> -->
+        <button type="button" ng-click="updateRole('edit')" ng-disabled="isDisabled" class="btn btn-normal" licence-type="btn" id="identity-role-edit" ><i class="icon-aw-modify"></i>{{'aws.action.edit' | translate}}</button>
+        <!-- <button type="button" data-toggle="modal" ng-click="del(checkedItems)" ng-disabled="delisDisabled" class="btn btn-warning" title="{{notDelTip}}"><i class="icon-aw-delete"></i>{{'aws.action.del' | translate}}</button> -->
+        <!-- <button class="btn btn-refresh" ng-click="refreshRole()"><i class="icon-aw-refresh"></i>{{"aws.action.refresh"|translate}}</button>
+        <div class="search-box">
+            <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search' | translate}}" />
+            </form>
+        </div> -->
+        <div class="pull-right">
+            <into-information modular="'role'"></into-information>
+            <!-- <setting title-data="titleData" site-title="titleName" table-data="networksTableData" search-tearm="networkSearchTearm(obj)"></setting> -->
+            <button class="btn btn-renovat right-ports" ng-click="refreshRole()"><i class="icon-aw-refresh"></i></button>            
+            <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search' | translate}}" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="table-content" ng-show="!editPage">
+        <empty-tip empty-type="loadData"></empty-tip>
+        <table ng-table="tableParams" class="table" show-filter="false">
+            <colgroup>
+                <col width="4%">
+                <col width="32%">
+                <col width="32%">
+                <col width="32%">
+            </colgroup>
+            <tr ng-repeat="item in $data">
+                <td header="'headerCheckbox.html'">
+                    <!--  <input type="checkbox" name="r" ng-model="checkboxes.items[item.id]" value="{{item.id}}" /> -->
+                    <label class="checkbox" ng-if="item.managementRole!='2'">
+                        <input type="checkbox" name="r" ng-model="checkboxes.items[item.id]" value="{{item.id}}" />
+                        <i class="iconfont"></i>
+                    </label>
+                </td>
+                <td data-title="'aws.role.table.role_name' | translate" sortable="'name'" title="{{item.name}}">
+                    <div class="edit-name edit-lg">
+                        <span title="{{item.name}}">{{item.name}}</span>
+                    </div>
+                </td>
+                <!-- <td data-title="'aws.role.table.role_domain' | translate" sortable="'domainName'">
+                    <div class="edit-name edit-lg">
+                        <span title="{{item.domainName}}">{{item.domainName}}</span>
+                    </div>
+                </td> -->
+                <td data-title="'aws.role.table.role_desc' | translate" sortable="'description'" >
+                    <span class="des">{{item.description}}</span>
+                </td>
+                <td data-title="'aws.role.table.role_createTime' | translate" sortable="'createTime'">
+                    {{item.createTime}}
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="table-content image-text"  ng-show="!editPage">
+        <div class="left-org">
+            <!-- <ul>
+                <li>超级管理员</li>
+                <li>部门管理员</li>
+                <li>项目管理员</li>
+                <li>普通管理员</li>
+            </ul> -->
+            <div class="img-item">
+                
+            </div>
+        </div>
+        <ul class="right-org">
+            <li>
+                <div class="inner">
+                    <i></i>
+                    <div class="text-item">
+                        <h3>
+                            超级管理员
+                        </h3>
+                        <p>
+                            默认为admin用户，为系统自动生成且不能修改，具有整个平台的最高权限。
+                        </p>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="inner">
+                    <i></i>
+                    <div class="text-item">
+                        <h3>
+                            部门管理员
+                        </h3>
+                        <p>
+                            权限仅次于超级管理员，负责创建项目，管理部门成员。
+                        </p>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="inner">
+                    <i></i>
+                    <div class="text-item">
+                        <h3>项目管理员</h3>
+                        <p>
+                            权限仅次于部门管理员，主要负责管理项目资源配额。
+                        </p>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="inner">
+                    <i></i>
+                    <div class="text-item">
+                        <h3>普通用户</h3>
+                        <p>
+                            为最基层组织成员，为云计算资源的真正使用者，不具备管理账户的能力。
+                        </p>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="box operating-box role-page"  ng-if="editPage" >
+        <div class="role-box">
+            <div class="page-inner">
+                <div class="table-content">
+                    <h3 class="page-title">{{new_or_editTitle}}</h3>
+                    <!-- <div>
+                        <form name="newRoleForm" novalidate>
+                            <div class="control-items2 clearfix">
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.role.table.role_name' | translate}}：</label>
+                                    <div class="controls">
+                                        <input type="text" class="form-control" name="name" ng-model="role_form.name"  title="{{notEditTip}}" ng-disabled="editDisable" placeholder="{{'aws.role.table.role_tip' | translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" repeatrole="domain_uid" required/>
+                                        <div class="error"  ng-messages="(submitValid ||newRoleForm.name.$dirty) && newRoleForm.name.$error">
+                                            <form-validate></form-validate>
+                                            <div ng-message="repeatrole">该权限名称已经存在，请重新输入</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.role.table.role_desc' | translate}}：</label>
+                                    <div class="controls">
+                                        <input type="text" class="form-control" name="descName" ng-model="role_form.description" placeholder="{{'aws.role.table.role_tip_desc' | translate}}" ng-maxlength="100">
+                                        <div class="error" ng-messages="(submitValid ||newRoleForm.descName.$dirty) && newRoleForm.descName.$error">
+                                            <form-validate max-num="'100'"></form-validate>
+    
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-items2 clearfix" ng-hide="hide_domain">
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.role.table.role_domain' | translate}}：</label>
+                                    <div class="controls">
+                                        <ui-select ng-model="role_form.domainUid" name="domain"  required>
+                                            <ui-select-match placeholder={{"aws.users.placeholder.department"|translate}}>{{$select.selected.name}}</ui-select-match>
+                                            <ui-select-choices repeat="dpm.domainUid as dpm in domainList | propsFilter:{name:$select.search}">
+                                                <div ng-bind-html="dpm.name | highlight: $select.search"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                        <div class="error" ng-messages="(submitValid ||newRoleForm.domain.$dirty) && newRoleForm.domain.$error">
+                                            <form-validate></form-validate>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div> -->
+                    <div class="menu-tree">
+                        <div ng-if="treeData">
+                            <menu-tree menu-data="treeData"></menu-tree>
+                        </div>
+                        <!-- <div class="tree-body" ivh-treeview="treeData" ivh-treeview-label-attribute="'text'"   ivh-treeview-twistie-expanded-tpl="' '" ivh-treeview-twistie-collapsed-tpl="' '" ivh-treeview-twistie-leaf-tpl="' '" ivh-treeview-node-tpl="tpl"></div> -->
+                        <div class="text-center">
+                            <button class="btn btn-info" ng-click="createRole(newRoleForm)">{{'aws.role.table.ok' | translate}}</button>
+                            <button class="btn btn-default" ng-click="closemenu()">{{'aws.action.cancel' | translate}}</button>
+                            <div class="red" ng-show="menuRequire">{{'aws.errors.menuRequire' | translate}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="col-4">
+            <ul class="text-list">
+                <li>说明信息</li>
+                <li>ceph</li>
+                <li>ceph</li>
+                <li>ceph</li>
+                <li>ceph</li>
+                <li>ceph</li>
+                <li>ceph</li>
+                <li>ceph</li>
+            </ul>
+        </div> -->
+    </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+    <!--<label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+        <i class="iconfont"></i>
+    </label>-->
+</script>

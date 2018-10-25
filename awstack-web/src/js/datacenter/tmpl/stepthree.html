@@ -1,0 +1,80 @@
+<div id="main">
+  <div class="container">
+    <div class="account-box">
+      <form class="form-horizontal" name="accountForm" novalidate>
+        <fieldset>
+          <div class="title">
+              <strong>账号配置</strong>
+          </div>
+          <div class="form-group">
+            <label class="control-label">{{'aws.register.info.area'|translate}}:</label>
+            <div class="control-item">
+              <input type="text" placeholder="" name="regionName" required class="form-control" ng-minlength="1" ng-maxlength="32" ng-blur="threeModule.change(threeModule.accountData.region)" ng-model="threeModule.accountData.region" ng-disabled="true"/>
+              <div ng-if="accountForm.regionName.$invalid && accountForm.regionName.$dirty">
+                <span class="help-block" ng-if="accountForm.regionName.$error.required">{{'aws.register.info.required'|translate}}</span>
+                <span class="help-block" ng-if="accountForm.regionName.$error.pattern">{{'aws.register.info.char4_16'|translate}}</span>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="form-group">
+            <label class="control-label">
+              {{'aws.register.info.Administrator'|translate}}:
+            </label>
+            <div class="control-item">
+              <input type="text" placeholder="" required name="username" ng-disabled="threeModule.isdisabled" autocomplete="false" repeatusername class="form-control" ng-model="threeModule.accountData.username" ng-pattern="/^[a-zA-Z0-9_]{4,16}$/" />
+              <div ng-if="accountForm.username.$invalid && accountForm.username.$dirty">
+                <span class="help-block" ng-if="accountForm.username.$error.required">{{'aws.register.info.required'|translate}}</span>
+                <span class="help-block" ng-if="accountForm.username.$error.pattern">{{'aws.register.info.char4_16'|translate}}</span>
+                <span class="help-block" ng-if="accountForm.username.$error.repeatusername && !accountForm.username.$error.pattern && !accountForm.username.$error.required">{{'aws.register.info.accountexit'|translate}}</span>
+              </div>
+              <div ng-if="threeModule.idExist && !accountForm.username.$error.repeatusername" class="help-block">{{'aws.register.info.accountexit'|translate}}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label">{{'aws.register.info.passwd'|translate}}:</label>
+            <div class="control-item">
+              <input type="password" placeholder="" name="accpassword" required id="accpassword" ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,/\-\^\%])[0-9a-zA-Z!@._:,/\-\^\%]{8,16}$/" class="form-control" ng-model="threeModule.accountData.password" ng-up />
+              <div ng-if="accountForm.accpassword.$invalid && accountForm.accpassword.$dirty">
+                <span class="help-block" ng-if="accountForm.accpassword.$error.required">{{'aws.register.info.required'|translate}}</span>
+                <span class="help-block" ng-if="accountForm.accpassword.$error.pattern">{{'aws.register.info.special_8_16'|translate}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label">{{'aws.register.info.confirm'|translate}}:</label>
+            <div class="control-item">
+              <input type="password" placeholder="" name="reaccpassword" required pw-check="accpassword" class="form-control" ng-model="threeModule.accountData.repassword" />
+              <div ng-if="accountForm.reaccpassword.$invalid && accountForm.reaccpassword.$dirty">
+                <span class="help-block" ng-if="accountForm.reaccpassword.$error.pwCheck || accountForm.reaccpassword.$error.required">{{'aws.register.info.passwddiff'|translate}}</span>
+              </div>
+            </div>
+          </div> -->
+        </fieldset>
+        <fieldset>
+          <div class="title">
+              <strong>NTP配置</strong>
+          </div>
+          <div class="form-group">
+            <label class="control-label">{{'aws.register.info.ntpserver'|translate}}：</label>
+          <div class="control-item">
+            <input type="text" class="form-control" placeholder="{{'aws.register.info.ipDomainPlaceHoder'|translate}}" ng-model="threeModule.ntpserver" name="ntpserver" ip-domain ng-maxlength="80"  required/>
+            <div ng-if="accountForm.ntpserver.$invalid">
+                <span class="help-block" ng-if="accountForm.ntpserver.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                <span class="help-block" ng-if="!accountForm.ntpserver.$error.required&&accountForm.ntpserver.$error.ipDomain">{{'aws.register.info.ipDomain'|translate}}</span>
+                <span class="help-block" ng-if="!accountForm.ntpserver.$error.required&&accountForm.ntpserver.$error.maxlength">{{'aws.register.info.max_length_80'|translate}}</span>
+            </div>
+          </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label">&nbsp;</label>
+            <div class="control-item">
+              <a  ng-click="threeModule.preStep()" class="btn btn-default">{{'aws.register.info.last'|translate}}</a>
+              <button class="btn btn-next" ng-disabled="accountForm.$invalid || fourModule.isdisabled" ng-click="threeModule.completeThree()" type="button">{{'aws.register.info.next'|translate}}</button>
+            </div>
+          </div>
+          <div ng-if="threeModule.serverError" class="help-block">服务器错误</div>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+</div>

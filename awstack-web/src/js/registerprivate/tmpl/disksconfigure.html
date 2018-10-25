@@ -1,0 +1,187 @@
+<div id="main">
+  <div class="container">
+    <div class="host-box clearfix" id="disks">
+      	<div class="fieid-box">
+      		<div class="disks-title">本地盘配置</div>
+      		<ul>
+				<li><i class="icon-aw-hdd"></i>HHD</li>      		
+				<li><i class="icon-aw-ssd ssd "></i>SSD</li>
+			</ul>
+      	</div>
+      	<div class="disks-list">
+			<ul class="no-use-disks clearfix">
+				<li ng-repeat = "v in disksJson.disks">
+					<div class="disks-item" draggable="true" indexNum="{{$index}}">
+						<div class="disk-out">
+							<span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+							<span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+							<span class="disk-name">{{v.name}}</span>
+						</div>
+					</div>
+					<div class="disks-detail">
+						<i></i>
+						<div class="detail-item">
+							<span class="title">硬盘名称：</span>
+							<span>{{v.name}}</span>
+						</div>
+						<div class="detail-item">
+							<span class="title">状态：</span>
+							<span class="bg-green" ng-if="v.status">健康</span>
+							<span class="bg-red" ng-if="!v.status">不健康</span>
+						</div>
+						<div class="detail-item">
+							<span class="title">硬盘类型：</span>
+							<span ng-if="v.ssd">SSD </span>
+							<span ng-if="!v.ssd">HDD</span>
+						</div>
+						<div class="detail-item">
+							<span class="title">硬盘容量：</span>
+							<span>{{v.capacity}}</span>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<!-- <p class="disks-warning">提示：为充分发挥SSD缓存盘的性能，建议缓存盘组中的机械数据盘最多为1块。</p> -->
+		<p class="disks-warning"></p>
+		<div class="disks-content">
+			<ul class="disks-group">
+				<li ng-repeat="item in disksJson.configGroup">
+					<div class="group-name">
+						<span>云主机本地盘空间</span>
+						<!--<span>缓存盘组{{$index+1}}</span>
+						<span class="group-cache">{{item.selected.name}}{{item.cachingSum}}G</span>
+						<span>数据盘{{item.dataSum}}G</span>
+						<span ng-click="deleteDisksGroup($index)" class="delete-group" ng-if="disksJson.configGroup.length>1"><i class="icon-aw-wrong"></i></span>-->
+					</div>
+					<div class="scale" ng-click="showConfDetail(item)">
+						<span class="caching-disk"  ng-style="{width:item.cachingRatio}" ng-if="item.caching.length>0">
+							<em class="name">{{item.selected.name}}</em>
+							<i class="scale-num">{{item.cachingSum}}G</i>
+						</span>
+						<span class="data-disk" ng-style="{width:item.dataRatio}" ng-if="item.data.length>0">
+							<em class="name">数据盘</em>
+							<i class="scale-num">{{item.dataSum}}G</i>
+						</span>
+						<span class="no-disk" ng-if="item.caching.length==0&&item.data.length==0">
+							<em class="name">未分配</em>
+							<i class="scale-num">0G</i>
+						</span>
+						<!--<span class="data-disk" style="width:100%" ng-if="item.data.length>0">
+							<em class="name">已分配</em>
+							<i class="scale-num">{{item.dataSum}}G</i>
+						</span>
+						<span class="no-disk" ng-if="item.data.length==0">
+							<em class="name">未分配</em>
+							<i class="scale-num">0G</i>
+						</span>-->
+					</div>
+					<div class="group-content clearfix is-deliver" ng-if="item.show">
+						<div class="caching-content">
+							<!-- div class="name-item clearfix">
+								<span class="name-type">类型：</span>
+				            	<div class="type-item">
+									<ui-select ng-model="item.selected" ng-change="storageModule.storageChange()">
+						                <ui-select-match placeholder="请选择类型">{{$select.selected.name}}</ui-select-match>
+						                <ui-select-choices repeat="data in diskscachType | filter:{name:$select.search}">
+						                  <div ng-bind-html="data.name | highlight: $select.search"></div>
+						                </ui-select-choices>
+						            </ui-select>
+								</div>
+							</div> -->
+							<div class="name-item">日志盘：</div>
+							<ul class="caching clearfix" indexNum="{{$index}}">
+								<span class="tips" ng-if="item.caching.length==0">可拖拽区域</span>
+								<li ng-repeat = "v in item.caching">
+									<div class="disks-item">
+										<div class="disk-out">
+											<span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+											<span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+											<span class="disk-name">{{v.name}}</span>
+										</div>
+										<span class="disks-remove">
+									    	<i class="icon-aw-wrong" ng-click="deleteDisks($index,'caching',item)"></i>
+									    </span>
+									</div>
+									<div class="disks-detail">
+										<i></i>
+										<div class="detail-item">
+											<span class="title">硬盘名称：</span>
+											<span>{{v.name}}</span>
+										</div>
+										<div class="detail-item">
+											<span class="title">状态：</span>
+											<span class="bg-green" ng-if="v.status">健康</span>
+											<span class="bg-red" ng-if="!v.status">不可用</span>
+										</div>
+										<div class="detail-item">
+											<span class="title">硬盘类型：</span>
+											<span ng-if="v.ssd">SSD </span>
+											<span ng-if="!v.ssd">HDD</span>
+										</div>
+										<div class="detail-item">
+											<span class="title">硬盘容量：</span>
+											<span>{{v.capacity}}</span>
+										</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+						<div class="data-content">
+							<div class="name-item">数据盘：</div>
+							<ul class="data clearfix" indexNum="{{$index}}">
+								<span class="tips" ng-if="item.data.length==0">可拖拽区域</span>
+								<li ng-repeat = "v in item.data">
+									<div class="disks-item">
+										<div class="disk-out">
+											<span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+											<span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+											<span class="disk-name">{{v.name}}</span>
+										</div>
+										<span class="disks-remove">
+									    	<i class="icon-aw-wrong" ng-click="deleteDisks($index,'data',item)" indexNum="{{$index}}"></i>
+									    </span>
+									</div>
+									<div class="disks-detail">
+										<i></i>
+										<div class="detail-item">
+											<span class="title">硬盘名称：</span>
+											<span>{{v.name}}</span>
+										</div>
+										<div class="detail-item">
+											<span class="title">状态：</span>
+											<span class="bg-green" ng-if="v.status">健康</span>
+											<span class="bg-red" ng-if="!v.status">不健康</span>
+										</div>
+										<div class="detail-item">
+											<span class="title">硬盘类型：</span>
+											<span ng-if="v.ssd">SSD </span>
+											<span ng-if="!v.ssd">HDD</span>
+										</div>
+										<div class="detail-item">
+											<span class="title">硬盘容量：</span>
+											<span>{{v.capacity}}</span>
+										</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</li>
+			</ul>	
+		</div>
+		<!-- <div class="add-groups">
+			<p class="data-tip" ng-if="dataTips">请确保数据盘不为空，再操作！</p>
+			<span ng-click="addGroup()">
+				<i class="icon-aw-add-to2"></i>
+				<span>添加缓存组</span>
+			</span>
+		</div> -->
+		<p class="data-tip" ng-if="dataTips">请确保数据盘不为空，再操作！</p>
+		<div class="text-center">
+			<button class="btn btn-next" ng-click="saveDisks()" type="button">保存</button>
+			<a ng-href="#/info/stepone" class="btn btn-default" href="#/info/stepone">返回节点列表</a>
+		</div>
+    </div>
+  </div>
+</div>

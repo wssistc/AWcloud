@@ -1,0 +1,219 @@
+<div class="page-inner">
+  <div class="table-action">
+    <button type="button" class="btn btn-new" ng-click="contactGroup('new')" licence-type="btn" id="monitor-alarmGroup-create" ><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="contactGroup('edit',editData)" ng-disabled="isDisabled"  licence-type="btn" id="monitor-alarmGroup-edit" ><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="delContactGroup(checkedItems)" ng-disabled="delisDisabled"  licence-type="btn" id="monitor-alarmGroup-del" ><i class=" icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+    <into-information modular="'contractgroup'"></into-information>
+    <div type="button" class="btn btn-renovat right-ports" ng-click="refreshContactGroup()">
+        <i class="icon-aw-refresh"></i>
+    </div>
+    <div class="search-box right-ports">
+        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.instances.search'|translate}}" />
+        </form>
+    </div>
+  </div>
+  <script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+      <i class="iconfont"></i>
+    </label>
+  </script>
+  <div class="table-content">
+  	<empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="tableParams" class="table">
+    	<colgroup>
+    		<col width="12%">
+    		<col width="22%">
+    		<col width="22%">
+    		<col width="22%">
+    		<col width="22%">
+    	</colgroup>
+     	<tr ng-repeat="item in $data">
+	        <td header="'headerCheckbox.html'">
+	          <label class="checkbox">
+	            <input type="checkbox" ng-model="checkboxes.items[item.id]" />
+	            <i class="iconfont"></i>
+	          </label>
+	        </td>
+	        <td data-title="headers.contactGroup" sortable="'name'">{{item.name}}</td>
+	        <!-- <td data-title="'联系人名称'"></td> -->
+	        <td data-title="headers.email">
+                <div class="edit-name" ng-repeat="obj in item.emails">
+                    <span title="{{obj.value}}">{{obj.value}}</span>
+                </div>
+            </td>
+	        <td data-title="headers.phone">
+                <div ng-repeat="obj in item.phones">
+                    <span title="{{obj.value}}">{{obj.value}}</span>
+                </div>   
+            </td>
+            <td data-title="headers.wechat">
+                <div class="edit-name"  ng-repeat="obj in item.wechats">
+                    <span title="{{obj.value}}">{{obj.value}}</span>
+                </div>
+            </td>
+		    <!-- <td data-title="headers.operate">
+                <button class="btn btn-default ng-binding" ng-click="contactGroup('edit',item)" licence-type="btn" id="monitor-alarmGroup-editContacts" >{{'aws.action.edit'|translate}}</button>
+                <button class="btn btn-default ng-binding" ng-click="delContactGroup([item])" licence-type="btn" id="monitor-alarmGroup-delContacts" >{{'aws.action.del'|translate}}</button>
+            </td> -->
+    	</tr>
+  		<!-- <tr ng-show="item.hideContacts" ng-repeat="contact in item.contacts" ng-repeat-end>
+	      	<td header="'headerCheckbox.html'"></td>
+	        <td data-title="headers.contactGroup"></td>
+	        <td data-title="headers.email">{{contact.email}}</td>
+	        <td data-title="headers.phone">{{contact.phone}}</td>
+	        <td data-title="headers.operate">
+				<a ng-click="editContact(contact)"><i class="icon-aw-modify"></i></a>
+				<a ng-click="deleteContact(contact)"><i class="icon-aw-wrong"></i></a>
+	        </td>
+      	</tr> -->
+    </table>
+  </div> 
+  <script type="text/ng-template" id="contactGroup.html">
+    <div class="modal-common contactGroup-modal">
+	    <div class="modal-header">
+	      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+	      <h3 class="modal-title">{{groupModalTitle}}</h3>
+	    </div>
+	    <div class="modal-body clearfix">
+	      <form name="createContactGroupForm" novalidate>
+          <uib-alert type="info">
+            <div>
+                <span>{{'aws.monitor.alarmModule.contactTips'|translate}}</span>
+            </div>
+          </uib-alert>
+            <!-- <p class="mailServer-tips">{{'aws.monitor.alarmModule.contactTips'|translate}}</p> -->
+	        <div class="control-group name">
+	          <label class="control-label">{{'aws.monitor.alarmModule.contactGroup'|translate}}：</label>
+	          <div class="controls">
+	            <input type="text" class="form-controls" name="name" ng-model="contactGroupForm.name" placeholder={{'aws.monitor.alarmModule.placeholder.requiredContactGroup'|translate}} ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required repeat-name />
+	            <div class="error" ng-messages='createContactGroupForm.name.$error' ng-if="createContactGroupForm.name.$dirty || submitted.name">
+	              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+	              <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+	              <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+	              <div ng-message="repeatName">{{'aws.errors.repeatContractGroupName' | translate}}</div>
+	            </div>
+	          </div>
+	        </div>
+	        <!-- <div class="contact add" ng-if="contactGroupForm.contacts.length === 1" >
+         		<a ng-click="addContactToGroup()" ><i class=" icon-aw-add-to2"></i></a>
+        	</div> -->
+
+	        <div ng-repeat="contact in contactGroupForm.email" class="clearfix">
+	        	<div class="control-group name">
+			        <label class="control-label">{{'aws.monitor.alarmModule.email'|translate}}：</label>
+	          	   <div class="controls">
+		              <input type="text" class="form-controls" name="email_{{$index}}" ng-model="contact.value" placeholder='example@xx.com' ng-pattern="/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/" required ng-maxlength="50"/>
+		              <div class="error" ng-messages="createContactGroupForm['email_'+$index].$error" ng-if="createContactGroupForm['email_'+$index].$dirty || submitted['email_'+$index]">
+		                <div ng-message="pattern">{{'aws.errors.emailPatternError'|translate}}</div>
+		                <div ng-message="maxlength">{{'aws.errors.emailmaxlength'|translate}}</div>
+                        <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+		              </div>
+	          	  </div>
+	       		</div>
+	       		<div class="contact del" ng-if="$index!=0">
+	       			<a ng-click="delContactOfGroup($index,contact,'email')" ><i class="icon-aw-wrong"></i></a>
+	       		</div>
+	       		<div class="contact add" ng-if="$index==(contactGroupForm.email.length-1) && contactGroupForm.email.length < 10">
+	       			<a ng-click="addContactToGroup('email')" ><i class="icon-aw-add-to2"></i></a>
+	       		</div>
+	        </div>
+            <div ng-repeat="contact in contactGroupForm.phone" class="clearfix">
+                <div class="control-group name">
+                    <label class="control-label">{{'aws.monitor.alarmModule.phone'|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="phone_{{$index}}" ng-model="contact.value" placeholder={{'aws.monitor.alarmModule.placeholder.phoneLength_11'|translate}} ng-pattern="/^1[0-9]{10}$/" required />
+                        <div class="error" ng-messages= "createContactGroupForm['phone_'+$index].$error" ng-if="createContactGroupForm['phone_'+$index].$dirty || submitted['phone_'+$index]">
+                            <div ng-message="pattern">{{'aws.errors.phonePatternError'|translate}}</div>
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact del" ng-if="$index!=0">
+                    <a ng-click="delContactOfGroup($index,contact,'phone')" ><i class="icon-aw-wrong"></i></a>
+                </div>
+                <div class="contact add" ng-if="$index==(contactGroupForm.phone.length-1) && contactGroupForm.phone.length < 10">
+                    <a ng-click="addContactToGroup('phone')" ><i class="icon-aw-add-to2"></i></a>
+                </div>
+            </div>
+            <div ng-repeat="contact in contactGroupForm.wechat" class="clearfix">
+                <div class="control-group name">
+                    <label class="control-label">{{'aws.monitor.alarmModule.wechatName'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.monitor.alarmModule.info.wechatName'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i> 
+                        <input type="text" class="form-controls wechat-name-input" name="wechat_{{$index}}" ng-model="contact.value" placeholder={{'aws.monitor.alarmModule.placeholder.wechatName'|translate}} ng-maxlength="100" ng-disabled="contact.disable"/>
+                        <div class="error" ng-messages="createContactGroupForm['wechat_'+$index].$error" ng-if="createContactGroupForm['wechat_'+$index].$dirty || submitted['wechat_'+$index]">
+                            <span ng-message="maxlength">{{'aws.errors.maxlength100'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="nickname" ng-class="{'disableName': contact.disable}">
+                    <a ng-click="checkNickname($index,contact,'wechat')">{{contact.check}}</a>
+                </div>
+                <div class="contact del" ng-if="$index!=0">
+                    <a ng-click="delContactOfGroup($index,contact,'wechat')" ><i class="icon-aw-wrong"></i></a>
+                </div>
+                <div class="contact add" ng-if="$index==(contactGroupForm.wechat.length-1) && contactGroupForm.wechat.length < 10">
+                    <a ng-click="addWechatToGroup('wechat')" ><i class="icon-aw-add-to2"></i></a>
+                </div>
+            </div>
+            <div class="clearfix">
+                <div class="control-group name">
+                    <label class="control-label">&nbsp;</label>
+                    <div class="controls">
+                        <button class="btn btn-info" type="button" ng-click="weChatBind()">{{'aws.monitor.alarmModule.weChatBind'|translate}}</button>
+                    </div>
+                </div>
+            </div>
+	        <div ng-if="contractGroupError===1&&repeatEmailOrPhone" class="contactGroup-error">{{'aws.monitor.alarmModule.inputSameEmail'|translate}}</div>
+	      </form>
+	    </div>
+	    <div class="modal-footer">
+	      <button class="btn btn-info" type="button" ng-click="contactGroupConfirm(createContactGroupForm)">{{"aws.action.ok"|translate}}</button>
+	      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+	    </div>
+  	</div>
+  </script>
+
+  <!-- 编辑联系人 -->
+  <script type="text/ng-template" id="editContact.html">
+    <div class="modal-common">
+	    <div class="modal-header">
+	      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+	      <h3 class="modal-title">{{'aws.monitor.alarmModule.editContact'|translate}}</h3>
+	    </div>
+	    <div class="modal-body">
+	      <form name="contactForm" novalidate>
+	        <div class="control-group">
+	          <label class="control-label">{{'aws.monitor.alarmModule.email'|translate}}:</label>
+	          <div class="controls">
+	            <input type="text" class="form-controls" name="email" placeholder="example@xx.com" ng-model="editContactForm.email" ng-pattern="/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/" required  ng-maxlength="50"/>
+	            <div class="error" ng-messages='contactForm.email.$error' ng-if="interacted(contactForm.email)">
+	              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+	              <div ng-message="pattern">{{'aws.errors.emailPatternError'|translate}}</div>
+	              <div ng-message="maxlength">{{'aws.errors.emailmaxlength'|translate}}</div>
+	            </div>
+	          </div>
+	        </div>
+	        <div class="control-group">
+	          <label class="control-label">{{'aws.monitor.alarmModule.phone'|translate}}:</label>
+	          <div class="controls">
+	            <input type="text" class="form-controls" name="phone" ng-model="editContactForm.phone" placeholder={{'aws.monitor.alarmModule.placeholder.phoneLength_11'|translate}} ng-pattern="/^1[3|4|5|8][0-9]\d{8}$/" required />
+	            <div class="error" ng-messages='contactForm.phone.$error' ng-if="interacted(contactForm.phone)">
+	              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+	              <div ng-message="pattern">{{'aws.errors.phonePatternError'|translate}}</div>
+	            </div>
+	          </div>
+	        </div>
+	        <div ng-if="contractGroupError===1&&repeatEmailOrPhone" class="contactGroup-error">{{'aws.monitor.alarmModule.inputSameEmail'|translate}}</div>
+	      </form>
+	    </div>
+	    <div class="modal-footer">
+	      <button class="btn btn-info" type="button" ng-click="contactConfirm(contactForm)">{{"aws.action.ok"|translate}}</button>
+	      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+	    </div>
+  	</div>
+  </script>
+</div>

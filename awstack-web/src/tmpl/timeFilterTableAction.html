@@ -1,0 +1,75 @@
+<div class="table-action directive-action-wrap" ng-class="{'time-error':filterData.timeStep == 'defined'&&(consumeStatistic_form.startTime.$error.pattern || consumeStatistic_form.startTime.$error.required || consumeStatistic_form.startTime.$error.pattern || consumeStatistic_form.endTime.$error.required || consumeStatistic_form.endTime.$error.gtTime)}">
+    <form class="form-inline date-box" novalidate  name="consumeStatistic_form" >
+        <div class="control-group">
+            <label class="control-label">时间筛选：</label>
+            <div class="controls">
+                <ui-select ng-model="filterData.timeStep" ng-change="timeSelectTab(filterData.timeStep)">
+                    <ui-select-match placeholder="请选择时间" >{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="item.value as item in timeType.options">
+                        <div ng-bind-html="item.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="form-group time-picker start" ng-if="filterData.timeStep == 'defined'">
+            <div class="input-group date form_date col-md-5">
+                <input class="form-control fromTime" name="startTime" type="text" size="16" ng-model="filterData.from" placeholder="{{'aws.log.start_at'|translate}}" time-pattern="timePattern" gt-time required >
+                <span class="input-group-addon calendar-cont">
+                    <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                </span>
+                <div class="error" ng-messages="consumeStatistic_form.startTime.$dirty&&consumeStatistic_form.startTime.$error">
+                    <div ng-message="timePattern">请输入正确的时间格式</div>
+                    <div ng-message="required">*必填项</div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group time-picker end" ng-if="filterData.timeStep == 'defined'">
+            <div class="input-group date form_date col-md-5">
+                <input class="form-control endTime" name="endTime" type="text" size="16" ng-model="filterData.to" placeholder="{{'aws.log.end_at'|translate}}" time-pattern="timePattern" gt-time gt-curr-time required >
+                <span class="input-group-addon calendar-cont">
+                    <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                </span>
+                <div class="error" ng-messages="consumeStatistic_form.endTime.$dirty&&consumeStatistic_form.endTime.$error">
+                    <div ng-message="timePattern">请输入正确的时间格式</div>
+                    <div ng-message="gtTime">{{"aws.errors.gtTime"|translate}}</div>
+                    <div ng-message="required">*必填项</div>
+                    <div ng-message="gtCurrTime">结束时间请小于等于当前时间</div>
+                </div>
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-info" ng-disabled="filterData.timeStep == 'defined'&&(consumeStatistic_form.startTime.$error.pattern || consumeStatistic_form.startTime.$error.required || consumeStatistic_form.startTime.$error.pattern || consumeStatistic_form.endTime.$error.required || consumeStatistic_form.endTime.$error.gtTime || consumeStatistic_form.endTime.$error.gtCurrTime)"
+                ng-click="query()">
+                <i class="icon-aw-search"></i> 查询</button>
+            <button type="button" class="btn btn-default" ng-disabled="filterData.timeStep == 'defined'&&(consumeStatistic_form.startTime.$error.pattern || consumeStatistic_form.endTime.$error.pattern || consumeStatistic_form.endTime.$error.gtTime)"
+                ng-csv="downloadData()" charset="utf-8" add-bom="true" csv-header="csvHeader" filename="{{fileName}}" ng-if="downloadData">
+                <i class="icon-aw-dc"></i> 导出</button>
+            <button type="button" class="btn btn-default" ng-disabled="filterData.timeStep == 'defined'&&(consumeStatistic_form.startTime.$error.pattern || consumeStatistic_form.endTime.$error.pattern || consumeStatistic_form.endTime.$error.gtTime)"
+                ng-if="definedDownloadData" ng-click="definedDownloadData()">
+                <i class="icon-aw-dc"></i> 导出</button>
+        </div>
+    </form>
+    <div class="dropdown show-title pull-right" ng-if="colsConfig">
+        <button type="button" class="btn btn-renovat dropdown-toggle" data-toggle="dropdown">
+            <i class="icon-aw-list"></i>
+        </button>
+        <ul class="dropdown-menu">
+            <li ng-repeat="col in colsConfig track by $index">
+                <div class="check-left">
+                    <label class="checkbox">
+                        <input type="checkbox" class="form-controls chk" name="col_show" ng-disabled="col.disable" ng-model="col.show" ng-change="selectCol()" />
+                        <i class="iconfont"></i>
+                    </label>
+                </div>
+                <span>{{col.title}}</span>
+            </li>
+        </ul>
+    </div>
+    <div type="button" class="btn btn-renovat pull-right" ng-click="refresh()" ng-if="refresh">
+        <i class="icon-aw-refresh"></i>
+    </div>
+    <div class="search-box pull-right" ng-if="search">
+        <button class="btn" type="submit" ng-disabled="consumeStatistic_form.searchTerm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="filterData.searchTerm" placeholder="{{'aws.action.search'|translate}}" ng-keyup="search()" />
+    </div>
+</div>

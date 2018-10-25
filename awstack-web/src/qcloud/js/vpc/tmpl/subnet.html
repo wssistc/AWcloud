@@ -1,0 +1,367 @@
+<div class="page-inner vpc-view"> 
+  <div class="page-title">
+    <h2>子网</h2>
+      <div class="btn-item-group">
+        <button ng-repeat="region in regions.options" ng-click="changeRegion(region.value)" ng-class="{'active':queryLimit.regionId==region.value}" ng-bind="region.name"></button>
+      </div>
+      <ui-select class="sel-lg" ng-model="queryLimit.vpc" ng-change="changeVpc(queryLimit.vpc)" title="{{queryLimit.vpc.vpcName}}"   title="{{queryLimit.vpc.vpcName}}">
+        <ui-select-match placeholder="切换网络">{{$select.selected.vpcName}}</ui-select-match>
+        <ui-select-choices repeat="vpc in vpcs.options">
+          <div class="subnet-ellips" ng-bind-html="vpc.vpcName | highlight: $select.search" title="{{vpc.vpcName}}"></div>
+        </ui-select-choices>
+      </ui-select>
+  </div>
+  
+  <div class="table-action">
+    <button type="button" data-toggle="modal" ng-click="createSubnetModal()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新建</button>
+    <!--<button class="btn btn-refresh" ng-click="refreshSubnetList()"><i class="icon-aw-refresh"></i>刷新</button>-->
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='搜索' />
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <table ng-table="subnetTable" class="table sub-table" show-filter="false">
+      <colgroup>
+        <col width="15%">
+        <col width="15%">
+        <col width="10%">
+        <col width="5%">
+        <col width="15%">
+        <col width="5%">
+        <col width="5%">
+        <col width="15%">
+        <col width="15%">
+      </colgroup>
+      <tr ng-repeat="subnet in $data">
+        <td data-title="'ID/名称'" sortable="'subnetName'">
+          <div class="edit-name name-lg">
+            <a ng-href="#/vpc/subnet?subnetId={{subnet.subnetId}}">{{subnet.unSubnetId}}</a>
+            <span class="ycx">{{subnet.subnetName}}</span>
+            <i class="icon-aw-modify blue" ng-click="editSubnetModal(subnet)"></i>
+          </div>
+        </td>
+        <td data-title="'所属网络'" sortable="'vpcName'">
+          <div><a ng-href="#/vpc/vpc?vpcId={{subnet.vpcId}}">{{subnet.unVpcId}}</a></div>
+          <div><span class="ycx">{{subnet.vpcName}}</span></div>
+        </td>
+        <td data-title="'CIDR'" sortable="'cidrBlock'">
+          <span>{{subnet.cidrBlock}}</span>
+        </td>
+        <td data-title="'可用区'" sortable="'zoneId'">
+          <span>{{"CN.vpc.zoneId." + subnet.zoneId |translate}}</span>
+        </td>
+        <td data-title="'关联路由表'" sortable="'routeTableName'">
+          <div><a ng-href="#/vpc/route?routeTableId={{subnet.routeTableId}}">{{subnet.routeTableId}}</a></div>
+          <div>
+            <span class="ycx">{{subnet.routeTableName}}</span>
+          </div>
+        </td>
+        <td data-title="'云主机'" sortable="'vpcDevices'">
+          <span ng-if="subnet.vpcDevices == 0">{{subnet.vpcDevices}} 个</span>
+          <a href="#/cvm/instances?vpcId={{subnet.vpcId}}&&subnetId={{subnet.subnetId}}&&regionId={{queryLimit.regionId}}&&zoneId={{subnet.zoneId}}" ng-if="subnet.vpcDevices > 0 ">{{subnet.vpcDevices}} 个</a>
+          <a href="#/buy/instances?vpcId={{subnet.vpcId}}&&subnetId={{subnet.subnetId}}&&regionId={{queryLimit.regionId}}&&zoneId={{subnet.zoneId}}"  uib-popover="添加云主机" popover-trigger="mouseenter"><i class="icon-aw-vm"  ></i></a>
+        </td>
+        <td data-title="'可用IP'" sortable="'availableIPNum'">
+        <span>{{subnet.availableIPNum}} 个</span>
+        </td>
+        
+        <td data-title="'创建时间'" sortable="'subnetCreateTime'">
+        <span>{{subnet.subnetCreateTime}}</span>
+        </td>
+        <td data-title="'操作'" sortable="''">
+        <a ng-click="deleteSubnet(subnet)" uib-popover={{subnet.delSubTip}} popover-trigger="mouseenter" ng-class="{'disabled':subnet.vpcDevices > 0}">删除</a>
+        <a ng-click="changeRoutetable(subnet)" uib-popover={{subnet.changeRoutetableTip}} popover-trigger="mouseenter" ng-class="{'disabled':subnet.routeTableOptions.length == 1}">更换路由表</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="detail-body" animation="animation">
+    <div class= 'animateContent {{animation}} '>
+      <div class='detailInner'>
+        <div class="detail-tab">
+          <div class="dt-title">
+            <a class="an-close" ng-href="#/vpc/subnet">返回<i class="icon-aw-angle-left"></i></a>
+            <span>{{subDetailItem.subnetName}}</span>
+          </div>
+          <div class="dt-box">
+            <ul class="nav nav-tabs">
+              <li class="active"><a>基本信息</a></li>
+              <!-- <li><a>ACL规则</a></li> -->
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane active">
+                <strong>基本信息</strong>
+                <dl class="dl-horizontal">
+                  <dt>子网名称</dt>
+                  <dd >
+                    <span ng-if="subDetailItem.subnetName">
+                      {{subDetailItem.subnetName}}
+                      <i class="icon-aw-modify blue" ng-click="editSubnetModal(subDetailItem,'detail')"></i>
+                    </span>
+                  </dd>
+                  <dt>子网ID</dt>
+                  <dd>{{subDetailItem.subnetId}}</dd>
+                  <dt>子网CIDR</dt>
+                  <dd>{{subDetailItem.cidrBlock}}</dd>
+                  <dt>所属网络</dt>
+                  <dd>
+                    <span ng-show="subDetailItem.unVpcId"><a href="#/vpc/vpc?vpcId={{subDetailItem.vpcId}}" class="blue">{{subDetailItem.unVpcId}}</a>( {{subDetailItem.vpcName}} | {{subDetailItem.cidrBlock}})</span>
+                  </dd>
+                  <dt>地域</dt>
+                  <dd><span ng-show="queryLimit.regionId">{{"CN.vpc.region." + queryLimit.regionId | translate}}</span></dd>
+                  <dt>可用区</dt>
+                  <dd><span ng-show="subDetailItem.zoneId">{{"CN.vpc.zoneId." + subDetailItem.zoneId | translate}}</span></dd>
+                  <!-- <dt>已关联ACL</dt>
+                  <dd>{{subDetailItem.ACL}}</dd> -->
+                  <dt>创建时间</dt>
+                  <dd>{{subDetailItem.subnetCreateTime}}</dd>
+                </dl>
+                <strong>包含资源</strong>
+                <table class="table">
+                  <colgroup>
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>资源类型</th>
+                      <th>包含资源</th>
+                      <th>数量</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td >基础云资源</td>
+                      <td>云主机</td>
+                      <td>
+                        <a href="#/cvm/instances?vpcId={{subDetailItem.vpcId}}&&subnetId={{subDetailItem.subnetId}}&&regionId={{queryLimit.regionId}}&&zoneId={{subDetailItem.zoneId}}" ng-if="subDetailItem.subItem.vpcDevices>0">{{subDetailItem.subItem.vpcDevices}}</a>
+                        <span ng-if="subDetailItem.subItem.vpcDevices == 0">0</span>
+                      </td>
+                      <td><a href="#/buy/instances?vpcId={{subDetailItem.vpcId}}&&subnetId={{subDetailItem.subnetId}}&&regionId={{queryLimit.regionId}}&&zoneId={{subDetailItem.zoneId}}">添加</a></td>
+                    </tr>
+                    <tr>
+                      <td>数据库</td>
+                      <td>MYSQL</td>
+                      <td>
+                        <a href="#/cdb/cdblist?vpcId={{subDetailItem.vpcId}}&&subnetId={{subDetailItem.subnetId}}&&regionId={{queryLimit.regionId}}&&zoneId={{subDetailItem.zoneId}}" ng-if="subDetailItem.cdbCount>0">{{subDetailItem.cdbCount}}</a>
+                        <span ng-if="subDetailItem.cdbCount == 0">0</span>
+                      </td>
+                      <td><a href="#/buy/mysql?vpcId={{subDetailItem.vpcId}}&&subnetId={{subDetailItem.subnetId}}&&regionId={{queryLimit.regionId}}&&zoneId={{subDetailItem.zoneId}}">添加</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <strong>路由策略</strong>
+                <div>已绑定路由表 {{subDetailItem.subItem.routeTableName}} 
+                  ( <a href="#/vpc/route?routeTableId={{subDetailItem.subItem.routeTableId}}&&unRouteTableId={{subDetailItem.subItem.unRouteTableId}}" class="blue">{{subDetailItem.subItem.unRouteTableId}}</a> ) 
+                  <a class="blue" ng-click="changeRoutetable(subDetailItem.subItem,'detail')" uib-popover={{subDetailItem.subItem.changeRoutetableTip}} popover-trigger="mouseenter" ng-class="{'disabled':subDetailItem.subItem.routeTableOptions.length == 1}">更换路由表</a>
+                </div>
+                <table class="table">
+                  <colgroup>
+                      <col width="25%">
+                      <col width="25%">
+                      <col width="25%">
+                      <col width="25%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>目的端</th>
+                      <th>下一跳类型</th>
+                      <th>下一跳</th>
+                      <th>备注</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="item in routePolicyList">
+                      <td>{{item.destinationCidrBlock}}</td>
+                      <td>{{"CN.vpc.nextType." + item.nextType | translate}}</td>
+                      <td>
+                        <div ng-if="item.nextHub=='Local'">
+                          <span >
+                            {{item.nextHub}}
+                            <i class="icon-aw-prompt" uib-popover="Local 路由策略由系统默认下发，表示 VPC 内云主机网络互通" popover-trigger="mouseenter"></i>
+                          </span>
+                        </div>
+                        <div ng-if="item.nextHub!='Local'">
+                          <div><a href="#/vpc/natgateway?natId={{item.unNextHub}}">{{item.unNextHub}}</a></div>
+                          <div>{{item.natName}}</div>
+                        </div>
+                      </td>
+                      <td>
+                        <div ng-if="item.nextHub=='Local'">
+                          <span class="ycx">系统默认下发，表示 VPC 内云主机网络互通<span>
+                        </div>
+                        <div ng-if="item.nextHub!='Local'">
+                          <span class="ycx">{{item.description}}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-pane">2</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/ng-template" id="createSubnetModal.html">
+    <div class="modal-common creSub-modal" >
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">创建子网</h3>
+        </div>
+        <div class="modal-body">
+          <form name="subnetModalForm" novalidate>
+            <div class="control-group">
+              <label class="control-label">所属网络</label>
+              <div class="controls">
+                <ui-select ng-model="subvpc" title='请选择所属网络' ng-change="changeSubVpc(subvpc)" >
+                    <ui-select-match>{{$select.selected.vpcId}} ( {{$select.selected.vpcName}} | {{$select.selected.cidrBlock}} )</ui-select-match>
+                  <ui-select-choices repeat="vpc in vpcsOptions">
+                    <div ng-bind-html="vpc.vpcId +' ( ' + vpc.vpcName + ' | ' +vpc.cidrBlock +' ) ' | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+                <div class="error" ng-if="vpcsOptions.length == 0" >*无可用私有网络</div>
+              </div>
+            </div>
+            <div class="control-group subset-wrap clearfix" ng-if="subnetSet.length>0" >
+              <div class="set-item">子网名称</div>
+              <div class="set-item">CIDR</div>
+              <div class="set-item">可用区</div>
+              <div class="set-item">关联路由表</div>
+              <div class="set-item">操作</div>
+            </div>
+            <div class="control-group subset-wrap clearfix" ng-repeat="sub in subnetSet">
+                <div class="input-text set-item" >
+                  <input type="text" class="form-controls" name="subname_{{$index}}" ng-model="sub.subnetName" placeholder="请输入子网名称" ng-maxlength="20"  required repeat-name /> <!--ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"-->
+                    <div class="error" ng-messages="subnetModalForm['subname_'+$index].$error" ng-if="interacted(subnetModalForm['subname_'+$index],$index)">
+                      <div ng-message="required">*必填项</div>
+                      <div ng-message="maxlength">请至多输入20个字符</div>
+                      <!--<div ng-message="pattern">只能输入字母、数字、汉字、横线以及下划线</div>-->
+                      <div ng-message="repeatName">该子网名称已存在,请重新输入</div>
+                    </div>
+                </div>
+                <div class="ip-group set-item" >
+                  <div class="clearfix">
+                    <div class="ip-text">{{sub.sub_cidr.ip_1}}</div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip-text">{{sub.sub_cidr.ip_2}}</div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip-text">
+                      <input type="text" class="form-controls" name="subip_3_{{$index}}" id="subip_3_{{$index}}" ng-model="sub.sub_cidr.ip_3" ng-blur="checkIp34(sub.sub_cidr.ip_3,'ip_3',$index)"  uib-popover={{sub.subip_3_range_tip}}  popover-trigger="focus" ng-readonly="sub.subip_3_readonly" />
+                    </div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip-text">
+                      <input type="text" class="form-controls" name="subip_4_{{$index}}" id="subip_4_{{$index}}" ng-model="sub.sub_cidr.ip_4" ng-blur="checkIp34(sub.sub_cidr.ip_4,'ip_4',$index)" uib-popover={{sub.subip_4_range_tip}}  popover-trigger="focus" ng-readonly="sub.subip_4_readonly" />
+                    </div>
+                    <div class="ip-spilt"> / </div>
+                  </div>
+                  <div class="clearfix">
+                    <ui-select ng-model="sub.sub_cidr.ip_5" ng-change="changeIp_5(sub.sub_cidr.ip_5,$index)" name="sub_cidrBlock_{{$index}}" >
+                      <ui-select-match>{{$select.selected}}</ui-select-match>
+                      <ui-select-choices repeat="ip_5 as ip_5 in subips_5">
+                        <div ng-bind-html="ip_5 | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                  </div>
+                  <!--<div class="error" ng-if="sub.cidrExist">*该CIDR已存在</div>-->
+                  <div class="error" ng-if="sub.cidrIntersect">*子网网段有重叠</div>
+                  <div class="error" ng-if="!sub.cidrSubnet">*子网网段超出VPC网段</div>
+                </div>
+                <div class="select set-item" >
+                  <ui-select ng-model="sub.zoneId">
+                      <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="zone.value as zone in subzones">
+                        <div ng-bind-html="zone.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+                <div class="select set-item" >
+                  <ui-select ng-model="sub.routeTableId">
+                      <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="route.value as route in routeTables">
+                        <div ng-bind-html="route.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+                <div class="action set-item" >
+                  <div class="sub del" ng-if="$index>0" ><a ng-click="delsub($index)"><i class="icon-aw-wrong"></i></a></div>
+                  <div class="sub add" ng-if="$index==(subnetSet.length-1)">
+                      <a ng-click="addsub(subvpc,$index+1)" ><i class="icon-aw-add-to2"></i></a>
+                  </div>
+                </div>
+  
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" type="button" ng-click="createSubConfirm(subnetModalForm,subnetSet)">确认</button>
+           <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+        </div>
+    </div>
+  </script>
+  <script type="text/ng-template" id="editSubnetModal.html">
+    <div class="vpc-modal modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">编辑名称</h3>
+      </div>
+      <div class="modal-body">
+        <form name="editSubModalForm" novalidate>
+        <div class="control-group">
+          <label class="control-label">子网名称:</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="subname" ng-model="editSubnetForm.subnetName" placeholder="请输入子网名称" ng-maxlength="20"  required repeat-name />
+            <div class="error" ng-messages='editSubModalForm.subname.$error' ng-if="interacted(editSubModalForm.subname)">
+              <div ng-message="required">*必填项</div>
+              <div ng-message="maxlength">请至多输入20个字符</div>
+              <div ng-message="repeatName">该子网名称已存在，请重新输入</div>
+            </div>
+          </div>
+        </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="editSubnetConfirm(editSubModalForm)">确认</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </div>
+  </script>
+  <script type="text/ng-template" id="changeRoutetableModal.html">
+    <div class="vpc-modal modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">更换路由表</h3>
+      </div>
+      <div class="modal-body">
+        <form name="changeRoutetableModalForm" novalidate>
+        <div class="control-group">
+          <label class="control-label">路由表:</label>
+          <div class="controls">
+            <ui-select name="routetable" ng-model="changeRoutetableForm.routeTableId" title='请选择路由表' required >
+                <ui-select-match placeholder="请选择路由表">{{$select.selected.routeTableName}}</ui-select-match>
+              <ui-select-choices repeat="routetable.routeTableId as routetable in routeTableOptions">
+                <div ng-bind-html="routetable.routeTableName | highlight: $select.search"></div>
+                </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages='changeRoutetableModalForm.routetable.$error' ng-if="interacted(changeRoutetableModalForm.routetable)">
+              <div ng-message="required">*必填项</div>
+            </div>
+          </div>
+        </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="changeRoutetableConfirm(changeRoutetableModalForm)">确认</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </div>
+  </script>
+</div>

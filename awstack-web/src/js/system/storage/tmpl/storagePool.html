@@ -1,0 +1,113 @@
+<div class="page-inner"> 
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+      <div class="tab-content">
+        <div class="detail-row">
+          <div class="detail-title">
+            <a class="an-close" ng-href="/system/storagedevice"><i class=" icon-aw-mail-reply"></i></a>
+          </div>
+          <div class="clear"></div>
+          <div class="detail-info">
+            <table class="table table-info column">
+              <tr>
+                <td>{{'aws.storage.pool.spname'|translate}}</td>
+                <td>{{detailData.Pool_name}}</td>
+                <td>{{'aws.storage.device.stName'|translate}}</td>
+                <td>{{detailData.Storage_name}}</td>
+              </tr>
+              <tr>
+                <td>{{'aws.storage.pool.capacity'|translate}}</td>
+                <td>{{detailData.capacity}}</td>
+                <td>{{'aws.storage.pool.free_capacity'|translate}}</td>
+                <td>{{detailData.free_capacity}}</td>
+              </tr>
+              <tr>
+                <td>{{'aws.storage.pool.status'|translate}}</td>
+                <td>{{'aws.storage.pool.'+ detailData.status|translate}}</td>
+                <td>{{'aws.storage.pool.vdisk_count'| translate }}</td>   
+                <td>{{detailData.vdisk_count}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </pane>
+  </div>
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="add.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{'aws.storage.pool.newTitle'|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="addform" novalidate>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.pool.spname' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="name" class="form-controls"  placeholder="{{'aws.storage.pool.spname_ph' | translate}}" ng-model="pool.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||addform.name.$dirty) && addform.name.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.pool.description' | translate}}：</label>
+          <div class="controls">
+            <textarea type="text" name="description" class="form-controls"  placeholder="{{'aws.storage.pool.description_ph' | translate}}" ng-model="pool.description" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32"  />
+            <div class="error" ng-messages="(submitInValid ||addform.description.$dirty) && addform.description.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmadd(addform)">{{'aws.action.ok' | translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="edit.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{'aws.storage.pool.editTitle'|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="addform" novalidate>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.pool.spname' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="name" class="form-controls"  placeholder="{{'aws.storage.pool.spname_ph' | translate}}" ng-model="pool.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||addform.name.$dirty) && addform.name.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.pool.description' | translate}}：</label>
+          <div class="controls">
+            <textarea type="text" name="description" class="form-controls"  placeholder="{{'aws.storage.pool.description_ph' | translate}}" ng-model="pool.description" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32"  />
+            <div class="error" ng-messages="(submitInValid ||addform.description.$dirty) && addform.description.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmadd(addform)">{{'aws.action.ok' | translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+  </div>
+</script>

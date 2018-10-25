@@ -1,0 +1,153 @@
+<div class="page-inner node-page">
+  <div class="tab-title">{{'aws.node.region'| translate}}：</div>
+  <uib-tabset active="">
+    <uib-tab index="$index + 1" ng-repeat="tab in regionTabs" ng-click="changeRegion(tab.regionUid)" heading="{{tab.regionName}}">
+      <div class="table-info node-info">
+      </div>
+      <div class="table-action">
+    <button type="button" ng-if="enterpriseVersion" ng-click="addNode(checkedItems)" ng-disabled="(!canAdd)||(!canAddTwo)" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{'aws.node.add'| translate}}</button>
+    <button type="button" ng-if="!enterpriseVersion" ng-click="addNode(checkedItems)" ng-disabled="!canAddTwo" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{'aws.node.add'| translate}}</button>
+    <!-- <button type="button"  ng-disabled="(!canMaintenance)||(!canMaintenanceTwo)" ng-click="maintenance(checkedItems)" class="btn btn-warning"><i class="icon-aw-repair"></i>{{'aws.node.repair'| translate}}</button>
+    <button type="button"  ng-disabled="(!canDel)||(!canDelTwo)" ng-click="deleteNode(checkedItems)" class="btn btn-warning"><i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button> -->
+    <button class="btn btn-refresh" ng-click="refreshNodes()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button>
+  </div>
+      <div class="table-content">
+        <table ng-table="tableParams" class="table" show-filter="false">
+          <colgroup>
+            <col width="4%" /> 
+            <col width="15%" />
+            <col width="15%" />
+            <col width="15%" />
+            <col width="12%" />
+            <col width="12%" />
+            <col width="12%" />
+            <col width="15%" />
+          </colgroup>
+          <tr ng-repeat="item in $data" ng-class="{true:'deleteNode',false:'none'}[item.status==21]">
+            <td header="'headerCheckbox.html'">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="checkboxes.items[item.nodeUid]" />
+                <i class="iconfont"></i>
+              </label>
+            </td>
+            <td data-title="'aws.node.hypervisorHostname'|translate" sortable="'hostName'">
+              <div class="edit-name">
+                <a ng-href="configure/node?id={{item.nodeUid}}&name={{item.hostName}}" title="{{item.hostName}}">{{item.hostName}}</a>
+              </div>
+            </td>
+            <td data-title="'aws.node.regionName'|translate" sortable="'regionName'">
+              {{item.regionName}}
+            </td>
+            <td data-title="'aws.node.management_IP'|translate" sortable="'regionName'">
+              {{item.hostInfoMap.ip}}
+            </td>
+            <td data-title="'aws.node.lastTime'|translate" sortable="'lastTime'">
+              <span class="date">{{item.lastTime| date:'yyyy-MM-dd HH:mm:ss'}}</span>
+            </td>
+            <td data-title="'aws.node.useStatus'|translate" sortable="'useStatus'">
+              {{'aws.node.useStatusValues.'+item.useStatus| translate}}
+            </td>
+            <td data-title="'aws.node.healthStaus.status'|translate" sortable="'healthStatus'">
+              <span ng-class="{'bg-green':(item.healthStatus=='status' || item.healthStatus==true),'bg-orange':(item.healthStatus=='repair')}" class="orange">
+              {{'aws.node.healthStaus.'+item.healthStatus| translate}}
+              </span>
+            </td> 
+            <td data-title="'aws.node.Status'|translate" sortable="'status'">
+              <span>{{'aws.node.status.'+item.status| translate}}</span>
+              <span><button type="button"  ng-show="item.canActivation" ng-click="activation(item)" class="btn btn-info">{{'aws.node.activation'| translate}}</button></span>
+              <span><button type="button"  ng-show="item.canRetry" ng-click="retry(item)" class="btn btn-info">{{'aws.node.retry'| translate}}</button></span>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </uib-tab>
+  </uib-tabset>
+
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+      <div class="tab-content">
+        <div class="detail-row">
+          <div class="detail-header">
+            <table class="table">
+              <tr>
+                <td>{{'aws.register.info.hostName'| translate}}：<a>{{detailHead.hostName}}</a></td>
+                <td>{{detailHead.regionName}}</td>
+                <td>{{detailHead.lastTime}}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="detail-title">
+            <a class="an-close" ng-href="configure/node"><i class="icon-aw-mail-reply"></i></a>
+            <span>{{'aws.node.nodeMessage'| translate}}</span>
+          </div>
+          <div class="detail-info node-info" ng-show="isShowNet">
+            <div class="net-field">
+              <div class="filed-title">{{'aws.node.networkt'| translate}}：</div>
+              <div class="control-group" ng-repeat="net in NodedetailData.network">
+                <label class="control-label">{{'aws.node.node_detail.'+net.role| translate}}：</label>
+                <div class="controls">
+                  <span type="text" class="value">IP：{{net.ip}} </span><br>
+                  <span type="text" class="value">{{'aws.node.netmask'| translate}}：{{net.netmask}} </span><br>
+                  <span  type="text" class="value" ng-show="net.isShow">{{'aws.node.vlan'| translate}}： {{net["vlan-start"]}} ~ {{net["vlan-end"]}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+         
+          <div class="detail-info">
+            <table class="table table-info column">
+              <tr>
+                <td>{{'aws.system.hypervisor.hypervisorHostname'|translate}}</td>
+                <td>{{nodename}}</td>
+                <td>{{'aws.system.hypervisor.type'|translate}}</td>
+                <td>{{hypervisor.type}}</td>
+              </tr>
+              <tr>
+                <td>{{'aws.system.hypervisor.runningVM'|translate}}</td>
+                <td>{{hypervisor.runningVM}}</td>
+                <td>{{'aws.system.hypervisor.virtualCPU'|translate}}</td>
+                <td>{{hypervisor.virtualCPU}}</td>
+              </tr>
+              <tr>
+                <td>{{'aws.system.hypervisor.virtualUsedCPU'|translate}}</td>
+                <td>{{hypervisor.virtualUsedCPU}}</td>
+                <td>{{'aws.system.hypervisor.localMemory'|translate}}</td>
+                <td>{{hypervisor.localMemory}}</td>
+              </tr>
+              <tr>
+                <td>{{'aws.system.hypervisor.localMemoryUsed'|translate}}</td>
+                <td>{{hypervisor.localMemoryUsed}}</td>
+                <td>{{'aws.system.hypervisor.freeRam'|translate}}</td>
+                <td>{{hypervisor.freeRam}}</td>
+              </tr>
+              <!-- <tr>
+                <td>{{'aws.system.hypervisor.localDisk'|translate}}</td>
+                <td>{{hypervisor.localDisk}}</td>
+                <td>{{'aws.system.hypervisor.leastDiskAvailable'|translate}}</td>
+                <td>{{hypervisor.leastDiskAvailable}}</td>
+              </tr>
+              <tr>
+                <td>{{'aws.system.hypervisor.localDiskUsed'|translate}}</td>
+                <td>{{hypervisor.localDiskUsed}}</td>
+                <td>{{'aws.system.hypervisor.freeDisk'|translate}}</td>
+                <td>{{hypervisor.localDisk - hypervisor.localDiskUsed}}</td>
+              </tr> -->
+              <tr>
+                <td>{{'aws.system.hypervisor.currentWorkload'|translate}}</td>
+                <td>{{hypervisor.currentWorkload}}</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </pane>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>

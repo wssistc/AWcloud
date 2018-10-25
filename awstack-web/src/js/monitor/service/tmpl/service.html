@@ -1,0 +1,128 @@
+<div class="page-inner monitor-view overview">
+  <div class="box">
+    <div class="col-4">
+      <div class="title">计算<div class="tips">
+            <span>正常：<em class="green">*</em></span><span>异常：<em class="orange">*</em></span>
+          </div></div>
+      <div class="panels clearfix">
+        <div class="pie-wrap nova-pie">
+          <div class="pie" chart-pie panel="novaPieChart.panels"></div>
+          <div class="pie-center" ng-if="novaPieChart.panels.data.length!=0">
+            <div class="num">{{novaTotal}}</div>
+            <div class="text">总服务数</div>
+          </div>
+        </div>
+        <div class="pie-legend category">
+          <dl class="dl-horizontal" ng-repeat="legend in novaPieChart.panels.data">
+            <dd>
+              <span><b>正常：</b><span class="normal">{{legend.value}}</span></span>
+              <span><b>异常：</b><span class="abnormal">{{legend.abnormal}}</span></span>
+            </dd>
+            <dt><span title="{{legend.name}}" style="color:{{novaPieChart.panels.colors[$index]}}">{{legend.name}}</span></dt>
+          </dl>
+          
+        </div>
+      </div>
+      
+    </div>
+    <div class="col-4">
+      <div class="title">存储<div class="tips">
+            <span>正常：<em class="green">*</em></span><span>异常：<em class="orange">*</em></span>
+          </div></div>
+      <div class="panels clearfix">
+        <div class="pie-wrap nova-pie">
+          <div class="pie" chart-pie panel="cinderPieChart.panels" ></div>
+          <div class="pie-center" ng-if="cinderPieChart.panels.data.length!=0">
+            <div class="num">{{cinderTotal}}</div>
+            <div class="text">总服务数</div>
+          </div>
+        </div>
+        <div class="pie-legend category">
+          <dl class="dl-horizontal" ng-repeat="legend in cinderPieChart.panels.data" >
+              <dd>
+                <span><b>正常：</b><span class="normal">{{legend.value}}</span></span>
+                <span><b>异常：</b><span class="abnormal">{{legend.abnormal}}</span></span>
+              </dd>
+              <dt><span title="{{legend.name}}" style="color:{{cinderPieChart.panels.colors[$index]}}">{{legend.name}}</span></dt>
+          </dl>
+          
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="title">网络<div class="tips">
+            <span>正常：<em class="green">*</em></span><span>异常：<em class="orange">*</em></span>
+          </div></div>
+      <div class="panels clearfix">
+        <div class="pie-wrap nova-pie">
+          <div class="pie" chart-pie panel="networkPieChart.panels"></div>
+          <div class="pie-center" ng-if="networkPieChart.panels.data.length!=0">
+            <div class="num">{{networkTotal}}</div>
+            <div class="text">总服务数</div>
+          </div>
+        </div>
+        <div class="pie-legend category">
+
+          <dl class="dl-horizontal" ng-repeat="legend in networkPieChart.panels.data">
+              <dd>
+                <span><b>正常：</b><span class="normal">{{legend.value}}</span></span>
+                <span><b>异常：</b><span class="abnormal">{{legend.abnormal}}</span></span>
+              </dd>
+              <dt><span title="{{legend.name}}" style="color:{{networkPieChart.panels.colors[$index]}}">{{legend.name}}</span></dt>
+          </dl>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="box">
+    <div class="col-4">
+      <div class="control-group">
+        <div class="control-label">数据库(KBps)：</div>
+        <div class="controls">
+          <ui-select ng-model="zoneForm.selectedMysqlhost" ng-disabled="options.disabled" ng-change="mysqlchange(zoneForm.selectedMysqlhost)" title="">
+            <ui-select-match placeholder="">{{$select.selected.host}}</ui-select-match>
+            <ui-select-choices repeat="mysqlhost in mysqlhosts.options | propsFilter:{host:$select.search}">
+              <div ng-bind-html="mysqlhost.host | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+        </div>
+      </div>
+      <div class="panels clearfix">
+        <div class="area-chart-wrap" chart-area panel="mysqlAreaChart.panels"></div>
+      </div>
+    </div>
+    <div class="col-4">
+        <div class="control-group">
+          <div class="control-label">缓存(KBps)</div>
+<!--           <div class="controls">
+            <ui-select ng-model="zoneForm.selectedMemhost" ng-disabled="options.disabled" ng-change="memchange(zoneForm.selectedMemhost)" title="">
+              <ui-select-match placeholder="">{{$select.selected.host}}</ui-select-match>
+              <ui-select-choices repeat="memhost in memhosts.options | propsFilter:{host:$select.search}">
+                <div ng-bind-html="memhost.host | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div> -->
+        </div>
+      <div class="panels clearfix">
+        <div class="area-chart-wrap" chart-area panel="memcachedAreaChart.panels"></div>
+      </div>
+    </div>
+    <div class="col-4">
+        <div class="control-group" >
+          <div class="control-label">消息队列(个)</div>
+<!--           <div class="controls">
+            <ui-select ng-model="zoneForm.selectedMqhost" ng-disabled="options.disabled" ng-change="mqchange(zoneForm.selectedMqhost)" title="">
+              <ui-select-match placeholder="">{{$select.selected.host}}</ui-select-match>
+              <ui-select-choices repeat="mqhost in mqhosts.options | propsFilter:{host:$select.search}">
+                <div ng-bind-html="mqhost.host | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div> -->
+        </div>
+      <div class="panels clearfix">
+        <div class="area-chart-wrap" chart-area panel="exchangeAreaChart.panels"></div>
+      </div>
+    </div>
+  </div>
+</div>

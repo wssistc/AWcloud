@@ -1,0 +1,138 @@
+<div class="page-inner">
+  <h3 class="page-title">{{"aws.keypair.keypair"|translate}}</h3>
+  <div class="table-action">
+    <button type="button" class="btn btn-primary" ng-click="createKeyPair()"><i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}</button>
+    <button type="button" class="btn btn-info" ng-click="importKeyPair()"><i class="icon-aw-modify"></i>{{"aws.keypair.import"|translate}}</button>
+    <button type="button" class="btn btn-warning" ng-disabled="delisDisabled" ng-click="deleteKeyPair()"><i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+    <button class="btn btn-refresh" ng-click="refreshKeyPairs()">
+      <i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}
+    </button>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+          <i class="icon-aw-search"></i>
+        </button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="tableParams" class="table " show-filter="false">
+      <tr ng-repeat="keypair in $data">
+        <td header="'headerCheckbox.html'">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[keypair.name]" />
+            <i class="iconfont"></i>
+          </label>
+        </td>
+        <td data-title="'aws.keypair.keypaireName'|translate" sortable="'name'">
+          {{keypair.name}}
+        </td>
+        <td data-title="'aws.keypair.fingerprint'|translate" sortable="'fingerprint'">
+          <span class="des des-lg">{{keypair.fingerprint}}</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="newKeyPair.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.keypair.createKeypair"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <!-- <uib-alert ng-if="beyondQuota_pro.key_pairs" type="danger">项目密钥对配额数不足</uib-alert>
+      <uib-alert ng-if="beyondQuota_dep.key_pairs" type="danger">部门密钥对配额数不足</uib-alert> -->
+      <form name="keyPairForm">
+        <div class="control-group">
+          <label class="control-label">{{"aws.keypair.keypaireName"|translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="name" ng-model="newKeyPairData.name" placeholder={{"aws.keypair.inputKeypairName"|translate}} ng-maxlength="32" ng-pattern="/^[a-zA-Z][a-zA-Z0-9_]*$/" required />
+            <div class="error" ng-messages='keyPairForm.name.$error' ng-if="interacted(keyPairForm.name)">
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+              <div ng-message="pattern">{{'aws.errors.noChinese'|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <!-- 标准版没有配额
+        <div class="control-group">
+            <label class="control-label">密钥对配额：</label>
+            <div class="controls">
+              <div class="clearfix bar-group">
+                <div quota-bar bardata="project_data"></div>
+                <div quota-bar bardata="domain_data"></div>
+              </div>
+            </div>
+        </div> -->
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="beyondQuota_dep.key_pairs || beyondQuota_pro.key_pairs || formSubmitted " ng-click="confirmNewKeypair(newKeyPairData)">{{"aws.action.ok"|translate}}
+      </button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="downloadPem.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.keypair.downloadPrivateKey"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+        <div class="alert alert-danger">
+          <strong>{{"aws.keypair.downloadTips"|translate}}</strong>
+        </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" ng-click="download()">{{"aws.keypair.download"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="importKeyPair.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.keypair.importKeypair"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="importKeyPairForm"> 
+        <div class="control-group">
+          <label class="control-label">{{"aws.keypair.keypaireName"|translate}}：</label>
+          <div class="controls">
+            <input type="text" name="name" class="form-controls"  ng-model="importKeyPairData.name"  placeholder={{"aws.keypair.inputKeypairName"|translate}} ng-maxlength="32" ng-pattern="/^[a-zA-Z][a-zA-Z0-9_]*$/" required />
+            <div class="error" ng-messages="importKeyPairForm.name.$error" ng-if="interacted(importKeyPairForm.name)" >
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+              <div ng-message="pattern">{{'aws.errors.noChinese'|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.keypair.publicKey"|translate}}：</label>
+          <div class="controls">
+            <textarea class="form-controls" name="publicKey" ng-model="importKeyPairData.public_key" placeholder="{{'aws.keypair.importPublicKey'|translate}}"  required >
+            </textarea>
+            <div class="error" ng-messages="importKeyPairForm.publicKey.$error" ng-if="interacted(importKeyPairForm.publicKey)">
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmImportKeypair(importKeyPairData,importKeyPairForm)" ng-disabled="formSubmitted" >{{"aws.action.ok"|translate}}
+      </button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>

@@ -1,0 +1,40 @@
+<div class="login-main clearfix">
+    <div class="container">
+        <form name="loginForm" class="login-form" ng-submit="login(lg)">
+            <legend>{{'aws.register.login.Eguestlogin'|translate}}</legend>
+            <fieldset>
+                <div class="control-group" ng-class="{'focus':namefocus}">
+                    <input class="form-controls" ng-focus="namefocus=true" ng-blur="namefocus=false" autocomplete="off" type="text" name="loginName" id="input_username" ng-model="lg.loginName" required placeholder="{{'aws.register.login.user'|translate}}" />
+                    <label class="control-label"><span class="scroll-bg"></span><span>{{'aws.register.login.user'|translate}}</span></label>
+                    <div ng-if="loginForm.loginName.$invalid && loginForm.loginName.$dirty">
+                        <span class="help-block" ng-if="loginForm.loginName.$error.required">{{'aws.register.login.required'|translate}}</span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="{'focus':passwordfocus}">
+                    <input class="form-controls" ng-focus="passwordfocus=true" ng-blur="passwordfocus=false" type="password" name="password" id="input_password" ng-model="lg.password" required placeholder="{{'aws.register.login.passwd'|translate}}" />
+                    <label class="control-label"><span class="scroll-bg"></span><span>{{'aws.register.login.passwd'|translate}}&nbsp;</span></label>
+                    <div ng-if="loginForm.password.$invalid && loginForm.password.$dirty">
+                        <span class="help-block" ng-if="loginForm.password.$error.required">{{'aws.register.login.required'|translate}}</span>
+                    </div>
+                </div>
+                <!--<div class="control-group code">
+						<input class="form-controls" type="text" placeholder="验证码"/>
+						&lt;!&ndash;<img src="http://192.168.137.50:8080/awstack-user/v1/verifycode" alt=""/>&ndash;&gt;
+						<div class="error-messages"></div>
+						<p class="help-tips" ng-click="getImg()">看不清楚? 换一张</p>
+					</div>-->
+                <div class="btn-item">
+                    <button type="submit" class="btn btn-primary" ng-disabled="loginForm.$invalid">{{'aws.register.login.login'|translate}}</button>
+                    <div ng-if="lgError" class="help-block">{{'aws.register.login.userorpasswderror'|translate}}</div>
+                    <div ng-if="" class="help-block">{{'aws.register.login.servererror'|translate}}</div>
+                </div>
+                <div class="link-wrap">
+                    <div class="link-cont">
+                        <a href="#/forgetpass">{{'aws.register.login.forgetpasswd'|translate}}</a>
+                        <p class="pull-right">{{'aws.register.login.aws_account'|translate}}<a ng-href="#/register">{{'aws.register.login.register'|translate}}&gt;&gt;</a></p>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>存储管理</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <h3>
+	添加备份存储</h3>
+<p>
+	<strong>说明：</strong><br />
+	云主机只能添加一个备份存储。</p>
+<p>
+	<strong>前提条件</strong></p>
+<p>
+	已获取对接的外部存储设备信息。</p>
+<p>
+	<strong>操作步骤</strong></p>
+<ol>
+	<li>
+		在云管平台的Web控制台上，选择&ldquo;产品和服务&gt;系统管理 &gt;运维管理&rdquo;，进入运维管理导航菜单。</li>
+	<li>
+		在左侧导航菜单中单击&ldquo;存储管理&rdquo;，进入存储管理页面。</li>
+	<li>
+		单击&ldquo;添加&rdquo;按钮。</li>
+	<li>
+		填写存储名称和描述信息，在存储用途的下拉列表中选择&ldquo;云主机备份资源池&rdquo;，在存储设备下拉列表中选择&ldquo;NFS&rdquo;或&ldquo;Ceph&rdquo;。</li>
+	<li>
+		单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+<h3>
+	添加后端存储</h3>
+<p>
+	<strong>前提条件</strong></p>
+<p>
+	已获取对接的外部存储设备信息，用户名、密码、IP地址等。</p>
+<p>
+	<strong>操作步骤</strong></p>
+<ol>
+	<li>
+		在云管平台的Web控制台上，选择&ldquo;产品和服务 &gt;系统管理 &gt;运维管理&rdquo;，进入运维管理导航菜单。</li>
+	<li>
+		在左侧导航菜单中单击&ldquo;存储管理&rdquo;，进入存储管理页面。</li>
+	<li>
+		单击&ldquo;添加&rdquo;按钮。</li>
+	<li>
+		在存储用途的下拉列表中选择&ldquo;云主机存储资源池&rdquo;，配置云主机后端存储设备信息。</li>
+</ol>
+<p>
+	<strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;注意</strong>：</p>
+<ul>
+	<li>
+		两节点软件交付模式下，不允许对接超融合Ceph。</li>
+	<li>
+		由于当前云管平台不对外部Ceph存储进行使用状态监控，当外部Ceph使用率过大时可能会影响云管平台功能的使用。</li>
+	<li>
+		当存储协议为&ldquo;FC&rdquo;时，则不需要配置主机。</li>
+	<li>
+		连接通用iscsi时，当有多个磁盘可供选择时，所有节点必须选择相同大小的磁盘才能对接成功。</li>
+</ul>
+<ol start="5">
+	<li>
+		配置主机信息，包括存储网信息和各节点网卡信息。</li>
+	<li>
+		在主机列表区勾选节点，单击&ldquo;磁盘配置&rdquo;按钮，选择超融合Ceph的磁盘。完成所有节点磁盘配置。</li>
+	<li>
+		单击&ldquo;网卡配置&rdquo;按钮，查看网卡配置信息。</li>
+	<li>
+		单击&ldquo;下发网络配置&rdquo;按钮，使配置生效。</li>
+	<li>
+		单击&ldquo;验证存储连通性&rdquo;按钮，验证各节点网络联通性。</li>
+	<li>
+		单击&ldquo;保存&rdquo;按钮。</li>
+</ol>
+<h3>
+	节点存储管理</h3>
+<p>
+	当云主机存储资源池对接的设备类型为&ldquo;通用FC&rdquo;或&ldquo;通用ISCSI&rdquo;时，数据中心新增节点纳入集群后，需要进行节点存储设备对接。</p>
+<p>
+	当对接的存储设备类型为&ldquo;通用FC&rdquo;时，单击名称列的存储名称，进入存储详情页面，选择&ldquo;节点存储管理&rdquo;页签。在节点列表区，选择新增的节点，单击&ldquo;磁盘管理&rdquo;按钮，选择挂载FC存储磁盘。</p>
+<p>
+	当对接的存储设备类型为&ldquo;通用ISCSI&rdquo;时，单击名称列的存储名称，进入存储详情页面，选择&ldquo;节点存储管理&rdquo;页签。单击&ldquo;发现目标（target）&rdquo;，查看节点信息，然后单击&ldquo;登陆并确认ISCSI存储设备&rdquo;按钮，当新增节点有多个磁盘可供选择时，必须选择其他节点相同大小的磁盘才能对接成功。</p>
+<h3>
+	修改存储</h3>
+<p>
+	<strong>注意</strong>：<br />
+	使用中存储设备不允许修改。</p>
+<p>
+	在存储管理页面，勾选待修改的存储，单击&ldquo;编辑&rdquo;按钮，修改存储名称和描述信息。</p>
+<h3>
+	删除存储</h3>
+<p>
+	<strong>注意</strong>：<br />
+	删除存储前需确认该存储未被使用。</p>
+<p>
+	在存储管理页面，勾选待删除的存储，单击&ldquo;删除&rdquo;按钮，在弹出的确认框里单击&ldquo;确定&rdquo;按钮。</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

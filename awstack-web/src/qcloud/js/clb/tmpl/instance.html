@@ -1,0 +1,178 @@
+<div class="page-inner">
+  <div class="page-title">
+    <h2>负载均衡实例列表</h2>
+    <!--
+    <ui-select class="sel-sm" ng-model="currentProject"
+               ng-change="changeProject(currentProject)">
+      <ui-select-match placehold="请选择项目">{{$select.selected.name}}</ui-select-match>
+      <ui-select-choices repeat="project in projectsList">
+        <div ng-bind-html="project.name | highlight: $select.search"></div>
+      </ui-select-choices>
+    </ui-select>
+    -->
+    <div class="btn-item-group">
+      <button type="button" class="type-btn" ng-class='{"active": item.code === currentRegion}'
+              ng-click="changeRegion(item)" ng-repeat="item in regionsList">
+        <span>{{item.name}}</span>
+      </button>
+    </div>
+  </div>
+  <div class="table-action">
+    <!-- 增删改查操作 -->
+    <button type="button" class="btn btn-primary" data-toggle="modal"
+            ng-click="buyLBInstancer()">
+      <i class="icon-aw-add-to2"></i>新建
+    </button>
+    <button type="button" class="btn btn-info" data-toggle="modal"
+            ng-click="modifyLBInstancer()" ng-disabled="!canModify">
+      <i class="icon-aw-modify"></i>修改
+    </button>
+    <button type="button" class="btn btn-info" data-toggle="modal"
+            ng-click="deleteLBInstancers()" ng-disabled="!canDelete">
+      <i class="icon-aw-delete"></i>删除
+    </button>
+    <!--charset需要设置成“utf-8”，add-bom需要设置成“true”-->
+    <!--csv-header第一个字段绝对不能是“ID”，可以是id, Id, iD等-->
+    <button type="button" class="btn btn-primary" ng-csv="downloadAllLBData()"
+            charset="utf-8" add-bom="true"
+            csv-header="['id', '名称', '类型', '所属网络', 'VIP', '域名', '地域', '创建时间', '状态']"
+            filename="clbs.{{currentRegion}}.{{currentProjectId}}.csv">
+      下载
+    </button>
+    <div class="search-box">
+      <button class="btn btn-search" type="submit"><i class="icon-aw-search"></i></button>
+      <input type="text" class="form-control" placeholder="可输入VIP或内网IP搜索" ng-model="searchContent"
+             ng-keyup="searchLB(searchContent)">
+    </div>
+    <button class="btn btn-refresh" ng-click="refreshLBData()">
+      <i class="icon-aw-refresh"></i>
+      刷新
+    </button>
+  </div>
+  <div class="table-content">
+    <table ng-table="lbInstanceTable" class="table table-check" show-filter="false">
+      <!--可以使用lbInstanceTable.data或$data-->
+      <tr ng-repeat="loadBalancer in lbInstanceTable.data">
+        <td header="'headerCheckbox.html'">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[loadBalancer.unLoadBalancerId]"/>
+            <i class="iconfont"></i>
+          </label>
+        </td>
+        <td data-title="'ID/名称'" sortable="'loadBalancerName'">
+          <div>
+            <a href="" ng-click="goToLBDetails(loadBalancer['unLoadBalancerId'])">
+              {{loadBalancer["unLoadBalancerId"]}}
+            </a>
+          </div>
+          <div>{{loadBalancer["loadBalancerName"]}}</div>
+        </td>
+        <td data-title="'类型'" sortable="'loadBalancerType'">
+          <span>{{loadBalancerTypes[loadBalancer['loadBalancerType']]}}</span>
+        </td>
+        <td data-title="'所属网络'" sortable="'subnetId'">
+          <div ng-if="loadBalancer['vpcName'] !== 'base'">
+            <div>
+              <a
+                ng-href="#/vpc/vpc?vpcId={{currentRegion}}_vpc_{{loadBalancer['vpcId']}}">
+                {{loadBalancer["unVpcId"]}}
+              </a>
+            </div>
+            <div>{{loadBalancer["vpcName"] || "-"}}</div>
+          </div>
+          <span ng-if="loadBalancer['vpcName'] === 'base'">基础网络</span>
+        </td>
+        <td data-title="'VIP'" sortable="'loadBalancerVips'">
+          <span>{{loadBalancer['loadBalancerVips'].join(", ")}}</span>
+        </td>
+        <td data-title="'实例域名'" sortable="'domain'">
+          <span>{{loadBalancer['domain']}}</span>
+        </td>
+        <td data-title="'创建时间'" sortable="'createTime'">
+          <span>{{loadBalancer['createTime']}}</span>
+        </td>
+        <td data-title="'状态'" sortable="'status'">
+          <span class="{{loadBalancer['status'] === 1 ? 'green' : 'orange'}}">
+            {{loadBalancerStatuses[loadBalancer['status']]}}
+          </span>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.allChecked" class="select-all" value=""/>
+    <i class="icon-aw-square"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="modifyLBInstancer.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">修改负载均衡实例</h3>
+    </div>
+    <div class="modal-body">
+      <form name="modifyLBInstancerForm">
+        <!--<uib-alert type="warning" class="alert-tip">-->
+        <!--</uib-alert>-->
+        <div class="control-group">
+          <label class="control-label">实例名称：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="loadBalancerName"
+                   ng-model="postData.loadBalancerName"
+                   placeholder="请输入负载均衡器的名称"
+                   ng-pattern="/^[\u4e00-\u9fa5_a-zA-Z0-9\-]+$/" ng-maxlength="20"/>
+            <div class="error" ng-if="modifyLBInstancerForm.loadBalancerName.$invalid">
+              <div ng-if="modifyLBInstancerForm.loadBalancerName.$error.pattern">负载均衡器的名称必须是：英文、汉字、数字、连接线"-"或下划线"_"
+              </div>
+              <div ng-if="modifyLBInstancerForm.loadBalancerName.$error.maxlength">负载均衡器的名称不能超过20个字符！</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">域名前缀：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="domainPrefix"
+                   ng-model="postData.domainPrefix"
+                   placeholder="请输入负载均衡器的名称" required
+                   ng-pattern="/^[a-z0-9\-]+$/" ng-maxlength="20"/>
+            <div class="error" ng-if="modifyLBInstancerForm.domainPrefix.$invalid">
+              <div ng-if="modifyLBInstancerForm.domainPrefix.$error.pattern">域名前缀必须是：小写字母、数字、连接线"-"</div>
+              <div ng-if="modifyLBInstancerForm.domainPrefix.$error.maxlength">域名前缀不能超过20个字符！</div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-disabled="modifyLBInstancerForm.$invalid"
+              ng-click="$close(postData)">确定
+      </button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="deleteLBInstancers.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">删除负载均衡实例</h3>
+    </div>
+    <div class="modal-body">
+      <form name="deleteLBInstanceForm">
+        <uib-alert type="warning" class="alert-tip">
+          <strong>【警告：删除操作不可撤销！】</strong>您确认删除选中的负载均衡实例？
+        </uib-alert>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="$close(selectedItems)">确定
+      </button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>

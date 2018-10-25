@@ -1,0 +1,1359 @@
+﻿<div class="storage-initSetting" ng-controller="initStorageSettingCtrl">
+    <div class="shade-box-initStorage" ng-if="showLoading">
+        <div class="global-loading shows">
+            <i class="loading-icon"></i>
+            <span>{{'aws.initSetting.addStorageWaitInfo'|translate}}</span>
+        </div>
+    </div>
+    <div class="shade-box-iscsi" ng-if="showIscsiLoading">
+        <div class="global-loading shows">
+            <i class="loading-icon"></i>
+            <span>{{'aws.initSetting.loading'|translate}}</span>
+        </div>
+    </div>
+    <div class="title">
+        <span>{{'aws.initSetting.configInsBackendSharedStorage'|translate}}</span>
+    </div>
+    <div ng-show="showType=='stor'">
+        <div class="step-title" ng-if="storageStepTwo">
+            <ul class="steps-sytle-ver clearfix">
+                <li class="clearfix step-start storageStep" ng-class="{'active':inStepOneBar}">
+                    <div class="inner">
+                        <span>{{'aws.initSetting.buttStorage'|translate}}</span>
+                        <i>1</i>
+                    </div>
+                </li>
+                <li class="clearfix step-end storageStep"  ng-class="{'active':inStepTwoBar}">
+                    <div class="inner">
+                        <span>{{'aws.initSetting.configureHost'|translate}}</span>
+                        <i>2</i>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="step-title stepThree-title" ng-if="storageStepThree">
+            <ul class="steps-sytle-ver clearfix">
+                <li class="clearfix step-start" ng-class="{'active':inStepOneBar}">
+                    <div class="inner">
+                        <span>{{'aws.initSetting.buttStorage'|translate}}</span>
+                        <i>1</i>
+                    </div>
+                </li>
+                <li class="clearfix step-middle"  ng-class="{'active':inStepTwoBar}">
+                    <div class="inner">
+                        <span>{{'aws.initSetting.configureHost'|translate}}</span>
+                        <i>2</i>
+                    </div>
+                </li>
+                <li class="clearfix step-end"  ng-class="{'active':inStepThreeBar}">
+                    <div class="inner">
+                        <span>{{'aws.initSetting.connectIscsi'|translate}}</span>
+                        <i>3</i>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="storage-box">
+            <form name="createStorageForm" class="createStorage" ng-show="inStepOne" novalidate>
+                <div class="control-group">
+                    <label class="control-label">{{'aws.initSetting.datacener'|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="setting.region" ng-change="changeRegion(setting.region, 'storageShow')" ng-disabled="true">
+                            <ui-select-match placeholder="{{'aws.initSetting.placeholder.selectDataCenter'|translate}}">{{$select.selected.regionName}}</ui-select-match>
+                            <ui-select-choices repeat="region in regionList | filter: {regionName: $select.search}">
+                                <div ng-bind-html="region.regionName | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{'aws.system.storagement.name'|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="name" ng-model="storage.name" ng-change="checkName()" placeholder="{{'aws.system.storagement.inputName'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\.)*$/" ng-maxlength="32" required ng-disabled="storageStatus" />
+                        <div class="error" ng-messages="(submitValid || createStorageForm.name.$dirty) && createStorageForm.name.$error">
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            <span ng-message="pattern">{{'aws.errors.nameLimit'|translate}}</span>
+                            <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                            <span ng-if="nameCheck">{{'aws.errors.storageName_check'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{'aws.system.storagement.manufacturer'|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="storage.manufacturer" ng-change="changeManufacturer(storage.manufacturer)" ng-disabled = "manageAddrClick || nfsAddrClick || storageStatus">
+                            <ui-select-match placeholder="{{'aws.system.storagement.selectManufacturer'|translate}}">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="manu in manufacturerList | filter: {name: $select.search}">
+                                <div ng-bind-html="manu.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div ng-if = "ruijieShow">
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.device'|translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="storage.ruijie.device" ng-change="changeRuijieDevice(storage.ruijie.device)" ng-disabled = "manageAddrClick || storageStatus">
+                                <ui-select-match placeholder="{{'aws.system.storagement.selectDevice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="device in ruijieDeviceList | filter: {name: $select.search}">
+                                    <div ng-bind-html="device.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.protocol'|translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="storage.ruijie.protocol" ng-change="changeRuijieProtocol(storage.ruijie.protocol)" ng-disabled="storageStatus" >
+                                <ui-select-match placeholder="{{'aws.system.storagement.selectProtocol'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="protocol in ruijieProtocolList | filter: {name: $select.search}">
+                                    <div ng-bind-html="protocol.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group ip_cidr" ng-if = "R2Show">
+                        <label class="control-label">{{'aws.system.storagement.ipAddr'|translate}}：</label>
+                        <div class="controls clearfix">
+                            <div class="flex">
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_0" ng-model="storage.ruijie.ip_0"  ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="1" max="255" limitnumrange placeholder="1~255" required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ip_0.$dirty) && createStorageForm.ip_0.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_1_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_1" ng-model="storage.ruijie.ip_1" ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="0" max="255" limitnumrange placeholder="0~255" required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ip_1.$dirty) && createStorageForm.ip_1.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_2" ng-model="storage.ruijie.ip_2" ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="0" max="255" limitnumrange placeholder="0~255" required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ip_2.$dirty) && createStorageForm.ip_2.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_3" ng-model="storage.ruijie.ip_3" ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="0" max="255" placeholder="0~255" limitnumrange required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ip_3.$dirty) && createStorageForm.ip_3.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group ip_cidr" ng-if = "C01Show">
+                        <label class="control-label">{{'aws.system.storagement.ctrl1'|translate}}：</label>
+                        <div class="controls clearfix">
+                            <div class="flex">
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ctrl1_0" ng-model="storage.ruijie.ctrl1_0"  ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="1" max="255" limitnumrange placeholder="1~255" required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ctrl1_0.$dirty) && createStorageForm.ctrl1_0.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_1_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ctrl1_1" ng-model="storage.ruijie.ctrl1_1" ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="0" max="255" limitnumrange placeholder="0~255" required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ctrl1_1.$dirty) && createStorageForm.ctrl1_1.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ctrl1_2" ng-model="storage.ruijie.ctrl1_2" ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="0" max="255" limitnumrange placeholder="0~255" required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ctrl1_2.$dirty) && createStorageForm.ctrl1_2.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ctrl1_3" ng-model="storage.ruijie.ctrl1_3" ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="0" max="255" placeholder="0~255" limitnumrange required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ctrl1_3.$dirty) && createStorageForm.ctrl1_3.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group ip_cidr" ng-if = "C01Show">
+                        <label class="control-label">{{'aws.system.storagement.ctrl2'|translate}}：</label>
+                        <div class="controls clearfix">
+                            <div class="flex">
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ctrl2_0" ng-model="storage.ruijie.ctrl2_0"  ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="1" max="255" limitnumrange placeholder="1~255" required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ctrl2_0.$dirty) && createStorageForm.ctrl2_0.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_1_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ctrl2_1" ng-model="storage.ruijie.ctrl2_1" ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="0" max="255" limitnumrange placeholder="0~255" required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ctrl2_1.$dirty) && createStorageForm.ctrl2_1.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ctrl2_2" ng-model="storage.ruijie.ctrl2_2" ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="0" max="255" limitnumrange placeholder="0~255" required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ctrl2_2.$dirty) && createStorageForm.ctrl2_2.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ctrl2_3" ng-model="storage.ruijie.ctrl2_3" ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="0" max="255" placeholder="0~255" limitnumrange required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ctrl2_3.$dirty) && createStorageForm.ctrl2_3.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.userName'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" name="userName" ng-model="storage.ruijie.userName" class="form-controls" placeholder="{{'aws.system.storagement.inputUserName'|translate}}" ng-pattern="/^[^\u4e00-\u9fa5]{0,}$/" ng-maxlength="32" required ng-disabled="storageStatus" />
+                            <div class="error" ng-messages="(submitValid || createStorageForm.userName.$dirty) && createStorageForm.userName.$error">
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                                <span ng-message="pattern">{{'aws.errors.noInputCN'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.password'|translate}}：</label>
+                        <div class="controls ksnode-pass">
+                            <i ng-click="showPassword = !showPassword" ng-class="{'icon-aw-no-display':showPassword,'icon-aw-display':!showPassword}"></i>
+                            <input type="{{showPassword ? 'text': 'password'}}" name="password" ng-model="storage.ruijie.password" class="form-controls" autocomplete="new-password" placeholder="{{'aws.system.storagement.inputPassword'|translate}}" ng-maxlength="30" required ng-disabled="storageStatus" />
+                            <div class="error" ng-messages="(submitValid || createStorageForm.password.$dirty) && createStorageForm.password.$error">
+                                <span ng-message="maxlength">{{'aws.errors.passmaxlength'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.pool'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" name="pool" ng-model="storage.ruijie.pool" class="form-controls" placeholder="{{'aws.system.storagement.inputPool'|translate}}" ng-change="checkPoolExist(storage.ruijie.pool)" ng-pattern="/^[^\u4e00-\u9fa5]{0,}$/" ng-maxlength="32" required ng-disabled="storageStatus" />
+                            <div class="error" ng-messages="(submitValid || createStorageForm.pool.$dirty) && createStorageForm.pool.$error">
+                                <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                                <span ng-message="pattern">{{'aws.errors.noInputCN'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                <span ng-if="poolUnique">{{'aws.system.storagement.poolExist'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-if = "C01Show && ISCSIShow">
+                        <label class="control-label">{{'aws.system.storagement.ctrl1Business'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" name="ctrl1Business" ng-model="storage.ruijie.ctrl1Business" class="form-controls" placeholder="{{'aws.action.pleaseInput'|translate}}" ng-maxlength="32" required ng-disabled="storageStatus" />
+                            <div class="error" ng-messages="(submitValid || createStorageForm.ctrl1Business.$dirty) && createStorageForm.ctrl1Business.$error">
+                                <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-if = "C01Show && ISCSIShow">
+                        <label class="control-label">{{'aws.system.storagement.ctrl2Business'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" name="ctrl2Business" ng-model="storage.ruijie.ctrl2Business" class="form-controls" placeholder="{{'aws.action.pleaseInput'|translate}}" ng-maxlength="32" required ng-disabled="storageStatus" />
+                            <div class="error" ng-messages="(submitValid || createStorageForm.ctrl2Business.$dirty) && createStorageForm.ctrl2Business.$error">
+                                <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.description'|translate}}：</label>
+                        <div class="controls">
+                            <textarea class="form-controls" name="description" ng-model="storage.ruijie.description" ng-maxlength="255" placeholder="{{'aws.system.storagement.inputDescription'|translate}}" ng-disabled="storageStatus"></textarea>
+                            <div class="error" ng-messages="(submitValid || createStorageForm.description.$dirty) && createStorageForm.description.$error">
+                                <div ng-message="maxlength">{{'aws.errors.maxlength_255'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">&nbsp;</label>
+                        <div class="controls">
+                            <button class="btn btn-info" type="button" ng-click="checkManageAddr()" ng-disabled="manageAddrClick || storageStatus">{{'aws.system.storagement.checkManageAddr'|translate}}</button>
+                            <span ng-if = "checkAddrLoadingShow">{{'aws.initSetting.Verification'|translate}}<i class="aw-spin icon-aw-refresh"></i></span>
+                            <span class="red" ng-if = "checkAddrTipShow">{{checkAddrTip}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if = "toyouShow">
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.device'|translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="storage.toyou.device" ng-disabled="storageStatus">
+                                <ui-select-match placeholder="{{'aws.system.storagement.selectDevice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="device in toyouDeviceList | filter: {name: $select.search}">
+                                    <div ng-bind-html="device.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.protocol'|translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="storage.toyou.protocol" ng-disabled="storageStatus">
+                                <ui-select-match placeholder="{{'aws.system.storagement.selectProtocol'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="protocol in toyouProtocolList | filter: {name: $select.search}">
+                                    <div ng-bind-html="protocol.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group ip_cidr">
+                        <label class="control-label">{{'aws.system.storagement.ipAddr'|translate}}：</label>
+                        <div class="controls clearfix">
+                            <div class="flex">
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_0" ng-model="storage.toyou.ip_0"  ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="1" max="255" limitnumrange placeholder="1~255" required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ip_0.$dirty) && createStorageForm.ip_0.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_1_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_1" ng-model="storage.toyou.ip_1" ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="0" max="255" limitnumrange placeholder="0~255" required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ip_1.$dirty) && createStorageForm.ip_1.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_2" ng-model="storage.toyou.ip_2" ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="0" max="255" limitnumrange placeholder="0~255" required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ip_2.$dirty) && createStorageForm.ip_2.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_3" ng-model="storage.toyou.ip_3" ng-change="changeManageAddr()" ng-disabled="manageAddrClick || storageStatus" min="0" max="255" placeholder="0~255" limitnumrange required/>
+                                    <div class="error" ng-messages="(submitValid || manageAddrValid || createStorageForm.ip_3.$dirty) && createStorageForm.ip_3.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.userName'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" name="userName" ng-model="storage.toyou.userName" class="form-controls" placeholder="{{'aws.system.storagement.inputUserName'|translate}}" ng-pattern="/^[^\u4e00-\u9fa5]{0,}$/" ng-maxlength="32" required ng-disabled="storageStatus" />
+                            <div class="error" ng-messages="(submitValid || createStorageForm.userName.$dirty) && createStorageForm.userName.$error">
+                                <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                                <span ng-message="pattern">{{'aws.errors.noInputCN'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.password'|translate}}：</label>
+                        <div class="controls ksnode-pass">
+                            <i ng-click="showPassword = !showPassword" ng-class="{'icon-aw-no-display':showPassword,'icon-aw-display':!showPassword}"></i>
+                            <input type="{{showPassword ? 'text': 'password'}}" name="password" ng-model="storage.toyou.password" class="form-controls" autocomplete="new-password" placeholder="{{'aws.system.storagement.inputPassword'|translate}}" ng-maxlength="30" required ng-disabled="storageStatus" />
+                            <div class="error" ng-messages="(submitValid || createStorageForm.password.$dirty) && createStorageForm.password.$error">
+                                <span ng-message="maxlength">{{'aws.errors.passmaxlength'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.pool'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" name="pool" ng-model="storage.toyou.pool" class="form-controls" placeholder="{{'aws.system.storagement.inputPool'|translate}}" ng-change="checkPoolExist(storage.toyou.pool)" ng-pattern="/^[^\u4e00-\u9fa5]{0,}$/" ng-maxlength="32" required ng-disabled="storageStatus" />
+                            <div class="error" ng-messages="(submitValid || createStorageForm.pool.$dirty) && createStorageForm.pool.$error">
+                                <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                                <span ng-message="pattern">{{'aws.errors.noInputCN'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                <span ng-if="poolUnique">{{'aws.system.storagement.poolExist'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.description'|translate}}：</label>
+                        <div class="controls">
+                            <textarea class="form-controls" name="description" ng-model="storage.toyou.description" ng-maxlength="255" placeholder="{{'aws.system.storagement.inputDescription'|translate}}" ng-disabled="storageStatus"></textarea>
+                            <div class="error" ng-messages="(submitValid || createStorageForm.description.$dirty) && createStorageForm.description.$error">
+                                <div ng-message="maxlength">{{'aws.errors.maxlength_255'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">&nbsp;</label>
+                        <div class="controls">
+                            <button class="btn btn-info" type="button" ng-click="checkManageAddr()" ng-disabled = "manageAddrClick || storageStatus">{{'aws.system.storagement.checkManageAddr'|translate}}</button>
+                            <span ng-if = "checkAddrLoadingShow">{{'aws.initSetting.Verification'|translate}} <i class="aw-spin icon-aw-refresh"></i></span>
+                            <span class="red" ng-if = "checkAddrTipShow">{{checkAddrTip}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if = "nfsShow">
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.description'|translate}}：</label>
+                        <div class="controls">
+                            <textarea class="form-controls" name="description" ng-model="storage.nfs.description" ng-maxlength="255" placeholder="{{'aws.system.storagement.inputDescription'|translate}}" ng-disabled="storageStatus"></textarea>
+                            <div class="error" ng-messages="(submitValid || createStorageForm.description.$dirty) && createStorageForm.description.$error">
+                                <div ng-message="maxlength">{{'aws.errors.maxlength_255'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group ip_cidr">
+                        <label class="control-label">{{'aws.system.storagement.nfsAddr'|translate}}：</label>
+                        <div class="controls clearfix">
+                            <div class="flex">
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_0" ng-model="storage.nfs.ip_0"  ng-change="changeNfsAddr()" ng-disabled="nfsAddrClick ||storageStatus" min="1" max="255" limitnumrange placeholder="1~255"  required/>
+                                    <div class="error" ng-messages="(submitValid || nfsAddrValid || createStorageForm.ip_0.$dirty) && createStorageForm.ip_0.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_1_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_1" ng-model="storage.nfs.ip_1" ng-change="changeNfsAddr()" ng-disabled="nfsAddrClick || storageStatus" min="0" max="255" limitnumrange placeholder="0~255"  required/>
+                                    <div class="error" ng-messages="(submitValid || nfsAddrValid || createStorageForm.ip_1.$dirty) && createStorageForm.ip_1.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_2" ng-model="storage.nfs.ip_2" ng-change="changeNfsAddr()" ng-disabled="nfsAddrClick || storageStatus" min="0" max="255" limitnumrange placeholder="0~255"  required/>
+                                    <div class="error" ng-messages="(submitValid || nfsAddrValid || createStorageForm.ip_2.$dirty) && createStorageForm.ip_2.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_3" ng-model="storage.nfs.ip_3" ng-change="changeNfsAddr()" ng-disabled="nfsAddrClick || storageStatus" min="0" max="255" placeholder="0~255" limitnumrange required/>
+                                    <div class="error" ng-messages="(submitValid || nfsAddrValid || createStorageForm.ip_3.$dirty) && createStorageForm.ip_3.$error">
+                                        <form-validate></form-validate>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">&nbsp;</label>
+                        <div class="controls">
+                            <button class="btn btn-info" type="button" ng-disabled="nfsAddrClick || storageStatus" ng-click="checkNfsAddr()">{{'aws.system.storagement.checkNfsAddr'|translate}}</button>
+                            <span ng-if = "checkNfsLoadingShow">{{'aws.initSetting.Verification'|translate}} <i class="aw-spin icon-aw-refresh"></i></span>
+                            <span class="red" ng-if = "checkNfsTipShow">{{checkNfsTip}}</span>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-show = "nfsPathShow">
+                        <label class="control-label">{{'aws.system.storagement.nfsPath'|translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="storage.nfs.nfsPath" ng-disabled = "!nfsPathList || storageStatus">
+                                <ui-select-match placeholder="{{nfsPathHolder}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="nfsPath in nfsPathList | filter: {name: $select.search}">
+                                    <div ng-bind-html="nfsPath.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if = "iscsiShow">
+                    <div class="control-group iscsiServer-group">
+                        <label class="control-label">{{"aws.initSetting.ISCSIServerIp"|translate}}：</label>
+                        <div class="controls ip-controls">
+                            <input type="text" name="serverIp" ng-model="storage.iscsi.serverIp" class="form-controls" placeholder="{{'aws.initSetting.ISCSIServerIp'|translate}}" ipaddrpattern="'one'" required />
+                            <div class="error" ng-messages="(submitValid || createStorageForm.serverIp.$dirty) && createStorageForm.serverIp.$error">
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                <span ng-message="ipaddrpattern">{{"aws.networks.ipPatternError"|translate}}</span>
+                            </div>
+                        </div>
+                        <label class="control-label port-label">{{"aws.initSetting.ISCSIPort"|translate}}：</label>
+                        <div class="controls port-controls">
+                            <input type="text" name="iscsiPort" ng-model="storage.iscsi.port" class="form-controls" placeholder="{{'aws.initSetting.placeholder.enterPort'|translate}}" min="1" max="65535" limitnumrange required />
+                            <div class="error" ng-messages="(submitValid || createStorageForm.iscsiPort.$dirty) && createStorageForm.iscsiPort.$error">
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                <span ng-message="limitnumrange">{{'aws.errors.limit_1_65535'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group grant-group">
+                        <div class="controls">
+                            <i ng-click="fold =!fold" class="conf-icon" ng-class="{'icon-aw-angle-up':fold,'icon-aw-angle-down':!fold}">
+                                <span>{{"aws.initSetting.configureAuthorizationInfo"|translate}}</span>
+                            </i>
+                        </div>
+                    </div>
+                    <div ng-show = "fold">
+                        <div class="control-group">
+                            <div class="controls">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" class="form-controls" ng-model="storage.iscsi.chap" />
+                                        <i class="iconfont"></i>{{"aws.initSetting.ISCSIServerValidateComputeServer"|translate}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <div class="controls-text">
+                                <span>{{"aws.initSetting.ISCSIServerValidateInfo"|translate}}</span>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if = "storage.iscsi.chap">
+                            <label class="control-label">{{'aws.system.storagement.userName'|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" name="userName" ng-model="storage.iscsi.userName" class="form-controls" placeholder="{{'aws.system.storagement.inputUserName'|translate}}" ng-pattern="/^[^\u4e00-\u9fa5]{0,}$/" ng-maxlength="32" ng-disabled="!storage.iscsi.chap" required />
+                                <div class="error" ng-messages="(submitValid || createStorageForm.userName.$dirty) && createStorageForm.userName.$error">
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                    <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                                    <span ng-message="pattern">{{'aws.errors.noInputCN'|translate}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if = "storage.iscsi.chap">
+                            <label class="control-label">{{'aws.system.storagement.password'|translate}}：</label>
+                            <div class="controls">
+                                <input type="password" name="password" ng-model="storage.iscsi.password" class="form-controls" autocomplete="new-password" placeholder="{{'aws.system.storagement.inputPassword'|translate}}" ng-maxlength="30" ng-disabled="!storage.iscsi.chap" required />
+                                <div class="error" ng-messages="(submitValid || createStorageForm.password.$dirty) && createStorageForm.password.$error">
+                                    <span ng-message="maxlength">{{'aws.errors.passmaxlength'|translate}}</span>
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if = "!storage.iscsi.chap">
+                            <label class="control-label">{{'aws.system.storagement.userName'|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" name="userName" class="form-controls" placeholder="{{'aws.system.storagement.inputUserName'|translate}}" ng-disabled="true"/>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if = "!storage.iscsi.chap">
+                            <label class="control-label">{{'aws.system.storagement.password'|translate}}：</label>
+                            <div class="controls">
+                                <input type="password" name="password" class="form-controls" autocomplete="new-password" placeholder="{{'aws.system.storagement.inputPassword'|translate}}" ng-disabled="!storage.iscsi.chap" />
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <div class="controls">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" class="form-controls" ng-disabled="!storage.iscsi.chap" ng-model="storage.iscsi.chap_in" />
+                                        <i class="iconfont"></i>{{"aws.initSetting.ComputeServerValidateISCSIServer"|translate}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <div class="controls-text">
+                                <span>{{"aws.initSetting.ComputeServerValidateInfo"|translate}}</span>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if = "storage.iscsi.chap_in">
+                            <label class="control-label">{{'aws.system.storagement.userName'|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" name="userName2" ng-model="storage.iscsi.userName2" class="form-controls" placeholder="{{'aws.system.storagement.inputUserName'|translate}}" ng-pattern="/^[^\u4e00-\u9fa5]{0,}$/" ng-maxlength="32" ng-disabled="!storage.iscsi.chap_in" required />
+                                <div class="error" ng-messages="(submitValid || createStorageForm.userName2.$dirty) && createStorageForm.userName2.$error">
+                                    <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                                    <span ng-message="pattern">{{'aws.errors.noInputCN'|translate}}</span>
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if = "storage.iscsi.chap_in">
+                            <label class="control-label">{{'aws.system.storagement.password'|translate}}：</label>
+                            <div class="controls">
+                                <input type="password" name="password2" ng-model="storage.iscsi.password2" class="form-controls" autocomplete="new-password" placeholder="{{'aws.system.storagement.inputPassword'|translate}}" ng-maxlength="30" ng-disabled="!storage.iscsi.chap_in" required />
+                                <div class="error" ng-messages="(submitValid || createStorageForm.password2.$dirty) && createStorageForm.password2.$error">
+                                    <span ng-message="maxlength">{{'aws.errors.passmaxlength'|translate}}</span>
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if = "!storage.iscsi.chap_in">
+                            <label class="control-label">{{'aws.system.storagement.userName'|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" name="userName2" class="form-controls" placeholder="{{'aws.system.storagement.inputUserName'|translate}}" ng-disabled="true" />
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if = "!storage.iscsi.chap_in">
+                            <label class="control-label">{{'aws.system.storagement.password'|translate}}：</label>
+                            <div class="controls">
+                                <input type="password" name="password2" class="form-controls" autocomplete="new-password" placeholder="{{'aws.system.storagement.inputPassword'|translate}}" ng-disabled="true" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if = "insideCephShow">
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.initSetting.storageCounterpart"|translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="storage.inCeph.copies">
+                                <ui-select-match placeholder="{{'aws.initSetting.placeholder.selectStorageCopy'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="copy in copyList | filter: {name: $select.search}">
+                                    <div ng-bind-html="copy.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if = "outsideCephShow">
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.description'|translate}}：</label>
+                        <div class="controls">
+                            <textarea class="form-controls" name="description" ng-model="storage.outCeph.description" ng-maxlength="255" placeholder="{{'aws.system.storagement.inputDescription'|translate}}"></textarea>
+                            <div class="error" ng-messages="(submitValid || createStorageForm.description.$dirty) && createStorageForm.description.$error">
+                                <div ng-message="maxlength">{{'aws.errors.maxlength_255'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.configFile'|translate}}：</label>
+                        <div class="controls insert-file-modal">
+                            <div class="file-box clearfix">
+                                <input type="text" class="form-controls" name="vaildfile" ng-model="selected_file" placeholder="{{'aws.system.storagement.inputConfigFile'|translate}}" required readonly>
+                                <div class="file-item">
+                                    <a href="javascript:void(0);" class="file-btn">
+                                        <input name="file" type="file" id="uploadConf" class="file-input" onchange="angular.element(this).scope().confFileChange()">
+                                    </a>
+                                    <button type="button" class="file-choose" >{{'aws.img.chooseFile'|translate}}</button>
+                                </div>
+                            </div>
+                            <div class="error" ng-messages="(submitValid || createStorageForm.vaildfile.$dirty) && createStorageForm.vaildfile.$error">
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                <span ng-if = "configFileCheck">{{'aws.system.storagement.configFileCheck'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.privilegeFile'|translate}}：</label>
+                        <div class="controls insert-file-modal">
+                            <div class="file-box clearfix title-margin">
+                                <input type="text" class="form-controls" name="privilegefile" ng-model="selected_privilegeFile" placeholder="{{'aws.system.storagement.inputPrivilegefile'|translate}}" required readonly>
+                                <div class="file-item">
+                                    <a href="javascript:void(0);" class="file-btn">
+                                        <input name="file" type="file" id="uploadPrivilege" class="file-input" onchange="angular.element(this).scope().privilegeFileChange()">
+                                    </a>
+                                    <button type="button" class="file-choose" >{{'aws.img.chooseFile'|translate}}</button>
+                                </div>
+                            </div>
+                            <span class="cephVersion">{{'aws.initSetting.cephEditionCompatibility'|translate}}</span>
+                            <div class="error" ng-messages="(submitValid || createStorageForm.privilegefile.$dirty) && createStorageForm.privilegefile.$error">
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                <span ng-if = "privilegeFileCheck">{{'aws.system.storagement.privilegeFileCheck'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.initSetting.storageUser'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" name="backupUser" ng-model="storage.outCeph.user" class="form-controls" placeholder="{{'aws.initSetting.placeholder.enterStorageUser'|translate}}" ng-maxlength="32" required />
+                            <div class="error" ng-messages="(submitValid || createStorageForm.backupUser.$dirty) && createStorageForm.backupUser.$error">
+                                <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.storagement.pool'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" name="backupPool" ng-model="storage.outCeph.pool" class="form-controls" placeholder="{{'aws.system.storagement.inputPool'|translate}}" ng-maxlength="32" required />
+                            <div class="error" ng-messages="(submitValid || createStorageForm.backupPool.$dirty) && createStorageForm.backupPool.$error">
+                                <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if = "fcShow">
+                    <!-- <div class="control-group">
+                        <label class="control-label">启用多路径服务：</label>
+                        <div class="controls">
+                            <div class="checkbox switch-btn">
+                                <label>
+                                    <input type="checkbox" class="form-controls" ng-model="storage.fc.multipath">
+                                    <i class="iconfont"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">&nbsp;</label>
+                        <div class="controls">
+                            <span>当FC存储有多条链路连接物理主机时使用。</span>
+                        </div>
+                    </div> -->
+                </div>
+            </form>
+            <div class="node-config" ng-if="inStepTwo&&inStepNode">
+                <div class="alert alert-warning" role="alert" ng-if="isEnabledArbiter">
+                    <div class="alert-content">
+                        <div class="alert-text">
+                            {{'aws.initSetting.twoNodeNotModifyStorageNet'|translate}}
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-warning" role="alert" ng-if="!isEnabledArbiter && !canModifyStoNet">
+                    <div class="alert-content">
+                        <div class="alert-text">
+                            {{'aws.initSetting.buttedIpStorageNotModifyStorageNet'|translate}}
+                        </div>
+                    </div>
+                </div>
+                <div class="table-action">
+                    <button class="btn btn-info" ng-click="nodeconfigure(ipForm)" ng-disabled="isEnabledArbiter || !canModifyStoNet || storageStatus || !ipForm.$valid">
+                        {{'aws.initSetting.downNetworkConfig'|translate}}
+                    </button>
+                    <button class="btn btn-default" ng-click="resetIpConf(ipForm)" ng-disabled="isEnabledArbiter || !canModifyStoNet || storageStatus">
+                        {{'aws.initSetting.resetIP'|translate}}
+                    </button>
+                    <span ng-if="storageVlanCheck" class="vlan-tips">{{'aws.initSetting.storageNet'|translate}}vlan{{'aws.initSetting.and'|translate}}{{'aws.initSetting.tenantNet'|translate}}vlan{{tenantIpRange[0].vlan}}{{'aws.initSetting.conflict'|translate}}</span>
+                </div>
+                <div class="storage-ipconfig">
+                    <form name="ipForm" novalidate>
+                        <div class="storage-row clearfix">
+                            <label class="storage-title">{{'aws.initSetting.storageNet'|translate}}：</label>
+                            <div class="storage-item">
+                                <div class="control-item">
+                                    <input type="text" placeholder="10.0.2.0/24" required id="storagecidr" name="storagecidr" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))[\/]([1-9]|[1-2][0-9]|[3][0]|[3][1])$/" ng-model="twoModule.storageCidr" class="form-control" ng-focus="twoModule.hidecidrCheck()" ng-disabled="isEnabledArbiter || !canModifyStoNet || storageStatus" />
+                                    <div ng-if="ipForm.storagecidr.$invalid && ipForm.storagecidr.$dirty">
+                                      <span class="help-block" ng-if="ipForm.storagecidr.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                                      <span class="help-block" ng-if="ipForm.storagecidr.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="storage-row clearfix" ng-show="false">
+                            <label class="storage-title">&nbsp;</label>
+                            <div class="storage-item">
+                                <div class="col-1 font-h">
+                                    <div class="checkbox">
+                                      <label>
+                                        <input type="checkbox" name="storageCheck" ng-change="changeCheck('storage',twoModule.storageCheck)" ng-model="twoModule.storageCheck" ng-disabled="isEnabledArbiter" /><i class="iconfont"></i><span> VLAN</span>
+                                      </label>
+                                    </div>
+                                </div>
+                                <div class="form-group title-group" ng-if="twoModule.storageCheck">
+                                  <label class="control-label">
+                                    VLAN ID
+                                  </label>
+                                  <div class="control-item">
+                                    <input type="text" name="storagevlan" vlanlimitstart placeholder="" class="form-control" ng-model="twoModule.storageVlan" />
+                                    <div ng-if="ipForm.storagevlan.$invalid && ipForm.storagevlan.$dirty">
+                                       <span class="help-block" ng-if="ipForm.storagevlan.$error.vlanlimitstart">
+                                          vlan{{'aws.initSetting.range'|translate}}2-4094
+                                        </span>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="storage-row clearfix">
+                            <label class="storage-title">&nbsp;</label>
+                            <div  class="storage-item">
+                                <div class="col-1 font-h">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" name="storageRangeCheck" ng-change="twoModule.rangeOff('storageRangeError')" ng-model="twoModule.storageRangeCheck" ng-disabled="isEnabledArbiter || !canModifyStoNet || storageStatus" /><i class="iconfont"></i><span>{{'aws.register.info.iprange'|translate}}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row" ng-if="twoModule.storageRangeCheck">
+                                    <div class="col-10">
+                                        <div class="add-group clearfix">
+                                            <div class="form-group">
+                                                <label class="control-label">{{'aws.register.info.start'|translate}}IP</label>
+                                                <div class="control-item">
+                                                  <input type="text" placeholder="10.0.2.1" class="form-control" id="storageNet" name="startname" storageincidr="storagecidr" required ng-focus="twoModule.rangeOff('storageRangeError')" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="twoModule.storageRange.start" ng-disabled="storageStatus">
+                                                  <div ng-if="ipForm.startname.$invalid">
+                                                    <span class="help-block" ng-if="ipForm.startname.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                                                    <span class="help-block" ng-if="ipForm.startname.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                                                    <span class="help-block" ng-if="ipForm.startname.$error.storageincidr && !ipForm.startname.$error.required && !ipForm.startname.$error.pattern">{{'aws.initSetting.IPNotInCIDR'|translate}}</span>
+                                                  </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">{{'aws.register.info.end'|translate}}IP</label>
+                                                <div class="control-item">
+                                                  <input type="text" placeholder="10.0.2.255" class="form-control" name="endname" gtip="storageNet" storageincidr="storagecidr" required ng-focus="twoModule.rangeOff('storageRangeError')" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="twoModule.storageRange.end" ng-disabled="storageStatus">
+                                                  <div ng-if="ipForm.endname.$invalid">
+                                                    <span class="help-block" ng-if="ipForm.endname.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                                                    <span class="help-block" ng-if="ipForm.endname.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                                                    <span class="help-block" ng-if="ipForm.endname.$error.storageincidr && !ipForm.endname.$error.required && !ipForm.endname.$error.pattern">{{'aws.initSetting.IPNotInCIDR'|translate}}</span>
+                                                    <span class="help-block" ng-if="ipForm.endname.$error.gtip">{{'aws.initSetting.startIPBiggerThanEndIP'|translate}}</span>
+                                                  </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="node-table">
+                    <div class="table-action">
+                        <button class="btn btn-info" ng-click="disksconfigure(checkedItems,'ceph')" ng-disabled="stateMachine.disksDisable || storageStatus" ng-if="insideCephShow">
+                          {{'aws.initSetting.disksConfig'|translate}}
+                        </button>
+                        <button class="btn btn-info" ng-click="cardconfigure(checkedItems)" ng-disabled="stateMachine.cardDisable || storageStatus">
+                          {{'aws.initSetting.netConfig'|translate}}
+                        </button>
+                        <button class ="btn btn-info" ng-click="checkNet(checkedItems)"  ng-disabled="storageStatus">
+                          {{'aws.initSetting.verifyStorageConnect'|translate}}
+                        </button>
+                    </div>
+                    <div class="table-content">
+                        <table ng-table="storageTableNodes" class="table">
+                            <tr ng-repeat="item in $data">
+                                <td header="'headerCheckbox.html'">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" ng-model="checkboxes.items[item.nodeUid]" ng-disabled="storageStatus" />
+                                            <i class="iconfont"></i>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td data-title="headers.storageTableNodes.hostName">
+                                    <a title="{{item.hostName}}">{{item.hostName}}</a>
+                                </td>
+                                <td data-title="headers.storageTableNodes.datacenter">
+                                    {{item.regionName}}
+                                </td>
+                                <td data-title="headers.storageTableNodes.manageNet" >
+                                    {{item.hostInfoMap.ip}}
+                                </td>
+                                <td data-title="headers.storageTableNodes.cpu">
+                                    {{item.hostInfoMap.cpu.ht}}
+                                </td>
+                                <td data-title="headers.storageTableNodes.memory" >
+                                    {{item.hostInfoMap.mem | unitFilter | number:1}}
+                                </td>
+                                <td data-title="'SSD'">
+                                    {{item.hostInfoMap.ssdAll}}{{item.hostInfoMap.ssdUnit}}
+                                </td>
+                                <td data-title="'SATA'">
+                                    {{item.hostInfoMap.sataAll}}{{item.hostInfoMap.sataUnit}}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div ng-if="inStepTwo&&!inStepNode">
+                <div class="node-table">
+                    <div class="table-action">
+                        <button class="btn btn-info" ng-click="disksconfigure(checkedItems,'fc')" ng-disabled="stateMachine.fcDisksDisable || storageStatus">
+                            {{'aws.initSetting.disksConfig'|translate}}
+                        </button>
+                    </div>
+                    <div class="table-content">
+                        <table ng-table="tableDiskNodes" class="table">
+                            <tr ng-repeat="item in $data">
+                                <td header="'headerCheckboxtableDiskNodes.html'">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" ng-model="checkboxestableDiskNodes.items[item.nodeUid]" ng-disabled="storageStatus" />
+                                            <i class="iconfont"></i>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td data-title="headers.tableDiskNodes.hostName">
+                                    <a title="{{item.hostName}}">{{item.hostName}}</a>
+                                </td>
+                                <td data-title="headers.tableDiskNodes.mountedFCStorage">
+                                    {{item.disk_config}}&nbsp;&nbsp;{{item.disk_speed}}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="inStepThree">
+                <div class="table-action">
+                    <button class="btn btn-info" ng-click="discoveryTarget()" ng-disabled="storageStatus">{{'aws.initSetting.findTarget'|translate}}
+                    </button>
+                    <button class="btn btn-info" ng-click="confirmDevice()" ng-disabled="loginDisabled || storageStatus">
+                    {{'aws.initSetting.lodinConfirmISCSIDevice'|translate}}
+                    </button>
+                </div>
+                <div class="table-content target-table" ng-if = "targetTab">
+                    <table class="table">
+                        <colgroup>
+                            <col width="15%">
+                            <col width="25%">
+                            <col width="60%">
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td>{{'aws.initSetting.hostName'|translate}}</td>
+                                <td>{{'aws.initSetting.findTargetStatus'|translate}}</td>
+                                <td>{{'aws.initSetting.targetIQNinfo'|translate}}</td>
+                            </tr>
+                            <tr ng-repeat="target in targetList track by $index">
+                                <td>
+                                    <div class="edit-name target-name">
+                                        <a title="{{target.node_name}}" ng-click="fold =!fold">{{target.node_name}}</a>
+                                    </div>
+                                </td>
+                                <td>
+                                    {{(target.retcode == '0' ? 'aws.system.storagement.storageTranslate.netConfig.success':'aws.system.storagement.storageTranslate.netConfig.fail')|translate}}
+                                </td>
+                                <td>
+                                    <div class="control-group">
+                                        <div class="controls">
+                                            <div class="radio-item">
+                                                <label class="iqn-label" title="{{target.msg}}">
+                                                    <input type="radio" name="radio_{{target.node_name}}" value="{{target.msg}}" ng-model="target.msg" title="{{target.msg}}" />
+                                                    <i class="iconfont"></i>{{target.msg}}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <!-- <span ng-click="fold =!fold" class="conf-icon iqn-icon" ng-class="{'icon-aw-angle-up':fold,'icon-aw-angle-down':!fold}"></span> -->
+                                    </div>
+                                    <!-- <div ng-show = "fold">
+                                        <div class="control-group">
+                                            <div class="controls">
+                                                <div class="radio-item radioTarget">
+                                                    <label class="iqn-label" ng-repeat="target in targetList track by $index">
+                                                        <input type="radio" name="radio" value="{{target.host_port}}" ng-model="target.host_port" />
+                                                        <i class="iconfont"></i>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> -->
+                                </td>
+                            </tr>
+                            <tr class="noData" ng-if = "targetList.length == 0">
+                                <td colspan="3">{{'aws.initSetting.notFindTarget'|translate}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-content target-table" ng-if = "!targetTab">
+                    <table class="table">
+                        <colgroup>
+                            <col width="15%">
+                            <col width="85%">
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td>{{'aws.initSetting.hostName'|translate}}</td>
+                                <td>{{'aws.initSetting.selectISCSIdevice'|translate}}</td>
+                            </tr>
+                            <tr ng-repeat="device in iscsiDeviceListAll track by $index">
+                                <td>
+                                    <div class="edit-name target-name">
+                                        <a title="{{device.node_name}}" ng-click="fold =!fold">{{device.node_name}}</a>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="control-group device-group first-group">
+                                        <div class="controls">
+                                            <div class="radio-item">
+                                                <label class="iqn-label">
+                                                    <input type="radio" name="radio_{{device.node_name}}" value="{{device.msg[0]}}" ng-model="device.selectInfo" ng-disabled="storageStatus" />
+                                                    <i class="iconfont"></i>/dev/{{splitIscsi(device.msg[0])}}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <span ng-show = "device.msg.length > 1" ng-click="fold =!fold" class="conf-icon iqn-icon" ng-class="{'icon-aw-angle-up':fold,'icon-aw-angle-down':!fold}"></span>
+                                    </div>
+                                    <div ng-show = "fold">
+                                        <div class="control-group device-group">
+                                            <div class="controls">
+                                                <div class="radio-item radioTarget">
+                                                    <label class="iqn-label" ng-repeat="msg in device.repeatMsg track by $index">
+                                                        <input type="radio" name="radio_{{device.node_name}}" value="{{msg}}" ng-model="device.selectInfo" ng-disabled="storageStatus" />
+                                                        <i class="iconfont"></i>/dev/{{splitIscsi(msg)}}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="showType=='sto'">
+        <ul class="nics-choose">
+          <li class="cluster">
+            <div class="inner nic-item">
+              <div class="text">{{'aws.initSetting.clusterNet'|translate}}</div>
+              <div class="addr netcontent" name="cluster">
+                <span class="text-tip" ng-class="{'hide':cardJson.nic_map.cluster.bonds}">{{'aws.initSetting.noNetCard'|translate}}</span>
+                <div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.cluster.bonds}">
+                  <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                  <div class="nic-info">
+                    <span class="nic-name" title="{{cardJson.nic_map.cluster.bonds}}">{{cardJson.nic_map.cluster.bonds}}</span>
+                    <span class="nic-speed">{{cardJson.nic_map.cluster.speed}}Mbps</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="mgmt">
+            <div class="inner nic-item">
+              <div class="text">{{'aws.initSetting.manageNet'|translate}}</div>
+              <div class="addr netcontent" name="mgmt">
+                <span class="text-tip" ng-class="{'hide':cardJson.nic_map.mgmt.bonds}">{{'aws.initSetting.noNetCard'|translate}}</span>
+                <div class="nic-out"  ng-class="{'nic1000':cardJson.nic_map.mgmt.bonds}">
+                  <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                  <div class="nic-info">
+                    <span class="nic-name" title="{{cardJson.nic_map.mgmt.bonds}}">{{cardJson.nic_map.mgmt.bonds}}</span>
+                    <span class="nic-speed">{{cardJson.nic_map.mgmt.speed}}Mbps</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="storage">
+            <div class="inner nic-item">
+              <div class="text">{{'aws.initSetting.storageNet'|translate}}</div>
+              <div class="addr netcontent" name="storage">
+                <span class="text-tip" ng-class="{'hide':cardJson.nic_map.storage.bonds}">{{'aws.initSetting.noNetCard'|translate}}</span>
+                <div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.storage.bonds}">
+                  <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                  <div class="nic-info">
+                    <span class="nic-name" title="{{cardJson.nic_map.storage.bonds}}">{{cardJson.nic_map.storage.bonds}}</span>
+                    <span class="nic-speed">{{cardJson.nic_map.storage.speed}}Mbps</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="tenant">
+            <div class="inner nic-item">
+              <div class="text">{{'aws.initSetting.tenantNet'|translate}}</div>
+              <div class="addr netcontent" name="tenant">
+                <span class="text-tip" ng-class="{'hide':cardJson.nic_map.tenant.bonds}">{{'aws.initSetting.noNetCard'|translate}}</span>
+                <div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.tenant.bonds}">
+                  <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                  <div class="nic-info">
+                    <span class="nic-name" title="{{cardJson.nic_map.tenant.bonds}}">{{cardJson.nic_map.tenant.bonds}}</span>
+                    <span class="nic-speed">{{cardJson.nic_map.tenant.speed}}Mbps</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="public">
+            <div class="inner nic-item">
+              <div class="text">{{'aws.initSetting.publicNet'|translate}}</div>
+              <div class="addr netcontent" name="public">
+                <span class="text-tip" ng-class="{'hide':cardJson.nic_map.public.bonds}">{{'aws.initSetting.noNetCard'|translate}}</span>
+                <div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.public.bonds}">
+                  <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                  <div class="nic-info">
+                    <span class="nic-name" title="{{cardJson.nic_map.public.bonds}}">{{cardJson.nic_map.public.bonds}}</span>
+                    <span class="nic-speed">{{cardJson.nic_map.public.speed}}Mbps</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <button class="btn btn-default" type="button" ng-click="getback()">
+            {{'aws.initSetting.close'|translate}}
+        </button>
+    </div>
+    <div ng-show="showType=='net'">
+        <div class="net-test">
+            <div class="net-tip" ng-if="netTestCan.testLoad">
+              <span>{{'aws.initSetting.waitCheckNetSpendOneMinute'|translate}}</span>
+              <i class="icon-aw-load aw-spin"></i>
+            </div>
+            <div class="net-banner"></div>
+            <div class="table-content net-show">
+              <table ng-table="netchecktableParams" class="table border">
+                <colgroup>
+                  <col width="50%">
+                  <col width="50%">
+                </colgroup>
+                <tr ng-repeat="item in $data">
+                  <td data-title="headers.netchecktableParams.hostName">{{item.nodeName}}</td>
+                  <td data-title="headers.netchecktableParams.storageNet">
+                    <div ng-repeat="confnode in item.result">
+                        <span ng-repeat="(v,i) in confnode" ng-class="{'red':i=='0','green':i=='1'}">
+                            {{v}}&nbsp;&nbsp;{{'aws.initSetting.netcheck.'+i|translate}}
+                        </span>
+                    </div>
+                  </td>
+                </tr>
+                <tr ng-if="checkFail">
+                    <td colspan="2" class="add-node">
+                      <p class="red">{{'aws.initSetting.checkNetFailed'|translate}}</p>
+                    </td> 
+                </tr>
+              </table>
+            </div>
+        </div>
+        <button class="btn btn-info" type="button" ng-click="startCheck()" ng-disabled="netTestCan.testBtn || storageStatus">
+            {{'aws.initSetting.startCheck'|translate}}
+        </button>
+        <button class="btn btn-default" type="button" ng-click="getback()">
+            {{'aws.initSetting.close'|translate}}
+        </button>
+    </div>
+    <div ng-if="showType=='disk'">
+        <div ng-if="dataTips" class="tool-tips">
+          <div ng-if="!insideCephShow">{{'aws.initSetting.disks.noFCDisks'|translate}}</div>
+          <div ng-if="insideCephShow">{{'aws.initSetting.disks.noDataDisks'|translate}}</div>
+        </div>
+        <div class="nodeName-box">
+           <div class="congfigMsg">{{'aws.initSetting.disks.disksConfigNode'|translate}}：</div>
+           <div class="config-node">
+              <div ng-repeat="item in checkedItems" class="node">{{item.hostName}}</div>
+           </div>
+        </div>
+        <div class="host-box clearfix" id="disks">
+            <div class="disks-list">
+                <div class="available-disk">{{'aws.initSetting.disks.availableDisks'|translate}}</div>
+                <ul class="no-use-disks clearfix">
+                    <li ng-repeat = "v in disksJson.disks">
+                        <div class="disks-item" draggable="true" indexNum="{{$index}}">
+                            <div class="disk-out">
+                                <span class="disk-circle"></span>
+                                <span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+                                <span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+                                <span class="disk-capacity">{{insideCephShow?v.capacity:v.size}}</span>
+                            </div>
+                        </div>
+                        <div class="disks-detail">
+                            <i></i>
+                            <div class="detail-item">
+                                <span class="title">{{'aws.initSetting.disks.diskName'|translate}}：</span>
+                                <span class="title-name" title="{{v.name}}">{{v.name}}</span>
+                            </div>
+                            <!-- <div class="detail-item">
+                                <span class="title">状态：</span>
+                                <span class="bg-green" ng-if="v.status">健康</span>
+                                <span class="bg-red" ng-if="!v.status">不健康</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="title">硬盘类型：</span>
+                                <span ng-if="v.ssd">SSD </span>
+                                <span ng-if="!v.ssd">HDD</span>
+                            </div> -->
+                            <div class="detail-item">
+                                <span class="title">{{'aws.initSetting.disks.diskCapicty'|translate}}：</span>
+                                <span>{{insideCephShow?v.capacity:v.size}}</span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>     
+            </div>
+            <p class="disks-warning"></p>
+            <div class="disks-content">
+                <ul class="disks-group">
+                    <li ng-repeat="item in disksJson.configGroup">
+                        <div class="group-content clearfix" ng-if="item.show&&insideCephShow">
+                            <div class="data-content">
+                                <div class="disk-type">{{'aws.initSetting.disks.journalDisk'|translate}}</div>
+                                <div class="disk-data">
+                                   <ul class="caching clearfix" indexNum="{{$index}}">
+                                        <span class="tips" ng-if="item.caching.length==0">{{'aws.initSetting.disks.draftingArea'|translate}}</span>
+                                        <li ng-repeat = "v in item.caching">
+                                            <div class="disks-item">
+                                                <div class="disk-out">
+                                                    <span class="disk-circle"></span>
+                                                    <span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+                                                    <span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+                                                    <span class="disk-capacity">{{v.capacity}}</span>
+                                                </div>
+                                                <span class="disks-remove">
+                                                    <i class="icon-aw-wrong" ng-click="deleteDisks($index,'caching',item)" indexNum="{{$index}}"></i>
+                                                </span>
+                                            </div>
+                                            <div class="disks-detail">
+                                              <i></i>
+                                              <div class="detail-item">
+                                                <span class="title">{{'aws.initSetting.disks.diskName'|translate}}：</span>
+                                                <span class="title-name" title="{{v.name}}">{{v.name}}</span>
+                                              </div>
+                                              <!-- <div class="detail-item">
+                                                <span class="title">状态：</span>
+                                                <span class="bg-green" ng-if="v.status">健康</span>
+                                                <span class="bg-red" ng-if="!v.status">不健康</span>
+                                              </div> -->
+                                              <div class="detail-item">
+                                                <span class="title">{{'aws.initSetting.disks.diskType'|translate}}：</span>
+                                                <span ng-if="v.ssd">SSD </span>
+                                                <span ng-if="!v.ssd">HDD</span>
+                                              </div>
+                                              <div class="detail-item">
+                                                <span class="title">{{'aws.initSetting.disks.diskCapicty'|translate}}：</span>
+                                                <span>{{v.capacity}}</span>
+                                              </div>
+                                              <!-- <div class="detail-item">
+                                                <span class="title">硬盘属性：</span>
+                                                <span>{{v.selected.name}}</span>
+                                              </div> -->
+                                            </div>
+                                        </li>
+                                    </ul> 
+                                </div>  
+                            </div>
+                            <div class="data-content">
+                                <div class="disk-type">{{'aws.initSetting.disks.dataDisk'|translate}}</div>
+                                <div class="disk-data">
+                                    <ul class="data clearfix" indexNum="{{$index}}">
+                                      <span class="tips" ng-if="item.data.length==0">{{'aws.initSetting.disks.draftingArea'|translate}}</span>
+                                      <li ng-repeat = "v in item.data">
+                                        <div class="disks-item">
+                                          <div class="disk-out">
+                                            <span class="disk-circle"></span>
+                                            <span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+                                            <span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+                                            <span class="disk-capacity">{{v.capacity}}</span>
+                                          </div>
+                                          <span class="disks-remove">
+                                              <i class="icon-aw-wrong" ng-click="deleteDisks($index,'data',item)" indexNum="{{$index}}"></i>
+                                            </span>
+                                        </div>
+                                        <div class="disks-detail">
+                                          <i></i>
+                                          <div class="detail-item">
+                                            <span class="title">{{'aws.initSetting.disks.diskName'|translate}}：</span>
+                                            <span class="title-name" title="{{v.name}}">{{v.name}}</span>
+                                          </div>
+                                          <!-- <div class="detail-item">
+                                            <span class="title">状态：</span>
+                                            <span class="bg-green" ng-if="v.status">健康</span>
+                                            <span class="bg-red" ng-if="!v.status">不健康</span>
+                                          </div> -->
+                                          <div class="detail-item">
+                                            <span class="title">{{'aws.initSetting.disks.diskType'|translate}}：</span>
+                                            <span ng-if="v.ssd">SSD </span>
+                                            <span ng-if="!v.ssd">HDD</span>
+                                          </div>
+                                          <div class="detail-item">
+                                            <span class="title">{{'aws.initSetting.disks.diskCapicty'|translate}}：</span>
+                                            <span>{{v.capacity}}</span>
+                                          </div>
+                                          <!-- <div class="detail-item">
+                                            <span class="title">硬盘属性：</span>
+                                            <span>{{v.selected.name}}</span>
+                                          </div> -->
+                                        </div>
+                                      </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="group-content clearfix" ng-if="item.show&&!insideCephShow">
+                            <div class="data-content fc-content">
+                                <div class="disk-type">{{'aws.initSetting.disks.FCstoragePool'|translate}}</div>
+                                <div class="disk-data">
+                                   <ul class="data clearfix" indexNum="{{$index}}">
+                                        <span class="tips" ng-if="item.data.length==0">{{'aws.initSetting.disks.draftingArea'|translate}}</span>
+                                        <li ng-repeat = "v in item.data">
+                                            <div class="disks-item">
+                                                <div class="disk-out">
+                                                    <span class="disk-circle"></span>
+                                                    <span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+                                                    <span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+                                                    <span class="disk-capacity">{{insideCephShow?v.capacity:v.size}}</span>
+                                                </div>
+                                                <span class="disks-remove">
+                                                    <i class="icon-aw-wrong" ng-click="deleteDisks($index,'data',item)" indexNum="{{$index}}"></i>
+                                                </span>
+                                            </div>
+                                            <div class="disks-detail">
+                                              <i></i>
+                                              <div class="detail-item">
+                                                <span class="title">{{'aws.initSetting.disks.diskName'|translate}}：</span>
+                                                <span class="title-name" title="{{v.name}}">{{v.name}}</span>
+                                              </div>
+                                              <!-- <div class="detail-item">
+                                                <span class="title">状态：</span>
+                                                <span class="bg-green" ng-if="v.status">健康</span>
+                                                <span class="bg-red" ng-if="!v.status">不健康</span>
+                                              </div> -->
+                                              <div class="detail-item">
+                                                <span class="title">{{'aws.initSetting.disks.diskType'|translate}}：</span>
+                                                <span ng-if="v.ssd">SSD </span>
+                                                <span ng-if="!v.ssd">HDD</span>
+                                              </div>
+                                              <div class="detail-item">
+                                                <span class="title">{{'aws.initSetting.disks.diskCapicty'|translate}}：</span>
+                                                <span>{{insideCephShow?v.capacity:v.size}}</span>
+                                              </div>
+                                              <!-- <div class="detail-item">
+                                                <span class="title">硬盘属性：</span>
+                                                <span>{{v.selected.name}}</span>
+                                              </div> -->
+                                            </div>
+                                        </li>
+                                    </ul> 
+                                </div>  
+                            </div>
+                        </div>
+                    </li>
+                </ul>   
+            </div>
+            <div class="text-center">
+                <button class="btn btn-info" ng-click="saveDisks()" type="button">{{'aws.action.save'|translate}}</button>
+                <button ng-click="backStoNode()" class="btn btn-default">{{'aws.action.cancel'|translate}}</button>
+            </div>
+        </div> 
+    </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+    <div class="checkbox">
+        <label>
+          <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" ng-disabled="storageStatus" />
+          <i class="iconfont"></i>
+        </label>
+    </div>
+</script>
+<script type="text/ng-template" id="headerCheckboxtableDiskNodes.html">
+    <div class="checkbox">
+        <label>
+          <input type="checkbox" ng-model="checkboxestableDiskNodes.checked" class="select-all-tableDiskNodes" value="" ng-disabled="storageStatus" />
+          <i class="iconfont"></i>
+        </label>
+    </div>
+</script>
+<script type="text/ng-template" id="netConfigure.html">
+    <div class="modal-common alert-modal">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="closeModal()">×</button>
+        <div class="modal-body">
+            <div class="netConfigureTitle">
+                <span>{{'aws.initSetting.disks.configurationProgress'|translate}}</span>
+            </div>
+            <div class="progess-bar">
+                <div class="pull-left">{{progess.number}}</div>
+                <div class="pull-right statusText" ng-class="{'failText': !progess.status}">{{progess.tips}}</div>
+                <div class="progress-step clearfix">
+                    <div class="progress-base" ng-class="{'pregress-100': progess.number=='100%','fail-color': !progess.status}" ng-style="{width: progess.number}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>

@@ -1,0 +1,333 @@
+<div class="page-inner">
+  <div class="page-title">
+      <h2>弹性公网IP</h2>
+      <div class="btn-item-group">
+        <button type="button" class="type-btn"  ng-class='{"active":item.region === options.region}' ng-click="changeRegion(item.region)" ng-repeat="item in regionList ">{{item.regionName}}</button>
+      </div>
+      <uib-alert type="warning" class="alert-tip" ng-show="system.diskInfo.rootType == 1">
+        弹性公网 IP（Elastic IP）是专为动态云计算设计的静态 IP 地址，在 腾讯云 系统中 EIP 地址与您的账户而非特定的资源（CVM实例）关联。</br>
+        弹性公网IP 地址同时适用于 基础网络 和 私有网络 的 CVM 实例，随时可以解绑、再分配到其他 CVM 实例，从而快速切换屏蔽实例故障。
+      </uib-alert>
+  </div>
+  
+  <div class="table-content">
+    <table ng-table="tableParams" class="table" >
+      <tr ng-repeat="item in $data">
+        <td data-title="'ID/名称'" sortable="'instanceName'">
+          <div class="edit-name">
+            <a>{{item.eipId}}</a>
+            <span ng-if = "item.eipName">{{item.eipName}}</span>
+            <span ng-if = "!item.eipName">未命名</span>
+            
+          </div>
+        </td>
+        <td data-title="'状态'" sortable="'status'">
+          <span class="{{item.status}}" ng-class="{'green':item.status==2,'red':item.status==4}">{{'CN.eip.table.status.'+item.status| translate}}</span>
+        </td>
+        <td data-title="'弹性IP地址'">{{item.eip}}</td>
+        <td data-title="'计费模式'"><span ng-class="{'green':item.unInstanceId,'red':!item.unInstanceId}">{{item.unInstanceId?"停止计费":"按小时计费"}}</span></td>
+        <td data-title="'绑定资源'">{{item.unInstanceId}}</td>
+        <td data-title="'资源类型'"><span ng-if="item.unInstanceId">{{'CN.eip.table.type.'+item.type| translate}}</span></td>
+        <td data-title="'申请时间'">{{item.createdAt | date: 'yyyy-MM-dd:HH:mm:ss'}}</td>
+        <td data-title="'操作'">
+          <a href=""uib-popover="未绑定资源" popover-enable="!item.unInstanceId" popover-trigger="mouseenter" popover-placement = "bottom" ng-class="{'disabled':!item.unInstanceId}" ng-click="unbind(item)">解绑</a>
+          <a href="" uib-popover="{{item.unInstanceIdNum==1?'已绑定一个云资源，不可释放':'已绑定云资源，请先解绑'}}" popover-trigger="mouseenter" popover-enable="item.unInstanceId"  popover-placement = "bottom" ng-class="{'disabled':item.unInstanceId}" ng-click="release(item)">释放</a>
+        </td>
+        
+      </tr>
+    </table>
+  </div>
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+      <div class="detail-tab">
+        <div class="dt-title">
+          <a ng-href="#/cvm/instances">云主机<i class="icon-aw-angle-left"></i></a><span>{{detailInfo.unInstanceId}}</span>
+        </div>
+        <div class="dt-box">
+          <ul class="nav nav-tabs clearfix">
+            <li ng-class="{'active': param_tab}" ng-click="detail_param(detailInfo.unInstanceId,true)" ><a>参数</a></li>
+            <li ng-class="{'active': sg_tab}" ng-click="detail_sg(detailInfo)" ><a>安全组</a></li>
+          </ul>
+          <div class="dt-content">
+            <div class="tab-pane" ng-show="param_tab">
+              <strong>主机信息</strong>
+              <dl class="dl-horizontal">
+                <dt>名称</dt>
+                <dd>{{detailInfo.instanceName}}</dd>
+                <dt>服务器ID</dt>
+                <dd>{{detailInfo.unInstanceId}}</dd> 
+                <dt>状态</dt>
+                <dd ng-class="{'green':detailInfo.status==2}">{{'CN.instances.table.status.'+detailInfo.status| translate}}</dd>
+                <dt>公网IP</dt>
+                <dd><span ng-repeat="wanIp in detailInfo.wanIpSet">{{wanIp}}</span></dd>
+                <dt>内网IP</dt>
+                <dd>{{detailInfo.lanIp}}</dd>
+                <dt>创建时间</dt>
+                <dd>{{detailInfo.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</dd>
+                <dt>到期时间</dt>
+                <dd ng-show="detailInfo.cvmPayMode != 1">-</dd>
+                <dd ng-show="detailInfo.cvmPayMode == 1">{{detailInfo.deadlineTime | date:'yyyy-MM-dd HH:mm:ss'}}</dd>
+                <dt>地域</dt>
+                <dd>{{'CN.instances.table.region.'+detailInfo.Region| translate}}</dd>
+                <dt>可用区</dt>
+                <dd>{{detailInfo.zoneName}}</dd>
+                <dt>主机计费模式</dt>
+                <dd>{{'CN.instances.table.cvmPayMode.'+detailInfo.cvmPayMode| translate}}</dd>
+                <dt>网络计费模式</dt>
+                <dd>{{'CN.instances.table.networkPayMode.'+detailInfo.networkPayMode| translate}}</dd>
+                <dt>所属网络</dt>
+                <dd>
+                  <span ng-if="detailInfo.vpcId">{{detailInfo.vpcId}}({{detailInfo.lanName}} | {{detailInfo.subnetInfo.cidrBlock}})</span>
+                  <span ng-if="!detailInfo.vpcId">基础网络</span>
+                </dd>
+                <dt>用作公网网关</dt>
+                <dd>{{'CN.instances.table.isVpcGateway.'+detailInfo.isVpcGateway| translate}}</dd>
+                <dt>所在子网</dt>
+                <dd>{{detailInfo.subnetInfo.subnetName}}</dd>
+              </dl>
+              <strong>机器配置</strong>
+              <dl class="dl-horizontal">
+                <dt>操作系统</dt>
+                <dd>{{detailInfo.os}}</dd>
+                <dt>CPU</dt>
+                <dd>{{detailInfo.cpu}}核</dd>
+                <dt>内存</dt>
+                <dd>{{detailInfo.mem}}GB</dd>
+                <dt>系统盘</dt>
+                <dd>{{detailInfo.diskInfo.rootSize}}({{'CN.instances.table.rootType.'+detailInfo.diskInfo.rootType | translate}})</dd>
+                <dt>公网宽带</dt>
+                <dd>{{detailInfo.bandwidth}}</dd>
+              </dl>
+              <strong>系统镜像</strong>
+              <dl class="dl-horizontal">
+                <dt>镜像名称</dt>
+                <dd>{{detailInfo.imageInfo.osName}} </dd>
+                <dt>类型</dt>
+                <dd>{{detailInfo.imageType}}</dd>
+                <dt>镜像ID</dt>
+                <dd>{{detailInfo.imageInfo.unImgId}}</dd>
+              </dl>
+              <strong>SSH密钥</strong>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>密钥ID</th>
+                    <th>密钥名称</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="item in detailInfo.sshKeyInfo">
+                    <td>{{item.keyId}}</td>
+                    <td>{{item.keyName}}</td>
+                    <td> <a  uib-popover="关机状态才可以解绑密钥" popover-enable="detailInfo.status != 4" popover-trigger="mouseenter" popover-placement="bottom" ng-class="{'disabled':detailInfo.status != 4}" ng-click="unbindsshkey(item)" >解绑</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="tab-pane" ng-show="sg_tab">
+              <uib-alert type="warning" class="alert-tip">
+                建议根据云主机操作系统，和云主机业务特性，来使用Linux安全组放通22端口或Windows安全组放通3389端口安全组，专业用户可以自行配置安全组提高云主机的安全性。</br>
+                注意：推荐安全组仅开放了远程登录接口，请根据您的业务来配置合适的安全组规则。
+              </uib-alert> 
+              <span class="tab-subtitle">
+                <strong>已加入安全组</strong>
+                <a class="blue" ng-click="modifysg_btn = true" ng-show ="!modifysg_btn" >编辑</a>
+                <a class="blue" ng-click="loadsg([detailInfo],'info')">配置安全组</a>
+              </span>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>优先级</th>
+                    <th>安全组ID/名称</th>
+                    <th ng-show="modifysg_btn">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat = "item in detailsgs ">
+                    <td>{{$index+1}}</td>
+                    <td>
+                      <span class="ycx"><a href="">{{item.sgId}}</a></span>
+                      <span>{{item.sgName}}</span>
+                    </td>
+                    <td ng-show="modifysg_btn">
+                      <i class="icon-aw-angle-up" ng-click = "upRecord(detailsgs,$index)"></i>
+                      <i class="icon-aw-angle-down" ng-click = "downRecord(detailsgs,$index)"></i>
+                      <i class="icon-aw-wrong" ng-click="rmsg(detailsgs,$index)"></i>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="btn-item-group" ng-show="modifysg_btn">
+                  <button class="btn btn-primary" type="button" ng-click="confirmInfoSg([detailInfo],detailsgs);modifysg_btn=false">确认</button>
+                  <button class="btn btn-default" type="button" ng-click="modifysg_btn = false">取消</button>
+              </div>
+              <strong>规则预览</strong>
+              <div class="btn-item-group">
+                <button type="button" class="type-btn" ng-class="{'active':gress_tab=='ingress'}" ng-click="changegress('ingress')">入站规则</button>
+                <button type="button" class="type-btn" ng-class="{'active':gress_tab=='egress'}"  ng-click="changegress('egress')">出站规则</button>
+              </div>
+              <div ng-repeat ="item in detailsgs">
+                <span class="tab-subtitle" >
+                  <strong class="sub-subtitle">{{$index+1}}</strong>
+                  <strong class="sub-subtitle">{{item.sgName}}</strong>
+                </span>
+                <table class="table" ng-show="gress_tab=='ingress'">
+                  <colgroup>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                  </colgroup>   
+                  <thead>
+                    <tr>
+                      <th>协议类型</th>
+                      <th>端口</th>
+                      <th>来源</th>
+                      <th>策略</th>
+                      <th>备注</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat = "sg in detail_ingress[item.sgId]">
+                      <td>{{sg.ipProtocol}}</td>
+                      <td>{{sg.portRange}}</td>
+                      <td ng-if="sg.cidrIp">{{sg.cidrIp}}</td>
+                      <td ng-if="sg.sgId">{{sg.sgId}}</td>
+                      <td>{{'CN.securitygroup.table.action.' + sg.action | translate}}</td>
+                      <td>{{sg.desc}}</td>
+                    </tr>
+                    <tr>
+                      <td>All traffic</td>
+                      <td>ALL</td>
+                      <td>0.0.0.0/0</td>
+                      <td>拒绝</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table class="table" ng-show="gress_tab=='egress'">
+                  <colgroup>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                  </colgroup>   
+                  <thead>
+                    <tr>
+                      <th>协议类型</th>
+                      <th>端口</th>
+                      <th>目标</th>
+                      <th>策略</th>
+                      <th>备注</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat = "sg in detail_egress[item.sgId]">
+                      <td>{{sg.ipProtocol}}</td>
+                      <td>{{sg.portRange}}</td>
+                      <td ng-if="sg.cidrIp">{{sg.cidrIp}}</td>
+                      <td ng-if="sg.sgId">{{sg.sgId}}</td>
+                      <td>{{'CN.securitygroup.table.action.' + sg.action | translate}}</td>
+                      <td>{{sg.desc}}</td>
+                    </tr>
+                    <tr>
+                      <td>All traffic</td>
+                      <td>ALL</td>
+                      <td>0.0.0.0/0</td>
+                      <td>拒绝</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>  
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </pane>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="release.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">释放弹性公网IP</h3>
+    </div>
+    <div class="modal-body">
+      <form name="keypairForm">
+        <div class="alert alert-warning">
+          确定释放该弹性公网IP？
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button"  ng-disabled="disRelease" ng-click="confirmRelease()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="unbind.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">解绑弹性公网IP</h3>
+    </div>
+    <div class="modal-body">
+      <form name="keypairForm">
+        <uib-alert type="info" class="alert-tip">
+          确定将该弹性公网IP与绑定的 NAT网关: {{eip.unInstanceId}} 解绑？</br>
+          解绑后，可能会影响您的业务，请提前做好准备。
+        </uib-alert>
+        <div class="control-group">
+          <label class="control-label"><i class="red">*</i>费用</label>
+          <div class="controls">
+            <span class="unit-box">￥0.20<span class="unit-txt">/小时 解绑后，空置EIP将开始收费</span></span>
+          </div>
+        </div>
+        <uib-alert type="danger" class="alert-tip" ng-show="cannotunbind">
+          NAT网关至少要绑定一个弹性公网IP,无法解绑。
+        </uib-alert>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button"  ng-disabled="disunbind || cannotunbind" ng-click="confirmUnbind()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

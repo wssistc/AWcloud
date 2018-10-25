@@ -1,0 +1,33 @@
+ 
+<div class="modal-common QRCode-modal">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{modalTitle}}</h3>
+    </div>
+    <div class="modal-body">
+        <div class="QRCodeImg" ng-if = "hasBindWechat == 1">
+            <img ng-src="{{QRCodeImg}}">
+        </div>
+        <div class="notBindTips" ng-if = "hasBindWechat == 0">
+            <div ng-if = "ADMIN">
+                <span>{{'aws.monitor.alarmModule.notBandTipsAdmin1'|translate}}</span>
+                <a href="/#/system/wechatserver">{{'aws.siteTitle.wechatserver'|translate}}</a>
+                <span>{{'aws.monitor.alarmModule.notBandTipsAdmin2'|translate}}</span>
+            </div>
+            <div ng-if = "!ADMIN">
+                <span>{{'aws.monitor.alarmModule.notBandTipsUser'|translate}}</span>
+            </div>
+        </div>
+    </div>
+    <div class="control-group" ng-if = "hasBindWechat == 1">
+        <label class="control-label">{{'aws.monitor.alarmModule.prompts'|translate}}</label>
+        <div class="controls">
+            <span>{{'aws.monitor.alarmModule.promptsMsg1'|translate}}</span><br>
+            <span>{{'aws.monitor.alarmModule.promptsMsg2'|translate}}</span><br>
+            <span>{{'aws.monitor.alarmModule.promptsMsg3'|translate}}</span>
+        </div>
+    </div>
+    <div class="modal-footer">
+      <!-- <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.close"|translate}}</button> -->
+    </div>
+</div>

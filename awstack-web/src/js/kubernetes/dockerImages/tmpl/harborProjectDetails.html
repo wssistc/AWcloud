@@ -1,0 +1,151 @@
+<div ng-controller="harborProjectDetailsCtrl">
+    <div class="table-action">
+        <button type="button" data-toggle="modal" class="btn btn-new"
+                ng-click="createRepository()" ng-disabled="isMine == 0">
+        <i class="icon-aw-add-to2"></i>{{"aws.k8s.dockerImages.createRepository" |translate}}
+        </button>
+        <button type="button" data-toggle="modal" class="btn btn-normal"
+                ng-click="deleteRepositories()" ng-disabled="isMine == 0 || !canDelete">
+        <i class="icon-aw-delete"></i>{{"aws.k8s.dockerImages.deleteImageRepos" |translate}}
+        </button>
+
+        <div class="pull-right">
+            <!-- <setting title-data="titleData" site-title="titleName" table-data="dockerClustersData" ></setting> -->
+            <div type="button" class="btn btn-renovat right-ports" ng-click="refresh()">
+                <i class="icon-aw-refresh"></i>
+            </div>
+            <div class="search-box right-ports">
+                <div class="search-box">
+                    <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(harborProjectDetails_search.globalSearchTerm)">
+                        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="harborProjectDetails_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    <table ng-table="tableParams" class="table" show-filter="false">
+        <colgroup>
+        <col width="20%">
+        <col width="80%">
+        </colgroup>
+        <tr ng-repeat="item in $data">
+        <td header="'headerCheckbox.html'" ng-if="isMine != 0">
+            <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[item.name]">
+            <i class="icon-aw-square"></i>
+            </label>
+        </td>
+        <td data-title='"aws.k8s.dockerImages.imageRepoName"|translate' sortable="'name'">
+            <a ng-click="goImgWarehouseDetails(item.name,harbor)">
+                <!-- ng-href="#/k8s/projects/{{projectId}}/repositories/{{encodeURL(item.name)}}" -->
+                {{harbor}}/{{item.name}}
+            </a>
+        </td>
+        </tr>
+    </table>
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value=""/>
+    <i class="icon-aw-square"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="createRepository.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.k8s.dockerImages.createRepository" |translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="createRepositoryForm">
+        <div class="control-group">
+          <label class="control-label">{{"aws.k8s.dockerImages.newRepoName" |translate}}：</label>
+          <div class="controls">
+            <input type="text" name="newRepoName" class="form-controls"
+                   placeholder="{{'aws.k8s.dockerImages.newRepoNameTips'|translate}}"
+                   ng-model="repositoryData.newRepoName"
+                   ng-maxlength="10" ng-disabled="repositoryData.hideNewRepoName"
+                   ng-pattern="/^[a-z]([-a-z0-9]*[a-z0-9])?$/"/>
+            <div class="error" ng-show="createRepositoryForm.newRepoName.$invalid">
+              <span ng-show="createRepositoryForm.newRepoName.$error.maxlength">
+                {{"aws.k8s.dockerImages.newRepoNameTooLong"|translate}}
+              </span>
+              <span ng-show="createRepositoryForm.newRepoName.$error.pattern">
+                {{"aws.k8s.dockerImages.newRepoNameMismatchPattern"|translate}}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.k8s.dockerImages.choseRepository"|translate}}：</label>
+          <div class="controls" style='margin-top:7px;'>
+            <input type="checkbox" ng-model="repositoryData.choseRepository" ng-disabled="!canSelectRepos">
+          </div>
+        </div>
+        <div class="control-group" ng-if="repositoryData.hideNewRepoName">
+          <label class="control-label">{{"aws.k8s.dockerImages.oldRepoName"|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="repositoryData.oldRepoName" required>
+              <ui-select-match placeholder="{{'aws.k8s.dockerImages.oldRepoNameTips'|translate}}">
+                {{$select.selected}}
+              </ui-select-match>
+              <ui-select-choices repeat="option in existedImageNames track by $index">
+                <div ng-bind-html="option | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.k8s.dockerImages.tagName" |translate}}：</label>
+          <div class="controls">
+            <input type="text" name="tagName" class="form-controls"
+                   placeholder="{{'aws.k8s.dockerImages.tagNameTips'|translate}}"
+                   ng-model="repositoryData.tagName" ng-maxlength="10" required
+                   ng-pattern="/^[a-z0-9]([a-z0-9\-\._]*[a-z0-9])?$/"/>
+            <div class="error" ng-show="createRepositoryForm.tagName.$invalid &&
+                                         createRepositoryForm.tagName.$dirty">
+              <span ng-show="createRepositoryForm.tagName.$error.required">
+                {{"aws.k8s.dockerImages.tagNameNotEmpty"|translate}}
+              </span>
+              <span ng-show="createRepositoryForm.tagName.$error.maxlength">
+                {{"aws.k8s.dockerImages.tagNameTooLong"|translate}}
+              </span>
+              <span ng-show="createRepositoryForm.tagName.$error.pattern">
+                {{"aws.k8s.dockerImages.tagNameMismatchPattern"|translate}}
+              </span>
+            </div>
+            <div class="error" ng-show="tagDuplicated">
+              <span>{{"aws.k8s.dockerImages.tagDuplicated"|translate}}</span>
+            </div>
+          </div>
+        </div>
+        <!--<div class="control-group">-->
+        <!--<label class="control-label">{{"aws.k8s.dockerImages.choseUploadDockerfile"|translate}}：</label>-->
+        <!--<div class="controls">-->
+        <!--<input type="checkbox" ng-model="repositoryData.choseUploadDockerfile">-->
+        <!--</div>-->
+        <!--</div>-->
+        <div class="control-group">
+          <label class="control-label">{{"aws.k8s.dockerImages.choseUploadDockerfile"|translate}}：</label>
+          <div class="controls">
+            <input type="file" nv-file-select="" uploader="uploader" ng-click="clearItems()"/>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      
+        
+        <button class="btn btn-info" type="button"
+            ng-disabled="createRepositoryForm.$invalid || !dockerfileSelected ||
+                        (createRepositoryForm.$valid && (!repoNameValid || tagDuplicated))"
+            ng-click="$close(repositoryData)">{{"aws.action.ok" |translate}}
+        </button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel" |translate}}</button>
+    </div>
+  </div>
+</script>

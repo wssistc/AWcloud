@@ -1,0 +1,293 @@
+
+<div ng-controller="topListCtrl">
+  <div class="inner clearfix"  ng-if='!isAuth'>
+    <div class="service-mask"></div>
+    <div class="logo">
+      <a ng-click="routeJump('/view',true)">&nbsp;&nbsp;</a>
+    </div>
+    <div ng-if ="!isfirstLogin">
+      <div class="service-title center-info header-padding" ng-show="!MEM_ADMIN">
+          <!-- <a class="clearfix"><span>{{'aws.topheader.services'|translate}}</span><i class="iconfont"></i></a> -->
+          <a class="clearfix"><i class="icon-aw-zhankai"></i></a>
+          <div ng-if="serviceListHide">
+            <div class="service-dropdown-layer">
+              <aside>
+                <ul>
+                  <li ng-repeat="item in allMenuJson | orderBy:'id'" ng-if="supportOtherClouds(item.cloudType)">
+                      <span ng-click="changeMenu($index)" ng-class="{'active':menuId==$index}">
+                        {{item.text}}
+                      </span>
+                      <i class="icon-aw-angle-right-1" ng-if="menuId==$index"> 
+                      </i>
+                  </li>
+                </ul>
+              </aside>
+              <ul class="sub-menu submenu-limit clearFix">
+                <li ng-repeat ="munes in subMenu.child | orderBy:'id'" class="dividing-line" ng-class="{'all-menus':menuId==0}"  ng-if="supportOtherClouds(munes.cloudType)">
+                <!-- <li ng-repeat ="munes in subMenu.child" class="dividing-line" ng-class="{'all-menus':menuId==0}"> -->
+                  <h3 ng-if="(munes.cloudType!='QCLOUD_API_KEY'&&munes.cloudType!='VMWARE_API_KEY'&&munes.cloudType!='PaaS')&&ADMIN"><a ng-click="routeJump('/view',true)">{{'aws.menu.'+munes.keywords | translate}}</a></h3>
+                  <h3 ng-if="!(munes.cloudType!='QCLOUD_API_KEY'&&munes.cloudType!='VMWARE_API_KEY'&&munes.cloudType!='PaaS')">{{'aws.menu.'+munes.keywords | translate}}</h3>
+                  <ul class="clearFix" style="column-count:8;column-gap:0">
+                    <li class="menu-item" ng-repeat = "items in munes.child" ng-if="!(munes.keywords=='openStack_view'&&items.noShow==2)" ng-class="{'vm-items':munes.cloudType =='VMWARE_API_KEY'}" ng-show="supportPaas(items)">
+                      <div class="sub-name">{{'aws.menu.'+items.keywords | translate}}</div>
+                      <ul>
+                        <li class="service-items" ng-repeat="item in items.child" ng-hide="item.keywords.indexOf('TBDS')>-1&&(item.keywords!='TBDS_entrance')">
+                        <!-- <li class="service-items" ng-repeat="item in items.child" ng-hide = "(item.keywords == 'Resource_Storage' && services.cinder != 'cinder')"> -->
+                          <a ng-click="routeJump(item.href,item)" ng-if="!(munes.cloudType=='QCLOUD_API_KEY'||munes.cloudType=='VMWARE_API_KEY')">{{'aws.menu.'+item.keywords | translate}}</a>
+                          <a  ng-click="qcloudJump(item.href)" ng-if="munes.cloudType=='QCLOUD_API_KEY'">{{'aws.menu.'+item.keywords | translate}}</a>
+                          <a href="{{item.href}}" target="_blank" ng-if="munes.cloudType=='VMWARE_API_KEY'">{{'aws.menu.'+item.keywords | translate}}</a>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+      </div>
+      <span class="line" ng-show ="!MEM_ADMIN"></span>
+      <ul class="short-cut clearfix" ng-show="hasResManage||hasUserManage">
+        <li class="notice-panel header-padding">
+          <a href="">{{'aws.topheader.operation'|translate}}</a>
+          <!-- <a href="" class="icon-aw-batch cut-icon"></a> -->
+          <div class="dropdown-layer quick-type">
+            <ul class="quick-item">
+                <li licence-type="btn" id="resource-vm-create">
+                    <div ng-if="hasResManage&&customizedIsAdmin">
+                        <a href="#/quickconfig/createins?type=quick">{{'aws.topheader.newInstance'|translate}}</a>
+                    </div> 
+                </li>      
+                <li licence-type="btn" id="identity-department-create">
+                    <div ng-if="ADMIN" ng-controller="easyCtrl" ng-click="easyDepartment()">
+                        <span>{{'aws.topheader.newDepart'|translate}}</span>
+                    </div>
+                </li>
+                <li licence-type="btn" id="identity-project-create">
+                    <div ng-if="(ADMIN||domainRole)&&hasUserManage"  ng-controller="easyCtrl" ng-click="easyProject()">
+                        <span>{{'aws.topheader.newPro'|translate}}</span>
+                    </div>
+                </li>
+                <li licence-type="btn" id="identity-users-create">
+                    <div ng-if="(ADMIN||domainRole)&&hasUserManage"  ng-controller="easyCtrl" ng-click="easyUser()">
+                        <span>{{'aws.topheader.newUser'|translate}}</span>
+                    </div>
+                </li>
+                <li licence-type="btn" id="resource-privateNet-create">
+                    <div ng-if="hasResManage&&canSetInitVpc" ng-controller="easyCtrl" ng-click="easyNetwork()">
+                       <span>{{'aws.topheader.newVpc'|translate}}</span>
+                    </div>
+                </li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+      <!-- <span class="line"></span>
+      <div class="dep-pro" ng-show="isStandBase">
+        <span class="title-item" ng-if='((isDomianAuth || isCvmAuth) && !isAdminAuth)||isAdminAuth'>部门：</span>
+        <div class="dep-box clearFix" ng-if='(isDomianAuth || isCvmAuth) && !isAdminAuth'>
+          <input type="text" class="form-control dep-text" ng-model="topDomian" ng-disabled="true"/>
+        </div>
+        <div class="dep-box clearFix" ng-if='isAdminAuth'>
+          <ui-select class="ui-select-black" ng-model="tops.depart.selected" ng-change="changedepart(tops.depart.selected)">
+            <ui-select-match placeholder="部门名称" title="{{$select.selected.domainName}}">{{$select.selected.disDomainName}}</ui-select-match>
+            <ui-select-choices repeat=" depart in tops.deparList | filter:{domainName:$select.search}">
+              <div ng-bind-html="depart.disDomainName | highlight: $select.search" title="{{depart.disDomainName}}"></div>
+            </ui-select-choices>
+          </ui-select>
+        </div>
+        <span class="title-item"  ng-if='isCvmAuth'>项目：</span>
+        <div class="pro-box clearFix" ng-if='isCvmAuth'>
+          <ui-select class="ui-select-black" ng-model="tops.pro.selected" ng-disabled="options.disabled" ng-change="changeproject(tops.pro.selected)">
+            <ui-select-match placeholder="{{ noProjectHolder ||'项目名称'}}" title="{{$select.selected.projectName}}">{{$select.selected.disProjectName}}</ui-select-match>
+            <ui-select-choices repeat="pro in tops.projectsList | filter:{projectName:$select.search}">
+              <div ng-bind-html="pro.disProjectName | highlight: $select.search" title="{{pro.disProjectName}}"></div>
+            </ui-select-choices>
+          </ui-select>
+        </div>
+      </div> -->
+      <ul class="user-mes-box clearfix">
+        <region-change></region-change>
+        <!-- <li class="admin-center-info header-padding">
+          <a><span class="icon-aw-language header-icon"></span></a>
+          <div class="dropdown-layer admin-center">
+            <ul class="admin-center-menu">
+              <li ng-repeat="item in trans.list" ng-click="tranSelect(item)">
+                <a class="cursor-pointer" ng-class="{'active':(item.value==tran.selected.value)}">{{item.text}}</a>
+              </li>
+            </ul>
+          </div>
+        </li> -->
+        <li class="user-notice-panel header-padding" ng-if="billingActive">
+          <a href="" class="icon-aw-billing header-icon"></a>
+          <div class="dropdown-layer notice-support">
+            <ul>
+              <li class="first"><span class="title">{{'aws.topheader.amount'|translate}}</span></li>
+              <li><strong class="amount">{{loginAccountConsumeData}}</strong><span class="amount-unit">{{'aws.topheader.yuan'|translate}}</span></li>
+              <li><a ng-click="viewLoginAccountConsumeDetail()" class="consumption">{{'aws.topheader.record'|translate}}</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="user-notice-panel header-padding" ng-if="show_email">
+          <!-- <a href=""><i class=" icon-aw-info"></i><span class="num" ng-hide="totalUnHandledTickes+unHandledMessage == 0">{{unHandledMessage+totalUnHandledTickes}}</span></a> -->
+            <a href="" class="icon-aw-information header-icon"><span class="num" ng-hide="totalUnHandledTickes+unHandledMessage == 0">{{unHandledMessage+totalUnHandledTickes}}</span></a>
+          <div class="dropdown-layer notice-support">
+            <ul>
+              <li class="first"><span class="title">{{"aws.tmpl.header.TicketTips"|translate}}</span></li>
+              <li><a href="#/ticket/pendingTickets" class="title red">{{'aws.topheader.application'|translate}}: <span class="green">{{totalUnHandledTickes}}</span> {{'aws.topheader.untreated'|translate}}</a></li>
+              <li><a href="#/ticket/pendingTickets" class="title red">{{'aws.topheader.information'|translate}}: <span class="green">{{unHandledMessage}}</span> {{'aws.topheader.unread'|translate}}</a></li>
+          
+            </ul>
+          </div>
+        </li>
+        <li class="admin-center-info header-padding">
+          <a class="icon-aw-help3 header-icon">
+            <span class="num" ng-show="showInitSettingAlert">1</span>
+          </a>
+          <div class="dropdown-layer admin-center">
+            <ul class="admin-center-menu">
+              <!-- <li><a class="cursor-pointer" href="#/cvm/cvmview">{{'aws.topheader.guidance'|translate}}</a></li> -->
+              <li><a class="cursor-pointer" href="/handbook/#/vm/concept" target="_blank">{{'aws.topheader.document'|translate}}</a></li>
+              <li><a class="cursor-pointer" ng-click="openInitSettingModal()">{{'aws.topheader.configuration'|translate}}</a><em class="spots"></em></li>
+            </ul>
+          </div>
+        </li>
+        <li class="admin-center-info header-padding">
+          <a><span class="icon-aw-dashboard header-icon"></span></a>
+          <div class="dropdown-layer admin-center">
+            <ul class="admin-center-menu">
+                <li>
+                    <a ng-click="changeStyle('white')" class="cursor-pointer">{{"aws.tmpl.header.white"|translate}}</a>
+                </li>
+                <li>
+                  <a ng-click="changeStyle('black')" class="cursor-pointer">{{"aws.tmpl.header.black"|translate}}</a>
+                </li>
+            </ul>
+          </div>
+        </li>
+        <li class="admin-center-info header-padding">
+          <a><span title='{{userName}}' class="icon-aw-user header-icon"></span></a>
+          <div class="dropdown-layer admin-center">
+            <ul class="admin-center-menu">
+              <!-- <li ng-if='isUserAdmin'><a ng-click="adminPasswordModify()"><i class="icon-aw-gear"></i>{{"aws.tmpl.header.passwordModify"|translate}}</a></li> -->
+                <li ng-hide="MEM_ADMIN&&freeLoginHide">
+                    <a ng-click="adminPasswordModify()">
+                      <!--<i class="icon-aw-gear"></i>-->
+                    {{"aws.tmpl.header.passwordModify"|translate}}</a>
+                </li>
+  
+              <!-- <li><a ng-href="#"><i class="icon-aw-user"></i>{{"aws.tmpl.header.personalinformation"|translate}}</a></li>
+              <li ng-show="ADMIN || DOMAIN_ADMIN"><a ng-href="/permit/user"><i class="icon-aw-modify"></i>{{"aws.tmpl.header.user"|translate}}</a></li> -->
+              <li><a  ng-click="logOut()" class="cursor-pointer">
+                <!--<i class="icon-aw-shut-down"></i>-->
+              {{"aws.tmpl.header.quit"|translate}}</a></li>
+            </ul>
+          </div>
+        </li>
+          
+      </ul>
+      <!-- <div class="translate-select" ng-if="">
+        <ui-select class="ui-select-black" ng-model="tran.selected" ng-change="tranSelect(tran.selected)">
+          <ui-select-match placeholder="{{$select.selected.text}}" title="{{$select.selected.text}}">{{$select.selected.text}}</ui-select-match>
+          <ui-select-choices repeat="item in trans.list | filter:{text:$select.search}">
+            <div ng-bind-html="item.text | highlight: $select.search"></div>
+          </ui-select-choices>
+        </ui-select>
+      </div> -->
+    </div>
+  </div>
+
+  <div class="inner is-auth" ng-if='isAuth'>
+    <div class="logo">
+      <a ng-href="/">&nbsp;&nbsp;</a>
+    </div>
+    <!-- <ul class="user-mes-box clearfix">
+        <li class="admin-center-info header-padding">
+          <a><span class="icon-aw-language header-icon"></span></a>
+          <div class="dropdown-layer admin-center">
+            <ul class="admin-center-menu">
+              <li ng-repeat="item in trans.list" ng-click="tranSelect(item)">
+                <a class="cursor-pointer" ng-class="{'active':(item.value==tran.selected.value)}">{{item.text}}</a>
+              </li>
+            </ul>
+          </div>
+        </li>
+    </ul> -->
+    <!-- <div class="translate-select pull-right ui-select-black">
+      <ui-select class="ui-select-black" ng-model="tran.selected" ng-change="tranSelect(tran.selected)">
+        <ui-select-match placeholder="{{$select.selected.text}}" title="{{$select.selected.text}}">{{$select.selected.text}}</ui-select-match>
+        <ui-select-choices repeat="item in trans.list | filter:{text:$select.search}">
+          <div ng-bind-html="item.text | highlight: $select.search"></div>
+        </ui-select-choices>
+      </ui-select>
+    </div> -->
+  </div>
+  <script type="text/ng-template" id="adminPasswordModify.html">
+     <div class="modal-common modifyPwd-modal">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">{{"aws.tmpl.header.passwordModify"|translate}}</h3>
+        </div>
+        <div class="modal-body pwdModify-box">
+            <form name="pwdModify">
+              <!-- <div class="control-group">
+                <label class="control-label">{{'aws.system.modifyPassword.username'|translate}} :</label>
+                <div class="controls">
+                  <span class="form-controls">admin</span>
+                </div>
+              </div> -->
+              <div class="control-group">
+                <label class="control-label"><i class="red">*</i> {{'aws.system.modifyPassword.oldPassword'|translate}} :</label>
+                <div class="controls">
+                  <input type="password" name="prePassword" ng-model="modify.prePassword" class="form-controls" autocomplete="off" placeholder="{{'aws.system.modifyPassword.pleaseInputOldPassword'|translate}}" required ng-keydown="canConfirm()"/>
+                  <div ng-if="pwdModify.prePassword.$error && (submitValid||pwdModify.prePassword.$dirty)">
+                      <span class="help-block" ng-if="pwdModify.prePassword.$error.required">{{'aws.system.modifyPassword.oldPasswordEmpty'|translate}}</span>
+                      <div ng-if="modifyError===1&&!pwdModify.prePassword.$error.required" class="help-block">
+                       {{'aws.system.modifyPassword.oldPasswordError'|translate}}
+                      </div>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label"><i class="red">*</i> {{'aws.system.modifyPassword.newPassword'|translate}} :</label>
+                <div class="controls">
+                  <input type="password" name="newPassword" id="newPassword" ng-model="modify.newPassword" class="form-controls" autocomplete="off" ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,/\-\^\%])[0-9a-zA-Z!@._:,/\-\^\%]{8,16}$/" placeholder="{{'aws.system.modifyPassword.pleaseInputNewPassword'|translate}}" required ng-keydown="canConfirm()"/>
+                  <div ng-if="pwdModify.newPassword.$error && (submitValid||pwdModify.newPassword.$dirty)">
+                    <span class="help-block" ng-if="pwdModify.newPassword.$error.required&&!firstStep">{{'aws.system.modifyPassword.newPasswordEmpty'|translate}}</span>
+                    <span class="help-block" ng-if="(pwdModify.newPassword.$error.pattern&&pwdModify.newPassword.$error.required)||(pwdModify.newPassword.$error.pattern && !firstStep)">{{'aws.system.modifyPassword.special_8_16'|translate}}</span>
+                  </div>
+                  <span class="help-block" ng-if="firstStep&&!equalCheck">{{'aws.system.modifyPassword.firstStep'|translate}}</span>
+                  <span class="help-block" ng-if="equalCheck&&!pwdModify.newPassword.$error.pattern&&!pwdModify.newPassword.$error.required">{{'aws.system.modifyPassword.equalCheck'|translate}}</span>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label"><i class="red">*</i> {{'aws.system.modifyPassword.confirmNewPassword'|translate}} :</label>
+                <div class="controls">
+                  <input type="password" name="confirmPassword" ng-model="modify.confirmPassword" autocomplete="off" class="form-controls" placeholder="{{'aws.system.modifyPassword.pleaseInputNewPasswordAgain'|translate}}" pw-check="newPassword" ng-keyup="canConfirm()"/>
+                  <div ng-if="pwdModify.confirmPassword.$error&& (submitValid||pwdModify.confirmPassword.$dirty)">
+                    <span class="help-block" ng-if="pwdModify.confirmPassword.$error.pwCheck">{{'aws.system.modifyPassword.newPasswordDiffer'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="modifyFail">
+                 <p ng-show="modifyError===2">
+                     {{'aws.system.modifyPassword.modifyPasswordFail'|translate}}
+                 </p>
+                 <p ng-if="isRotate">{{'aws.system.modifyPassword.modifying'|translate}} <span class="aw-spin icon-aw-refresh"></span></p>
+                 <p ng-if="successModify">{{'aws.system.modifyPassword.modifySuccess'|translate}}</p>
+                 <p ng-if="modifyError===3">{{'aws.system.modifyPassword.modifyFrequent'|translate}}</p>
+                 <p ng-if="modifyError===4">{{'aws.statusCode.01080304'|translate}}</p>
+                 <p ng-if="modifyError===5">{{'aws.statusCode.01080305'|translate}}</p>
+                 <p ng-if="modifyError===6">{{'aws.statusCode.01100110'|translate}}</p>
+              </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+           <button class="btn btn-primary" ng-click="modifyPwd(modify,pwdModify)" ng-disabled="(canModifyAfterSuccess||confirmTwice)&&!pwdCheck">
+                {{"aws.action.ok"|translate}}
+           </button>
+           <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+     </div>
+  </script>
+</div>
+

@@ -1,0 +1,103 @@
+<div class="page-inner" ng-controller="completeCtrl">
+  <div class="progress-box">
+  <div ng-class="{'hide':ending}">
+    <ul class="progress-text">
+      <li ng-class="{'hide':startUp}">
+        <div class="warp clearfix">
+          <div class="img-box"><i class="icon-aw-pc"></i><i class="icon-aw-cloud"></i></div>
+          <div class="text-box">
+            <h2>{{'aws.register.comp.start'|translate}}</h2>
+            <p>{{'aws.register.comp.decr'|translate}}</p>
+          </div>
+        </div>
+      </li>
+      <li ng-class="{'show':startUp}" class="slide">
+        <ul class="animation clearfix">
+          <li class="slide-bg-1"><!-- <img src="../images/progress-img.png" alt=""> --></li>
+          <li class="slide-bg-2"><!-- <img src="../images/progress-img2.png" alt=""> --></li>
+          <li class="slide-bg-3"><!-- <img src="../images/progress-img3.png" alt=""> --></li>
+        </ul>
+        <div class="checkbox">
+          <label ng-if="enable_ceph" ng-class="{'active':components_ceph}"><input type="checkbox" id="inlineCheckbox1" ng-model="components_ceph" disabled><i class="icon-aw-square"></i> {{'aws.register.comp.ceph'|translate}}</label>
+          <label ng-class="{'active':components_keystone}"><input type="checkbox" id="inlineCheckbox1" ng-model="components_keystone" disabled><i class="icon-aw-square"></i> {{'aws.register.comp.keystone'|translate}}</label>
+          <label ng-class="{'active':components_glance}"><input type="checkbox" id="inlineCheckbox2" ng-model="components_glance" disabled><i class="icon-aw-square"></i> {{'aws.register.comp.glance'|translate}}</label>
+          <label ng-class="{'active':components_cinder}"><input type="checkbox" id="inlineCheckbox3" ng-model="components_cinder" disabled><i class="icon-aw-square"></i> {{'aws.register.comp.cinder'|translate}}</label>
+          <label ng-class="{'active':components_nova}"><input type="checkbox" id="inlineCheckbox4" ng-model="components_nova" disabled><i class="icon-aw-square"></i> {{'aws.register.comp.nova'|translate}}</label>
+          <label ng-class="{'active':components_neutron}"><input type="checkbox" id="inlineCheckbox5" ng-model="components_neutron" disabled><i class="icon-aw-square"></i> {{'aws.register.comp.neutron'|translate}}</label>
+        </div>
+      </li>
+    </ul>
+    <div class="websocket-tips">
+      <p class="failed" ng-class="{'show':failed}">{{'aws.register.comp.failed'|translate}}</p>
+      <ul ng-class="{'hide':startUp}">
+          <li ng-repeat="item in complete.message track by $index">{{item}}</li>
+      </ul>
+      <p class="playing" ng-class="{'show':startUp && !failed}">{{'aws.register.comp.playing'|translate}}<span class="playing-animate"><b class="one"></b><b class="one"></b><b class="one"></b></span></p>
+      <div class="progress-step">
+          <div class="progress-base" ng-class="{'color-0':'color-0','color-1':'color-1','color-2':'color-2','color-3':'color-3','color-4':'color-4','color-5':'color-5','color-6':'color-6','color-7':'color-7','color-8':'color-8','color-9':'color-9'}[complete.status]">
+              <div class="an-to"></div>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ending" ng-class="{'show':ending}">
+    <ul class="progress-text">
+      <li>
+      <div class="warp done">
+        <i class="icon-aw-correct"></i>
+        <h2>{{'aws.register.comp.success'|translate}}!</h2>
+        <p>{{'aws.register.comp.successAll'|translate}}</p>
+        </div>
+      </li>
+    </ul>
+    <div class="websocket-tips text-center">
+      <a ng-href="/" class="btn btn-primary">{{'aws.register.comp.tosass'|translate}}</a>
+    </div>
+  </div>
+  
+</div>
+<div class="bottom-action">
+  <button class="btn btn-default" ng-show="!redo" ng-click="reset()">{{'aws.register.comp.restart'|translate}}</button>
+  <button class="btn btn-primary" ng-click="detail()">{{'aws.register.comp.detail'|translate}}</button>
+</div>
+<div class="delete-wrap" ng-if="showAlert">
+  <div class="delete-alert delete-show">
+    <div class="alert alert-danger"close="close()">
+      <button type="button" class="close" ng-click="close({$event: $event})">
+          <span aria-hidden="true">×</span>
+          <span class="sr-only">Close</span>
+      </button>
+      <div class="del-cont"><span>{{'aws.register.comp.reallyRestart'|translate}}</span></div>
+      <div class="btn-item">
+        <button type="button" class="btn btn-danger" ng-click="reseConfirm()" ng-disabled="notDel">{{'aws.action.ok'|translate}}</button>
+        <button type="button" class="btn btn-default" ng-click="close()">{{'aws.action.cancel'|translate}}</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="modal-box" ng-class="{'show':showConfDetail}">
+    <div class="modala">
+      <div class="modal-body">
+        <table class="table border">
+          <thead>
+            <tr>
+              <th>{{'aws.register.info.type'|translate}}</th>
+              <th>{{'aws.register.info.cidr'|translate}}</th>
+              <th>{{'aws.register.info.IPaddresses'|translate}}</th>
+              <th>{{'aws.register.info.vlantag'|translate}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="item in usedList">
+              <td>{{'aws.register.info.'+item.name|translate}}</td>
+              <td>{{item.cidr}}</td>
+              <td><span ng-repeat="ip in item.iprange">{{ip.start}}~{{ip.end}}</span></td>
+              <td>{{item.vlan}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

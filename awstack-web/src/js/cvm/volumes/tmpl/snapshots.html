@@ -1,0 +1,283 @@
+<div class="page-inner">
+  <uib-tabset active="active" class="tab-offset-right" justified="true">
+    <uib-tab index="0" heading="{{'aws.instances.rollback.dataDisk' | translate}}" ng-click="changeActive(0)" disable="!canSnapShot">
+      <div class="table-action">
+        <button type="button" data-toggle="modal"  ng-click="enabledVolume(editData)" 
+        class="btn btn-normal" licence-type="btn" id="resource-dataVolSnap-createVol" ng-class="{'disabled':!canCV}"
+        uib-popover="{{!btn.limit['volumes_snapshots']?storageTypeTip:CVTip}}"
+        popover-enable="!canCV" popover-trigger="mouseenter" popover-placement = "right" ng-show="ListApplication">
+        <i class="icon-aw-hard-disk"></i>{{'aws.snapshots.startVolume'|translate}}</button>
+        <button type="button" data-toggle="modal" title="{{prompt_message}}" ng-disabled="!canDel" ng-click="deleteSnapshots(checkedItems)" class="btn btn-normal" licence-type="btn" id="resource-dataVolSnap-del"> <i class=" icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+        <div class="pull-right">
+          <into-information modular="'snapshotsData'"></into-information>
+          <button class="btn btn-renovat right-ports" ng-click="refreshSnap()" licence-type="btn" id="resource-dataVolSnap-refresh"><i class="icon-aw-refresh"></i></button>
+          <div class="search-box right-ports">
+            <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+              <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+              <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="snapshot_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+            </form>
+          </div>
+        </div>
+        
+      </div>
+      <div class="table-content"  ng-if="active==0">
+        <table ng-table="dataTable" class="table" show-filter="false">
+          <tr ng-repeat="snapshot in $data">
+            <td header="'headerCheckbox.html'">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="checkboxes.items[snapshot.id]" />
+                <i class="iconfont"></i>
+              </label>
+            </td>
+            <td data-title="headers.snapshotName" sortable="'name'">
+              <div class="edit-name edit-lg">
+                <a ng-href="/cvm/snapshots?id={{snapshot.id}}" title="{{snapshot.name}}">{{snapshot.name}}</a>
+              </div>
+            </td>
+            <td data-title="headers.volume" sortable="'volumeName'">
+              <div class="edit-name edit-lg">
+                <span title="{{snapshot.volumeName}}">{{snapshot.volumeName}}</span>
+              </div>
+            </td>
+            <!-- <td data-title="headers.description" sortable="'description'">
+              <span class="des">{{snapshot.description}}</span>
+            </td> -->
+            <td data-title="headers.size" sortable="'size'">{{snapshot.size}}</td>
+            <td data-title="headers.status" sortable="'status'">
+              <span ng-class="{'bg-green':(snapshot.status=='available'||snapshot.status=='in-use'),'bg-blue':(snapshot.status=='creating'||snapshot.status=='deleting'||snapshot.status=='attaching'||snapshot.status=='detaching'||snapshot.status=='error-deleting'),'bg-orange':(snapshot.status=='inavailable'),'bg-red':(snapshot.status=='error')}">{{"aws.snapshots.table.status."+snapshot.status | translate}}<i ng-class="{'icon-aw-refresh':(snapshot.status=='creating' || snapshot.status=='deleting')}" class="aw-spin"></i>
+              </span>
+            </td>
+          </tr>
+        </table>
+        <service-tip service = "'cinder'"  menus="menuGuide" menu-href="'/system/storageManagement'"></service-tip>
+        <empty-tip empty-type="loadData1"></empty-tip>
+      </div>
+    </uib-tab>
+    <uib-tab index="1" heading="{{'aws.instances.rollback.systemDisk' | translate}}" ng-click="changeActive(1)" disable="!canSnapShot">
+      <div class="table-action">
+        <button type="button" class="btn btn-normal" ng-disabled="isDisabled||canNewInstance" ng-click="newInstance(editData)" licence-type="btn" id="resource-sysVolSnap-createVm"  ng-show="ListApplication"><i class="icon-aw-add-to2"></i>{{'aws.img.new_instance'|translate}}</button>
+        <button type="button" data-toggle="modal"  ng-click="enabledVolume(editData)" 
+        class="btn btn-normal" licence-type="btn" id="resource-dataVolSnap-createVol" ng-class="{'disabled':!canCV}"
+        uib-popover="{{!btn.limit['volumes_snapshots']?storageTypeTip:CVTip}}"
+        popover-enable="!canCV" popover-trigger="mouseenter" popover-placement = "right" ng-show="ListApplication">
+        <i class="icon-aw-hard-disk"></i>{{'aws.snapshots.startVolume'|translate}}</button>
+        <button type="button" data-toggle="modal" title="{{prompt_message}}" ng-disabled="!canDel" ng-click="deleteSnapshots(checkedItems)" class="btn btn-normal" licence-type="btn" id="resource-sysVolSnap-del"> <i class=" icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+        <div class="pull-right">
+          <into-information modular="'snapshotsData'"></into-information>
+          <button class="btn btn-renovat right-ports" ng-click="refreshSnap()" licence-type="btn" id="resource-dataVolSnap-refresh"><i class="icon-aw-refresh"></i></button>
+          <div class="search-box right-ports">
+            <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+              <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+              <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="snapshot_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="table-content" ng-if="active==1">
+        <table ng-table="sysTable" class="table" show-filter="false">
+          <tr ng-repeat="snapshot in $data">
+            <td header="'headerCheckbox.html'">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="checkboxes.items[snapshot.id]" />
+                <i class="iconfont"></i>
+              </label>
+            </td>
+            <td data-title="headers.snapshotName" sortable="'name'">
+              <div class="edit-name edit-lg">
+                <a ng-href="/cvm/snapshots?id={{snapshot.id}}" title="{{snapshot.name}}">{{snapshot.name}}</a>
+              </div>
+            </td>
+            <td data-title="headers.volume" sortable="'volumeName'">
+              <div class="edit-name edit-lg">
+                <span title="{{snapshot.volumeName}}">{{snapshot.volumeName}}</span>
+              </div>
+            </td>
+            <!-- <td data-title="headers.description" sortable="'description'">
+              <span class="des">{{snapshot.description}}</span>
+            </td> -->
+            <td data-title="headers.size" sortable="'size'">{{snapshot.size}}</td>
+            <td data-title="headers.status" sortable="'status'">
+              <span ng-class="{'bg-green':(snapshot.status=='available'||snapshot.status=='in-use'),'bg-blue':(snapshot.status=='creating'||snapshot.status=='deleting'||snapshot.status=='attaching'||snapshot.status=='detaching'||snapshot.status=='error-deleting'),'bg-orange':(snapshot.status=='inavailable'),'bg-red':(snapshot.status=='error')}">{{"aws.snapshots.table.status."+snapshot.status | translate}}<i ng-class="{'icon-aw-refresh':(snapshot.status=='creating' || snapshot.status=='deleting')}" class="aw-spin"></i>
+              </span>
+            </td>
+          </tr>
+        </table>
+        <service-tip service = "'cinder'"  menus="menuGuide"  menu-href="'/system/storageManagement'"></service-tip>
+        <empty-tip empty-type="loadData2"></empty-tip>
+      </div>
+    </uib-tab>
+  </uib-tabset>
+  <div class="detailIns-box">
+      <div class= 'animateContent  {{insAnimation}} '>
+          <div class='detailInner'>
+              <div class="tab-content">
+                  <div class="detail-title">
+                  <a class="an-close" ng-click="closeNewIns()"><i class=" icon-aw-mail-reply"></i></a>
+                  <span>{{'aws.instances.addinstances.newInstance'|translate}}</span>
+                  </div>
+                  <div class="detail-info"  ng-if="insAnimation == 'animateIn'">
+                  <div ng-controller ="createInsCtrl" ng-include = "'js/shortcuts/instances/tmpl/createIns.html'"></div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class='animate-backup'></div>
+  </div>
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+      <div class="tab-content">
+        <div class="detail-row">
+          <div class="detail-header">
+            <table class="table">
+              <tr>
+                <td><a>{{detailData.name}}</a></td>
+                <td>{{detailData.tenant}}</td>
+                <td>{{detailData.volumeName}}</td>
+                <td>{{detailData.size}}</td>
+                <td>{{detailData.status}}</td>
+                <td>{{detailData.type}}</td>
+                <td>{{detailData.description}}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="detail-title">
+            <a class="an-close" ng-href="/cvm/snapshots"><i class="icon-aw-mail-reply"></i></a>
+            <span>{{'aws.snapshots.detailSnapshot'|translate}}</span>
+          </div>
+          <div class="detail-info">
+            <div class="tab-content-line tall"></div>
+            <div class="table-content table-small" >
+              <table class="table table-info column">
+                <tr>
+                  <td>{{'aws.snapshots.snapshotName'|translate}}</td>
+                  <td>{{detailData.name}}</td>
+                  <td>{{'aws.volumes.volumeName'|translate}}</td>
+                  <td>{{detailData.volumeName}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.created'|translate}}</td>
+                  <td>{{detailData.created| date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                  <td>{{'aws.snapshots.size'|translate}}</td>
+                  <td>{{detailData.size}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.status'|translate}}</td>
+                  <td>{{'aws.snapshots.table.status.'+detailData.status| translate}}</td>
+                  <!-- <td>{{'aws.snapshots.description'|translate}}</td>
+                  <td>{{detailData.description}}</td> -->
+                  <td></td>
+                  <td></td>
+                </tr>
+                <!-- <tr>
+                  <td>{{'aws.volumes.metaData'|translate}}</td>
+                  <td>{{detailData.metaData}}</td>
+                  
+                  <td></td>
+                  <td></td>
+                  <td>{{'aws.volumes.type'|translate}}</td>
+                  <td>{{detailData.type}}</td>
+                </tr> -->
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </pane>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="enabledVolumeModel.html">
+  <div class="addUser-modal modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+      <h3 class="modal-title">{{'aws.snapshots.startVolume'|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-danger" ng-show="isShowDep">{{errorMessageDep}}</div>
+      <div class="alert alert-danger" ng-show="isShowPro">{{errorMessagePro}}</div>
+      <div class="alert alert-danger" ng-if="isShowDepVolumes">{{errorMessageDepVolumes}}</div>
+      <div class="alert alert-danger" ng-if="isShowProVolumes">{{errorMessageProVolumes}}</div>
+      <form name="createVolumeForm" novalidate>
+        <div class="control-group">
+            <label class="control-label">{{'aws.volumes.cv.name'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="name" ng-model="volumeForm.name" placeholder="{{'aws.volumes.cv.pInputName'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\.)*$/" ng-maxlength="32" required />
+              <div class="error" ng-if="interacted(createVolumeForm.name)" ng-messages="createVolumeForm.name.$error" >
+                <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.nameLimit'|translate}}</div>
+                <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+              </div>
+            </div>
+          </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}：</label>
+          <div class="controls">
+            <textarea ng-maxlength="255" class="form-controls" name="description" ng-model="volumeForm.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}"></textarea>
+            <div class="error" ng-if="interacted(createVolumeForm.description)" ng-messages="createVolumeForm.description.$error" >
+                <div ng-message="maxlength">{{'aws.errors.maxlength255'|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">{{'aws.volumes.cv.config'|translate}}：</label>
+            <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip3' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <input type="text" class="form-controls" name="size" ng-model="volumeForm.size" placeholder="{{'aws.volumes.cv.defaultSize'|translate}}" ng-change="isShowError(volumeForm.size)" ng-pattern="/^[1-9]+[0-9]*$/" oldsizesnap="createVolumeForm.size" />
+              <div class="error" ng-if="interacted(createVolumeForm.size)" ng-messages="createVolumeForm.size.$error" >
+                <div ng-message="pattern" class="volume-form-name-error">{{'aws.volumes.cv.pInputNum'|translate}}</div>
+                <div ng-message="oldsizesnap" class="volume-form-name-error">{{'aws.volumes.errorMessage.atLeastSize'|translate}}</div>
+                <!-- <div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.limit_volume'|translate}}</div> -->
+
+              </div>
+            </div>
+          </div>
+        <div class="control-group" ng-if="root_device_not_shared">
+          <label class="control-label">{{'aws.volumes.multiattach'|translate}}：</label>
+          <div class="controls" class="checkbox">
+            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip4' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="form-controls" ng-model="volumeForm.multiattach" />
+                <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.volumes.gigQuota'|translate}}：</label>
+          <div class="controls">
+            <div class="clearfix bar-group">
+              <div quota-bar bardata="project_data"></div>
+              <div quota-bar bardata="domain_data" ng-show="ADMIN || DOMAIN_ADMIN"></div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.volumes.volumesQuota'|translate}}：</label>
+          <div class="controls">
+            <div class="clearfix bar-group">
+              <div quota-bar bardata="project_data_volumes"></div>
+              <div quota-bar bardata="domain_data_volumes" ng-show="ADMIN || DOMAIN_ADMIN"></div>
+            </div>
+          </div>
+        </div>
+      </form>
+      <div class="des-info" ng-if = "showPriceTip">
+        <span>{{'aws.networks.price.totalPrice' | translate}}：</span>
+        <strong>¥{{priceHour}}</strong>
+        <span>{{'aws.networks.price.perHour' | translate}} × 1 =</span>
+        <strong>¥{{priceHourAbout}}</strong>
+        <span>{{'aws.networks.price.perHour' | translate}} ({{'aws.networks.price.count' | translate}} ¥{{priceMonth}} {{'aws.networks.price.perMonth' | translate}})</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="!canConfirm()" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+    </div>
+  </div>
+</script>

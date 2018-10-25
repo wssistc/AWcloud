@@ -1,0 +1,61 @@
+<div class="page-inner">
+  <div class="page-title">
+    <h2>云服务器概览</h2>
+  </div>
+	
+	<div class="box">
+		<div class="col-8 text-center" style="border:none;">
+      <div class="title text-left">云服务器状态</div>
+      <div class="panels clearfix"  style="display:inline-block;margin: 0 auto;width:500px;">
+        <div class="pie-wrap">
+        	<div class=" pie" chart-pie panel='vmChart.panels'></div> 
+        </div>
+        <div class="pie-legend" ng-if="showAllVm" >
+          <p>您有<span class="blue">{{vm.vmTotal}}</span> 台服务器，目前都运行正常</p>
+        </div>
+        <div ng-if="showNormalVm" class="pie-legend" >
+          <dl class="dl-horizontal" ng-repeat="legend in vmChart.panels.datalist">
+            <dt><i style="background-color:{{vmChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+            <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?vmChart.panels.colors[$index]:'inherit'}>{{legend.value>=0?legend.value:0}} 台</span></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="col-4" ng-if="showNormalVm">
+      <div class="title">待续费云服务器</div>
+      <div style="padding: 0 20px;">
+        <table class="table" ng-table="vmTable" show-filter="false">
+          <col width="50%">
+          <col width="50%">
+          <tr ng-repeat="vm in $data">
+            <td data-title="'ID/主机名'" sortable="'uInstanceId'">
+              <div class="edit-name">
+                <a ng-href="#/cvm/instances?vmid={{vm.uInstanceId}}&regionid={{vm.regionId}}">{{vm.uInstanceId}}</a>
+                <span>{{vm.alias}}</span>
+              </div>
+            </td>
+            <td data-title="'地域'" sortable="'regionId'">
+              <span>{{"CN.overview.region."+vm.regionId | translate}}</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+	</div>
+  <div class="box">
+    <div class="col-6" ng-repeat="region in regionList" style="float:none;min-height:auto;border:none;display:inline-block;margin-bottom:15px;">
+      <div class="panels clearfix">
+        <div class="title">{{"CN.overview.region."+region.id | translate}}</div>
+        <div class="bar-wrap" >
+          <ul>
+            <li ng-repeat = "item in region.value" class="clearfix">
+              <span ng-show="item.zoneId" style="padding-left:20%;color:#999;">{{"CN.cbs.table.zone."+item.zoneId | translate}}</span>
+              <div quota-bar bardata="item" id="insQuota"></div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

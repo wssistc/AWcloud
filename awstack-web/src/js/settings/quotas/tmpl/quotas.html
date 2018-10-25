@@ -1,0 +1,59 @@
+<div class="page-inner quotas-type">
+	<uib-tabset active="" class="tab-offset-right">
+		<uib-tab index="$index + 1" ng-repeat="data in typeData" ng-click="changeType(data.type)" heading="{{data.name}}">
+			<!-- <form name="quotaForm">
+				<div class="control-items2 clearfix">
+					<div class="control-group" ng-repeat="quota in quotas ">
+						<label class="control-label">{{'aws.quota.'+quota.name | translate}}</label>
+						<div class="controls" style="padding-right: 120px;">
+							<input class="form-controls" type="text" name="{{quota.name}}" ng-model="quota.hardLimit" ng-pattern="/^([0-9]+)$/" ng-maxlength="32" required></input>
+							<label class="checkbox">{{'aws.config.isCanConfig'|translate}}：
+								<input ng-disabled=isDisabled(quota.name) type="checkbox" ng-model=quota.isShow />
+								<i class="iconfont"></i>
+							</label>
+							<div class="error" ng-if="interacted(quotaForm[quota.name])" ng-messages="quotaForm[quota.name].$error" >
+								<div ng-message="required" class="quotaForm-form-name-error">{{'aws.errors.required'|translate}}</div>
+								<div ng-message="pattern" class="quotaForm-form-name-error">{{'aws.errors.integer'|translate}}</div>
+								<div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form> -->
+			<table ui-tree="treeOptions" id="tree-root" class="table table-responsive">
+				<thead>
+			        <tr>
+						<th>{{'aws.quota.sort' | translate}}</th>
+						<th width="80%">{{'aws.quota.quotaName' | translate}}</th>
+						<th>{{'aws.quota.defaultNum' | translate}}</th> 
+						<th>{{'aws.config.isCanConfig'|translate}}</th>		   
+					</tr>
+				</thead>
+				<tbody ui-tree-nodes ng-model="quotas">
+					<tr ng-repeat="quota in quotas" ui-tree-node ng-hide = "(quota.name == 'backups' || quota.name == 'backup_gigabytes' ) && services.backups != 'backups'">
+						<td>
+							<i class="glyphicon glyphicon-resize-vertical" ui-tree-handle></i> 
+						</td>
+						<td>
+							{{'aws.quota.'+quota.name | translate}}
+						</td>
+						<td>
+							<input class="form-controls" type="text" ng-model="quota.hardLimit" ng-change="isErrorFunc(quota,data.type)"></input>
+							<div class="quotaForm-form-name-error">{{quota.errorMessage}}</div>
+						</td>
+						<td>
+							<label class="checkbox">
+								<input ng-model="quota.isShow" ng-disabled=isDisabled(quota.name) type="checkbox"  />
+								<i class="iconfont"></i>
+							</label> 
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br>
+			<div class="text-center">
+				<button class="btn btn-info" ng-disabled="cantConfirm||isCantEdit" ng-click="confirmQuota(data.type)">{{'aws.action.ok'|translate}}</button><button class="btn btn-default" ng-click="cancel(data.type)">{{'aws.action.reset'|translate}}</button>
+			</div>
+		</uib-tab>
+	</uib-tabset>
+</div>

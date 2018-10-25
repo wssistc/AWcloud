@@ -1,0 +1,75 @@
+<div>暂无数据</div>
+<!-- <div>
+  <pane class="detail-body" ng-controller="detailCtrl" animation="animation">
+    <div class="tab-content">
+      <div class="detail-row ins-info">
+        <div class="detail-header">
+          <table class="table">
+            <tr>
+              <td><a ng-href="/cvm/instances">{{insConfigData.name}}</a></td>
+              <td> {{insConfigData.proName}}</td>
+              <td> {{insConfigData.name}}</td>
+              <td> {{insConfigData.imageName}}</td>
+              <td> {{insConfigData.fixedIps[0]}}</td>
+              <td> {{insConfigData.floatingIps[0]}}</td>
+              <td> {{insConfigData.createtime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+              <td> {{'aws.instances.table.status.'+insConfigData.status| translate}}</td>
+              <td> {{'aws.instances.table.'+insConfigData.startStyle| translate}}</td>
+            </tr>
+          </table>
+        </div>
+        <div class="detail-title">
+          <a class="an-close" ng-href="/cvm/instances"><i class=" icon-aw-mail-reply"></i></a>
+          <span>{{'aws.instances.cloudInstanceDetail'|translate}}</span>
+        </div>
+        <div class="clear"></div>
+        <div class="detail-info">
+          <uib-tabset active="" justified="true">
+            <uib-tab index="0" heading="{{'aws.instances.info.configureInfo'|translate}}" ng-click="choseConfigTab()">
+              <div class="">
+                <table class="table table-info column">
+                  <tr>
+                    <td>{{'aws.instances.cloudInstanceName'|translate}}</td>
+                    <td>{{insConfigData.name}}</td>
+                    <td>{{'aws.instances.image'|translate}}</td>
+                    <td>{{insConfigData.imageName}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{'aws.instances.configration'|translate}}</td>
+                    <td>
+                      CPU：{{insConfigData.vcpus}}{{'aws.instances.info.core'|translate}}，{{'aws.instances.info.memory'|translate}}：{{insConfigData.ram/1024}}GB，{{'aws.instances.info.localDisk'|translate}}：vda
+                    </td>
+                    <td>{{'aws.instances.status'|translate}}</td>
+                    <td>{{'aws.instances.table.status.'+insConfigData.status| translate}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{'aws.instances.privateIP'|translate}}</td>
+                    <td><span ng-repeat="ip in insConfigData.fixedIps">{{ip}}</br></span></td>
+                    <td>{{'aws.instances.publicIP'|translate}}</td>
+                    <td><span ng-repeat="ip in insConfigData.floatingIps">{{ip}}</br></span></td>
+                  </tr>
+                  <tr>
+                    <td>{{'aws.instances.firewall'|translate}}</td>
+                    <td><span ng-repeat="secGroup in insConfigData.secGroups">{{secGroup}}<br/></span></td>
+                    <td>{{'aws.instances.create_at'|translate}}</td>
+                    <td>{{insConfigData.createtime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{'aws.instances.volume'|translate}}</td>
+                    <td>{{insConfigData.diskNewName}}</td>
+                    <td><span ng-if="ADMIN">{{'aws.instances.hostName'|translate}}</span></td>
+                    <td><span ng-if="ADMIN">{{insConfigData.hostName}}</span></td>
+                  </tr>
+                </table>
+              </div>
+            </uib-tab>
+            <uib-tab index="1" heading="{{'aws.instances.info.logInfo'|translate}}" ng-click="choseLogTab()" ng-show ="insConfigData.status != 'error'">
+              <div ng-bind-html="logContent|trust_html">
+              </div>
+            </uib-tab>
+          </uib-tabset>
+        </div>
+      </div>
+    </div>
+  </pane>
+</div> -->

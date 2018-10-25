@@ -1,0 +1,195 @@
+<div class="page-inner">
+  <div class="table-action">
+    <button type="button" data-toggle="modal" ng-click="createLB('new')" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+    <button type="button"  data-toggle="modal" ng-click="createLB('edit')" ng-disabled="isDisabled" class="btn btn-info  ng-binding"><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+    <button type="button" data-toggle="modal" ng-disabled="delisDisabled" ng-click="deleteBalancer(checkedItems)" class="btn btn-warning"> <i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+    <button class="btn btn-refresh" ng-click="initTable()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button>
+    <div class="dropdown" ng-if="L3">
+      <button type="button" class="btn btn-info dropdown-toggle" ng-disabled="delisDisabled" data-toggle="dropdown">{{'aws.instances.moreOps'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+      <ul class="dropdown-menu">
+        <li>
+          <button ng-click="bindFloatingIp(editData)" ng-disabled="bindfloatingIps">{{'aws.instances.bindingPublicIP'|translate}}</button>
+        </li>
+        <li>
+          <button ng-click="unbindFloatingIp(editData)" ng-disabled="relievefloatIpDis">{{'aws.instances.releasingPublicIPBindings'|translate}}</button>
+        </li>
+      </ul>
+    </div>
+    <div class="search-box">
+        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder={{"aws.action.search"|translate}} />
+        </form>
+    </div>
+  </div>
+  <script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+      <i class="icon-aw-square"></i>
+    </label>
+  </script>
+  <div class="table-content">
+    <table ng-table="tableParams" class="table " show-filter="false">
+      <colgroup>
+        <col width="5%">
+        <col width="23.75%">
+        <col width="23.75%">
+        <col width="23.75%">
+        <col width="23.75%">
+      </colgroup>
+      <tbody>
+        <tr ng-repeat="balance in $data">
+          <td header="'headerCheckbox.html'">
+              <label class="checkbox">
+                  <input type="checkbox" ng-model="checkboxes.items[balance.id]" />
+                  <i class="icon-aw-square"></i>
+              </label>
+          </td>
+          <td data-title="'aws.loadbalancers.lb.name'| translate" sortable="'name'">
+              <div class="edit-name edit-lg">
+                <a ng-href="#/cvm/loadbalancers/{{balance.id}}?active=0" title="{{balance.name}}">{{balance.name}}</a>
+              </div>
+          </td>
+          <td data-title="'aws.loadbalancers.lb.description'| translate" sortable="'description'"><span class="des">{{balance.description}}</span></td>
+          <td data-title="'aws.loadbalancers.lb.provisioning_status'| translate" sortable="'provisioning_status'">
+            <span ng-class="{'bg-green':(balance.provisioning_status=='ONLINE'||balance.provisioning_status=='ACTIVE'||balance.provisioning_status=='true'),'bg-blue':(balance.provisioning_status=='PENDING_UPDATE'||balance.provisioning_status=='PENDING_CREATE'),'bg-orange':(balance.provisioning_status=='OFFLINE'||balance.provisioning_status=='INACTIVE'||balance.provisioning_status=='false'),'bg-red':(balance.provisioning_status=='ERROR')}">
+              {{'aws.loadbalancers.ui.table.'+ balance.provisioning_status| translate}}
+            </span>
+            </td>
+          <td data-title="'aws.loadbalancers.lb.vip_address'| translate" sortable="'vip_address'">{{balance.vip_address}}
+          <!-- <td data-title="'aws.loadbalancers.lb.operating_status'| translate" sortable="'operating_status'">{{'aws.loadbalancers.lb.table.'+ balance.operating_status| translate}}</td> -->
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <loading-data  data="tabledata"></loading-data>
+  </div>
+  
+</div>
+
+<script type="text/ng-template" id="newLB.html">
+  <div class="modal-common">
+    <form name="createLBForm" autocomplete="off">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">{{'aws.loadbalancers.ui.' + Vlan.title | translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.lb.name'| translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" ng-change="checkedName(Vlan.name)" name="name" ng-model="Vlan.name" placeholder="{{'aws.loadbalancers.lb.name_placeholder'| translate}}" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required />
+            <div  class="error" ng-messages="(submitInValid ||createLBForm.name.$dirty) && createLBForm.name.$error">                                                        
+              <form-validate ></form-validate>
+            </div>
+            <div class="error" ng-if="NameCheck">{{'aws.errors.balanceName_check'|translate}}</div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.lb.description'| translate}}：</label>
+          <div class="controls">
+            <textarea type="text" ng-maxlength="255" class="form-controls" name="description" ng-model="Vlan.description" placeholder="{{'aws.loadbalancers.lb.description_placeholder'| translate}}" /></textarea>
+            <div  class="error" ng-messages="(submitInValid ||createLBForm.description.$dirty) && createLBForm.description.$error">
+              <form-validate max-num = "255"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.lb.Vlan'| translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="Vlan.selectedId" name="Vlan" ng-change="changeID(Vlan.selectedId)" ng-disabled="Vlan.isEdit" required>
+              <ui-select-match placeholder="{{'aws.loadbalancers.lb.Vlan_placeholder'| translate}}">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="item in Vlan.subnet | filter: {name: $select.search}">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div  class="error" ng-messages="(submitInValid ||createLBForm.Vlan.$dirty) && createLBForm.Vlan.$error">
+              <form-validate ></form-validate>
+            </div>
+          </div>
+        </div>
+       <!--  <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.lb.vip_address'| translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="vip_address" testincidr  choosecidr="Vlan.selectedId.cidr" startip="Vlan.selectedId.allocationPools[0].start" endip="Vlan.selectedId.allocationPools[0].end"
+             ng-model="Vlan.vip_address" placeholder="{{'aws.loadbalancers.lb.emptyOrAddrField' | translate }}"  ng-disabled="Vlan.isEdit" />
+            <div class="error" ng-messages="(submitInValid ||createLBForm.vip_address.$dirty) && createLBForm.vip_address.$error">
+              <form-validate ></form-validate>
+              <span ng-message="testincidr" ng-bind="outcidrtip"></span>
+            </div>
+          </div>
+        </div> -->
+        <!-- <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.lb.admin_state_up'| translate}}：</label>
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" name="admin_state_up" ng-model="Vlan.admin_state_up">
+              <i class="icon-aw-square"></i>
+            </label>
+          </div>
+        </div> -->
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirm(createLBForm)">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+      </div>
+    </form>
+  </div>
+</script>
+
+<script type="text/ng-template" id="bind-os-FloatingIp.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$close()">×</button>
+      <h3 class="modal-title">{{'aws.instances.FloatingIp.bindIP'| translate}}</h3>
+    </div>
+    <div class="modal-body ">
+      <form name="floatingForm">
+        <div class="control-group" ng-if="!hideips">
+          <label class="control-label">{{'aws.instances.FloatingIp.ipAddr'|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="floatingIp.floatingip_id" name="floatingName" required ng-disabled="!IpsList.length">
+              <ui-select-match placeholder="{{!IpsList.length?('aws.instances.FloatingIp.noFloatingIp'|translate):''}}">{{$select.selected.ip}}</ui-select-match>
+              <ui-select-choices group-by="groupFind" repeat="value in IpsList | filter: {ip : $select.search}">
+                <div ng-bind-html="value.ip | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div  class="error" ng-messages="(submitInValid ||floatingForm.floatingName.$dirty) && floatingForm.floatingName.$error">
+              <form-validate ></form-validate>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirm(floatingIp,floatingForm)">{{'aws.instances.addinstances.ok'|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="relieve-os-FloatingIp.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$close()">×</button>
+      <h3 class="modal-title">{{'aws.instances.FloatingIp.unbindIP'| translate}}</h3>
+    </div>
+    <div class="modal-body ">
+      <form name="unbindfloatingForm">
+        <div class="control-group" >
+          <label class="control-label">{{'aws.instances.FloatingIp.ipAddr'|translate}}：</label>
+          <div class="controls">
+            <input class="form-control" name="ip" ng-model="floatingIp.ip" readonly></input>
+            <div  class="error" ng-messages="(submitInValid ||unbindfloatingForm.ip.$dirty) && unbindfloatingForm.ip.$error">
+              <form-validate ></form-validate>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirm(unbindfloatingForm)">{{'aws.instances.addinstances.ok'|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+    </div>
+  </div>
+</script>

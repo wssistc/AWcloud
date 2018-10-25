@@ -1,0 +1,56 @@
+{
+  "MODEL":{
+    "SAVE":{
+      "TITLE":"新建",
+      "ERROR":"意外错误：无法保存流程",
+      "SAVING":"流程保存中",
+      "COMMENT":"说明",
+      "NEWVERSION":"将此作为新版本保存？这意味着你总是可以回到以前的版本"
+    },
+    "LASTMODIFIEDDATE":"上次保存",
+    "NAME":"名称",
+    "DESCRIPTION":"描述"
+  },
+  "PROPERTY":{
+    "EMPTY":"",
+    "PROPERTY":{
+      "EDIT":{
+        "TITLE":"描述信息"
+      }
+    }
+    
+  },
+  "ACTION":{
+    "CANCEL":"返回",
+    "SAVE":"保存",
+    "OK"  :"确定",
+    "SAVE-AND-CLOSE":"保存并关闭",
+    "SEND":"发送",
+    "CANCEL":"取消",
+    "SELECT":"选择",
+    "ADD":"增加",
+    "REMOVE":"移除"
+  },
+  "TOOLBAR":{
+    "ACTION":{
+      "SAVE":"保存",
+      "CUT":"剪切",
+      "COPY":"复制",
+      "PASTE":"粘贴",
+      "DELETE":"删除",
+      "REDO":"撤消",
+      "UNDO":"后退",
+      "ALIGNVERTICAL":"水平居中",
+      "ALIGNHORIZONTAL":"垂直居中",
+      "SAMESIZE":"同等尺寸",
+      "ZOOMIN":"放大",
+      "ZOOMOUT":"缩小",
+      "ZOOMACTUAL":"还原",
+      "ZOOMFIT":"适中",
+      "BENDPOINT":{
+        "ADD":"",
+        "REMOVE":""
+      }
+    }
+  }
+}

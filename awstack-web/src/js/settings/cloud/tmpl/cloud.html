@@ -1,0 +1,98 @@
+<div class="box operating-box">
+	<div class="cloud-box">
+		<div class="page-inner" >
+			<form name="cloudForm" novalidate>
+                <div class="settings-box">
+                    <div class="control-group control-choose">
+                        <label class="control-label ">{{'aws.cloud.cloudType' | translate}}：</label>
+                        <div class="controls">
+                            <div class="choose-item">
+                                <ui-select ng-model="selectedCloud" ng-change="changCloud(selectedCloud)" ng-disabled="disabled" title="{{'aws.cloud.ChooseCloud' | translate}}">
+                                    <ui-select-match placeholder="{{'aws.cloud.selectCloudType' | translate}}">{{$select.selected.paramDesc}}</ui-select-match>
+                                    <ui-select-choices repeat="cloudData in publicSettings | propsFilter: {paramDesc: $select.search}">
+                                        <div ng-bind-html="cloudData.paramDesc | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div class="control-group" ng-if="selectedCloud.paramName=='VMWARE_API_KEY'">
+                        <div class="control-tips">
+                            <p>1.当控制台链接格式为https，链接示例：https://ip:7343/console/?vmId=vm-id&vmName=vm-name&host=host_ip&sessionTicket=xxxxx&thumbprint=xxxxxxxxxx
+                            </p>
+                            <p>2.当控制台链接格式为http，链接示例：http://ip:7331/console/?vmId=vm-id&vmName=vm-name&host=host_ip&sessionTicket=&thumbprint=xxxxxxxxxx
+                            </p>
+                            <p>3.当控制台链接格式为vmrc，链接示例：https://ip:9443/vsphere-client/vmrc/vmrc.jsp?vm=urn:vmomi:VirtualMachine:vm-xx:xxxxxxxxxx
+                            </p>
+                        </div>
+                    </div> -->
+                    <div ng-repeat="vmCloudCon in selectedCloudCon track by vmCloudCon.radio" ng-class="{'separation-line':$index!=selectedCloudCon.length-1}">
+                        <div class="add-shut" ng-if="selectedCloudCon[0].vmConsoleUrl">
+                            <i ng-click="addVm($index)" class="icon-aw-add-to" ng-if="$index==selectedCloudCon.length-1"></i>
+                            <i ng-click="shutVm($index)" class="icon-aw-1shut-down" ng-if="$index!=selectedCloudCon.length-1||selectedCloudCon.length>1"></i>
+                        </div>
+                        <div class="control-group" ng-repeat="(k,v) in vmCloudCon" ng-if="k!='sslThumbprint'&&k!='radio'" ng-class="{'top':k=='vmConsoleUrl'}">
+                            <label class="control-label">{{'aws.cloud.'+k | translate}}：</label>
+                            <div class="controls group" ng-if="k=='Active'">
+                                <div class="checkbox switch-btn">
+                                    <label>
+                                        <input type="checkbox" class="form-controls" ng-disabled="cantQId||cantQKey||cantALIKey||cantALIID||cantVUrl||cantVName||cantVPw" ng-model="vmCloudCon[k]">
+                                        <i class="iconfont"></i>
+                                    </label>
+                                </div>
+
+                                <!-- <input class="form-controls" type="checkbox" ng-model="selectedCloudCon[k]"> -->
+                                <div class="chk-tip" >
+                                    <span ng-show="validVCenterUrl['valid_'+vmCloudCon.radio]=='success'" ng-class="{'succ':validVCenterUrl['valid_'+vmCloudCon.radio]=='success'}">验证成功！</span>
+                                    <span ng-show="validVCenterUrl['valid_'+vmCloudCon.radio]=='fail'" ng-class="{'fail':validVCenterUrl['valid_'+vmCloudCon.radio]=='fail'}" >验证失败！</span>
+                                </div>
+                                <div ng-if="selectedCloud.paramName=='VMWARE_API_KEY'"  class="chk-btn">
+                                    <button class="btn btn-primary" ng-disabled="cloudForm['vCenterUrl'+vmCloudCon.radio].$error.pattern" ng-click="checkVCenterUrlValid(vmCloudCon,vmCloudCon.radio)" >验证有效性</button>
+                                </div>
+                            </div>
+                            <div class="controls" ng-if="k!='Active'">
+                                <input ng-if="(k=='vCenterUrl')" name="{{k+vmCloudCon.radio}}" class="form-controls"
+                                type="text" ng-change="isActive(k,vmCloudCon[k])" ng-model="vmCloudCon[k]" ng-pattern="/^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$|^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" required >
+                                <input ng-if="(k!='vCenterPassword')&&(k!='vmConsoleUrl')&&(k!='vCenterUrl')" name="{{k+vmCloudCon.radio}}" class="form-controls" type="text" ng-change="isActive(k,vmCloudCon[k])" ng-model="vmCloudCon[k]" required>
+                                <input ng-if="k=='vCenterPassword'" name="{{k+vmCloudCon.radio}}"  class="form-controls" type="password" ng-change="isActive(k,vmCloudCon[k])" ng-model="vmCloudCon[k]" required>
+                                <div class="error" ng-messages="(submitValid ||cloudForm[(k+vmCloudCon.radio)].$dirty)&&cloudForm[(k+vmCloudCon.radio)].$error">
+                                    <form-validate pattern-msg="'请输入正确格式的域名或IP'"></form-validate>
+                                </div>
+                                <div class="radio-item clearFix" ng-if="k=='vmConsoleUrl'">
+                                    <label>
+                                        <input type="radio" name="{{vmCloudCon.radio}}" value="https" ng-model="vmCloudCon[k]"/>
+                                        <i class="iconfont"></i>https
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="{{vmCloudCon.radio}}" value="http" ng-model="vmCloudCon[k]"/>
+                                        <i class="iconfont"></i>http
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="{{vmCloudCon.radio}}" value="vmrc" ng-model="vmCloudCon[k]"/>
+                                        <i class="iconfont"></i>vmrc
+                                    </label>
+                                    <div ng-if="selectedCloud.paramName=='VMWARE_API_KEY'" class="tip" >
+                                        <p>
+                                            1.请参考vSphere Web Client中虚拟机控制台的链接格式进行选择，默认为https
+                                        </p>
+                                        <p ng-if="vmCloudCon[k]=='https'">2.当控制台链接格式为https，链接示例：https://ip:7343/console/?vmId=vm-id&vmName=vm-name&host=host_ip&sessionTicket=xxxxx&thumbprint=xxxxxxxxxx</p>
+                                        <p ng-if="vmCloudCon[k]=='http'">2.当控制台链接格式为http，链接示例：http://ip:7331/console/?vmId=vm-id&vmName=vm-name&host=host_ip&sessionTicket=&thumbprint=xxxxxxxxxx</p>
+                                        <p ng-if="vmCloudCon[k]=='vmrc'">2.当控制台链接格式为vmrc，链接示例：https://ip:9443/vsphere-client/vmrc/vmrc.jsp?vm=urn:vmomi:VirtualMachine:vm-xx:xxxxxxxxxx</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="controls">
+                        <p class="error-tips" ng-if="!checkVmName">vCenter名称重复</p>
+                    </div>
+                    <button class="btn btn-info"  ng-click="updateCloud(cloudForm)" ng-disabled="isHaddle">{{'aws.action.ok'|translate}}</button>
+                    <button class="btn btn-default" ng-click="cancel()">{{'aws.action.reset'|translate}}</button>
+                </div>
+			</form>
+		</div>
+	</div>
+</div>

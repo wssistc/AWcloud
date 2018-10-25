@@ -1,0 +1,54 @@
+<div class="modal-common">
+	<div class="modal-header">
+		<button type="button" class="close" ng-click="$dismiss()">×</button>
+		<h3 class="modal-title">{{departTitle}}</h3>
+	</div>
+	<div class="modal-body">
+		<form action="" name="createDepForm" novalidate>
+			<div class="control-group">
+				<label class="control-label "><span class="red">*</span>{{'aws.depart.newDepart.dep_name' | translate}}：</label>
+				<div class="controls" >
+					<input type="text" name="name" class="form-controls" ng-disabled="notEditName" title="{{notEditTip}}"  placeholder="{{'aws.org.upOrg.name_tip' | translate}}" ng-model="domain.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" ng-change="repeatName=false"
+					required />
+					<div class="error-messages error" ng-if="interacted(createDepForm.name)" ng-messages="createDepForm.name.$error" >
+						<div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+						<div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.noSpecial'|translate}}</div>
+						<div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+						<div ng-if="repeatName">{{'aws.errors.noRepeatDepName'|translate}}</div>
+					</div>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">{{'aws.depart.newDepart.pro_desc' | translate}}：</label>
+				<div class="controls">
+					<textarea class="form-controls" name="descName" ng-model="domain.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" ng-maxlength="256"></textarea>
+					<div class="error-messages error" ng-if="interacted(createDepForm.descName)" ng-messages="createDepForm.descName.$error" >
+						<div ng-message="maxlength">{{'aws.errors.maxlength256'|translate}}</div>
+					</div>
+				</div>
+			</div>
+			<span class="form-title">{{'aws.depart.quota'|translate}}<i class="icon-aw-question-mark question-tip" uib-popover="可编辑下面默认配额"  popover-trigger="mouseenter" popover-placement = "bottom" ></i></span>
+			<div ng-if='!getDepConfig' class="marginLeft">{{'aws.project.quotafail'|translate}}<span class='redPointer' ng-click='getCanEditQuota()'>{{'aws.project.retry'|translate}}</span></div>
+			<div class="control-row"  ng-repeat="quota in canEditQuotas">
+				<div class="control-group control-item-inner">
+					<label class="control-label" title="{{'aws.quota.'+quota.name | translate}}"><span class="red">*</span>{{'aws.quota.'+quota.name | translate}}：</label>
+					<div class="controls">
+						<input class="form-control" type="text" name="{{quota.name}}" ng-model="quota.hardLimit" availquota2 ng-pattern="/^([1-9][0-9]*)$/" required/>
+						<div class="error-messages error" ng-if="interacted(createDepForm[quota.name])" ng-messages="createDepForm[quota.name].$error" >
+							<div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+							<div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.atleast'|translate}}</div>
+							<div ng-message="availquota2">{{'aws.common.unreasonable'|translate}}</div>
+						</div>
+					</div> 
+				</div>
+				<div class="clear" ng-if="$odd"></div>
+			</div>
+			<div class="clear"></div>
+
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-info" ng-disabled='!getDepConfig||canSubmit' type="button" ng-click="confirmDep()">{{'aws.instances.addinstances.ok'|translate}}</button>
+		<button class="btn btn-default"  type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+	</div>
+</div>

@@ -1,0 +1,209 @@
+<div class="page-inner ticketReport-page">
+    <div class="box ">
+        <form class="form-inline date-box " role="form" name="tableFilterForm" novalidate>
+            <div class="table-action">
+                <div class="control-group">
+                    <label class="control-label">数据中心：</label>
+                    <div class="controls">
+                        <ui-select ng-model="tableCnsForm.region"  name="department" title='选择数据中心'>
+                            <ui-select-match placeholder='选择数据中心'>
+                                {{$select.selected.regionName}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="region in regionList | filter:{regionName:$select.search}" >
+                                <div ng-bind-html="region.regionName | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">部门：</label>
+                    <div class="controls">
+                        <ui-select ng-model="tableCnsForm.department" ng-change="changeDepartment()" name="department" title='选择部门' ng-disabled="!ADMIN">
+                            <ui-select-match placeholder='选择部门'>
+                                {{$select.selected.domainName}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="department in departmentUser | filter:{domainName:$select.search}" >
+                                <div ng-bind-html="department.domainName | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+
+                <!-- region Start -->
+                <!-- <div class="control-group">
+                    <label class="control-label">项目：</label>
+                    <div class="controls">
+                        <ui-select ng-model="tableCnsForm.project" ng-change="changeProject()" name="project" title='选择项目'>
+                            <ui-select-match placeholder='选择项目'>
+                                {{$select.selected.projectname}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="projrect in tableCnsForm.department.projects | filter:{projectname:$select.search}">
+                                <div ng-bind-html="projrect.projectname | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div> -->
+
+                <!-- 用户 -->
+                <div class="control-group">
+                    <label class="control-label">申请用户：</label>
+                    <div class="controls">
+                        <ui-select ng-model="tableCnsForm.user"  name="user" title='选择用户'>
+                            <ui-select-match placeholder='选择用户'>
+                                {{$select.selected.name}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="user in tableCnsForm.department.user | filter:{name:$select.search}">
+                                <div ng-bind-html="user.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+
+                <!-- 工单名称 -->
+                <div class="control-group">
+                    <label class="control-label">工单名称：</label>
+                    <div class="controls">
+                        <input type="text" placeholder='输入工单名称' ng-model="tableCnsForm.ticketName">
+                    </div>
+                </div>
+
+                <!-- 报表类型 -->
+                <div class="control-group">
+                    <label class="control-label">处理人：</label>
+                    <div class="controls">
+                        <ui-select ng-model="tableCnsForm.disposer"  name="disposer" title="选择处理人">
+                            <ui-select-match placeholder="选择处理人">
+                                {{$select.selected.name}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="disposer in filterInfo.disposers | filter:{name:$select.search}">
+                                <div ng-bind-html="disposer.name  | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                
+
+                 </div>
+            <div class="table-action" ng-class="{'time-error':tableFilterForm.startTime.$error.pattern || tableFilterForm.endTime.$error.pattern || tableFilterForm.endTime.$error.gtBillTime }">
+                <!-- 类型/type Start -->
+                <div class="control-group">
+                        <label class="control-label">工单类型：</label>
+                        <div class="controls">
+                            <ui-select ng-model="tableCnsForm.ticketType" ng-change="changeTicketType(tableCnsForm.ticketType)" name="ticketType" title="选择工单类型">
+                                <ui-select-match placeholder="选择工单类型">
+                                    {{$select.selected.name}}
+                                </ui-select-match>
+                                <ui-select-choices repeat="ticketType in filterInfo.ticketTypes | filter:{name:$select.search}">
+                                    <div ng-bind-html="ticketType.name  | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                
+                <!--时间搜索-->
+                <div class="form-group control-group time-picker start">
+                    <label class="control-label">{{"aws.bill.startTime"|translate}}：</label>
+                    <div class="input-group controls date form_date col-md-5">
+                        <input readonly class="form-control fromTime" name="startTime" type="text" size="16" ng-model="filterData.from" placeholder={{"aws.bill.startTime"|translate}} ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])$/" get-bill-time="tableCnsForm"
+                            autocomplete="off" gt-time>
+                        <span class="input-group-addon calendar-cont">
+                          <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                        </span>
+                        <div class="error" ng-messages="tableFilterForm.startTime.$error">
+                            <div ng-message="pattern">{{"aws.bill.error.pattern"|translate}}</div>
+                            <div ng-message="gtTime">{{"aws.bill.error.gtCurrTime"|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group control-group time-picker end">
+                    <label class="control-label">{{"aws.bill.endTime"|translate}}：</label>
+                    <div class="input-group controls date form_date col-md-5">
+                        <input class="form-control endTime" name="endTime" readonly type="text" size="16" ng-model="filterData.to" placeholder={{"aws.bill.endTime"|translate}} ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])$/" get-bill-time="tableCnsForm"
+                            autocomplete="off" gt-time>
+                        <span class="input-group-addon calendar-cont">
+                                <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                        </span>
+                        <div class="error" ng-messages="tableFilterForm.endTime.$error">
+                            <div ng-message="pattern">{{"aws.bill.error.pattern"|translate}}</div>
+                            <div ng-message="gtTime">{{"aws.bill.error.gtCurrTime"|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+             
+               
+                <!--处理状态-->
+               
+                <div class="control-group">
+                    <label class="control-label">处理状态：</label>
+                    <div class="controls">
+                        <ui-select ng-model="tableCnsForm.disposeStatus"  name="disposeStatus" title="选择处理状态">
+                            <ui-select-match placeholder="选择处理状态">
+                                {{$select.selected.status}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="disposeStatus in  filterInfo.disposeStatuses | filter:{status:$select.search}">
+                                <div ng-bind-html="disposeStatus.status | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+               
+                <div class="form-group control-group setting-group">
+                    
+                        <div class="pull-right">
+                            <span class="pull-left">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                            <button type="button" class="btn btn-info" ng-click="tableQueryFun(tableFilterForm)" ng-disabled="tableFilterForm.$invalid"><i class="icon-aw-search"></i>{{"aws.bill.search"|translate}}</button>
+                            <!--<a href={{downloadExcelHref}} class="btn btn-default"><i class="icon-aw-download"></i>下载</a>-->
+                            <!--charset需要设置成“utf-8”，add-bom需要设置成“true”-->
+                            <!--csv-header第一个字段绝对不能是“ID”，可以是id, Id, iD等-->
+                            <button type="button" class="btn btn-default " ng-csv="downloadAllData()"
+                                        charset="utf-8" add-bom="true"
+                                        csv-header="[ '申请用户', '工单名称', '工单类型', '开始时间', '结束时间', '处理状态']"
+                                        filename="工单报表.csv">
+                                        <i class="icon-aw-dc"></i>
+                                    导出
+                                    
+                             </button>
+                             <into-information modular="'ticketReports'"></into-information>
+                            <div type="button" class="btn btn-renovat right-ports" ng-click="refresh()">
+                              <i class="icon-aw-refresh"></i>
+                            </div>
+                          </div>
+                        </div>
+                </div>
+               
+            </div>
+        </form>
+        <div class="table-content">
+            <empty-tip empty-type="loadData"></empty-tip>
+            <table ng-table="tableParams" class="table">
+                <tr ng-repeat="item in $data | searchFilter:{name:SearchTerm,description:SearchTerm,version:SearchTerm}" >
+                    <td data-title="'部门'"  sortable="'domainUid'" ng-if="titleData[0].value">
+                        {{item.domainName}}
+                    </td>
+                     <td data-title="'申请用户'"  sortable="'userName'" >
+                        {{item.userName}}
+                    </td>
+                     <td data-title="'工单名称'"  sortable="'serverName'" >
+                        {{item.serverName}}
+                    </td>
+                     <td data-title="'工单类型'"  sortable="'type'" >
+                        {{"aws.ticket.applyTypes."+item.type|translate}}
+                    </td>
+                     <td data-title="'开始时间'"  sortable="'startTime'" >
+                        {{item.startTime}}
+                    </td>
+                     <td data-title="'结束时间'"  sortable="'endTime'">
+                        {{item.endTime}}
+                    </td>
+                     <td data-title="'处理状态'"  sortable="'status_info'" >
+                         <span class="status-text" ng-class="{'bg-green':(item.status=='0' ||item.status=='1' || item.status=='5' ),
+                            'bg-red':(item.status=='3' || item.status=='2'), 'bg-blue':(item.status=='6') }">
+                             {{item.status_info}}
+                         </span>  
+                    </td>
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</div>

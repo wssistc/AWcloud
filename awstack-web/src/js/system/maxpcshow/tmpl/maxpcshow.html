@@ -1,0 +1,64 @@
+<div class = "page-inner">
+    <div class="alert alert-gray-font multi-mes alert-no-close">
+        <div class="alert-content">
+            <div class="alert-text">
+                    用户自定义设置屏幕分辨率、展示内容及布局，云管系统将当前环境的健康状态通过可视化的组件展示，并生成URL地址供用户在大屏设备上访问。
+            </div>
+        </div>
+    </div>
+	<div class="table-action">
+        <div class="btn-box">
+            <button type="button" class="btn btn-info" ng-disabled="disabled_btn" ng-click="new()">新建</button>
+            <button type="button" ng-class="{'btn-default disabled':isDisabled,'btn-primary':!isDisabled}" class="btn"
+            uib-popover="{{isDisabled?('请选择'):''}}"
+            popover-enable="isDisabled" popover-trigger="mouseenter" popover-placement = "bottom" 
+            ng-click="editFunc(editData)" >编辑</button>
+
+            <button type="button" ng-class="{'btn-default disabled':btns.disabled_btn,'btn-primary':!btns.disabled_btn}" class="btn"
+            uib-popover="{{isDisabled?('请选择'):'请选择禁用状态的数据'}}"
+            popover-enable="btns.disabled_btn" popover-trigger="mouseenter" popover-placement = "bottom" 
+            ng-click="enabledFunc(editData)" >启用</button>
+
+            <button type="button" ng-class="{'btn-default disabled':btns.enabled_btn,'btn-warning':!btns.enabled_btn}" class="btn"
+            uib-popover="{{isDisabled?('请选择'):'请选择启用状态的数据'}}"
+            popover-enable="btns.enabled_btn" popover-trigger="mouseenter" popover-placement = "bottom" 
+            ng-click="disabledFunc(editData)" >禁用</button>
+
+            <button type="button" ng-class="{'btn-default disabled':delisDisabled,'btn-warning':!delisDisabled}" class="btn"
+            uib-popover="{{delisDisabled?('请选择'):''}}"
+            popover-enable="delisDisabled" popover-trigger="mouseenter" popover-placement = "bottom" 
+            ng-click="delFunc(editData)" >删除</button>
+        </div>
+        <div class="pull-right">
+            <search-refresh  class="rs" refresh-fuc="refreshTable" context= "context" table-data = "cephViewtabledata" table-content="'cephViewTable'" status-list="table.searchList" btn-type="checkbox"></search-refresh>  
+            <setting-col  title-data="tableCols" site-title="titleName" table-data="cephViewtabledata" config-search="configSearch" ></setting-col>
+        </div>
+    </div>
+	<div class="table-content">
+        <table ng-table-dynamic="msTable with tableCols" class="table" show-filter="false">
+            <tr ng-repeat="obj in $data track by $index ">
+                <td ng-repeat="item in $columns" ng-switch="item.field" >
+                    <label class="checkbox" ng-switch-when="check">
+                        <input name="osd" type="checkbox" value={{obj.id}} ng-model="checkboxesmsTable.items[obj.id]" >
+                        <i class="iconfont"></i>
+                    </label>
+                    <span ng-switch-when="isEnabledCopy">
+                        <span ng-class="{'bg-green':obj.isEnabled,'bg-orange':!obj.isEnabled}">{{obj[item.field]}}</span>
+                    </span>
+                    <span ng-switch-default>{{obj[item.field]}}</span>
+                </td>
+            </tr>
+        </table>
+	</div>
+	
+</div>
+<script type="text/ng-template" id="headerCheckboxmsTable.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-model="checkboxesmsTable.checked" class="select-all-msTable" value="" />
+		<i class="iconfont"></i>
+	</label>
+</script>
+
+
+
+

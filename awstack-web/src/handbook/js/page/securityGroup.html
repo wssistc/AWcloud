@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>安全组</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <p>
+	安全组是一个逻辑上的分组，可以实现相互信任的云主机之间的通信。可以将同一地域内具有相同网络安全隔离需求的云主机加到同一个安全组内，从而这些云主机使用相同的安全策略。</p>
+<p>
+	安全组作用范围是在云主机上，更具体来说是作用在云主机的端口而不是网络上。安全组和防火墙的区别：</p>
+<ul>
+	<li>
+		防火墙：路由级别做隔离</li>
+	<li>
+		安全组：云主机级别做隔离</li>
+</ul>
+<p>
+	可以通过安全组策略对云主机的出入流量进行安全过滤，封闭以及开启特定的端口，以保证云主机的安全访问。默认的，只有22端口（使用ssh）和3389（使用rdp）的端口是开放的，其他端口默认都是关闭的。</p>
+<h3>
+	新建安全组</h3>
+<ol>
+	<li>
+		在安全组列表页，单击页面右上方的&ldquo;新建&rdquo;按钮。</li>
+	<li>
+		输入安全组名称、描述，单击&ldquo;下一步&rdquo;。</li>
+	<li>
+		新建安全组规则。</li>
+</ol>
+<p>
+	&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 安全组规则的参数设置介绍如下：</p>
+<ul>
+	<li>
+		TCP、UDP规则：过滤基于TCP、UDP规则的端口号。<br />
+		方向：入口和出口。<br />
+		端口：可指定端口和端口范围。如果指定端口，则需要在下面填入端口号（范围1～65535）；如果指定端口范围，则填入起始端口和结束端口。<br />
+		方式：CIDR，指定网络网段。安全组，指定某一安全组。如：允许从网段10.5.0.0/24，端口范围34-56的TCP访问。</li>
+	<li>
+		ICMP规则：过滤ICMP规则。<br />
+		方向：入口和出口。<br />
+		类型和编码：ICMP报文中的类型字段，和编码一起使用。如类型字段8，编码字段0，代表ping请求回显；类型字段0，编码字段0，代表ping请求应答。不指定则填-1。<br />
+		方式：CIDR，指定网络网段。安全组，指定某一安全组。如：允许0.0.0.0/0（所有）的ICMP访问。</li>
+	<li>
+		ALL ICMP规则：过滤所有的ICMP规则。<br />
+		方向：入口和出口。<br />
+		方式：CIDR，指定网络网段；安全组，指定某一安全组。具体含义同上。</li>
+</ul>
+<p>
+	&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4. 单击&ldquo;完成&rdquo;按钮。操作成功后，可以在安全组列表区查看。</p>
+<h3>
+	删除安全组</h3>
+<p>
+	<strong>注意</strong>：<br />
+	当安全组内有一个或多个云主机，需要将这些云主机与其他安全组关联，与该安全组解除关联。该安全组才能被删除。</p>
+<p>
+	删除安全组，安全组规则也将删除。</p>
+<ol>
+	<li>
+		在安全组列表页，勾选待删除的安全组，单击&ldquo;删除&rdquo;按钮。</li>
+	<li>
+		在弹出的确认对话框单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+<h3>
+	检查安全组规则是否生效</h3>
+<p>
+	通过以下方法，检测前面添加的安全组规则是否生效。</p>
+<ol>
+	<li>
+		前面云主机加载的安全组firewall_test中，有一条默认规则是允许云主机访问外部网络。那么执行<strong>ping</strong>命令，可以ping通外部网络。</li>
+	<li>
+		从另外一台云主机中，启动控制台，访问刚才新建的云主机，发现无法访问，是由于安全组中没有这条规则，外部目标无法访问。</li>
+	<li>
+		添加外部网络可以访问的规则。在云管平台的Web控制台上，单击左侧导航栏的&ldquo;虚拟资源管理&rdquo;，然后在页面右侧的项目列表区点击项目进入项目的概况页面。然后单击&ldquo;安全&rdquo;页签并选择&ldquo;安全组&rdquo;。单击安全组名称&ldquo;firewall_test&rdquo;。添加规则。</li>
+	<li>
+		添加规则之后，可以看到firewall_test中多了一条规则，允许从目标default的ICMP访问。</li>
+	<li>
+		再从另外一台主机来访问，发现可以ping通这台主机了。</li>
+</ol>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

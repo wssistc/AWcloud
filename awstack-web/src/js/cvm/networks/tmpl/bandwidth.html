@@ -1,0 +1,77 @@
+<div class="page-inner">
+  <h3 class="page-title">{{"aws.bandwidths.bandwidth"|translate}}</h3>
+  <div class="table-action">
+    <button type="button" data-toggle="modal" ng-click="openEditBandwidthModel(editData)" ng-disabled="isDisabled" class="btn btn-info"><i class="icon-aw-modify"></i>{{"aws.action.edit"|translate}}</button>
+    <button class="btn btn-refresh" ng-click="refreshBandwidth()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+      </form>
+    </div>
+  </div>
+  <script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+      <i class="iconfont"></i>
+    </label>
+  </script>
+  <div class="table-content">
+    <empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="tableParams" class="table" show-filter="false">
+      <tr ng-repeat="bandwidth in $data">
+        <td header="'headerCheckbox.html'">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[bandwidth.portId]" />
+            <i class="iconfont"></i>
+          </label>
+        </td>
+        <td data-title="headers.portId" sortable="'portId'">
+          {{bandwidth.portId}}
+        </td>
+        <!-- <td data-title="headers.projectName" sortable="tenantName">
+          <span>{{bandwidth.tenantName}}</span>
+        </td> -->
+        <td data-title="headers.ipAddr" sortable="'ip'">
+          <span ng-repeat="ip in bandwidth.ipAddr">{{ip}}</br></span>
+        </td>
+        <td data-title="headers.bandwidth+'(Mbps)'" sortable="'bandwidth'">
+          {{bandwidth.bandWidth}}
+        </td>
+        <td data-title="headers.phyNetWork" sortable="'phyNetWork'">
+          {{bandwidth.phyNetWork}}
+        </td>
+        <td data-title="headers.device" sortable="'device'">
+          {{bandwidth.device}}
+        </td>
+      </tr>
+    </table>
+  </div>
+  <script type="text/ng-template" id="editBandwidthModal.html">
+    <div class="modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{"aws.bandwidths.editBandwidth"|translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <form name="editBandwidthForm">
+          <div class="control-group">
+            <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.bandwidths.bandwidth"|translate}}(Mbps)：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="name" ng-model="bandwidthForm.bandwidth" ng-pattern="/^[0-9]*[1-9][0-9]*$/" placeholder='{{"aws.bandwidths.bandwidth"|translate}}' required>
+              <div class="error" ng-messages='editBandwidthForm.name.$error' ng-show="interacted(editBandwidthForm)">
+                <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+                <div ng-message="pattern">{{"aws.errors.integer"|translate}}</div>
+                <div ng-show="invalid_num">{{"aws.errors.limit_1000"|translate}}</div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="bandwidthConfirm()">{{"aws.action.ok"|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+      </div>
+    </div>
+  </script>
+</div>

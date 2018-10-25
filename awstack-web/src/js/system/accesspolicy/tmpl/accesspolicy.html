@@ -1,0 +1,320 @@
+<div class="page-inner">
+<div class="sec-setting-page tab-offset-right ">
+  <ul class="nav nav-tabs top-nav" ng-init="tab.index=0">
+      <li ng-class="{active: tab.index == 0}" >
+          <a ng-click="tab.index = 0">访问策略</a>
+      </li>
+      <li ng-class="{active: tab.index == 1}" >
+          <a ng-click="tab.index =1">登录失败策略</a>
+      </li>
+  </ul>
+
+  <div class="tab-content">
+    <div class="tab-pane" ng-class="{active:tab.index == 0}">
+        <div class="table-action">
+            <button type="button" data-toggle="modal" ng-click="wbListIps('new')" class="btn btn-new"><i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}</button>
+            <button type="button" data-toggle="modal" ng-click="wbListIps('edit',editData)" ng-disabled="isDisabled" class="btn btn-normal"><i class="icon-aw-modify"></i>{{"aws.action.edit"|translate}}</button>
+            <button type="button" data-toggle="modal" ng-click="delWbListIps(checkedItems)" ng-disabled="delisDisabled" class="btn btn-normal"> <i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+            <div class="pull-right">
+              <into-information modular="'accesspolicy'"></into-information>
+              <setting title-data="titleData" site-title="titleName" table-data="accessPolicyTableData" search-tearm="accessPolicySearchTearm(obj)"></setting>
+              <button class="btn btn-renovat right-ports" ng-click="refreshWbListIps()"><i class="icon-aw-refresh"></i></button>
+              <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch('tableParams','item')" >
+                  <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                  <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm.item" placeholder="{{'aws.instances.search'|translate}}" />
+                </form>
+              </div>
+            </div>
+        </div>
+        <div class="table-content">
+          <empty-tip empty-type="loadData"></empty-tip>
+          <table ng-table="tableParams" class="table">
+            <colgroup>
+              <col width="5%">
+              <col width="15%">
+              <col width="10%">
+              <col width="20%">
+              <col width="10%">
+              <col width="15%">
+              <col width="25%">
+            </colgroup>
+            <tr ng-repeat="item in $data">
+              <td header="'headerCheckbox.html'">
+                <label class="checkbox">
+                  <input type="checkbox" ng-model="checkboxes.items[item.id]" />
+                  <i class="iconfont"></i>
+                </label>
+              </td>
+              <td data-title="'aws.system.accesspolicy.name'|translate" sortable="'listName'" ng-if="titleData[0].value">
+                <div class="edit-name">
+                  <span title="{{item.listName}}">{{item.listName}}</span>
+                </div>
+              </td>
+              <td data-title="'aws.system.accesspolicy.type'|translate" sortable="'_wbType'" ng-if="titleData[1].value">{{item._wbType}}</td>
+              <td data-title="'aws.system.accesspolicy.ipAddr'|translate" sortable="'bgnIp'" ng-if="titleData[2].value">
+                  <span ng-repeat="bgnip in item._bgnIp track by $index">{{bgnip}}<span ng-if="item.endIp ==''"><br/></span></span>
+                  <i ng-if="item.endIp!=''"> ~ </i>
+                  {{item.endIp}}
+              </td>
+              <!-- <td data-title="'aws.system.accesspolicy.endIP'|translate" sortable="'endIp'">{{item.endIp}}</td> -->
+              <td data-title="'aws.system.accesspolicy.enabled'|translate" sortable="'enabled'" ng-if="titleData[3].value">{{'aws.system.accesspolicy.'+item.enabled|translate }}</td>
+              <td data-title="'aws.system.accesspolicy.createTime'|translate" sortable="'createTimes'" ng-if="titleData[4].value"><span class="date">{{item.createTimes}}</span></td>
+              <td data-title="'aws.system.accesspolicy.description'|translate" sortable="'description'" ng-if="titleData[5].value">
+                <span class="des" title="{{item.description}}">{{item.description}}</span>
+              </td>
+            </tr>
+          </table>
+        </div>
+    </div>
+    <div class="tab-pane"  ng-class="{active:tab.index == 1}" ng-controller="loginLockPolicyCtrl" >
+        <div class="setting-box" ng-show="loginLockPolicySwitchPage">
+          <div class="title">登录失败锁定策略</div>
+          <div class="set-wrap">
+              <div class="control-group">
+                  <label class="control-label"><span class="red"> * </span> 登录失败锁定策略：</label>
+                  <div class="controls">
+                      <div class="checkbox switch-btn">
+                          <label>
+                              <input type="checkbox" class="form-controls" ng-model="loginLockActive">
+                              <i class="iconfont"></i>
+                          </label>
+                      </div>
+                  </div>
+              </div>
+              <div class="desc">
+                  密码验证介绍
+                  <p>用户连续输入错误登录信息超过规定次数后，该用户将被锁定。</p>
+              </div>
+          </div>
+          <div class="btn-wrap text-center">
+              <button class="btn btn-primary" ng-click="loginLockPolicySwitch(loginLockActive)">保存</button>
+          </div>
+        </div>
+        <div ng-if="!loginLockPolicySwitchPage">
+          <div class="control-group top">
+            <label class="control-label">锁定策略：</label>
+            <div class="controls">
+                <div class="checkbox switch-btn">
+                    <label>
+                        <input type="checkbox" class="form-controls" ng-model="loginLockActive" ng-change="loginLockPolicySwitch(loginLockActive)">
+                        <i class="iconfont"></i>
+                    </label>
+                </div>
+            </div>
+          </div>
+          <div class="table-action">
+            <div class="alert-tip">登录失败锁定策略：当用户连续<span class="orange"> {{login_error_times}}次 </span>登录失败后，将禁止用户<span class="orange"> {{login_locked_expired}}分钟 </span>不能尝试登录平台</div>
+            <button type="button" data-toggle="modal"  class="btn btn-normal" ng-click="setLockPolicy()">设置</button>
+            <button type="button" data-toggle="modal"  class="btn btn-normal" ng-disabled="delisDisabled" ng-click="delLockPolicy(checkedItems)">删除</button>
+            <div class="pull-right">
+              <button class="btn btn-renovat right-ports" ng-click="refreshLockPolicyTable()"><i class="icon-aw-refresh"></i></button>
+              <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch('lockPolicyTable','policyitem')">
+                  <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                  <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm.policyitem" placeholder="{{'aws.instances.search'|translate}}" />
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="table-content">
+            <empty-tip empty-type="loadLockPolicyTableData" tip-id="'lockPolicy-tip-msg'"></empty-tip>
+            <table class="table" ng-table="lockPolicyTable">
+              <tr ng-repeat="item in $data track by $index">
+                <td header="'headerCheckbox.html'">
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="checkboxes.items[item.userUid]" />
+                        <i class="iconfont"></i>
+                    </label>
+                </td>
+                <td data-title="'用户名'" sortable="'name'">{{item.name}}</td>
+                <td data-title="'解锁时间'" sortable="'lockedTime'">{{item.lockedTime}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+    </div>
+  </div>
+  
+  <script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+      <i class="iconfont"></i>
+    </label>
+  </script>
+  <script type="text/ng-template" id="wbListIps.html">
+    <div class="modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{wbListIpsTitle}}</h3>
+      </div>
+      <div class="modal-body">
+        <form name="accessPolicyForm" novalidate>
+          <div class="control-group radio-wrap">
+              <label class="control-label">{{"aws.system.accesspolicy.type"|translate}}：</label>
+              <div class="controls">
+                  <div class="radio-item clearFix">
+                    <label class="radio"><input type="radio" ng-model="wbListIpsForm.wbType" name="whiteList"  value="1" /><i class="iconfont"></i>{{"aws.system.accesspolicy.whiteList"|translate}}</label>
+                    <label class="radio"><input type="radio" ng-model="wbListIpsForm.wbType" name="blackList" value="0" /><i class="iconfont"></i>{{"aws.system.accesspolicy.blackList"|translate}}</label>
+                  </div>
+              </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label"><span class="red">*</span>{{"aws.system.accesspolicy.name"|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="name" ng-model="wbListIpsForm.listName" placeholder={{policynameHolder}} ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required />
+              <div class="error" ng-messages='accessPolicyForm.name.$error' ng-if="interacted(accessPolicyForm.name)">
+                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+                <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+              </div>
+            </div>
+          </div>
+          <div class="control-group radio-wrap">
+              <label class="control-label">{{'aws.system.accesspolicy.ipInputType'|translate}}：</label>
+              <div class="controls">
+                  <div class="radio-item clearFix">
+                    <label class="radio"><input type="radio" ng-model="wbListIpsForm.ipType" ng-disabled="editWBlistIp && wbListIpsForm.ipType==2" name="more" value="1" /><i class="iconfont"></i>{{'aws.system.accesspolicy.ipAddr'|translate}}</label>
+                    <label class="radio"><input type="radio" ng-model="wbListIpsForm.ipType" ng-disabled="editWBlistIp && wbListIpsForm.ipType==1" name="range" value="2" /><i class="iconfont"></i>{{'aws.system.accesspolicy.range'|translate}}</label>
+                  </div>
+              </div>
+          </div>
+            <div class="control-group" ng-if="!ipRange">
+                <label class="control-label"><span class="red">*</span>{{'aws.system.accesspolicy.ipAddr'|translate}}：</label>
+                <div class="controls">
+                    <input type="text" class="form-controls" name="start_ip" id="startIp" ng-model="wbListIpsForm.bgnIp"  ng-focus="focusSet();" placeholder="{{'aws.system.accesspolicy.ipAddrPlaceholder'|translate}}" ipaddrpattern ipadd="'access'" required />
+                    <div class="error" ng-messages="accessPolicyForm.start_ip.$error" ng-if="interacted(accessPolicyForm.start_ip)" >
+                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                    <div ng-message="ipaddrpattern">{{'aws.errors.ipAddrPatternError1_254'|translate}}<span ng-if="moreIpError">,{{'aws.system.accesspolicy.moreIpTip'|translate}}</span></div>
+                    </div>
+                </div>
+            </div>
+          <div ng-if="ipRange">
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>{{"aws.system.accesspolicy.startIP"|translate}}：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="start_ip" id="startIp" ng-model="wbListIpsForm.bgnIp" placeholder={{"aws.system.accesspolicy.inputStartIp"|translate}} ipaddrpattern="'one'" ipadd="'access'" required />
+                <div class="error" ng-messages="accessPolicyForm.start_ip.$error" ng-if="interacted(accessPolicyForm.start_ip)" >
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="ipaddrpattern">{{'aws.errors.ipAddrPatternError1_254'|translate}}</div>
+                  
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>{{"aws.system.accesspolicy.endIP"|translate}}：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="end_ip" id ="endIp" ng-model="wbListIpsForm.endIp" placeholder={{"aws.system.accesspolicy.inputEndIp"|translate}} required ipaddrpattern="'one'" ipadd="'access'" gtip="startIp" />
+                <div class="error" ng-messages="accessPolicyForm.end_ip.$error" ng-if="interacted(accessPolicyForm.end_ip)" >
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="ipaddrpattern">{{'aws.errors.ipAddrPatternError1_254'|translate}}</div>
+                  <div ng-message="gtip">{{'aws.errors.gtIpError'|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="control-group radio-wrap">
+              <label class="control-label">{{"aws.system.accesspolicy.enabled"|translate}}：</label>
+              <div class="controls">
+                <label class="checkbox">
+                  <input type="checkbox" class="form-controls chk" name="enabled" ng-model="wbListIpsForm.enabled" />
+                  <i class="iconfont"></i>
+                </label>
+              </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{"aws.system.accesspolicy.description"|translate}}：</label>
+            <div class="controls">
+              <textarea type="text" class="form-controls" name="description" ng-model="wbListIpsForm.description" ng-maxlength="80"></textarea>
+              <div class="error" ng-messages="accessPolicyForm.description.$error" ng-if="interacted(accessPolicyForm.description)">
+                <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+              </div>
+            </div>
+          </div>
+          <div class="red text-center" ng-if="ipRepeat">
+            {{"aws.system.accesspolicy.ipRepeat"|translate}}
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="wbListIpsConfirm(wbListIpsForm,accessPolicyForm)">{{"aws.action.ok"|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+      </div>
+    </div>
+  </script>
+  <script type="text/ng-template" id="lockPolicySettingModal.html">
+    <div class="modal-common lock-set-modal modal-smallest
+">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">登录失败锁定策略设置</h3>
+      </div>
+      <div class="modal-body">
+        <form name="lockPolicySettingForm" novalidate>
+          <div class="control-group">
+              <label class="control-label">连续登录失败次数：</label>
+              <div class="controls">
+                  <ui-select name="tryNum" ng-model="policySettingForm.tryNum" required ng-if="policySettingForm.tryNum !='defined' " >
+                    <ui-select-match placeholder='请选择连续登录失败次数'>{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="item.value as item in tryNumList">
+                        <div ng-bind-html="item.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                  
+                  <div ng-if="policySettingForm.tryNum =='defined' " >
+                    <input type="text" class="form-controls" name="tryNum" ng-model="policySettingForm.definedTryNum" placeholder="请输入连续登录失败次数"  required limitnumrange min="1" max="99"  ng-maxlength="2" />
+                    <button type="button" class="del" ng-click="delDefinedInput('tryNum')">×</button>
+                  </div>
+                  
+                  <div class="error" ng-messages='lockPolicySettingForm.tryNum.$error' ng-if="interacted(lockPolicySettingForm.tryNum)">
+                      <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                      <div ng-message="limitnumrange">请输入1~99的整数</div>
+                  </div>
+              </div>
+          </div>
+          <div class="control-group">
+              <label class="control-label sub">锁定用户登录时间：</label>
+              <div class="controls">
+                  <ui-select name="lockedTime" ng-model="policySettingForm.lockedTime" required ng-if="policySettingForm.lockedTime !='defined'">
+                      <ui-select-match placeholder="请选择锁定用户登录时间：">{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="item.value as item in lockedTimeList">
+                          <div ng-bind-html="item.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                  </ui-select>
+                  <div ng-if="policySettingForm.lockedTime =='defined' ">
+                    <input type="text" class="form-controls" name="lockedTime" ng-model="policySettingForm.definedLockedTime" placeholder="请输入锁定用户登录时间"  required  limitnumrange min="1" max="9999" ng-maxlength="4"/>
+                    <button type="button" class="del" ng-click="delDefinedInput('lockedTime')">×</button>
+                    
+                  </div>
+                  <div class="error" ng-messages='lockPolicySettingForm.lockedTime.$error' ng-if="interacted(lockPolicySettingForm.lockedTime)">
+                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                    <div ng-message="limitnumrange">请输入1~9999的整数</div>
+                  </div>
+              </div><span>（分钟）</span>
+          </div>
+          <div class="alert-tip">
+            <div class="left">登录失败锁定策略：</div>
+            <div class="right">
+                <div>当用户连续
+                   <span class="orange" ng-if="policySettingForm.tryNum !='defined'" > {{policySettingForm.tryNum}}次</span>
+                   <span class="orange" ng-if="policySettingForm.tryNum =='defined'" > {{policySettingForm.definedTryNum?policySettingForm.definedTryNum:login_error_times}}次</span>
+                   登录失败后，
+                </div>
+                <div>将禁止用户
+                   <span class="orange" ng-if="policySettingForm.lockedTime !='defined'" > {{policySettingForm.lockedTime}} 分钟</span>
+                   <span class="orange" ng-if="policySettingForm.lockedTime =='defined'" > {{policySettingForm.definedLockedTime?policySettingForm.definedLockedTime:login_locked_expired}} 分钟</span>
+                   不能尝试登录平台
+                </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="lockPolicySettingCfm(lockPolicySettingForm)">{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+      </div>
+    </div>
+  </script>
+</div>
+</div>

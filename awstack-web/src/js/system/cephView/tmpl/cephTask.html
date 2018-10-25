@@ -1,0 +1,76 @@
+<div class=" modal-common modal-middle">
+    <div class="modal-header">
+          <button type="button" class="close" ng-click="$close()">×</button>
+          <h3 class="modal-title">{{'aws.cephView.cephTask' | translate}}</h3>
+    </div>
+    <div class="modal-body">
+            <div class="table-action">
+                <button type="button" ng-class="{'btn-default disabled':del_btn,'btn-warning':!del_btn}" class="btn"
+                uib-popover="{{isDisabled?('aws.cephView.tips.tip4' | translate):('aws.cephView.tips.tip5' | translate)}}"
+                popover-enable="del_btn" popover-trigger="mouseenter" popover-placement = "bottom" 
+                ng-click="delTask(checkedItemscephTaskTable)" ><i class="icon-aw-delete"></i>{{'aws.action.del' | translate}}</button>
+                <div class="pull-right">
+                    <div class="search-list">
+                        <ui-select ng-model="table.searchItem"  ng-change="tableGlobalSearch()">
+                            <ui-select-match placeholder="{{'aws.action.pleaseSelect' | translate}}">
+                                {{$select.selected.name}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="search in table.searchList | propsFilter:{name:$select.search}">
+                                <div ng-bind-html="search.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                    <button class="btn btn-renovat right-ports" ng-click="getCephTasks()"><i class="icon-aw-refresh"></i></button>
+                    <!-- <search-refresh  class="rs" refresh-fuc="refreshTable" context= "context" table-content="'cephViewTable'" btn-type="checkbox"></search-refresh>   -->
+                </div>
+            </div>
+            <div class="table-content">
+                <table ng-table-dynamic="cephTaskTable with tableCols" class="table" show-filter="false">
+                    <tr ng-repeat="task in $data track by $index ">
+                        <td ng-repeat="item in $columns" ng-switch="item.field" >
+                            <label class="checkbox" ng-switch-when="check">
+                                <input name="osd" type="checkbox" value={{task.id}} ng-model="checkboxescephTaskTable.items[task.id]" >
+                                <i class="iconfont"></i>
+                            </label>
+                            <span ng-switch-when="jobStatusCopy" ng-class="{
+                                'bg-blue':(task.jobStatus=='EXECUTING'),
+                                'bg-green':(task.jobStatus=='FINISHED'),
+                                'bg-red':(task.jobStatus=='FAILED' || task.jobStatus=='ABNORMAL'),
+                                'bg-grey':(task.jobStatus=='NORMAL' || task.jobStatus=='PAUSED')
+                                }">{{task[item.field]}}
+                            </span>
+                            <span ng-switch-default>{{task[item.field]}}</span>
+                        </td>
+                    </tr>
+                </table>
+                <loading-data data="cephTaskTable.data"></loading-data>
+            </div>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="$dismiss()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+    </div>
+  </div>
+<script type="text/ng-template" id="headerCheckboxCephTaskTable.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-model="checkboxescephTaskTable.checked" class="select-all-cephTaskTable" value="" />
+		<i class="iconfont"></i>
+	</label>
+</script>
+
+<script type="text/ng-template" id="os-delete.html">
+    <div class=" modal-common modal-del">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$close()">×</button>
+        </div>
+        <div class="modal-body ">
+            <div class="box">
+            <span class = "del"> {{"aws.instances.tipMsg.delSever" | translate}} </span>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info del-btn" type="button" ng-disabled="doubleClick" ng-click="confirmDel()">{{'aws.action.ok'|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+    </div>
+  </script>

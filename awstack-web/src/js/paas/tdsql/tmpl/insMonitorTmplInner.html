@@ -1,0 +1,26 @@
+<div class="insMonitor-container">
+	<div class="time-box"></div>
+	<div class="monitor-box">
+		<div class="monitor-items">
+			<ul class="menu-level-one">
+				<li ng-repeat="monitor in monitorList" ng-class="{'levelOneActive':monitor.open}">
+					<span ng-click="selectMonitorType(monitor)">
+						<i class="icon-arrrow"></i>
+					    {{monitor.name}}{{monitor.open}}
+					</span>
+					<ul class="menu-level-two" ng-if="monitor.child.length>0&&monitor.open">
+						<li ng-repeat="childMonitor in monitor.child" ng-class="{'selectedMonitor':
+
+
+
+
+						}">
+							<span ng-click="selectMonitorItem(childMonitor)">{{childMonitor.name}}</span>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+		<div class="monitor-chart">图标</div>
+	</div>	
+</div>

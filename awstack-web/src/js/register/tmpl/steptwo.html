@@ -1,0 +1,670 @@
+<div id="main">
+  <div class="container">
+    <div class="internet-box">
+      <form class="form-horizontal" name="ipForm" novalidate>
+        <fieldset ng-if="twoModule.enable_sdn">
+          <div class="title">
+            <div class="col-1 font-h title-h">
+              <strong>租户网络隔离方式:</strong>
+            </div>
+            <div class="col-1 font-h">
+              <div class="checkbox">
+                <label>
+                  <input type="radio" name="neutron_type" value="vlan" ng-model="twoModule.neutron_type" ng-click="twoModule.setVlan(twoModule.neutron_type)"/><i class="icon-aw-square"></i><span>{{'aws.register.info.vlan'|translate}}</span></label>
+              </div>
+            </div>
+            <div class="col-1 font-h">
+              <div class="checkbox">
+                <label>
+                  <input type="radio" name="neutron_type" value="vxlan" ng-model="twoModule.neutron_type"  ng-click="twoModule.setVlan(twoModule.neutron_type)"/><i class="icon-aw-square"></i><span>VXLAN</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-10"  ng-if="twoModule.neutron_type=='vxlan'">
+              <div class="form-group">
+                <label class="control-label">起始VNI</label>
+                <div class="control-item">
+                  <input type="text" placeholder="" name="tenantStart" class="form-control" vlan vxlanlimitstart ng-model="twoModule.tenantStart" />
+                  <div ng-if="ipForm.tenantStart.$invalid && ipForm.tenantStart.$dirty">
+                    <span class="help-block" ng-if="ipForm.tenantStart.$error.vxlanlimitstart&&!valnstartFlag">请输入1-16777215范围内的正整数</span>
+                    <span class="help-block" ng-if="ipForm.tenantStart.$error.vlan&&valnstartFlag">起始VNI必须小于结束VNI</span>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label">结束VNI</label>
+                <div class="control-item">
+                  <input type="text" placeholder="" name="tenantEnd" vlan vxlanlimitend class="form-control" ng-model="twoModule.tenantEnd" />
+                  <div ng-if="ipForm.tenantEnd.$invalid && ipForm.tenantEnd.$dirty">
+                    <span class="help-block" ng-if="ipForm.tenantEnd.$error.vxlanlimitend&&!valnendFlag">请输入1-16777215范围内的正整数</span>
+                    <span class="help-block" ng-if="ipForm.tenantEnd.$error.vlan&&valnendFlag">结束VNI必须大于起始VNI</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-10"  ng-if="twoModule.neutron_type=='vlan'">
+              <div class="form-group">
+                <label class="control-label">{{'aws.register.info.vlanstart'|translate}}</label>
+                <div class="control-item">
+                  <input type="text" placeholder="" name="tenantStart" class="form-control" vlan vlanlimitstart ng-model="twoModule.tenantStart" />
+                  <div ng-if="ipForm.tenantStart.$invalid && ipForm.tenantStart.$dirty">
+                    <span class="help-block" ng-if="ipForm.tenantStart.$error.vlanlimitstart&&!valnstartFlag">{{'aws.register.info.inputint'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.tenantStart.$error.vlan&&valnstartFlag">起始VLAN必须小于结束VLAN</span>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label">{{'aws.register.info.vlanend'|translate}}</label>
+                <div class="control-item">
+                  <input type="text" placeholder="" name="tenantEnd" vlan vlanlimitend class="form-control" ng-model="twoModule.tenantEnd" />
+                  <div ng-if="ipForm.tenantEnd.$invalid && ipForm.tenantEnd.$dirty">
+                    <span class="help-block" ng-if="ipForm.tenantEnd.$error.vlanlimitend&&!valnendFlag">{{'aws.register.info.inputint'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.tenantEnd.$error.vlan&&valnendFlag">结束VLAN必须大于起始VLAN</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="clear"></div>
+            <span class="help-block"  ng-if="twoModule.tenantRangeError.rangeTotal">{{'aws.register.info.rangeTotal'|translate}}</span>
+            <span class="help-block"  ng-if="twoModule.tenantRangeError.rangeSame">{{'aws.register.info.rangeSame'|translate}}</span>
+          </div>
+        </fieldset>
+        <fieldset ng-if="twoModule.enable_sdn">
+          <div class="title">
+            <div class="col-1 font-h title-h">
+              <!-- <a class="icon-tip" data-toggle="tooltip" data-placement="bottom" title=""><i class="icon-aw-question-mark"></i></a> -->
+              <strong>{{'aws.register.info.floating'|translate}}:</strong>
+            </div>
+            <div class="col-1 font-h">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="publicRangeCheck" ng-change="twoModule.rangeOff('publicRangeError')" ng-model="twoModule.floatingRangeCheck" ng-disabled="twoModule.floatingRangeCheck"/><i class="icon-aw-square"></i><span>{{'aws.register.info.iprange'|translate}}</span></label>
+              </div>
+            </div>
+            <div class="col-1 font-h">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="publicCheck" ng-change="changeCheck('public',twoModule.publicCheck)" ng-model="twoModule.publicCheck" /><i class="icon-aw-square"></i><span>VLAN</span></label>
+              </div>
+            </div>
+            <div  class="form-group title-group"  ng-if="twoModule.publicCheck">
+              <label class="control-label">
+                {{'aws.register.info.vlan'|translate}}
+              </label>
+              <div class="control-item">
+                <input type="text" placeholder="" class="form-control" vlanlimitstart name="publicvlan" ng-model="twoModule.publicVlan" required/>
+                <div ng-if="ipForm.publicvlan.$invalid && ipForm.publicvlan.$dirty">
+                  <span class="help-block" ng-if="ipForm.publicvlan.$error.vlanlimitstart">{{'aws.register.info.inputint'|translate}}</span>
+                  <span class="help-block" ng-if="ipForm.publicvlan.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                </div> 
+              </div>
+            </div>
+          </div>
+          <div class="row" ng-if="twoModule.floatingRangeCheck">
+            <div class="col-10">
+              <div class="add-group clearfix" ng-repeat="item in twoModule.floatingRange">
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.start'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="192.168.1.1" name="{{item.startname}}"  incidr="floatingcidr" required class="form-control" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.start" checksassip sassip="sassIP"/>
+                    <div ng-if="ipForm[item.startname].$invalid">
+                      <span class="help-block" ng-if="ipForm[item.startname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm[item.startname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm[item.startname].$error.incidr && !ipForm[item.startname].$error.required && !ipForm[item.startname].$error.pattern">IP地址不在CIDR范围之内</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.end'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" name="{{item.endname}}" placeholder="192.168.1.254" gtip incidr="floatingcidr" required class="form-control" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.end" checksassip sassip="sassIP"/>
+                    <div ng-if="ipForm[item.endname].$invalid">
+                      <span class="help-block" ng-if="ipForm[item.endname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm[item.endname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm[item.endname].$error.incidr && !ipForm[item.endname].$error.required && !ipForm[item.endname].$error.pattern">IP地址不在CIDR范围之内</span>
+                      <span class="help-block" ng-if="ipForm[item.endname].$error.gtip">结束IP地址必须比起始IP地址大</span>
+                      <span class="help-block" ng-if="ipForm[item.endname].$error.checksassip">业务网ip范围不能包含云管ip</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- <span class="add-ip" ng-if="$index==0" ng-click="twoModule.addFloating($index)">{{'aws.register.info.addRangeIp'|translate}}</span> -->
+                <span class="del-ip" ng-if="$index" ng-click="twoModule.delFloating($index)"><i class="icon-aw-1shut-down"></i></span>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-10">
+              <div class="form-group">
+                <label class="control-label">{{'aws.register.info.cidr'|translate}}</label>
+                <div class="control-item">
+                  <input type="text" placeholder="192.168.1.0/24" required id="floatingcidr" name="floatingcidr" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))[\/]([1-9]|[1-2][0-9]|[3][0]|[3][1])$/" ng-model="twoModule.floatingCidr" class="form-control" ng-focus="twoModule.hidecidrCheck()"/>
+                  <div ng-if="ipForm.floatingcidr.$invalid">
+                    <span class="help-block" ng-if="ipForm.floatingcidr.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.floatingcidr.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label">{{'aws.register.info.floatinggateway'|translate}}</label>
+                <div class="control-item">
+                  <input type="text" placeholder="192.168.1.1" gateway="floatingcidr" start="'floatingStart'" end="'floatingEnd'" name="floatinggateway" required ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" class="form-control" ng-model="twoModule.floatinggateway" />
+                  <div ng-if="ipForm.floatinggateway.$invalid">
+                    <span class="help-block" ng-if="ipForm.floatinggateway.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.floatinggateway.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.floatinggateway.$error.gateway">网关必须在起始IP与结束IP范围之外</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <div class="title" ng-if="twoModule.neutron_type=='vlan'">
+            <div class="col-1 font-h title-h">
+              <strong>集群网/存储网/租户网高可用VLAN ID:</strong>
+            </div>
+            <div class="row">
+              <div class="col-10">
+                <div class="form-group">
+                  <div class="control-item ha-item">
+                    <input type="text" placeholder="请填写高可用VLAN" class="form-control" vlanlimitstart name="havlan" ng-model="twoModule.logical" ng-change="twoModule.logicalVlan(twoModule.logical)" required/>
+                    <div ng-if="ipForm.havlan.$invalid && ipForm.havlan.$dirty">
+                      <span class="help-block" ng-if="ipForm.havlan.$error.vlanlimitstart">{{'aws.register.info.inputint'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="tips">该VLAN ID会被系统占用，不能被用户使用，请不要将该vlan id置于租户网络隔离的vlan范围内。</div>
+              </div>
+            </div>
+          </div>
+          <div class="title" ng-if="twoModule.neutron_type=='vxlan'">
+            <div class="col-1 font-h title-h">
+              <strong>集群网/存储网VLAN ID:</strong>
+            </div>
+            <div class="row">
+              <div class="col-10">
+                <div class="form-group">
+                  <div class="control-item ha-item">
+                    <input type="text" placeholder="若置空，则不会隔离逻辑网络" class="form-control" logicalvlanlimit name="logical" ng-model="twoModule.logical" ng-change="twoModule.logicalVlan(twoModule.logical)"/>
+                    <div ng-if="ipForm.logical.$invalid && ipForm.logical.$dirty">
+                      <span class="help-block" ng-if="ipForm.logical.$error.logicalvlanlimit">请输入2-4094范围内的正整数或者为空！</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </fieldset> 
+        <fieldset>
+          <div class="col-1 font-h title-h">
+            <strong ng-click="twoModule.advanceSet()" class="advance-setting">高级网络配置</strong>
+          </div>
+          <div class="col-1 font-h">
+            <strong  ng-if="twoModule.advanceSetting" class="icon-aw-angle-up"></strong>
+            <strong  ng-if="!twoModule.advanceSetting" class="icon-aw-angle-down"></strong>
+          </div>
+          <div class="row">
+            <div class="col-10">
+            </div>
+          </div>    
+        </fieldset>
+        <div ng-if="twoModule.advanceSetting">
+          <fieldset>
+            <div class="title">
+              <div class="col-1 font-h  title-h">
+                <!-- <a class="icon-tip" data-toggle="tooltip" data-placement="bottom" title=""><i class="icon-aw-question-mark"></i></a> -->
+                <strong>{{'aws.register.info.clusternetwork'|translate}}:</strong>
+              </div>
+              <div class="col-1 font-h">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="clusterRangeCheck" ng-change="twoModule.rangeOff('clusterRangeError')" ng-model="twoModule.clusterRangeCheck" /><i class="icon-aw-square"></i><span>{{'aws.register.info.iprange'|translate}}</span>
+                  </label>
+                </div>
+              </div>
+              <div class="col-1 font-h">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="clusterCheck" ng-change="changeCheck('cluster',twoModule.clusterCheck)" ng-model="twoModule.clusterCheck" /><i class="icon-aw-square"></i><span>VLAN</span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-group title-group" ng-if="twoModule.clusterCheck">
+                  <label class="control-label">
+                    {{'aws.register.info.vlan'|translate}}
+                  </label>
+                  <div class="control-item">
+                    <input type="text" class="form-control" name="clustervlan" vlanlimitstart ng-model="twoModule.clusterVlan" />
+                    <div ng-if="ipForm.clustervlan.$invalid && ipForm.clustervlan.$dirty">
+                      <span class="help-block" ng-if="ipForm.clustervlan.$error.vlanlimitstart">{{'aws.register.info.inputint'|translate}}</span>
+                    </div>
+                  </div>
+              </div>
+            </div>
+            <div class="row" ng-if="twoModule.clusterRangeCheck">
+              <div class="col-10">
+                <div class="add-group clearfix" ng-repeat="item in twoModule.clusterRange track by $index">
+                  <div class="form-group">
+                    <label class="control-label">{{'aws.register.info.start'|translate}}</label>
+                    <div class="control-item">
+                      <input type="text" placeholder="10.0.1.1" name="{{item.startname}}" required ng-focus="twoModule.rangeOff('clusterRangeError')" class="form-control" incidr="clustercidr" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.start" />
+                      <div ng-if="ipForm[item.startname].$invalid">
+                        <span class="help-block" ng-if="ipForm[item.startname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm[item.startname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm[item.startname].$error.incidr && !ipForm[item.startname].$error.required && !ipForm[item.startname].$error.pattern">IP地址不在CIDR范围之内</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label">{{'aws.register.info.end'|translate}}</label>
+                    <div class="control-item">
+                      <input type="text" name="{{item.endname}}" placeholder="10.0.1.255" required ng-focus="twoModule.rangeOff('clusterRangeError')" class="form-control" gtip incidr="clustercidr" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.end" />
+                      <div ng-if="ipForm[item.endname].$invalid">
+                        <span class="help-block" ng-if="ipForm[item.endname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm[item.endname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm[item.endname].$error.incidr && !ipForm[item.endname].$error.required && !ipForm[item.endname].$error.pattern">IP地址不在CIDR范围之内</span>
+                        <span class="help-block" ng-if="ipForm[item.endname].$error.gtip">结束IP地址必须比起始IP地址大</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="add-ip" ng-if="$index==0" ng-click="twoModule.addCluster($index)">{{'aws.register.info.addRangeIp'|translate}}</span>
+                  <span class="del-ip" ng-if="$index" ng-click="twoModule.delCluster($index)"><i class="icon-aw-1shut-down"></i></span>
+                </div>
+                
+                <!-- <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.netmask'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="255.255.255.0" name="clusterNetmask" required ng-pattern="/^(254|252|248|240|224|192|128|0)\.0\.0\.0|255\.(254|252|248|240|224|192|128|0)\.0\.0|255\.255\.(254|252|248|240|224|192|128|0)\.0|255\.255\.255\.(254|252|248|240|224|192|128|0)$/" class="form-control" ng-model="twoModule.clusterNetmask" />
+                    <div ng-if="ipForm.clusterNetmask.$invalid && ipForm.clusterNetmask.$dirty">
+                      <span class="help-block" ng-if="ipForm.clusterNetmask.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm.clusterNetmask.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    </div>
+                  </div>
+                </div> -->
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-10">
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.cidr'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="10.0.1.0/24" id="clustercidr" name="clustercidr" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))[\/]([1-9]|[1-2][0-9]|[3][0]|[3][1])$/" required ng-model="twoModule.clusterCidr" class="form-control" ng-model="clusterCidr"  ng-focus="twoModule.hidecidrCheck()" ng-change="twoModule.checkAllNet(twoModule.clusterCidr,'cluster')">
+                    <div ng-if="ipForm.clustercidr.$invalid && ipForm.clustercidr.$dirty">
+                      <span class="help-block" ng-if="ipForm.clustercidr.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm.clustercidr.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    </div>
+                    <span class="help-block" ng-if="twoModule.cidrAllCheck.cluster">与10.179.243.0/24网段冲突！</span>
+                  </div>
+                </div>
+                <div ng-if="gateWayCan">
+                  <div class="form-group">
+                    <label class="control-label"><i class="icon-aw-question-mark getway-tip"  uib-popover="探测IP用于心跳检测，建议配置在物理交换机上。"
+                    popover-enable="true" popover-trigger="mouseenter" popover-placement = "bottom" ></i> 探测IP地址</label>
+                    <div class="control-item">
+                      <input type="text" placeholder="10.0.1.1" incidr="clustercidr" gateway="clustercidr" start="'clusterStart'" end="'clusterEnd'" name="clustergateway" required ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" class="form-control" ng-model="twoModule.clustergateway"/>
+                      <div ng-if="ipForm.clustergateway.$invalid">
+                        <span class="help-block" ng-if="ipForm.clustergateway.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm.clustergateway.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm.clustergateway.$error.gateway">网关必须在起始IP与结束IP范围之外</span>
+                        <span class="help-block" ng-if="ipForm.clustergateway.$error.incidr && !ipForm.clustergateway.$error.required && !ipForm.clustergateway.$error.pattern&& !ipForm.clustergateway.$error.gateway">IP地址不在CIDR范围之内</span>
+                      </div>
+                    </div>
+                  </div>
+                <!-- <button class="btn btn-next check-btn" ng-disabled="" ng-click="" type="button">检查IP有效性</button> -->
+                </div>
+              </div>
+              <div class="clear"></div>
+              <span class="help-block"  ng-if="twoModule.clusterRangeError.rangeTotal">{{'aws.register.info.rangeTotal'|translate}}</span>
+              <span class="help-block"  ng-if="twoModule.clusterRangeError.rangeSame">{{'aws.register.info.rangeSame'|translate}}</span>
+            </div>
+          </fieldset>
+          <fieldset ng-if="twoModule.enable_storage_network">
+            <div class="title">
+              <div class="col-1 font-h  title-h">
+                <!-- <a class="icon-tip" data-toggle="tooltip" data-placement="bottom" title=""><i class="icon-aw-question-mark"></i></a> -->
+                <strong>{{'aws.register.info.Storagenetwork'|translate}}:</strong>
+              </div>
+              <div class="col-1 font-h">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="storageRangeCheck" ng-change="twoModule.rangeOff('storageRangeError')" ng-model="twoModule.storageRangeCheck" /><i class="icon-aw-square"></i><span>{{'aws.register.info.iprange'|translate}}</span></label>
+                </div>
+              </div>
+              <div class="col-1 font-h">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="storageCheck" ng-change="changeCheck('storage',twoModule.storageCheck)" ng-model="twoModule.storageCheck" /><i class="icon-aw-square"></i><span> VLAN</span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-group title-group" ng-if="twoModule.storageCheck">
+                  <label class="control-label">
+                    {{'aws.register.info.vlan'|translate}}
+                  </label>
+                  <div class="control-item">
+                    <input type="text" name="storagevlan" vlanlimitstart placeholder="" class="form-control" ng-model="twoModule.storageVlan" />
+                    <div ng-if="ipForm.storagevlan.$invalid && ipForm.storagevlan.$dirty">
+                      <span class="help-block" ng-if="ipForm.storagevlan.$error.vlanlimitstart">{{'aws.register.info.inputint'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div class="row" ng-if="twoModule.storageRangeCheck">
+              <div class="col-10">
+                <div class="add-group clearfix" ng-repeat="item in twoModule.storageRange">
+                  <div class="form-group">
+                    <label class="control-label">{{'aws.register.info.start'|translate}}</label>
+                    <div class="control-item">
+                      <input type="text" placeholder="10.0.2.1" class="form-control" name="{{item.startname}}" incidr="storagecidr" required ng-focus="twoModule.rangeOff('storageRangeError')" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.start">
+                      <div ng-if="ipForm[item.startname].$invalid">
+                        <span class="help-block" ng-if="ipForm[item.startname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm[item.startname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm[item.startname].$error.incidr && !ipForm[item.startname].$error.required && !ipForm[item.startname].$error.pattern">IP地址不在CIDR范围之内</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label">{{'aws.register.info.end'|translate}}</label>
+                    <div class="control-item">
+                      <input type="text" placeholder="10.0.2.255" class="form-control" name="{{item.endname}}" gtip incidr="storagecidr" required ng-focus="twoModule.rangeOff('storageRangeError')" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.end">
+                      <div ng-if="ipForm[item.endname].$invalid">
+                        <span class="help-block" ng-if="ipForm[item.endname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm[item.endname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm[item.endname].$error.incidr && !ipForm[item.endname].$error.required && !ipForm[item.endname].$error.pattern">IP地址不在CIDR范围之内</span>
+                        <span class="help-block" ng-if="ipForm[item.endname].$error.gtip">结束IP地址必须比起始IP地址大</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="add-ip" ng-if="$index==0" ng-click="twoModule.addStorage()">{{'aws.register.info.addRangeIp'|translate}}</span>
+                  <span class="del-ip" ng-if="$index" ng-click="twoModule.delStorage($index)"><i class="icon-aw-1shut-down"></i></span>
+                </div>
+                <!-- <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.netmask'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="255.255.255.0" name="storageNetmask" required ng-pattern="/^(254|252|248|240|224|192|128|0)\.0\.0\.0|255\.(254|252|248|240|224|192|128|0)\.0\.0|255\.255\.(254|252|248|240|224|192|128|0)\.0|255\.255\.255\.(254|252|248|240|224|192|128|0)$/" class="form-control" ng-model="twoModule.storageNetmask" />
+                    <div ng-if="ipForm.storageNetmask.$invalid && ipForm.storageNetmask.$dirty">
+                      <span class="help-block" ng-if="ipForm.storageNetmask.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm.storageNetmask.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    </div>
+                  </div>
+                </div> -->
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-10">
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.cidr'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="10.0.2.0/24" required id="storagecidr" name="storagecidr" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))[\/]([1-9]|[1-2][0-9]|[3][0]|[3][1])$/" ng-model="twoModule.storageCidr" class="form-control" ng-focus="twoModule.hidecidrCheck()" ng-change="twoModule.checkAllNet(twoModule.storageCidr,'storage')"/>
+                    <div ng-if="ipForm.storagecidr.$invalid && ipForm.storagecidr.$dirty">
+                      <span class="help-block" ng-if="ipForm.storagecidr.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm.storagecidr.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    </div>
+                    <span class="help-block" ng-if="twoModule.cidrAllCheck.storage">与10.179.243.0/24网段冲突！</span>
+                  </div>
+                </div>
+                <div ng-if="gateWayCan">
+                  <div class="form-group">
+                    <label class="control-label"><i class="icon-aw-question-mark getway-tip"  uib-popover="探测IP用于心跳检测，建议配置在物理交换机上。"
+                    popover-enable="true" popover-trigger="mouseenter" popover-placement = "bottom" ></i> 探测IP地址</label>
+                    <div class="control-item">
+                      <input type="text" placeholder="10.0.2.1" incidr="storagecidr" gateway="storagecidr" start="'storageStart'" end="'storageEnd'" name="storagegateway" required ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" class="form-control" ng-model="twoModule.storagegateway"/>
+                      <div ng-if="ipForm.storagegateway.$invalid">
+                        <span class="help-block" ng-if="ipForm.storagegateway.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm.storagegateway.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm.storagegateway.$error.gateway">网关必须在起始IP与结束IP范围之外</span>
+                        <span class="help-block" ng-if="ipForm.storagegateway.$error.incidr && !ipForm.storagegateway.$error.required && !ipForm.storagegateway.$error.pattern&& !ipForm.storagegateway.$error.gateway">IP地址不在CIDR范围之内</span>
+                      </div>
+                    </div>
+                  </div>
+                <!-- <button class="btn btn-next check-btn" ng-disabled="" ng-click="" type="button">检查IP有效性</button> -->
+                </div>
+              </div>
+              <div class="clear"></div>
+              <span class="help-block"  ng-if="twoModule.storageRangeError.rangeTotal">{{'aws.register.info.rangeTotal'|translate}}</span>
+              <span class="help-block"  ng-if="twoModule.storageRangeError.rangeSame">{{'aws.register.info.rangeSame'|translate}}</span>
+            </div>
+            <!-- <div class="row">
+              <div class="col-10">
+                <div class="form-group">
+                  <label class="control-label">
+                    <div class="checkbox">
+                      <label>
+                        <input type="checkbox" name="storageCheck" ng-model="twoModule.storageCheck" /><i class="icon-aw-square"></i><span>{{'aws.register.info.vlan'|translate}}</span></label>
+                    </div>
+                  </label>
+                  <div class="control-item" ng-if="twoModule.storageCheck">
+                    <input type="text" name="storagevlan" ng-pattern="/^[1-9]\d*$/" placeholder="" class="form-control" ng-model="twoModule.storageVlan" />
+                    <div ng-if="ipForm.storagevlan.$invalid && ipForm.storagevlan.$dirty">
+                      <span class="help-block" ng-if="ipForm.storagevlan.$error.pattern">{{'aws.register.info.inputint'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div> -->
+          </fieldset>
+          <fieldset>
+            <div class="title">
+              <div class="col-1 font-h  title-h">
+                <strong>{{'aws.register.info.TenantNetwork'|translate}}:</strong>
+              </div>
+              <div class="col-1 font-h" ng-if="twoModule.enable_sdn">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="tenantRangeCheck" ng-change="twoModule.rangeOff('tenantRangeError')" ng-model="twoModule.tenantRangeCheck" /><i class="icon-aw-square"></i><span>{{'aws.register.info.iprange'|translate}}</span></label>
+                </div>
+              </div>
+              <div class="col-1 font-h watch-ha-item" ng-if="twoModule.enable_sdn&&twoModule.neutron_type=='vlan'">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="tenantVlanCheck" ng-model="twoModule.tenantVlanCheck" /><i class="icon-aw-square"></i><span>高可用监听VLAN</span></label>
+                </div>
+              </div>
+              <div class="form-group title-group" ng-if="twoModule.tenantVlanCheck&&twoModule.neutron_type=='vlan'">
+                  <label class="control-label ha-input">
+                    {{'aws.register.info.vlan'|translate}}
+                  </label>
+                  <div class="control-item">
+                    <input type="text" class="form-control" name="tenantvlan" vlanlimitstart ng-model="twoModule.ha_vlan" />
+                    <div ng-if="ipForm.tenantvlan.$invalid && ipForm.tenantvlan.$dirty">
+                      <span class="help-block" ng-if="ipForm.tenantvlan.$error.vlanlimitstart">{{'aws.register.info.inputint'|translate}}</span>
+                    </div>
+                  </div>
+              </div>
+            </div>
+            <div class="row" ng-if="twoModule.tenantRangeCheck">
+              <div class="col-10">
+                <div class="add-group clearfix" ng-repeat="item in twoModule.tenantRange">
+                  <div class="form-group">
+                    <label class="control-label">{{'aws.register.info.start'|translate}}</label>
+                    <div class="control-item">
+                      <input type="text" placeholder="10.0.3.1" class="form-control" name="{{item.startname}}" incidr="tenantcidr" required ng-focus="twoModule.rangeOff('tenantRangeError')" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.start">
+                      <div ng-if="ipForm[item.startname].$invalid">
+                        <span class="help-block" ng-if="ipForm[item.startname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm[item.startname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm[item.startname].$error.incidr && !ipForm[item.startname].$error.required && !ipForm[item.startname].$error.pattern">IP地址不在CIDR范围之内</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label">{{'aws.register.info.end'|translate}}</label>
+                    <div class="control-item">
+                      <input type="text" placeholder="10.0.3.255" class="form-control" name="{{item.endname}}" gtip incidr="tenantcidr" required ng-focus="twoModule.rangeOff('tenantRangeError')" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.end">
+                      <div ng-if="ipForm[item.endname].$invalid">
+                        <span class="help-block" ng-if="ipForm[item.endname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm[item.endname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm[item.endname].$error.incidr && !ipForm[item.endname].$error.required && !ipForm[item.endname].$error.pattern">IP地址不在CIDR范围之内</span>
+                        <span class="help-block" ng-if="ipForm[item.endname].$error.gtip">结束IP地址必须比起始IP地址大</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="add-ip" ng-if="$index==0" ng-click="twoModule.addTenant()">{{'aws.register.info.addRangeIp'|translate}}</span>
+                  <span class="del-ip" ng-if="$index" ng-click="twoModule.delTenant($index)"><i class="icon-aw-1shut-down"></i></span>
+                </div>
+                <!-- <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.netmask'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="255.255.255.0" name="tenantNetmask" required ng-pattern="/^(254|252|248|240|224|192|128|0)\.0\.0\.0|255\.(254|252|248|240|224|192|128|0)\.0\.0|255\.255\.(254|252|248|240|224|192|128|0)\.0|255\.255\.255\.(254|252|248|240|224|192|128|0)$/" class="form-control" ng-model="twoModule.tenantNetmask" />
+                    <div ng-if="ipForm.tenantNetmask.$invalid && ipForm.tenantNetmask.$dirty">
+                      <span class="help-block" ng-if="ipForm.tenantNetmask.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm.tenantNetmask.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    </div>
+                  </div>
+                </div> -->
+              </div>
+            </div>
+            <div class="row" ng-show="twoModule.enable_sdn">
+              <div class="col-10">
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.cidr'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="10.0.3.0/24" required id="tenantcidr" name="tenantcidr" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))[\/]([1-9]|[1-2][0-9]|[3][0]|[3][1])$/" ng-model="twoModule.tenantCidr" class="form-control" ng-focus="twoModule.hidecidrCheck()" ng-change="twoModule.checkAllNet(twoModule.tenantCidr,'tenant')"/>
+                    <div ng-if="ipForm.tenantcidr.$invalid && ipForm.tenantcidr.$dirty">
+                      <span class="help-block" ng-if="ipForm.tenantcidr.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm.tenantcidr.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    </div>
+                    <span class="help-block" ng-if="twoModule.cidrAllCheck.tenant">与10.179.243.0/24网段冲突！</span>
+                  </div>
+                </div>
+                <div ng-if="gateWayCan">
+                  <div class="form-group">
+                    <label class="control-label"><i class="icon-aw-question-mark getway-tip"  uib-popover="探测IP用于心跳检测，建议配置在物理交换机上。"
+                    popover-enable="true" popover-trigger="mouseenter" popover-placement = "bottom" ></i> 探测IP地址</label>
+                    <div class="control-item">
+                      <input type="text" placeholder="10.0.3.1" incidr="tenantcidr"  gateway="tenantcidr" start="'tenantRangeStart'"  end="'tenantRangeEnd'"  name="tenantgateway" required ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" class="form-control" ng-model="twoModule.tenantgateway"/>
+                      <div ng-if="ipForm.tenantgateway.$invalid">
+                        <span class="help-block" ng-if="ipForm.tenantgateway.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm.tenantgateway.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                        <span class="help-block" ng-if="ipForm.tenantgateway.$error.gateway">网关必须在起始IP与结束IP范围之外</span>
+                        <span class="help-block" ng-if="ipForm.tenantgateway.$error.incidr && !ipForm.tenantgateway.$error.required && !ipForm.tenantgateway.$error.pattern&& !ipForm.tenantgateway.$error.gateway">IP地址不在CIDR范围之内</span>
+                      </div>
+                    </div>
+                  </div>
+                <!-- <button class="btn btn-next check-btn" ng-disabled="" ng-click="" type="button">检查IP有效性</button> -->
+                </div>
+              </div>
+            </div>
+            <!-- <div class="row">
+              <div class="col-10"  ng-if="twoModule.neutron_type=='vxlan'">
+                <div class="form-group">
+                  <label class="control-label">起始VNI</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="" name="tenantStart" class="form-control" vlan vxlanlimitstart ng-model="twoModule.tenantStart" />
+                    <div ng-if="ipForm.tenantStart.$invalid && ipForm.tenantStart.$dirty">
+                      <span class="help-block" ng-if="ipForm.tenantStart.$error.vxlanlimitstart&&!valnstartFlag">请输入1-16777215范围内的正整数</span>
+                      <span class="help-block" ng-if="ipForm.tenantStart.$error.vlan&&valnstartFlag">起始VNI必须小于结束VNI</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label">结束VNI</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="" name="tenantEnd" vlan vxlanlimitend class="form-control" ng-model="twoModule.tenantEnd" />
+                    <div ng-if="ipForm.tenantEnd.$invalid && ipForm.tenantEnd.$dirty">
+                      <span class="help-block" ng-if="ipForm.tenantEnd.$error.vxlanlimitend&&!valnendFlag">请输入1-16777215范围内的正整数</span>
+                      <span class="help-block" ng-if="ipForm.tenantEnd.$error.vlan&&valnendFlag">结束VNI必须大于起始VNI</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-10"  ng-if="twoModule.neutron_type=='vlan'">
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.vlanstart'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="" name="tenantStart" class="form-control" vlan vlanlimitstart ng-model="twoModule.tenantStart" />
+                    <div ng-if="ipForm.tenantStart.$invalid && ipForm.tenantStart.$dirty">
+                      <span class="help-block" ng-if="ipForm.tenantStart.$error.vlanlimitstart&&!valnstartFlag">{{'aws.register.info.inputint'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm.tenantStart.$error.vlan&&valnstartFlag">起始VLAN必须小于结束VLAN</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.vlanend'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="" name="tenantEnd" vlan vlanlimitend class="form-control" ng-model="twoModule.tenantEnd" />
+                    <div ng-if="ipForm.tenantEnd.$invalid && ipForm.tenantEnd.$dirty">
+                      <span class="help-block" ng-if="ipForm.tenantEnd.$error.vlanlimitend&&!valnendFlag">{{'aws.register.info.inputint'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm.tenantEnd.$error.vlan&&valnendFlag">结束VLAN必须大于起始VLAN</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="clear"></div>
+              <span class="help-block"  ng-if="twoModule.tenantRangeError.rangeTotal">{{'aws.register.info.rangeTotal'|translate}}</span>
+              <span class="help-block"  ng-if="twoModule.tenantRangeError.rangeSame">{{'aws.register.info.rangeSame'|translate}}</span>
+            </div> -->
+          </fieldset>
+        </div>
+        <p class="help-block text-center"  ng-if="cidrCheckFlag">集群网、存储网、租户网、业务网CIDR范围不可有并集</p>
+        <p class="help-block text-center"  ng-if="haCheckFlag">高可用监听VLAN ID不可和租户网VLAN范围有交集</p>
+        <p class="help-block text-center"  ng-if="tenantStoVlan">储存网VLAN ID不可和租户网VLAN范围有交集</p>
+        <div class="text-center">
+          <a ng-href="#/info/stepone" class="btn btn-default">{{'aws.register.info.last'|translate}}</a>
+          <button class="btn btn-next" 
+          ng-disabled="ipForm.$invalid||
+          twoModule.cidrAllCheck.cluster||
+          twoModule.cidrAllCheck.tenat||
+          twoModule.cidrAllCheck.storage
+          " 
+          ng-click="netTestFun()" type="button">网络检测</button>
+          <button class="btn btn-next"
+          ng-disabled="ipForm.$invalid||
+            twoModule.cidrAllCheck.cluster||
+            twoModule.cidrAllCheck.tenat||
+            twoModule.cidrAllCheck.storage"
+           ng-click="twoModule.completeTwo(ipForm,true)" type="button">{{'aws.register.info.next'|translate}}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script type="text/ng-template" id="netTest.html">
+  <div class="modal-lg-size">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">网络检查</h3>
+      </div>
+      <div class="modal-body">
+        <div class="net-tip" ng-if="netTestCan.testLoad">
+          <span>请稍后，网络检测预计耗时10分钟</span>
+          <i class="icon-aw-load aw-spin"></i>
+        </div>
+        <div class="net-banner"></div>
+        <div class="table-content net-show">
+          <table ng-table="tableParams" class="table border">
+            <colgroup>
+              <col width="25%">
+              <col width="25%">
+              <col width="25%">
+              <col width="25%">
+            </colgroup>
+            <tr ng-repeat="item in $data">
+              <td data-title="'主机名'">{{item.name}}</td>
+              <td data-title="'集群网'" ng-class="{'red':item.clusterstatus=='1','green':item.clusterstatus=='0'}">{{item.cluster}}</td>
+              <td data-title="'存储网'" ng-class="{'red':item.storagestatus=='1','green':item.storagestatus=='0'}">
+                {{item.storage}}
+              </td>
+              <td data-title="'租户网'" ng-class="{'red':item.tenantstatus=='1','green':item.tenantstatus=='0'}">
+                <div ng-if="item.tenant.indexOf('\n')>-1" class="storage-vlan" ng-repeat="i in item.tenant.split('\n')">
+                  {{i}}
+                </div>
+                <div ng-if="item.tenant.indexOf('\n')==-1">{{item.tenant}}</div>
+              </td>
+            </tr>
+            <tr ng-if="netConfig">
+              <td colspan="4" class="add-node">
+                <p class="red">检测任务未执行成功！</p>
+              </td> 
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="netest-foot">
+        <div>完成网络验证方式：</div>
+        <div class="net_tips">1.验证租户网、存储网、集群网的二层联通性</div>
+        <button class="btn btn-next net_cardCheck" ng-click="startTestNet(ipForm)" type="button" ng-disabled="netTestCan.testBtn">网络检测</button>
+      </div>
+  </div>
+</script>

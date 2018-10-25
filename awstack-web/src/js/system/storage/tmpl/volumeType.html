@@ -1,0 +1,191 @@
+<div class="page-inner">
+  <div class="table-action">
+    <!-- <button type="button" class="btn btn-info"  ng-click="init()">{{'aws.action.init'|translate}}</button> -->
+    <!-- <button type="button" class="btn btn-info" ng-disabled="isDisabled" ng-click="edit(editData)"><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+    <button type="button" data-toggle="modal" ng-disabled="delisDisabled" ng-click="delete()" class="btn btn-info"> <i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+    <button class="btn btn-refresh" ng-click="getStvolumeType()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button> -->
+    <div class="search-box ">
+      <form name="searchForm" novalidate="" ng-keyup="applyGlobalSearch()" class="ng-pristine ng-valid ng-valid-maxlength">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"> <i class="icon-aw-search"></i>
+        </button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder={{"aws.action.search"|translate}} >
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <table ng-table="tableParams" class="table instanceTable" > 
+    <tr ng-repeat="item in $data">
+      <!-- <td header="'headerCheckbox.html'" class="check-td">
+        <label class="checkbox">
+          <input type="checkbox" name="r" ng-model="checkboxes.items[item.id]" value="{{item.id}}" />
+          <i class="iconfont"></i>
+        </label>
+      </td> -->
+      <td data-title="'aws.storage.voltype.vtname'|translate" sortable="'name'"><a>{{item.name}}</a></td>
+      <td data-title="'ID'" >{{item.id}}</td>
+    </tr>
+    </table>
+    <loading-data  data="tabledata"></loading-data>  
+  </div>
+  
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="add.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{'aws.storage.voltype.newTitle'|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="addform" novalidate>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.voltype.vtname' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="name" class="form-controls"  placeholder="{{'aws.storage.voltype.vtname_ph' | translate}}" ng-model="voltype.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||addform.name.$dirty) && addform.name.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.voltype.devicename' | translate}}：</label>
+
+          <div class="controls">
+            <ui-select ng-model="voltype.devicename" name="device" required>
+              <ui-select-match placeholder="{{'aws.storage.voltype.devicename_ph'|translate}}" >{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="device in deviceList | propsFilter: {name: $select.search}">
+                <div ng-bind-html="device.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="(submitInValid ||addform.device.$dirty) && addform.device.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.voltype.choosestpool' | translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="voltype.stpool" name="pool" required>
+              <ui-select-match placeholder="{{'aws.storage.voltype.choosestpool_ph'|translate}}" >{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="pool in poolList | propsFilter: {name: $select.search}">
+                <div ng-bind-html="pool.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="(submitInValid ||addform.pool.$dirty) && addform.pool.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">{{'aws.storage.voltype.choosetype' | translate}}:</label>
+            <div class="controls">
+                <div class="checkbox-item clearFix">
+                    <label class="checkbox"><input type="checkbox" ng-model="voltype.typeone" name="one"  value="one" /><i class="iconfont"></i>{{'aws.storage.voltype.typeone' | translate}}</label>
+                    <label class="checkbox"><input type="checkbox" ng-model="voltype.typetwo" name="two" value="two" /><i class="iconfont"></i>{{'aws.storage.voltype.typetwo' | translate}}</label>
+                    <label class="checkbox"><input type="checkbox" ng-model="voltype.typethree" name="three" value="three" /><i class="iconfont"></i>{{'aws.storage.voltype.typethree' | translate}}</label>
+                    <label class="checkbox"><input type="checkbox" ng-model="voltype.typefour" name="four" value="four" /><i class="iconfont"></i>{{'aws.storage.voltype.typefour' | translate}}</label>
+                    <label class="checkbox"><input type="checkbox" ng-model="voltype.typefive" name="five" value="five" /><i class="iconfont"></i>{{'aws.storage.voltype.typefive' | translate}}</label>
+                </div>
+            </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.voltype.description' | translate}}：</label>
+          <div class="controls">
+            <textarea type="text" name="stIp" class="form-controls"  placeholder="{{'aws.storage.features.description_ph' | translate}}" ng-model="voltype.description" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32"  />
+            <div class="error" ng-messages="(submitInValid ||addform.stIp.$dirty) && addform.stIp.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmadd(addform)">{{'aws.action.ok' | translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="edit.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{'aws.storage.voltype.newTitle'|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="addform" novalidate>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.voltype.vtname' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="name" class="form-controls"  placeholder="{{'aws.storage.voltype.vtname_ph' | translate}}" ng-model="voltype.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||addform.name.$dirty) && addform.name.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.voltype.devicename' | translate}}：</label>
+
+          <div class="controls">
+            <ui-select ng-model="voltype.devicename" name="device" required>
+              <ui-select-match placeholder="{{'aws.storage.voltype.devicename_ph'|translate}}" >{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="device in deviceList | propsFilter: {name: $select.search}">
+                <div ng-bind-html="device.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="(submitInValid ||addform.device.$dirty) && addform.device.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.voltype.choosestpool' | translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="voltype.stpool" name="pool" required>
+              <ui-select-match placeholder="{{'aws.storage.voltype.choosestpool_ph'|translate}}" >{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="pool in poolList | propsFilter: {name: $select.search}">
+                <div ng-bind-html="pool.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="(submitInValid ||addform.pool.$dirty) && addform.pool.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">{{'aws.storage.voltype.choosetype' | translate}}:</label>
+            <div class="controls">
+                <div class="checkbox-item clearFix">
+                    <label class="checkbox"><input type="checkbox" ng-model="voltype.typeone" name="one"  value="one" /><i class="iconfont"></i>{{'aws.storage.voltype.typeone' | translate}}</label>
+                    <label class="checkbox"><input type="checkbox" ng-model="voltype.typetwo" name="two" value="two" /><i class="iconfont"></i>{{'aws.storage.voltype.typetwo' | translate}}</label>
+                    <label class="checkbox"><input type="checkbox" ng-model="voltype.typethree" name="three" value="three" /><i class="iconfont"></i>{{'aws.storage.voltype.typethree' | translate}}</label>
+                    <label class="checkbox"><input type="checkbox" ng-model="voltype.typefour" name="four" value="four" /><i class="iconfont"></i>{{'aws.storage.voltype.typefour' | translate}}</label>
+                    <label class="checkbox"><input type="checkbox" ng-model="voltype.typefive" name="five" value="five" /><i class="iconfont"></i>{{'aws.storage.voltype.typefive' | translate}}</label>
+                </div>
+            </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.voltype.description' | translate}}：</label>
+          <div class="controls">
+            <textarea type="text" name="stIp" class="form-controls"  placeholder="{{'aws.storage.features.description_ph' | translate}}" ng-model="voltype.description" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32"  />
+            <div class="error" ng-messages="(submitInValid ||addform.stIp.$dirty) && addform.stIp.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmadd(addform)">{{'aws.action.ok' | translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+  </div>
+</script>
+

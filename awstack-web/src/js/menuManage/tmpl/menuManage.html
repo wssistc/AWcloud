@@ -1,0 +1,173 @@
+<!-- Nested node template -->
+<div class="page-inner">
+	<!-- button item start -->
+	<div class="table-action">
+		<button ng-click="expandAll()" class="btn">展开所有菜单</button>
+		<button ng-click="collapseAll()" class="btn">收起所有菜单</button>
+		<button ng-click="newSubItem('','newRootMenu')" class="btn btn-primary">新建根菜单</button>
+	</div>
+
+	<!-- table start -->
+	<div class="table-content">
+		<div class="row">
+			<div class="col-sm-8">
+				<div ui-tree data-nodrop-enabled="true" id="tree-root">
+					<ul ui-tree-nodes ng-model="data">
+						<li ng-repeat="node in data" ui-tree-node ng-include="'nodes_renderer.html'"></li>
+					</ul>
+				</div>
+			</div>
+
+		 <div class="col-sm-4 menu" ng-show="detailData">
+				<table class="table table-info column">
+					<tr>
+						<td>菜单名称:</td>
+						<td>{{detailData.name}}</td>
+						<td>菜单描述:</td>
+						<td>{{detailData.description}}</td>
+					</tr>
+					<tr>
+						<td>菜单级别:</td>
+						<td>{{detailData.type}}</td>
+						<td>菜单路径:</td>
+						<td>{{detailData.url}}</td>
+					</tr>
+					<tr>
+						<td>菜单顺序:</td>
+						<td>{{detailData.order}}</td>
+						<td>可见角色:</td>
+						<td>{{detailData.newRole}}</td>
+					</tr>
+				</table>
+			<!-- <pre class="code">{{ data | json }}</pre> -->
+		</div>
+	</div>
+
+	<script type="text/ng-template" id="nodes_renderer.html">
+		<div ui-tree-handle class="tree-node tree-node-content clearfix">
+			<div class="tree-name">
+				<a class="btn btn-success btn-xs"  data-nodrag ng-click="toggle(this)">
+					<span>{{node.name}}</span>
+					<span ng-class="{'icon-aw-angle-right': collapsed, 'icon-aw-angle-down': !collapsed}"></span>
+				</a>
+			</div>
+			<div class="tree-item" style="width:2rem;">
+				<a class="btn" data-nodrag ng-click="newSubItem(this,'new')"><i class="icon-aw-add-to2"></i></a>
+				<a class="btn" data-nodrag ng-click="showDetail(this)">详情</a>
+				<a class="btn" data-nodrag ng-click="newSubItem(this,'edit')"><i class="icon-aw-modify"></i></a>
+				<a class="btn" data-nodrag ng-click="deleteMenu(this)"><i class="icon-aw-delete"></i></span></a>
+			</div>
+		</div >
+		<ul ui-tree-nodes="" ng-model="node.child" ng-class="{hidden: collapsed}">
+			<li ng-repeat="node in node.child" ui-tree-node ng-include="'nodes_renderer.html'">
+			</li>
+		</ul>
+	</script>
+	<script type="text/ng-template" id="addMenu.html">
+		<div class="modal-common">
+			<div class="modal-header">
+				<button type="button" class="close" ng-click="$dismiss()">×</button>
+				<h3 class="modal-title">{{menuTitle}}</h3>
+			</div>
+			<div class="modal-body">
+				<form action="" name="menuForm" novalidate>
+					<div class="control-group">
+						<label class="control-label ">菜单名称:</label>
+						<div class="controls" >
+							<input type="text" name="name" class="form-controls"  placeholder="请输入菜单名称" ng-model="menuData.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+							<div class="error" ng-messages="(submitInValid ||menuForm.name.$dirty) && menuForm.name.$error">
+								<form-validate pattern-msg="'aws.errors.noSpecial'|translate"></form-validate>
+							</div>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">菜单描述:</label>
+						<div class="controls">
+							<input type="text" class="form-controls" name="menuDesc" ng-model="menuData.description" placeholder="请输入描述信息" required/> 
+							<div class="error" ng-messages="(submitInValid ||menuForm.menuDesc.$dirty) && menuForm.menuDesc.$error">
+								<form-validate></form-validate>
+							</div>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">菜单路径:</label>
+						<div class="controls">
+							<input type="text" class="form-controls" name="menuUrl" ng-model="menuData.url" placeholder="请输入菜单路径" /> 
+
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">是否可用:</label>
+						<div class="controls">
+							<ui-select ng-model="isEnabled"  name="enable" ng-change=changeEnabled(isEnabled) ng-disabled="disabled" title="选择是否可用" required>
+								<ui-select-match placeholder="选择是否可用">{{$select.selected.name}}</ui-select-match>
+								<ui-select-choices repeat="enabledData in enabledDatas | propsFilter: {name: $select.search}">
+									<div ng-bind-html="enabledData.name | highlight: $select.search"></div>
+								</ui-select-choices>
+							</ui-select>
+							<div class="error" ng-messages="(submitInValid ||menuForm.enable.$dirty) && menuForm.enable.$error">
+								<form-validate></form-validate>
+							</div>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">菜单关键字:</label>
+						<div class="controls">
+							<input type="text" class="form-controls" name="menuKeywords" ng-model="menuData.keywords" placeholder="请输入菜单关键字" required/> 
+							<div class="error" ng-messages="(submitInValid ||menuForm.menuKeywords.$dirty) && menuForm.menuKeywords.$error">
+								<form-validate></form-validate>
+							</div>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">模块:</label>
+						<div class="controls">
+							<input type="text" class="form-controls" name="menuBusiAuth" ng-model="menuData.busiType" placeholder="请输入菜单关键字" /> 
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">选择可见角色:</label>
+						<div class="controls checkbox">
+							<label class="checkbox">
+								<input type="checkbox" name="menuRole" value="2" ng-model="menuRole_admin"/>
+ 								<i class="iconfont" ng-model="menuRole_admin"></i>超级管理员&nbsp&nbsp
+							</label>
+							<label class="checkbox">
+								<input type="checkbox" name="menuRole" value="3" ng-model="menuRole_domainadmin"/>
+								<i class="iconfont"></i>部门管理员&nbsp&nbsp
+							</label>
+							<label class="checkbox">
+								<input type="checkbox" name="menuRole" value="4" ng-model="menuRole_proadmin" />
+								<i class="iconfont"></i>项目管理员&nbsp&nbsp
+							</label>
+							<label  class="checkbox">
+								<input type="checkbox" name="menuRole" value="5" ng-model="menuRole_member" />
+								<i class="iconfont"></i>普通用户&nbsp&nbsp
+							</label>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-info" type="button" ng-click="confirmAddMenu(menuForm)">{{'aws.instances.addinstances.ok'|translate}}</button>
+				<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+			</div>
+		</div>
+	</script>
+
+	<script type="text/ng-template" id="drop-modal.html">
+		<div class="org-modal modal-common">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+				<h3 class="modal-title">{{'aws.org.upOrg.move_org' | translate}}</h3>
+			</div>
+			<div class="modal-body">
+				<div class="moveDepart">确定移动该菜单</div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-info" type="button" ng-click="$close(list)">{{'aws.action.ok' | translate}}</button>
+				<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+			</div>
+		</div>
+	</script>
+</div>

@@ -1,0 +1,202 @@
+<div class="view-content">
+    <div class="page-title clearfix">
+        <h3>新建集群</h3>
+        <a class="btn btn-default" href="#/cluster">返回集群列表</a>
+    </div>
+    <div class="vm-create">
+        <form name="" novalidate autocomplete="off">
+            <uib-tabset active=active justified="true">
+                <uib-tab index="0" heading="创建新集群">
+                    <div class="panel-group col-two" role="tablist">
+                        <div class="panel">
+                            <div class="panel-collapse collapse in" role="tabpanel">
+                            <br>
+                                <div class="control-group">
+                                    <label class="control-label">名称：</label>
+                                    <div class="controls">
+                                        <div class="half">
+                                            <input type="text" class="form-controls" name="name" placeholder="请输入名称" required="">
+                                        </div>
+                                        <div class="half">&nbsp;</div>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">位置：</label>
+                                    <div class="controls">
+                                        <div class="search-box">
+                                            <button class="btn" type="submit"><i class="icon-aw-search"></i></button>
+                                            <input type="text" class="form-control" placeholder="搜索">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">&nbsp;</label>
+                                    <div class="controls">
+                                        <div class="half">
+                                            <div class="angular-ui-tree">
+                                                <ol class="angular-ui-tree-nodes">
+                                                    <li class="angular-ui-tree-node">
+                                                        <div class="angular-ui-tree-handle active">
+                                                            <div class="tree-name">
+                                                                <a class="btn btn-success">
+                                                                    <span>localhost</span>
+                                                                    <span class="glyphicon glyphicon-chevron-right"></span>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                        <div class="half">&nbsp;</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-heading" role="tab" id="clusterhead1">
+                                <h4 class="panel-title">
+                                    <a role="button" data-toggle="collapse" href="#clusterfooter1" aria-expanded="true" aria-controls="clusterfooter1"><i class="icon-aw-angle-down"></i> DRS</a>
+                                    <div class="checkbox vertical">
+                                        <label>
+                                            <input type="checkbox" name="" checked>
+                                            <i class="iconfont"></i>打开
+                                        </label>
+                                    </div>
+                                </h4>
+                            </div>
+                            <div id="clusterfooter1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="clusterhead1" aria-expanded="true">
+                                <div class="control-group">
+                                    <label class="control-label">自动化级别：</label>
+                                    <div class="controls">
+                                        <div class="half">
+                                        下拉列表。ui-select-container
+                                        </div>
+                                        <div class="half">&nbsp;</div>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">迁移阈值：</label>
+                                    <div class="controls">
+                                        <div class="half">
+                                            进度条
+                                        </div>
+                                        <div class="half">&nbsp;</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-heading" role="tab" id="clusterhead2">
+                                <h4 class="panel-title">
+                                    <a role="button" data-toggle="collapse" href="#clusterfooter2" aria-expanded="true" aria-controls="clusterfooter2"><i class="icon-aw-angle-down"></i> vSphere HA</a>
+                                    <div class="checkbox vertical">
+                                        <label>
+                                            <input type="checkbox" name="" checked="">
+                                            <i class="iconfont"></i>打开
+                                        </label>
+                                    </div>
+                                </h4>
+                            </div>
+                            <div id="clusterfooter2" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="clusterhead2" aria-expanded="true">
+                                <div class="control-group">
+                                    <label class="control-label">主机监控：</label>
+                                    <div class="controls">
+                                        <div class="half">
+                                            <div class="checkbox vertical">
+                                                <label>
+                                                    <input type="checkbox" name="" checked="">
+                                                    <i class="iconfont"></i>启用主机监控
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="half">&nbsp;</div>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">接入监控状态：</label>
+                                    <div class="controls">
+                                        <div class="checkbox vertical">
+                                            <label>
+                                                <input type="checkbox" name="" checked="">
+                                                <i class="iconfont"></i>启用接入监控
+                                            </label>
+                                        </div> 
+                                        <span class="form-tips">接入控制将阻止违反可用性限制的虚拟机打开电源</span>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">策略：</label>
+                                    <div class="controls">
+                                        <div class="radio vertical">
+                                            <label>
+                                                <input type="radio" name="cel" checked="">
+                                                <i class="iconfont"></i>群集允许的主机故障数目 
+                                                <input type="text" class="form-controls input-mini" name="name" placeholder="" style="display: inline-block;">
+                                            </label>
+                                            <label>
+                                                <input type="radio" name="cel">
+                                                <i class="iconfont"></i>作为故障切换备用容量保留的群集资源百分比
+                                                <span class="text">预留的故障切换CPU容量 <input type="text" class="form-controls input-mini" name="name" placeholder="" style="display: inline-block;"> % CPU</span>
+                                                <span class="text">预留的故障切换内存容量 <input type="text" class="form-controls input-mini" name="name" placeholder="" style="display: inline-block;"> % CPU</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">虚拟机监控状态：</label>
+                                    <div class="controls">
+                                        <div class="half">
+                                            下拉列表。ui-select-container
+                                        </div>
+                                        <span class="val form-tips">可在“管理设置”区域的“虚拟机替代项”页面中设置个别虚拟机替代项。</span>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">监控敏感度：</label>
+                                    <div class="controls">
+                                        <div class="half">
+                                            进度条
+                                        </div>
+                                        <div class="half">&nbsp;</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-heading" role="tab" id="clusterhead3">
+                                <h4 class="panel-title">
+                                    <a role="button" data-toggle="collapse" href="#clusterfooter3" aria-expanded="true" aria-controls="clusterfooter3"><i class="icon-aw-angle-down"></i> EVC</a>
+                                </h4>
+                            </div>
+                            <div id="clusterfooter3" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="clusterhead3" aria-expanded="true">
+                                <div class="control-group">
+                                    <label class="control-label">EVC模式：</label>
+                                    <div class="controls">
+                                        <div class="half">
+                                        下拉列表。ui-select-container
+                                        </div>
+                                        <div class="half">&nbsp;</div>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">描述：</label>
+                                    <div class="controls">
+                                        <div class="half">
+                                            <textarea class="form-controls" placeholder="请输入描述"></textarea>
+                                        </div>
+                                        <div class="half">&nbsp;</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </uib-tab>
+            </uib-tabset>
+        </form>
+        <div class="btn-items">
+            <button class="btn btn-info" type="button">确定</button>
+            <button class="btn btn-default" type="button">取消</button>
+        </div>
+    </div>
+</div>

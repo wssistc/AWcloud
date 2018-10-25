@@ -1,0 +1,384 @@
+<div class="page-inner">
+    <div class="tab-offset-right">
+        <ul class="nav nav-tabs nav-justified">
+            <li ng-class="{active:general.curTable == 'saas'}" class="uib-tab nav-item " ng-click="toSaas()">
+                <a>云管参数</a>
+            </li>
+            <li ng-class="{active:general.curTable == 'saasSevice'}" class="uib-tab nav-item"  ng-click="toSaasSevice()">
+                <a>云服务参数</a>
+            </li>
+        </ul>
+    </div>
+    <div ng-show="general.curTable == 'saas'">
+        <table  class="table">
+            <colgroup>
+                <col width="20%">
+                <col width="40%">
+                <col width="20%">
+                <col width="20%">
+            </colgroup> 
+            <thead>
+                <tr>
+                    <th>设置项</th>
+                    <th>描述</th>
+                    <th>操作</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>系统超时时间</td>
+                    <td>若用户登录后，在配置的超时时间内无操作，系统会自动注销</td>
+                    <td>
+                        <ui-select ng-model="ENT_EXPIRE_TOKEN.paramValue" ng-change=changeHost(host) ng-disabled="disabled" >
+                            <ui-select-match placeholder="{{'aws.action.pleaseSelect'|translate}}">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="time.id as time in timeList | propsFilter: {name: $select.search}">
+                                <div ng-bind-html="time.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </td>
+                    <td>
+                        <button type="button"  ng-click="saasCofSet('ENT_EXPIRE_TOKEN')" ng-disabled="!conf_token_change" class="btn btn-info" >{{'aws.action.save'|translate}}</button>
+                    </td>
+                </tr>
+                <!-- <tr>
+                    <td>租期管理</td>
+                    <td>开启或者关闭周期管理</td>
+                    <td>
+                        <div class="checkbox switch-btn">
+                            <label uib-popover=""  popover-trigger="mouseenter" popover-placement = "left" >
+                                <input type="checkbox" class="form-controls" ng-change="getStatus(job)" ng-model="job.task_switch">
+                                <i class="iconfont"></i>
+                            </label>
+                        </div>
+                    </td>
+                    <td>
+                        <button type="button"  ng-click="test()" class="btn btn-info" >{{'aws.action.save'|translate}}</button>
+                    </td>
+                </tr> -->
+                <tr>
+                    <td>配额配置开关</td>
+                    <td>控制部门和项目配额的关系，关闭时单个项目配额不能大于部门，开时，所有项目的配额和不能大于其部门的配额</td>
+                    <td>
+                        <div class="checkbox switch-btn">
+                            <label uib-popover=""  popover-trigger="mouseenter" popover-placement = "left" >
+                                <input type="checkbox" class="form-controls" ng-change="getStatus(job)" ng-model="ENT_QUOTA_CEHCK_CONFIG.paramValue">
+                                <i class="iconfont"></i>
+                            </label>
+                        </div>
+                    <td>
+                        <button type="button"  ng-click="saasCofSet('ENT_QUOTA_CEHCK_CONFIG')" ng-disabled="!conf_quota_change" class="btn btn-info" >{{'aws.action.save'|translate}}</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>新用户是否强制修改密码</td>
+                    <td>启用时，针对非admin新用户强制修改密码</td>
+                    <td>
+                        <div class="checkbox switch-btn">
+                            <label uib-popover=""  popover-trigger="mouseenter" popover-placement = "left" >
+                                <input type="checkbox" class="form-controls" ng-change="getStatus(job)" ng-model="ENT_PWD_FORCE_MODIFY.paramValue">
+                                <i class="iconfont"></i>
+                            </label>
+                        </div>
+                    <td>
+                        <button type="button"  ng-click="saasCofSet('ENT_PWD_FORCE_MODIFY')" ng-disabled="!conf_pwdModify_change" class="btn btn-info" >{{'aws.action.save'|translate}}</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>是否启用用户密码超时</td>
+                    <td>启用时，非admin用户密码过期时强制修改密码</td>
+                    <td>
+                        <div class="checkbox switch-btn">
+                            <label uib-popover=""  popover-trigger="mouseenter" popover-placement = "left" >
+                                <input type="checkbox" class="form-controls" ng-change="getStatus(job)" ng-model="ENT_PWD_EXPIRED_DAYS.paramValue">
+                                <i class="iconfont"></i>
+                            </label>
+                        </div>
+                    <td>
+                        <button type="button"  ng-click="saasCofSet('ENT_PWD_EXPIRED_DAYS')" ng-disabled="!conf_pwdExpired_change" class="btn btn-info" >{{'aws.action.save'|translate}}</button>
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+    <div ng-show="general.curTable == 'saasSevice'">
+        <div class = "dash-table">
+            <table  class="table">
+                <colgroup>
+                    <col width="20%">
+                    <col width="40%">
+                    <col width="20%">
+                    <col width="20%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class = "all all-left"><span class="in">设置项</span></th>
+                        <th>描述</th>
+                        <th>操作</th>
+                        <th class = "all all-right"><span class="in">&nbsp</span> </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="dashed">
+                        <td><span>回收站资源过期时间（天）</span></td>
+                        <td>用户删除的资源，暂时保存在回收站中，系统默认的时间过后会删除回收站的内容</td>
+                        <td>
+                            <form name="novaConfForm1">
+                                <input type="text" name="expirationTime"  ng-model="generalConf.reclaim_instance_interval"  class="form-controls" min="reclaim_instance_interval_range.min" max="reclaim_instance_interval_range.max" limitnumrange required />
+                            </form>
+                        </td>
+                        <td>
+                            <div class="red" ng-messages="(submitInValid ||novaConfForm1.expirationTime.$dirty) && novaConfForm1.expirationTime.$error">
+                                <form-validate></form-validate>
+                                <div ng-message="limitnumrange">{{"aws.errors.limit_min_max"|translate:reclaim_instance_interval_range}}</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="dashed">
+                        <td>节点保存内存（GB）</td>
+                        <td>每个节点保留的最小内存数</td>
+                        <td>
+                            <form name="novaConfForm2">
+                                <input type="text" name="reserved_memory"  ng-model="generalConf.nova_reserved_memory_size" min="nova_reserved_memory_size_range.min" max="nova_reserved_memory_size_range.max" limitnumrange required >
+                            </form>
+                        </td>
+                        <td>
+                            <div class="red" ng-messages="(submitInValid ||novaConfForm2.reserved_memory.$dirty) && novaConfForm2.reserved_memory.$error">
+                                <form-validate></form-validate>
+                                <div ng-message="limitnumrange">{{"aws.errors.limit_min_max"|translate:nova_reserved_memory_size_range}}</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="dashed">
+                        <td>CPU超分比</td>
+                        <td>正常配置是1-4，超过4有风险，超过8有可能平台中的云主机无法使用</td>
+                        <td>
+                            <form name="novaConfForm3">
+                                <input type="text" name="cpu_allocatio"  ng-model="generalConf.cpu_allocation_ratio" min="cpu_allocation_ratio_range.min" max="cpu_allocation_ratio_range.max" limitnumrange required >
+                            </form>
+                        </td>
+                        <td>
+                            <div class="red" ng-messages="(submitInValid ||novaConfForm3.cpu_allocatio.$dirty) && novaConfForm3.cpu_allocatio.$error">
+                                <form-validate></form-validate>
+                                <div ng-message="limitnumrange">{{"aws.errors.limit_min_max"|translate:cpu_allocation_ratio_range}}</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- <tr>
+                        <td>内存超分比</td>
+                        <td>无</td>
+                        <td>
+                            <input type="text" name="expirationTime"  ng-model="generalConf.ram_allocation_ratio">
+                        </td>
+                        <td></td>
+                    </tr> -->
+                    <tr class="dashed">
+                        <td>创建云主机失败重试次数（次）</td>
+                        <td></td>
+                        <td>
+                            <form name="novaConfForm4">
+                                <input type="text" name="allocate_retries"  ng-model="generalConf.block_device_allocate_retries" min="block_device_allocate_retries_range.min" max="block_device_allocate_retries_range.max" limitnumrange required >
+                            </form>
+                        </td>
+                        <td>
+                            <div class="red" ng-messages="(submitInValid ||novaConfForm4.allocate_retries.$dirty) && novaConfForm4.allocate_retries.$error">
+                                <form-validate></form-validate>
+                                <div ng-message="limitnumrange">{{"aws.errors.limit_min_max"|translate:block_device_allocate_retries_range}}</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="dashed">
+                        <td>创建云主机失败重试间隔（秒）</td>
+                        <td></td>
+                        <td>
+                            <form name="novaConfForm5">
+                                <input type="text" name="retries_interval"  ng-model="generalConf.block_device_allocate_retries_interval" min="block_device_allocate_retries_interval_range.min" max="block_device_allocate_retries_interval_range.max" limitnumrange required >
+                            </form>
+                        </td>
+                        <td>
+                            <div class="red" ng-messages="(submitInValid ||novaConfForm5.retries_interval.$dirty) && novaConfForm5.retries_interval.$error">
+                                <form-validate></form-validate>
+                                <div ng-message="limitnumrange">{{"aws.errors.limit_min_max"|translate:block_device_allocate_retries_interval_range}}</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class = "all all-left">
+                            <div class="in">&nbsp</div>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td class = "all all-right">
+                            <div class="in">
+                                <button type="button"  ng-click="confSet('0')" class="btn btn-info"   ng-disabled="!canModifyConfSet_0 || !conf_nova_change ">{{novaRetry?('aws.action.retry'|translate):('aws.action.save'|translate)}}</button>
+                                <span ng-show="showModifyConfSet_0" class="loadingText blue">{{'aws.general.modifying'|translate}} <i class="aw-spin icon-aw-refresh"></i></span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="dashed" ng-show="services.cinder">
+                        <td>创建云硬盘重试次数（次）</td>
+                        <td></td>
+                        <td>
+                            <form name="cinderConfForm1">
+                                <input type="text" name="max_attempts"  ng-model="generalConf.scheduler_max_attempts"  min="scheduler_max_attempts_range.min" max="scheduler_max_attempts_range.max" limitnumrange required >
+                            </form>
+                        </td>
+                        <td>
+                            <div class="red" ng-messages="(submitInValid1 ||cinderConfForm1.max_attempts.$dirty) && cinderConfForm1.max_attempts.$error">
+                                <form-validate></form-validate>
+                                <div ng-message="limitnumrange">{{"aws.errors.limit_min_max"|translate:scheduler_max_attempts_range}}</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr ng-show="services.cinder">
+                        <td class = "all all-left">
+                            <div class="in">&nbsp</div>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td class = "all all-right">
+                            <div class="in">
+                                <button type="button"  ng-click="confSet('1')" class="btn btn-info" ng-disabled="!canModifyConfSet_1 || !conf_cinder_change">{{cinderRetry?('aws.action.retry'|translate):('aws.action.save'|translate)}}</button>
+                                <span ng-show="showModifyConfSet_1" class="loadingText blue">{{'aws.general.modifying'|translate}} <i class="aw-spin icon-aw-refresh"></i></span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="dashed" ng-show="services.cinder">
+                        <td>高可用触发次数（次）</td>
+                        <td></td>
+                        <td>
+                            <form name="confSetForm1">
+                                <input type="text" name="action_retries"  ng-model="generalConf.action_retries"  min="action_retries_range.min" max="action_retries_range.max" limitnumrange required >
+                            </form>
+                        </td>
+                        <td>
+                            <div class="red" ng-messages="(submitInValid2 ||confSetForm1.action_retries.$dirty) && confSetForm1.action_retries.$error">
+                                <form-validate></form-validate>
+                                <div ng-message="limitnumrange">{{"aws.errors.limit_min_max"|translate:action_retries_range}}</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="dashed" ng-show="services.cinder">
+                        <td>高可用检测间隔（秒）</td>
+                        <td></td>
+                        <td>
+                            <form name="confSetForm2">
+                                <input type="text" name="check_interval"  ng-model="generalConf.check_interval"  min="check_interval_range.min" max="check_interval_range.max" limitnumrange required >
+                            </form>
+                        </td>
+                        <td>
+                            <div class="red" ng-messages="(submitInValid2 ||confSetForm2.check_interval.$dirty) && confSetForm2.check_interval.$error">
+                                <form-validate></form-validate>
+                                <div ng-message="limitnumrange">{{"aws.errors.limit_min_max"|translate:check_interval_range}}</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="dashed">
+                        <td>UPS类型选择</td>
+                        <td></td>
+                        <td>
+                            <form name="confSetForm3">
+                                <ui-select name="ups" ng-model="generalConf.ups_type" ng-disabled="canSelect" required>
+                                    <ui-select-match placeholder="{{'aws.general.selectUpsType' | translate}}">{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="ups.id as ups in upsTypeList | propsFilter: {name: $select.search}">
+                                        <div ng-bind-html="ups.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </form>
+                        </td>
+                        <td>
+                            <div class="red" ng-messages="(submitInValid2 ||confSetForm3.ups.$dirty) && confSetForm3.ups.$error">
+                                <form-validate></form-validate>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class = "all all-left">
+                            <div class="in">&nbsp</div>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td class = "all all-right">
+                            <div class="in">
+                                <button type="button"  ng-click="confSet('2')" class="btn btn-info"  ng-disabled="!canModifyConfSet_2 || !conf_ups_change">{{upsRetry?('aws.action.retry'|translate):('aws.action.save'|translate)}}</button>
+                                <span ng-show="showModifyConfSet_2" class="loadingText blue">{{'aws.general.modifying'|translate}} <i class="aw-spin icon-aw-refresh"></i></span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr ng-show="currentNodeCount>2">
+                        <td>平台规模</td>
+                        <td>用户可以通过系统参数选择，云平台是小规模（比如10节点），中等规模（30节点），大规模（大于50节点），用户根据实际节点选择不同的规模后，云平台可以自动化调整后台openstack相关的服务的最优线程，来满足该规模下的需要</td>
+                        <td>
+                            <ui-select ng-model="generalConf.platform_scale"  ng-disabled="disabled" ng-change="chkNodeCountScale(generalConf.platform_scale)" title="{{'aws.volumes.lv.chooseHost'|translate}}">
+                                <ui-select-match placeholder="请选择">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="count.id as count in nodeCountList | propsFilter: {name: $select.search}">
+                                    <div ng-bind-html="count.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class ="red" ng-show ="showScaleTip" >该操作为高危操作，请慎重</div>
+                        </td>
+                        <td class = "all all-right">
+                            <div class="in">
+                                <button type="button"  ng-click="confSet('3')" class="btn btn-info" ng-disabled="!canModifyConfSet_3 || !conf_platform_change">{{platformRetry?('aws.action.retry'|translate):('aws.action.save'|translate)}}</button>
+                                <span ng-show="showModifyConfSet_3" class="loadingText blue">{{'aws.general.modifying'|translate}} <i class="aw-spin icon-aw-refresh"></i></span>
+                            </div>
+                        </td>
+                    </tr>
+            
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="deleteNode.html">
+    <div class=" modal-common deletNode-modal">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">更新云服务参数</h3>
+      </div>
+      <div class="modal-body ">
+        <uib-alert  type="danger" >
+          <div>
+            <span class='configure'>{{"aws.node.confirmDel6" | translate}}</span></br>
+          </div>
+        </uib-alert>
+        <form name="passForm" novalidate>
+          <div class="control-group">
+            <label class="control-label">{{'aws.auth.user'|translate}}：</label>
+            <div class="controls">
+              <input class="form-controls" 
+                   autocomplete="off"
+                         type="text"
+                         name="username"
+                         ng-model="username"
+                         required 
+                         />
+              <div  class="error" ng-messages="(submitInValid ||passForm.username.$dirty) && passForm.username.$error">
+                <form-validate ></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-class="{'focus':passwordfocus}">
+            <label class="control-label">{{'aws.auth.passwd'|translate}}：</label>
+            <div class="controls">
+              <input class="form-controls"
+                          type="password"
+                          name="password"
+                          ng-model="password"
+                          required
+                          />
+              <div  class="error" ng-messages="(submitInValid ||passForm.password.$dirty) && passForm.secName.$error">
+                <form-validate ></form-validate>
+              </div>
+            </div> 
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+            <button class="btn btn-info" type="button" ng-click="confirmConfSet()">{{'aws.instances.addinstances.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+      </div>
+    </div>
+  </script>

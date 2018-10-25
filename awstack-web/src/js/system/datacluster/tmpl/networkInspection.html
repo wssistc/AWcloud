@@ -1,0 +1,39 @@
+﻿<div class="disk-congfig">
+    <div>
+        <div class="net-tip" ng-show="netTestCan.testLoad">
+          <span>请稍后，网络检测预计耗时10分钟</span>
+          <i class="icon-aw-load aw-spin"></i>
+        </div>
+        <div class="net-banner">
+        	<button class="btn btn-next net_cardCheck" ng-click="startTestNet(ipForm)" type="button" ng-disabled="netTestCan.testBtn">开始检查</button>
+        </div>
+        <div class="table-content net-show">
+          <table ng-table="tableParams" class="table border">
+            <colgroup>
+              <col width="25%">
+              <col width="25%">
+              <col width="25%">
+              <col width="25%">
+            </colgroup>
+            <tr ng-repeat="item in $data">
+              <td data-title="'主机名'">{{item.name}}</td>
+              <td data-title="'集群网'" ng-class="{'red':item.clusterstatus=='1','green':item.clusterstatus=='0'}">{{item.cluster}}</td>
+              <td data-title="'存储网'" ng-class="{'red':item.storagestatus=='1','green':item.storagestatus=='0'}">
+                {{item.storage}}
+              </td>
+              <td data-title="'租户网'" ng-class="{'red':item.tenantstatus=='1','green':item.tenantstatus=='0'}">
+                <div ng-if="item.tenant.indexOf('\n')>-1" class="storage-vlan" ng-repeat="i in item.tenant.split('\n')">
+                  {{i}}
+                </div>
+                <div ng-if="item.tenant.indexOf('\n')==-1">{{item.tenant}}</div>
+              </td>
+            </tr>
+            <tr ng-if="netConfig">
+              <td colspan="4" class="add-node">
+                <p class="red">检测任务未执行成功！</p>
+              </td> 
+            </tr>
+          </table>
+        </div>
+    </div>
+</div>

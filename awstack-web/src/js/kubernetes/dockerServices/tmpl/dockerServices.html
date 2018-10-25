@@ -1,0 +1,303 @@
+<div class="page-inner">
+    <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='2'}">
+        <div class="table-action">
+            <button type="button" class="btn btn-new" disabled="disabled"><i class="icon-aw-add-to2"></i> {{"aws.k8s.dockerServices.createService" |translate}}</button>
+            <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-delete"></i> {{"aws.k8s.dockerServices.deleteServices" |translate}}</button>
+            <div class="pull-right">
+                <into-information modular="'k8sservices'"></into-information>
+                <button class="btn btn-renovat right-ports" disabled="disabled"><i class="icon-aw-refresh"></i></button>
+                <div class="search-box right-ports">
+                    <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="table-content">
+            <table class="table">
+                <colgroup>
+                    <col width="8%">
+                    <col width="12%">
+                    <col width="10%">
+                    <col width="10%">
+                    <col width="12%">
+                    <col width="15%">
+                    <col width="18%">
+                    <col width="15%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>
+                            <label class="checkbox">
+                                <input type="checkbox" name="r" disabled="disabled" />
+                                <i class="iconfont"></i>
+                            </label>
+                        </th>
+                        <th>{{"aws.k8s.dockerServices.name"|translate}}</th>
+                        <th>{{"aws.k8s.dockerServices.type"|translate}}</th>
+                        <th>{{"aws.k8s.dockerServices.sessionAffinity"|translate}}</th>
+                        <th>{{"aws.k8s.dockerServices.clusterIP"|translate}}</th>
+                        <th>{{"aws.k8s.dockerServices.ports"|translate}}</th>
+                        <th>{{"aws.k8s.dockerServices.labels"|translate}}</th>
+                        <th>{{"aws.k8s.dockerServices.creationTimestamp"|translate}}</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td colspan="8" class="text-center">
+                        如需使用容器管理块功能，请打开”系统管理 > 系统设置 > <a href="/#/system/plugin">功能管理</a> “界面添加”容器管理”模块
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='1'}">
+      <div class="table-action">
+        <button type="button" data-toggle="modal" ng-click="createService()" class="btn btn-primary">
+            <i class="icon-aw-add-to2"></i>{{"aws.k8s.dockerServices.createService" |translate}}
+        </button>
+        <button type="button" data-toggle="modal" class="btn btn-warning" ng-click="deleteDockerServices()" ng-disabled="!canDelete">
+            <i class="icon-aw-delete"></i>{{"aws.k8s.dockerServices.deleteServices" |translate}}
+        </button>
+        <div class="pull-right">
+            <setting title-data="titleData" site-title="titleName" table-data="dockerClustersData"></setting>
+            <div type="button" class="btn btn-renovat right-ports" ng-click="refresh()">
+                <i class="icon-aw-refresh"></i>
+            </div>
+            <div class="search-box">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(dockerClusters_search.globalSearchTerm)">
+                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="dockerClusters_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="table-content">
+        <table ng-table="tableParams" class="table" show-filter="false">
+            <colgroup>
+                <col width="8%">
+                <col width="12%">
+                <col width="10%">
+                <col width="10%">
+                <col width="12%">
+                <col width="15%">
+                <col width="18%">
+                <col width="15%">
+            </colgroup>
+            <tr ng-repeat="item in $data">
+                <td header="'headerCheckbox.html'">
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="checkboxes.items[item.name]" />
+                        <i class="icon-aw-square"></i>
+                    </label>
+                </td>
+                <td data-title='"aws.k8s.dockerServices.name"|translate' sortable="'name'" ng-if="titleData[0].value">
+                    <a ng-click="showDetails(item.name)">{{item.name}}</a>
+                    <!-- ng-href="#/k8s/services/?id={{item.name}} -->
+                </td>
+                <td data-title='"aws.k8s.dockerServices.type"|translate' sortable="'spec.type'" ng-if="titleData[1].value">
+                    {{item.spec.type}}
+                </td>
+                <td data-title='"aws.k8s.dockerServices.sessionAffinity"|translate' sortable="'spec.sessionAffinity'" ng-if="titleData[2].value">
+                    {{item.spec.sessionAffinity === "ClientIP" ? "是" : "否"}}
+                </td>
+                <td data-title='"aws.k8s.dockerServices.clusterIP"|translate' sortable="'spec.clusterIP'" ng-if="titleData[3].value">
+                    {{item.spec.clusterIP}}
+                </td>
+                <td data-title='"aws.k8s.dockerServices.ports"|translate' sortable="'ports'" ng-if="titleData[4].value">
+                    {{(item.ports)}}
+                </td>
+                <td data-title='"aws.k8s.dockerServices.labels"|translate' sortable="'metadata.labels'" ng-if="titleData[5].value">
+                    {{getLabels(item.metadata.labels)}}
+                </td>
+                <td data-title='"aws.k8s.dockerServices.creationTimestamp"|translate' sortable="'metadata.creationTimestamp'" ng-if="titleData[6].value">
+                    {{item.metadata.creationTimestamp | localDate}}
+                </td>
+            </tr>
+        </table>
+    </div>
+    </div>
+
+    <div ng-controller="detailCtrl">
+        <pane class="detail-body" animation="animation">
+            <div class="tab-content">
+                <div class="detail-row ins-info">
+                    <div class="detail-header"></div>
+                    <div class="detail-title">
+                        <a class="an-close" ng-href="k8s/services"><i class="icon-aw-mail-reply"></i></a>
+                        <span>{{serverTitle}}{{'aws.transmissionMag.datails'|translate}}</span>
+                    </div>
+                    <div class="detail-info">
+                        <div class="tab-content-line"></div>
+                        <div>
+                            <div ng-include="'js/kubernetes/dockerServices/tmpl/dockerServiceDetails.html'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </pane>
+    </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+        <i class="icon-aw-square"></i>
+    </label>
+</script>
+<script type="text/ng-template" id="createService.html">
+    <div class="modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{"aws.k8s.dockerServices.createService" |translate}}</h3>
+        </div>
+        <div class="modal-body k8s-modal">
+            <form name="createServiceForm">
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.createService.serviceName" |translate}}</label>
+                    <div class="controls">
+                        <input type="text" name="serviceName" class="form-controls" style="width: 93%;" placeholder="{{'aws.k8s.createService.serviceNameTips'|translate}}" ng-model="createServiceData.name" ng-maxlength="32" required ng-pattern="/^[a-z]([-a-z0-9]*[a-z0-9])?$/" />
+                        <div class="error" ng-show="createServiceForm.serviceName.$invalid &&
+                                         createServiceForm.serviceName.$dirty">
+                            <span ng-show="createServiceForm.serviceName.$error.required">
+                                {{"aws.k8s.createService.serviceNameNotEmpty"|translate}}
+                            </span>
+                            <span ng-show="createServiceForm.serviceName.$error.maxlength">
+                                {{"aws.k8s.createService.serviceNameTooLong"|translate}}
+                            </span>
+                            <span ng-show="createServiceForm.serviceName.$error.pattern">
+                                {{"aws.k8s.createService.serviceNameMismatchPattern"|translate}}
+                            </span>
+                        </div>
+                        <div class="error" ng-show="createServiceForm.serviceName.$valid &&serviceNameRepeated">
+                            <span>
+                                {{"aws.k8s.createService.serviceNameRepeated"|translate}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.createService.dockerClusters"|translate}}</label>
+                    <div class="controls">
+                        <ui-select ng-model="createServiceData.selectedCluster" required style="width: 93%;">
+                            <ui-select-match placeholder="{{'aws.k8s.createService.dockerClustersTips'|translate}}">
+                                {{$select.selected.metadata.name}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="option in clustersData track by $index">
+                                <div ng-bind-html="option.metadata.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.createService.serviceType"|translate}}</label>
+                    <div class="controls">
+                        <ui-select ng-model="createServiceData.type" required style="width: 93%;">
+                            <ui-select-match placeholder="{{'aws.k8s.createService.serviceTypeTips'|translate}}">
+                                {{$select.selected}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="option in types track by $index">
+                                <div ng-bind-html="option | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.createService.sessionAffinity"|translate}}</label>
+                    <div class="controls">
+                        <ui-select ng-model="createServiceData.sessionAffinity" required style="width: 93%;">
+                            <ui-select-match placeholder="{{'aws.k8s.createService.sessionAffinityTips'|translate}}">
+                                {{$select.selected}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="option in sessionAffinities track by $index">
+                                <div ng-bind-html="option | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <!--start of service ports-->
+                <div class="service-group">
+                    <div class="service-ports" ng-repeat="port in createServiceData.ports track by $index">
+                        <label class="port-index-label">{{"aws.k8s.createService.portsLabel"|translate}}{{$index+1}}</label>
+                        <div class="control-group">
+                            <div class="ports-control">
+                                <div class="left">
+                                    <label class="ports-label-name">{{'aws.k8s.createService.portName'|translate}}</label>
+                                    <input class="ports-label-value" name="portName{{$index + 1}}" placeholder="{{'aws.k8s.createService.portNameOptional'|translate}}" ng-pattern="/^[a-z]([-a-z0-9]*[a-z0-9])?$/" ng-maxlength="32" type="text" ng-model="port.name" required ng-change="repeatPortName(port,$index)" />
+                                </div>
+                                <div class="right">
+                                    <label class="ports-label-name">{{'aws.k8s.createService.protocol'|translate}}</label>
+                                    <input class="ports-label-value" name="protocol{{$index + 1}}" type="text" ng-disabled="true" ng-model="port.protocol" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="error" ng-show="createServiceForm['portName{{$index + 1}}'].$invalid && createServiceForm['portName{{$index + 1}}'].$dirty">
+                            <span ng-show="createServiceForm['portName{{$index + 1}}'].$error.required">
+                                {{"aws.k8s.createService.portNameNotEmpty"|translate}}
+                            </span>
+                            <span ng-show="createServiceForm['portName{{$index + 1}}'].$error.pattern">
+                                {{"aws.k8s.createService.portNameMismatch"|translate}}
+                            </span>
+                            <span ng-show="createServiceForm['portName{{$index + 1}}'].$error.maxlength">
+                                {{"aws.k8s.createService.portNameTooLong"|translate}}
+                            </span>    
+                        </div>
+                        <div class="error"  ng-show="createServiceForm['portName{{$index + 1}}'].$valid && repeatPortNameMsg">
+                            <span>
+                                {{port.errorPortNameMsg}}
+                            </span>
+                        </div>
+                        <div class="control-group">
+                            <div class="ports-control">
+                                <div class="left">
+                                    <label class="ports-label-name">{{'aws.k8s.createService.port'|translate}}</label>
+                                    <input class="ports-label-value" name="port{{$index + 1}}" placeholder="{{'aws.k8s.createService.portTips'|translate}}" ng-pattern="/^((?:[1-9]\d{0,3})|([1-5]\d{4})|(6[0-4]\d{3})|(65[0-4]\d{2})|(655[0-2]\d)|(6553[0-5]))$/" type="text" ng-model="port.port" ng-change="repeatPort(port,$index)"/>
+                                </div>
+                                <div class="right">
+                                    <label class="ports-label-name">{{'aws.k8s.createService.targetPort'|translate}}</label>
+                                    <input class="ports-label-value" name="targetPort{{$index + 1}}" type="text" ng-disabled="true" ng-model="port.targetPort" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="error"  ng-show="createServiceForm['port{{$index + 1}}'].$valid && repeatportMsg">
+                            <span>
+                                {{port.errorPortMsg}}
+                            </span>
+                        </div>
+                        <div class="error" ng-show="createServiceForm['port{{$index + 1}}'].$invalid &&
+                                         createServiceForm['port{{$index + 1}}'].$dirty">
+                            <span ng-show="createServiceForm['port{{$index + 1}}'].$error.pattern">
+                                {{"aws.k8s.createService.portMismatch"|translate}}
+                            </span>
+                        </div>
+                        <div class="control-group" ng-show="showNodePort">
+                            <div class="ports-control">
+                                <div class="full">
+                                    <label class="ports-label-name">{{"aws.k8s.createService.nodePort" |translate}}</label>
+                                    <div class="controls" style="width: 86%;">
+                                        <ui-select ng-model="port.nodePort">
+                                            <ui-select-match placeholder="{{'aws.k8s.createService.nodePortTips'|translate}}">
+                                                {{$select.selected}}
+                                            </ui-select-match>
+                                            <ui-select-choices repeat="option in availableNodePorts track by $index">
+                                                <div ng-bind-html="option | highlight: $select.search"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="error" ng-show="nodePortsRepeated">
+                            <span>{{"aws.k8s.createService.nodePortsRepeated"|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <!--end of service ports-->
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-info" type="button" ng-disabled="createServiceForm.$invalid || serviceNameRepeated || nodePortsRepeated || repeatPortNameMsg || repeatportMsg" ng-click="$close(createServiceData)">{{"aws.action.ok" |translate}}
+            </button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel" |translate}}</button>
+        </div>
+    </div>
+</script>

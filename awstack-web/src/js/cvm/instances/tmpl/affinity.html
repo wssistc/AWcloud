@@ -1,0 +1,128 @@
+<div class="page-inner storage-box">
+    <div class="table-action">
+        <button type="button" data-toggle="modal" class="btn btn-new" ng-click="createAffinity()" licence-type = "btn" id="resource-vmgroup-create"><i class="icon-aw-add-to2" ></i>{{'aws.action.create'|translate}}</button>
+        <button type="button" class="btn btn-normal" ng-disabled="delisDisabled" ng-click="deleteAffinity()" licence-type = "btn" id="resource-vmgroup-del"><i class="icon-aw-delete" ></i>{{'aws.action.del'|translate}}</button>
+        <div class="pull-right">
+            <into-information modular="'affinity'"></into-information>
+            <button class="btn btn-renovat right-ports" ng-click="refreshTable()"><i class="icon-aw-refresh"></i></button>
+            <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm"
+                        placeholder="{{'aws.instances.search'|translate}}" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <script type="text/ng-template" id="headerCheckbox.html">
+        <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+        <i class="iconfont"></i>
+      </label>
+    </script>
+    <div>
+        <empty-tip empty-type="loadData"></empty-tip>
+        <table ng-table="tableParams" class="table" show-filter="false">
+            <tr ng-repeat="data in $data">
+                <td header="'headerCheckbox.html'">
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="checkboxes.items[data.id]" />
+                        <i class="iconfont"></i>
+                    </label>
+                </td>
+                <td data-title="'aws.instances.addinstances.name'|translate" sortable="'name'">
+                    <span><a ng-href="/cvm/affinity?id={{data.id}}">{{data.name}}</a></span>
+                </td>
+                <td data-title="'aws.instances.affinityRole'|translate" sortable="''">{{'aws.instances.'+data.beAffinity| translate}}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script type="text/ng-template" id="newAffinity.html">
+    <div class="modal-common">
+        <form name="createForm" autocomplete="off">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="$close()">×</button>
+                <h3 class="modal-title">{{'aws.instances.newVmGroup'|translate}}</h3>
+            </div>
+            <div class="modal-body">
+                <div class="control-group">
+                    <label class="control-label">{{'aws.loadbalancers.lb.name'| translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="name" ng-model="createData.name" placeholder="{{'aws.loadbalancers.lb.name_placeholder'| translate}}"
+                            ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required />
+                        <div class="error" ng-messages="(submitInValid ||createForm.name.$dirty) && createForm.name.$error">
+                            <form-validate></form-validate>
+                        </div>
+                        <div class="error" ng-if="NameCheck">{{'aws.errors.balanceName_check'|translate}}</div>
+                        <div class="error" ng-if="repeatName">{{"aws.instances.tip.repeatNameTip"|translate}}</div>
+                    </div>
+                </div>
+                <div class="control-group radio-wrap">
+                    <label class="control-label">{{"aws.instances.affinityRole"|translate}}：</label>
+                    <div class="controls">
+                        <div class="radio-item clearFix">
+                            <label class="radio"><input type="radio" ng-model="createData.beAffinity" name="beAffinity"  value="1" /><i class="iconfont"></i>{{"aws.instances.affinity"|translate}}</label>
+                            <label class="radio"><input type="radio" ng-model="createData.beAffinity" name="beAffinity" value="0" /><i class="iconfont"></i>{{"aws.instances.notAffinity"|translate}}</label>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-disabled="canSubmit" ng-click="confirm(createForm)">{{'aws.action.ok'|translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+            </div>
+        </form>
+    </div>
+</script>
+<div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+        <div class="tab-content affinity-detail-page">
+            <div class="detail-row">
+                <div class="detail-title">
+                    <a class="an-close" ng-href="/cvm/affinity"><i class="icon-aw-mail-reply"></i></a>
+                    <span>{{baseInfo.name}}详情</span>
+                </div>
+
+                <div class="detail-info phyMac-min-height">
+                    <div class="tab-content-line"></div>
+                    <div class="table-title">{{'aws.instances.affinityMembers'|translate}}</div>
+                    <div class="table-action">
+                        <div class="pull-right">
+                            <div type="button" class="btn btn-renovat" ng-click="refreshMemberTable()">
+                                <i class="icon-aw-refresh"></i>
+                            </div>
+                            <div class="search-box">
+                                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(globalSearchTerm_)">
+                                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm_"
+                                        placeholder="{{'aws.instances.search'|translate}}" />
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-content table-small">
+                        <empty-tip empty-type="loadData_" tip-id="'member-table-msg'"></empty-tip>
+                        <table ng-table="memeberTable" class="table" show-filter="false">
+                            <tr ng-repeat="data in $data">
+                                <td data-title="'aws.instances.uhostName'|translate" sortable="'name'">{{data.name}}</td>
+                                <td data-title="'aws.instances.imageName'|translate" sortable="'imageName'">{{data.imageName}}</td>
+                                <td data-title="'aws.instances.status'|translate" sortable="'status'"><span ng-class="{
+                                'bg-green':(data.status=='active'||data.status=='up'),
+                                'bg-blue':(data.status=='building'||data.status=='build'||data.status=='powering-off'||data.status=='powering-on'||data.status=='deleting'||data.status=='deleted'||data.status=='soft-deleting'||data.status=='soft-delete'||data.status=='reboot_pending'||data.status=='reboot'||data.status=='pausing'||data.status=='unpausing'||data.status=='suspending'||data.status=='resuming'||data.status=='resize'||data.status=='resize_prep'||data.status=='resize_finish'||data.status=='resize_migrating'||data.status=='image_backup'||data.status=='image_snapshot'||data.status=='spawning'||data.status=='migrating'||data.status=='rebuilding'||data.status=='rebuild'),
+                                'bg-orange':(data.status=='stopped'||data.status=='shutoff'||data.status=='paused'||data.status=='suspended'||data.status=='resized'||data.status=='verify_resize'||data.status=='revert_resize'||data.status=='down'||data.status=='unknow'||data.status=='unrecognized'),'bg-red':(data.status=='error')
+                                }">{{'aws.instances.table.status.'+data.status| translate}}</span></td>
+                                <td data-title="'aws.instances.privateIP'|translate" sortable="'fixedIps'" >
+                                    <span ng-repeat="item in data.fixedIps">{{item}}<br></span>
+                                </td>
+                                <td data-title="'aws.instances.publicIP'|translate" sortable="'floatingIps'" ><span ng-repeat="item in data.floatingIps">{{item}}<br></span></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+    </pane>
+    </div>

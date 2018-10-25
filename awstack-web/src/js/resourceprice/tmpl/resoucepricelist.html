@@ -1,0 +1,151 @@
+<div class="page-inner">
+    <div class="wraper">
+        <div class="table-action">
+            <!--<div class="control-group">
+                <label class="control-label">企业名称：</label>
+                <div class="controls">
+                    <ui-select ng-model="globalSearchTerm.enterpriseId" ng-change="applyEnterpriseSearch()"
+                               title='选择企业名称'>
+                        <ui-select-match placeholder='选择企业名称'>
+                            {{$select.selected.enterpriseName=="全部"?"选择企业名称":$select.selected.enterpriseName}}
+                        </ui-select-match>
+                        <ui-select-choices repeat="enterprise.enterpriseId as enterprise in enterprises.options">
+                            <div ng-bind-html="enterprise.enterpriseName"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">数据中心：</label>
+                <div class="controls">
+                    <ui-select ng-model="globalSearchTerm.region" ng-change="applyGlobalSearch()" title='选择数据中心'>
+                        <ui-select-match placeholder='选择数据中心'>
+                            {{$select.selected.regionName}}
+                        </ui-select-match>
+                        <ui-select-choices repeat="reg.region as reg in regions.options">
+                            <div ng-bind-html="reg.regionName"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>-->
+            <div class="control-group">
+                <label class="control-label">{{"aws.price.prodType"|translate}}：</label>
+                <div class="controls">
+                    <ui-select ng-model="globalSearchTerm.prodTypeId" ng-change="applyGlobalSearch()"
+                               title={{"aws.price.choiceProdType"|translate}}>
+                        <ui-select-match placeholder={{"aws.price.choiceProdType"|translate}}>
+                            {{$select.selected.prodTypeName}}
+                        </ui-select-match>
+                        <ui-select-choices repeat="proType.prodTypeId as proType in productTypes.options">
+                            <div ng-bind-html="proType.prodTypeName"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{"aws.price.priceType"|translate}}：</label>
+                <div class="controls">
+                    <ui-select ng-model="globalSearchTerm.priceType" ng-change="applyGlobalSearch()"
+                               title={{"aws.price.choicePriceType"|translate}}>
+                        <ui-select-match placeholder={{"aws.price.choicePriceType"|translate}}>
+                            {{$select.selected.name}}
+                        </ui-select-match>
+                        <ui-select-choices repeat="priceType.value as priceType in priceTypeoptions">
+                            <div ng-bind-html="priceType.name"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-content">
+            <table ng-table="tableParams" class="table" show-filter="false">
+                <tr ng-repeat="item in $data">
+                    <td data-title="'aws.price.serialNumber'|translate" sortable="">{{$index+1}}</td>
+                    <!--<td data-title="'aws.price.enterpriseName'|translate" sortable="'enterpriseName'">
+                        {{item.enterpriseName}}
+                    </td>
+                    <td data-title="'aws.price.region'|translate" sortable="'region'">{{item.region}}</td>-->
+                    <td data-title="'aws.price.prodType'|translate" sortable="'prodTypeName'">{{item.prodTypeName}}
+                    </td>
+                    <td data-title="'aws.price.unit'|translate" sortable="'unit'">{{item.unit}}</td>
+                    <td data-title="'aws.price.priceType'|translate" sortable="'priceType'">{{item.respriceType}}</td>
+                    <td data-title="'aws.price.price'|translate" sortable="'unitPrice'">{{item.unitPrice}}</td>
+                    <td data-title="'aws.price.operate'|translate">
+                        <button class="btn btn-default" ng-click="editResourcePrice(item)">
+                            {{"aws.price.edit"|translate}}
+                        </button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+<script type="text/ng-template" id="editResourcePriceModal.html">
+    <div class="modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{"aws.price.editProductPrice"|translate}}</h3>
+        </div>
+        <div class="modal-body">
+            <form name="updateResPriceTypeForm">
+               <!-- <div class="control-group">
+                    <label class="control-label">{{"aws.price.enterpriseName"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" ng-model="updateResPriceTypeData.enterpriseName" ng-disabled="true">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.price.region"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" ng-model="updateResPriceTypeData.region" ng-disabled="true">
+                    </div>
+                </div>-->
+                <div class="control-group">
+                    <label class="control-label">{{"aws.price.prodType"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text"
+                               ng-model="updateResPriceTypeData.prodTypeName"
+                               ng-disabled="true">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.price.unit"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" ng-model="updateResPriceTypeData.unit" ng-disabled="true">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.price.priceType"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" ng-model="updateResPriceTypeData.respriceType"
+                               ng-disabled="true">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.price.price"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="unitPrice"
+                               ng-model="updateResPriceTypeData.unitPrice"
+                               placeholder={{"aws.price.PleaseEnterPrice"|translate}}
+                               ng-pattern="/^(([1-9][0-9]*)|(0\.(0[1-9]|[1-9][0-9]?))|([1-9][0-9]*\.[0-9]{1,2}))$/"
+                               required>
+                        <div class="error"
+                             ng-messages="(submitForm || updateResPriceTypeForm.unitPrice.$dirty)&&updateResPriceTypeForm.unitPrice.$error">
+                            <div ng-message="pattern">{{"aws.price.error.pattern"|translate}}</div>
+                            <div ng-message="required">{{"aws.price.PleaseEnterPrice"|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="editResourcePriceConfirm(updateResPriceTypeForm)">
+                {{"aws.price.determine"|translate}}
+            </button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.price.cancel"|translate}}
+            </button>
+        </div>
+    </div>
+</script>

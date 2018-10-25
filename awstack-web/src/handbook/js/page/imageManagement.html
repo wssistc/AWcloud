@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>镜像管理</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <h3>
+	上传镜像</h3>
+<p>
+	云管平台安装部署完成后，需要将工具盘ISO中的cloudtools和其他操作系统镜像文件（raw、qcow2或者iso）上传到镜像库。其中raw和qcow2格式可以直接创建云主机，iso格式需要通过&ldquo;制作镜像&rdquo;功能才可制作成创建云主机可用的镜像。</p>
+<p>
+	<strong>说明：</strong><br />
+	由于镜像文件比较大，通常用下面的方法手工上传镜像到云管平台，可以节省时间和减少网络带宽的占用。</p>
+<p>
+	将制作好的镜像文件上传到物理节点的/var/lib/upload_image目录下。等镜像文件上传成功后，可以在云管平台镜像管理列表中查看。此方法上传的镜像为私有镜像，可以通过编辑按钮，将镜像改成公有，还可以根据需要修改镜像的名称、操作系统、版本。镜像文件上传成功后，系统自动删除/var/lib/upload_image下的镜像文件。</p>
+<p>
+	除了手工上传镜像文件到云管平台，也可以通过自动上传镜像文件到云管平台，具体操作如下所述。</p>
+<p>
+	<strong>前提条件</strong></p>
+<p>
+	存在已制作好的raw、qcow2或者iso格式的镜像文件。</p>
+<p>
+	<strong>操作步骤</strong></p>
+<ol>
+	<li>
+		在云管平台的Web控制台上，选择&ldquo;产品和服务&gt;虚拟资源管理 &gt;镜像&rdquo;，进入镜像导航菜单。</li>
+	<li>
+		在左侧导航菜单中单击&ldquo;镜像管理&rdquo;，进入镜像管理页面。</li>
+	<li>
+		单击&ldquo;上传镜像&rdquo;按钮。</li>
+	<li>
+		设置镜像的各项参数。</li>
+	<li>
+		完成以上设置后，单击&ldquo;确定&rdquo;按钮。<br />
+		上传过程中，显示进度条。当选择&ldquo;从文件上传&rdquo;时，则页面显示上传进度和传输速率。当进度条显示100%时表示上传操作完成。</li>
+</ol>
+<h3>
+	使用指定镜像创建云主机</h3>
+<p>
+	在镜像的列表中，勾选待操作的镜像（格式为qcow2或者raw，iso格式的镜像不支持此操作），然后单击&ldquo;新建云主机&rdquo;按钮，弹出云主机的新建界面，除了不需要设置镜像外，其他参数设置与前面&ldquo;云主机&rdquo;提供的新建是一致的，这里不再赘述。</p>
+<h3>
+	删除镜像</h3>
+<p>
+	非admin只能删除自己的私有镜像。</p>
+<p>
+	<strong>说明</strong>：<br />
+	当镜像后端为Ceph存储（包括超融合Ceph和外部Ceph），使用raw格式镜像创建云主机后，该镜像无法删除。</p>
+<p>
+	在镜像的列表中，勾选待删除的镜像，单击&ldquo;删除&rdquo;按钮，然后在弹出的确认框单击&ldquo;确定&rdquo;按钮。</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+  <meta charset="utf-8">
+  <meta name="renderer" content="webkit" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+  <title>控制台</title>
+  
+  <script src="/js/config.js" id="page-config" data-js="
+    lodash/lodash.min.js
+    jquery/jquery.min.js
+    jquery/jquery.zclip.js
+    moment/min/moment.min.js
+    d3/d3.min.js
+    bootstrap/dist/js/bootstrap.min.js
+    bootstrap-datetime-picker/js/bootstrap-datetimepicker.js
+    bootstrap-datetime-picker/js/bootstrap-datetimepicker.zh-CN.js
+    angular/angular.min.js
+    angular-animate/angular-animate.min.js
+    angular-route/angular-route.min.js
+    angular-resource/angular-resource.min.js
+    angular-sanitize/angular-sanitize.min.js
+    angular-messages/angular-messages.min.js
+    angular-translate/dist/angular-translate.min.js
+    angular-ivh-treeview/dist/ivh-treeview.min.js
+    angular-file-saver/dist/angular-file-saver.bundle.min.js
+    angular-ui-bootstrap/dist/ui-bootstrap-tpls.js
+    angular-ui-tree/dist/angular-ui-tree.min.js
+    angularjs-dropdown-multiselect/src/angularjs-dropdown-multiselect.js
+    angularjs-slider/dist/rzslider.min.js
+    ng-table/dist/ng-table.min.js
+    ui-select/dist/select.min.js
+    ng-csv/ng-csv.min.js
+    bootstrap-daterangepicker/moment.js
+    bootstrap-daterangepicker/daterangepicker.js
+    " data-css="
+    angularjs-slider/dist/rzslider.min.css
+    bootstrap/dist/css/bootstrap.min.css
+    bootstrap-datetime-picker/css/bootstrap-datetimepicker.min.css
+    angular/angular-csp.css
+    angular-ivh-treeview/dist/ivh-treeview.min.css
+    angular-ivh-treeview/dist/ivh-treeview-theme-basic.css
+    ui-select/dist/select.min.css
+    bootstrap-daterangepicker/daterangepicker.css
+    "></script>
+    <link rel="stylesheet" href="/css/qcloud.css">
+    <link rel="shortcut icon" href="/favicon.ico"/>
+    <link rel="bookmark" href="/favicon.ico"/>
+</head>
+<body ng-controller="mainCtrl">
+<header>
+  <div class="inner">
+    <div class="logo">
+      <a ng-href="{{homePage}}"></a>
+    </div>
+    <div class="top-right">
+    </div>
+  </div>
+</header>
+<div class="main open" table-hide>
+  <aside>
+    <!-- <div class="logo">
+      <a ng-href="{{homePage}}"></a>
+    </div> -->
+    <ul>
+      <li><a ng-href="{{homePage}}"><i class="icon-aw-home"></i>返回</a></li>
+      <li ng-repeat="item in globalMenu" ng-class="{'active':item.active==menuCurrent}">
+        <a ng-href="{{item.url}}"><i class="{{item.icon}}"></i><span ng-bind="item.name"></span></a>
+      </li>
+    </ul>
+  </aside>
+
+  <div class="page-alert-list" ng-class="{'show-dash-alert':dashAlerts.list}">
+    <div ng-repeat='alert in dashAlerts.list' ng-class="{'alert-building': alert.severity=='building','alert-success': alert.severity=='success','alert-warning': alert.severity=='warning','alert-error': alert.severity=='error'}" class="alert">
+      <button type="button" class="alert-close" ng-click="dashAlerts.clear(alert)">
+        <i class="icon-aw-wrong"></i>
+      </button>
+      <div class="alert-title"></div>
+      <div><span ng-bind="alert.text"></span><i ng-show="alert.severity=='building'" class="icon-aw-refresh aw-spin"></i></div>
+    </div>
+  </div>
+  <div class="delete-wrap" ng-show="showAlert">
+    <div class="delete-alert" ng-class="{'delete-show':showAlert}">
+      <uib-alert type="{{ContType}}" close="close()">
+        <div class="del-cont" ng-bind-html="delCont |trust_html"></div>
+        <div class="btn-item">
+          <button type='button' class='btn {{btnType}}' ng-click='confirm()' ng-disabled="notDel">确定</button><button type='button' class='btn btn-default' ng-click="close({$event: $event})">取消</button>
+        </div>
+     </uib-alert>
+    </div>
+  </div>
+  <div class="delete-wrap" ng-show="NoMoney">
+    <div class="delete-alert" ng-class="{'delete-show':NoMoney}">
+      <div class="alert alert-warning">
+        <button type="button" class="close" ng-click="tipsClose()">
+            <span aria-hidden="true">×</span>
+            <span class="sr-only">Close</span>
+        </button>
+          <div class="del-cont"><span>余额不足,确定后将会跳转到充值页面</span></div>
+          <div class="btn-item">
+            <a ng-href="{{Recharge}}" target="_blank" class="btn btn-info">确定</a>
+            <button type="button" class="btn btn-default" ng-click="tipsClose()">取消</button>
+          </div>
+      </div>
+    </div>
+  </div>
+  <div class="delete-wrap" ng-show="Notoken">
+    <div class="delete-alert" ng-class="{'delete-show':Notoken}">
+      <div class="alert alert-warning">
+        <button type="button" class="close" ng-click="Notoken=false">
+            <span aria-hidden="true">×</span>
+            <span class="sr-only">Close</span>
+        </button>
+          <div class="del-cont"><span>登录超时,请点击确定按钮重新登录</span></div>
+          <div class="btn-item">
+            <a ng-href="{{homePage}}" class="btn btn-info">确定</a>
+            <button type="button" class="btn btn-default" ng-click="Notoken=false">取消</button>
+          </div>
+      </div>
+    </div>
+  </div>
+  <div class="main-content">      
+    <div class="menu-manage">
+      <nav class="nav">
+        <div class="clearfix" ng-repeat="item in globalMenu" >
+          <ul class="clearfix" ng-if="item.active == itemActive">
+              <li ng-repeat="children in item.child"  ng-class="{'subCurrent':children.active==subCurrent || (children.topAct==topAct && topAct)}">
+                <a ng-href="{{children.url}}" ><span ng-bind="children.name"></span></a>
+              </li>
+          </ul>
+        </div>
+      </nav>
+
+    </div>
+    <div ng-view></div>
+  </div>
+</div>
+<script type="text/javascript" src="/js/qcloud.js"></script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<div class="page-inner monitor-view rabbitmq-view">
+    <div class="box">
+        <ul class="text-list">
+            <li><div>{{rabbitmqBasicInfo.connections}}</div><p>{{"aws.monitor.rabbitmq.connectionNumber" | translate }}</p></li>
+            <li><div>{{rabbitmqBasicInfo.channels}}</div><p>{{"aws.monitor.rabbitmq.channel" | translate }}</p></li>
+            <li><div>{{rabbitmqBasicInfo.exchanges}}</div><p>{{"aws.monitor.rabbitmq.switchNumber" | translate }}</p></li>
+            <li><div>{{rabbitmqBasicInfo.queues}}</div><p>{{"aws.monitor.rabbitmq.queue" | translate }}</p></li>
+            <li><div>{{rabbitmqBasicInfo.consumers}}</div><p>{{"aws.monitor.rabbitmq.consumerNumber" | translate }}</p></li>
+        </ul>
+    </div>
+    <div class="col-12">
+      <div class="col-title">{{"aws.monitor.rabbitmq.msgQueue" | translate }}</div>
+      <div class="box layout-grid areaChart" >
+        <div class="col-4" ng-repeat="item in panels.queues | orderBy:'priority' " >
+          <div class="inner">
+            <div class="panels clearfix">
+              <div class="area-chart-title">{{item.title}}</div>
+              <div class="area-chart-wrap" chart-area queue="item.chartName" panel="item"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="col-title">{{"aws.monitor.rabbitmq.msgRate" | translate }}</div>
+      <div class="box layout-grid areaChart" >
+        <div class="col-4" ng-repeat="item in panels.rate | orderBy:'priority' " >
+          <div class="inner">
+            <div class="panels clearfix">
+              <div class="area-chart-title">{{item.title}}</div>
+              <div class="area-chart-wrap" chart-area panel="item"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="box">
+        <div class="table-content">
+            <table ng-table="tableParams" class="table" show-filter="false">
+                <tr ng-repeat="node in $data">
+                    <td data-title="'aws.monitor.rabbitmq.nodeName' | translate" sortable="'hostName'">{{node.hostName}}</td><!-- ng-href="/monitor/rabbitmq?id={{node.hostName}}" -->
+                    </td>
+                    <td data-title="'aws.monitor.rabbitmq.fileDescriptor' | translate" sortable="'fd_used'"><span>{{node.fd_used}}</span></td>
+                    <td data-title="'aws.monitor.rabbitmq.socketDescriptor' | translate" sortable="'socket_used'"><span>{{node.socket_used}}</span></td>
+                    <td data-title="'aws.monitor.rabbitmq.process' | translate" sortable="'proc_used'"><span>{{node.proc_used}}</span></td>
+                    <td data-title="'aws.monitor.rabbitmq.mem' | translate" sortable="'mem_used'"><span>{{node.mem_used}}</span></td>
+                    <td data-title="'aws.monitor.rabbitmq.diskSpace' | translate" sortable="'disk_free'"><span>{{node.disk_free}}</span></td>
+                    <td data-title="'aws.monitor.rabbitmq.durationTime' | translate" sortable="'uptime'"><span>{{node.uptime|millSecondsToTimeString}}</span></td>
+                    <td data-title="'aws.monitor.rabbitmq.type' | translate" sortable="'type'"><span>{{node.type}}</span></td>
+                </tr>
+            </table>
+        </div>
+        <div ng-controller="rabbitmqNodeDetailCtrl">
+          <pane class="detail-body" animation="animation" >
+            <div class="tab-content">
+              <div class ="detail-row">
+                <div class="detail-header"></div>
+                <div class="detail-title">
+                  <a class="an-close" ng-href="/monitor/rabbitmq"><i class="icon-aw-mail-reply"></i></a>
+                  <span>{{'aws.monitor.rabbitmq.nodeDetail' | translate}}</span>
+                </div>
+                <div class="detail-info">
+                  
+                </div>
+              </div>
+            </div>
+          </pane>
+        </div>
+    </div>
+</div>

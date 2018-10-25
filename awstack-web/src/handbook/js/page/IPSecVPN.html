@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>IPSec VPN</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <h3>
+	新建VPN</h3>
+<p>
+	<strong>前提条件</strong></p>
+<p>
+	本地路由器和目标路由器均已关联子网。</p>
+<p>
+	<strong>操作步骤</strong></p>
+<ol>
+	<li>
+		在云管平台的Web控制台上，选择&ldquo;产品和服务 &gt;虚拟资源管理 &gt;网络&rdquo;，进入网络导航菜单。</li>
+	<li>
+		在左侧导航菜单中单击&ldquo;IPSec VPN&rdquo;，进入IPSec VPN页面。</li>
+	<li>
+		单击&ldquo;新建&rdquo;按钮，设置基础信息。</li>
+	<li>
+		单击&ldquo;下一步&rdquo;按钮，配置站点连接信息。</li>
+	<li>
+		单击&ldquo;新建&rdquo;按钮，完成VPN1创建。新创建的VPN1状态为&ldquo;关闭&rdquo;。</li>
+	<li>
+		参考之前的步骤，继续创建另一个VPN2。</li>
+</ol>
+<p>
+	<strong>注意：</strong></p>
+<p>
+	配置站点连接信息时，将VPN1的本地网络信息配置为VPN2的目标网络信息，将VPN1的目标网络信息配置为VPN2的本地网络信息。</p>
+<p>
+	IPSec VPN功能会与公网IP功能冲突，建立站点连接之后请检查站点双方私有子网内云主机是否绑定公网IP，如果有则需要解除公网绑定。</p>
+<p>
+	创建完成后VPN2状态为&ldquo;创建中&rdquo;，大约5秒左右为&ldquo;运行&rdquo;，刷新页面，VPN1状态变为&ldquo;运行&rdquo;。此时，本地网络和目标网络可以进行通讯。</p>
+<h3>
+	修改VPN</h3>
+<p>
+	在VPN列表，勾选待操作的VPN，单击&ldquo;编辑&rdquo;按钮，修改完成后单击&ldquo;确定&rdquo;按钮。</p>
+<p>
+	<strong>注意</strong>：<br />
+	如果修改后的VPN状态为&ldquo;关闭&rdquo;，则可能由于修改了目标网关地址导致VPN可不用。</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<div class="page-inner" ng-controller="dockerNodesCtrl">
+  <div class="table-action">
+      <div class="pull-right">
+          <search-refresh  class="rs" refresh-fuc="initData" context= "context" table-content="'tableParams'" table-data="tabledata" btn-type="checkbox"></search-refresh>  
+          <setting-col  title-data="tableCols" site-title="titleName" table-data="tabledata" config-search="configSearch" ></setting-col>
+      </div>
+  </div>
+  <div class="table-content">
+    <!-- <table ng-table="tableParams" class="table" show-filter="false">
+      <colgroup>
+        <col width="11%">
+        <col width="11%">
+        <col width="8%">
+        <col width="16%">
+        <col width="12%">
+        <col width="9%">
+        <col width="10%">
+        <col width="8%">
+        <col width="15%">
+      </colgroup>
+      <tr ng-repeat="item in $data">
+        <td data-title='"aws.k8s.dockerNodes.name"|translate' sortable="'name'">
+          <a ng-href="#/k8s/nodes/{{item.name}}">{{item.name}}</a>
+        </td>
+        <td data-title='"aws.k8s.dockerNodes.InternalIP"|translate' sortable="'name'">
+          <span>
+            {{item.InternalIP}}
+          </span>
+        </td>
+        <td data-title='"aws.k8s.dockerNodes.operatingSystem"|translate'
+            sortable="'data.status.nodeInfo.operatingSystem'">
+          <span>
+            {{item.operatingSystem}}
+          </span>
+        </td>
+        <td data-title='"aws.k8s.dockerNodes.kernelVersion"|translate'
+            sortable="'data.status.nodeInfo.kernelVersion'">
+          <span>
+            {{item.kernelVersion}}
+          </span>
+        <td data-title='"aws.k8s.dockerNodes.containerRuntimeVersion"|translate'
+            sortable="'data.status.nodeInfo.containerRuntimeVersion'">
+          <span>
+            {{item.containerRuntimeVersion}}
+          </span>
+        </td>
+        </td>
+        <td data-title='"aws.k8s.dockerNodes.kubeletVersion"|translate'
+            sortable="'data.status.nodeInfo.kubeletVersion'">
+          <span>
+            {{item.kubeletVersion}}
+          </span>
+        </td>
+        <td data-title='"aws.k8s.dockerNodes.KubeletReady"|translate'>
+          <span>
+            {{item.KubeletReady}}
+          </span>
+        </td>
+        <td data-title='"aws.k8s.dockerNodes.podSchedulable"|translate'>
+          <span>
+            {{item.podSchedulable}}
+          </span>
+        </td>
+        <td data-title='"aws.k8s.dockerNodes.creationTimestamp"|translate'
+            sortable="'data.metadata.creationTimestamp'">
+          {{item.creationTimestamp}}
+        </td>
+      </tr>
+    </table> -->
+    <table ng-table-dynamic="tableParams with tableCols" class="table" show-filter="false">
+        <tr ng-repeat="node in $data track by $index ">
+          <td ng-repeat="item in $columns" ng-switch="item.field" >
+              <span ng-switch-when="name">
+                  <!-- <a ng-click="detailFunc(node)">{{node.name}}</a> -->
+                  <a ng-href="configure/node?id={{node.name}}&name={{node.name}}&nodeType=k8s" title="{{node.name}}">{{node.name}}</a>
+              </span>
+              <span ng-switch-default>{{node[item.field]}}</span>
+          </td>
+        </tr>
+    </table>
+    <service-tip service = "'k8s'"   menus=['系统管理','系统设置','功能管理']  menu-href="'/system/plugin'"></service-tip>
+  </div>
+
+  <div ng-controller="detailCtrl" ng-if =  "isK8sPage">
+      <pane class="detail-body" animation="animation">
+          <div class="tab-content">
+            <div class="detail-row">
+              <div class="detail-title">
+                <a class="an-close" ng-href="/k8s/nodes">
+                  <i class="icon-aw-mail-reply"></i>
+                </a>
+                <span>{{'aws.k8s.dockerNodes.details' | translate}}</span>
+              </div>
+              <div class="detail-info">
+                <div class="tab-content-line"></div>
+                  <div ng-include="'js/kubernetes/dockerNodes/tmpl/detailpart.html'"></div>
+              </div>
+            </div>
+          </div>
+      </pane>
+  </div>
+</div>

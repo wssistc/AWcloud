@@ -1,0 +1,16 @@
+<div class="page-inner monitor-view memcached-view">
+        <div class="title clearfix">
+            <div class="name">{{"aws.monitor.cache.nodeName" | translate }} : <span>{{rabbitmqBasicInfo.nodeName}}</span> </div>
+             <div class="key">{{"aws.monitor.cache.keyTotal" | translate }} : <span>{{rabbitmqBasicInfo.keyTotal}}</span></div>
+        </div>
+    <div class="box layout-grid areaChart" >
+          <div class="col-4" ng-repeat="item in panels.memcached | orderBy:'priority' " >
+            <div class="inner">
+              <div class="panels clearfix">
+                <div class="area-chart-title">{{item.title}}</div>
+                <div class="area-chart-wrap" chart-area panel="item"></div>
+              </div>
+            </div>
+          </div>
+    </div>
+</div>

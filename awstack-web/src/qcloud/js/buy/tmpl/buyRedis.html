@@ -1,0 +1,143 @@
+<div class="page-inner">
+  <div class="shop-title">
+    <a ng-href="#/redis/redislist">返回<i class="icon-aw-angle-left"></i></a><span>创建云存储Redis</span>
+  </div>
+  <div class="shop-body">
+    <form name="newRedis" novalidate>
+          <div class="control-group">
+            <label class="control-label">地域</label>
+            <div class="controls">
+              <span class="tips">—&nbsp;&nbsp;华南地区&nbsp;&nbsp;—&nbsp;&nbsp;—&nbsp;&nbsp;华东地区&nbsp;&nbsp;—&nbsp;&nbsp;—&nbsp;&nbsp;华北地区&nbsp;&nbsp;—</span>
+              <div class="btn-item-group btn-item-lg">
+                <button ng-class="{'active':item.region==regionCur}" ng-click="selReg(item)" ng-repeat="item in regionList">{{"CN.region."+item.region|translate}}</button>
+              </div>
+              <span class="tips">不同地域云产品之间内网不互通；选择最靠近您客户的地域，可降低访问时延</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label"><i class="icon-aw-prompt" uib-tooltip="可用区是同一地域下，电子和网络互相独立的物理区域（一般是一个物理机房）单可用区故障不会影响其他可用区云服务的正常运行"></i>可用区</label>
+            <div class="controls">
+              <div class="btn-item-group btn-item-lg">
+                <button ng-class="{'active':item==curZoneId}" ng-click="selZone(item)" ng-repeat="item in zoneList">{{"CN.mysql.zoneId."+item|translate}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">网络</label>
+            <div class="controls">
+              <div class="btn-item-group btn-item-lg">
+                <button ng-class="{'active':curNetC=='base'}" ng-click="curNetC='base'">基础网络</button>
+                <button ng-class="{'active':curNetC=='perNet'}" ng-click="chooseNetwork()">私有网络</button>
+              </div>
+              
+            </div>
+          </div>
+          <div class="control-group" ng-if="curNetC=='perNet'">
+            <label class="control-label">&nbsp;</label>
+            <div class="controls">
+              <div>
+                  <ui-select class="uisel-sm" ng-model="network.select" name="network" ng-change="selNetwork(network.select)" required ng-disabled="!networkList.length>0">
+                    <ui-select-match>{{$select.selected.vpcName}}</ui-select-match>
+                    <ui-select-choices  repeat="item in networkList | filter: {vpcName : $select.search}">
+                      <div ng-bind-html="item.vpcName | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                  <ui-select class="uisel-sm" ng-model="subnet.select" name="subnet" required ng-change="selsubNet(subnet.select)" ng-disabled="!subNetList.length>0">
+                    <ui-select-match>{{$select.selected.subnetName}}</ui-select-match>
+                    <ui-select-choices  repeat="item in subNetList | filter: {subnetName : $select.search} ">
+                      <div ng-bind-html="item.subnetName | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                  <button type="button" class="btn btn-refresh"><i class="icon-aw-refresh green" ng-click="refreshNet()"></i></button>
+                  <span class="orange" ng-if="hasSubNet">可用区内无有效子网，请更换可用区或新建子网</span>
+                  <span class="tips" ng-if="netNum.show">共<span ng-bind="netNum.totalIPNum" class=""></span>个子网IP，剩<span ng-bind="netNum.availableIPNum" class=""></span>个可用</span>
+              </div>
+              <span class="tips">如现有的网络不合适，您还可以去控制台 <a target="_blank" ng-href="#/vpc/vpc">新建私有网络</a> 或者 <a target="_blank"  ng-href="#/vpc/subnet">新建子网</a></span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">规格</label>
+            <div class="controls">
+              <div class="btn-item-group btn-item-lg">
+                <button ng-class="{'active':curTypes.type==val.type}" ng-click="selType(val)" ng-repeat="(key,val) in Type">{{val.typeName}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">容量</label>
+            <div class="controls rzslider-box">
+              <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+              <input type="text" ng-model="slider.value" min="slider.options.floor" num-range max="slider.options.ceil"/>
+              <span class="unit">GB</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">类型</label>
+            <div class="controls">热备</div>
+          </div>
+          <!-- <div class="control-group">
+            <label class="control-label">指定项目:</label>
+            <div class="controls">
+              <ui-select ng-model="project.selected" ng-change="selectedProject(project.selected)" name="project" title="项目切换">
+                <ui-select-match placeholder="项目切换">{{$select.selected.projectName}}</ui-select-match>
+                <ui-select-choices repeat="item in projectList | filter:{projectName:$select.search}">
+                  <div ng-bind-html="item.projectName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div> -->
+          <div class="control-group">
+            <label class="control-label">购买数量</label>
+            <div class="controls">
+              <div class="count-box" count-box count="goodsNum" count-min="1" count-max="10">
+                <span class="minus">-</span>
+                <input type="text" ng-model="goodsNum" class="button-num" required/>
+                <span class="add">+</span>
+              </div> 台
+
+              
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label"><i class="red">*</i> 密码</label>
+            <div class="controls">
+              <input type="password" name="password" id="password" ng-model="password" class="form-control input-lg" regpass ng-minlength="8" ng-maxlength="16" placeholder="至少包含字母、数字和字符（_+-&=!@#$%^*()）中的两种,且长度为8-16个字符" required />
+              <form-validate class="error" min-num="8" max-num="16" ng-messages="(submitalid || newRedis.password.$dirty) && newRedis.password.$error"></form-validate>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label"><i class="red">*</i> 确认密码</label>
+            <div class="controls">
+                <input type="password" name="repassword" ng-model="repassword" class="form-control input-lg" placeholder="请再次输入密码" required pw-check="password"/>
+                <form-validate class="error" ng-messages="(submitalid || newRedis.repassword.$dirty) && newRedis.repassword.$error"></form-validate>
+            </div>
+
+          </div>
+          <div class="control-group">
+            <label class="control-label">购买时长</label>
+            <div class="controls">
+              <div class="btn-item-group btn-item-xs">
+                <button ng-class="{'active':item.value==curPeri}" ng-click="selPeri(item)" ng-repeat="item in periodList">{{item.text}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">总计费用</label>
+            <div class="controls">
+              <span ng-if="priceIng" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+              <div class="price-tips" ng-class="{'in':!priceIng}">
+                <span class="unit-box">{{price}}<span class="unit-txt">元</span></span>
+              </div>
+              
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">&nbsp;</label>
+            <div class="controls">
+              <button class="btn btn-info" type="button" ng-disabled="subMt" ng-click="confirm(newRedis)">确定</button>
+            </div>
+          </div>
+
+        </form>
+  </div>
+</div>

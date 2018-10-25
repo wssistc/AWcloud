@@ -1,0 +1,342 @@
+<div class="page-inner">
+<uib-tabset active="">
+  <uib-tab index="0"  heading='{{"aws.workflow.apply"|translate}}'>
+    <div class="ticket">
+      <div class="title">{{"aws.workflow.ticket"|translate}}</div>
+      <ul class="data-list">
+        <li ng-repeat="item in ticketQuestions">
+          <div class="inner">
+            <div class="icon-box">
+              <i class="{{item.icon}}"></i>
+            </div>
+            <div class="text">
+              <h5>{{"aws.workflow."+item.title | translate}}</h5>
+              <p>{{"aws.workflow."+item.dec | translate}}</p>
+              <span class="action" ng-click="ticketApply(item.type)">{{"aws.workflow."+item.button | translate}}</span>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </uib-tab>
+  <uib-tab index="1"  heading='{{"aws.workflow.applied"|translate}}' ng-click="tiApp()">
+    <div class="table-action">
+      <div class="search-box">
+        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+          <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+          <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="create.globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+        </form>
+      </div>
+    </div>
+    <div class="table-content">
+      <table ng-table="tableParams" class="table">
+        <colgroup>
+          <col width="16.67%">
+          <col width="16.67%">
+          <col width="16.67%">
+          <col width="16.67%">
+          <col width="16.67%">
+          <col width="16.67%">
+        </colgroup>
+        <tr ng-repeat="item in $data">
+          <td data-title="headers.title"  sortable="'title'">
+            <div class="edit-name edit-lg">
+              <a  ng-if="item.status!='status'" ng-click="listType('resource',item)" title="{{item.title}}">{{item.title}}</a>
+              <a  ng-if="item.status=='status'" ng-click="listType('reply',item)" title="{{item.title}}">{{item.title}}</a>
+            </div>
+          </td>
+          <td data-title="headers.type"  sortable="'type'">
+            {{item.type}}
+          </td>
+          <td data-title="headers.curStep">
+            <span ng-if="item.endActivityId">{{item.endActivityId}}</span>
+            <span ng-if="!item.endActivityId">{{item.curStep}}</span>
+          </td>
+          <td data-title="headers.startTime">
+            <span ng-if="item.createdtime">
+            	{{item.createdtime | date:'yyyy-MM-dd HH:mm:ss'}}
+            </span>
+          </td>
+          <td data-title="headers.endTime">
+            <span>{{item.endTime}}</span>
+          </td>
+          <td data-title="headers.status">
+            <span ng-if="item.status!='status'">{{"aws.workflow."+item.status | translate}}</span>
+            <span ng-if="item.type == item._type && item.endtime" >
+            	{{item._status}}
+            </span>
+            <span ng-if="item.type == item._type && !item.endtime ">
+            		<button class="btn btn-warning ng-binding" ng-click="closeMesApply(item.id)">{{item._status}}</button>
+            </span>
+          </td>
+        </tr>
+      </table>
+      <loading-data  data="Tabledatas"></loading-data>
+    </div>
+  </uib-tab>
+</uib-tabset> 
+<div ng-controller="detailCtrl">
+    <pane class="detail-body ticket-detail" animation="animation">
+      <div class="workflowStatus" ng-if="ticketsType=='reply'">
+        <div class="detail-title">
+          <a class="an-close" ng-href="/ticket/create" href="/ticket/create" ng-click="SignList()">
+            <i class=" icon-aw-mail-reply"></i>
+          </a>
+          <span>{{wfqa.title}}</span>
+        </div>
+        <div class="assiginTiltle">
+          <span>{{"aws.workflow.initialAssigneeName" | translate}} ：{{wfqa.proposer}}</span>
+          <span>{{"aws.workflow.applyTime" | translate}} ：{{wfqa.createdtime | date:'yyyy-MM-dd HH:mm:ss'}}</span>
+          <p>{{wfqa.description}}</p>
+        </div>
+        <h4>{{"aws.ticket.allReply" | translate}}</h4>
+        <dl ng-repeat="item in wfqareply">
+          <dt class="dt_ty"><i class="icon-aw-user"></i></dt>
+          <dd class="dd_ty">
+            <div class="Handlename">
+              <span class="name">{{item.createdby}}</span><span class="time">{{item.createdtime | date:'yyyy-MM-dd HH:mm:ss'}}</span>
+            </div>
+            <div class='space-item' ng-bind-html="item.reply|trust_html"></div>
+          </dd>
+        </dl>
+        <div class="replyForm">
+          <form  name="replyForm">
+            <div class="control-group">
+              <div class="controls">
+                <textarea type="text" ng-model="qa.description" name="description" class="form-controls" placeholder="{{'aws.ticket.replyPlaceholder'|translate}}" required ng-maxlength="255"></textarea>
+                <div class="error" ng-messages="(submitValid ||replyForm.description.$dirty) && replyForm.description.$error">
+                  <form-validate max-num = "255"></form-validate>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary" ng-click="Replyconfirm(replyForm)">{{"aws.ticket.reply"| translate}}</button>
+          </form>
+        </div>
+    </div>
+    <div class="workflowStatus"  ng-if="ticketsType=='resource'">
+        <div class="detail-title">
+          <a class="an-close" ng-href="/ticket/create" href="/ticket/create">
+            <i class=" icon-aw-mail-reply"></i>
+          </a>
+          <span>{{"aws.ticket.resourceDetail" | translate}}</span>
+        </div>
+        <div class="assiginResource ">
+          <span>{{"aws.workflow.initialAssigneeName" | translate}} ：{{processVariable.applyUser}}</span>
+          <span>{{"aws.workflow.applyTime" | translate}}：{{processVariable.createdtime}}</span>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.ticket.approvalResult"|translate}}：</label>
+          <div class="controls refuseColor" ng-if="processVariable.approve=='2'">
+            <i class="icon-aw-1shut-down"></i><span>{{"aws.ticket.refuse"|translate}}</span>
+          </div>
+          <div class="controls approvalColor" ng-if="processVariable.approve=='1'">
+            <i class="icon-aw-correct"></i><span>{{"aws.ticket.approval"|translate}}</span>
+          </div>
+          <div class="controls approvalColor" ng-if="processVariable.approve=='0'">
+            <span>{{"aws.ticket.approvalStyle.unapproved"|translate}}</span>
+          </div>
+        </div>
+        <div class="control-group" ng-if="processVariable.approve=='2'">
+          <label class="control-label">{{"aws.ticket.refuseReason"|translate}}：</label>
+          <div class="controls">
+            <span>{{processVariable.dec}}</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.workflow.description"|translate}}：</label>
+          <div class="controls">
+            <table class="table table-info column">
+              <colgroup>
+                <col width="25%">
+                <col width="25%">
+                <col width="25%">
+                <col width="25%">
+              </colgroup>
+              <tbody>
+                <tr>
+                  <td>{{"aws.ticket.domainUid" | translate}}</td>
+                  <td>{{processVariable.domainUid}}</td>
+                  <td>{{"aws.ticket.projectname" | translate}}</td>
+                  <td>{{processVariable.projectname}}</td>
+                </tr>
+                <tr>
+                  <td>{{"aws.workflow.variables.quota.instances" | translate}}</td>
+                  <td>{{processVariable.quota.instances}}</td>
+                  <td>{{"aws.workflow.variables.quota.cores" | translate}}</td>
+                  <td>{{processVariable.quota.cores}}</td>
+                </tr>
+                <!-- <tr>
+                  <td>{{"aws.workflow.variables.quota.volumes" | translate}}</td>
+                  <td>{{processVariable.quota.volumes}}</td>
+                  <td>{{}}</td>
+                  <td>{{}}</td>
+                </tr> -->
+                <tr>
+                  <td>{{"aws.workflow.variables.quota.ramGb" | translate}}</td>
+                  <td>{{processVariable.quota.ram}}</td>
+                  <td>{{"aws.workflow.variables.quota.snapshots" | translate}}</td>
+                  <td>{{processVariable.quota.snapshots}}</td>
+                </tr>
+                <tr>
+                  <td>{{"aws.workflow.variables.quota.volumes" | translate}}</td>
+                  <td>{{processVariable.quota.volumes}}</td>
+                  <td ng-if="L3">{{"aws.workflow.variables.quota.floatingip" | translate}}</td>
+                  <td ng-if="L3">{{processVariable.quota.floatingip}}</td>
+                  <td ng-if="!L3"></td>
+                  <td ng-if="!L3"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+    </div>
+  </pane>
+</div>
+
+  
+<script type="text/ng-template" id="ticketQa.html">
+  <div class=" modal-common">
+    <form name="ticketQaForm" novalidate>
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{"aws.workflow.tickTitle"|translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">{{"aws.workflow.addressee"|translate}}：</label>
+          <div class="controls">
+            <div class="choose-box">
+              <ui-select ng-model="Addresseegroup.selected" multiple  required >
+                <ui-select-match placeholder="{{'aws.workflow.user'|translate}}">{{$item.name}}</ui-select-match>
+                <ui-select-choices repeat="data in Addressee | filter:{name:$select.search}">
+                  <div class="choose" ng-bind-html="data.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.workflow.title"|translate}}：</label>
+          <div class="controls">
+            <input type="text" ng-model="qa.title" name="title" class="form-controls" placeholder="{{'aws.workflow.informationTitle'|translate}}" required ng-maxlength="32"/>
+            <div class="error" ng-messages="(submitValid ||ticketQaForm.title.$dirty)&&ticketQaForm.title.$error">
+              <form-validate max-num = "32"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.workflow.description"|translate}}：</label>
+          <div class="controls">
+            <textarea type="text" ng-model="qa.description" name="description" class="form-controls" placeholder="{{'aws.workflow.informationDescription'|translate}}" required ng-maxlength="255"></textarea>
+            <div class="error" ng-messages="(submitValid ||ticketQaForm.description.$dirty) && ticketQaForm.description.$error">
+              <form-validate max-num = "255"></form-validate>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info ng-binding" ng-click="ticketQaconfirm(ticketQaForm)">{{"aws.action.ok"| translate}}</button>
+        <button class="btn btn-default ng-binding" type="button" ng-click="$dismiss()">{{"aws.action.cancel"| translate}}</button>
+      </div>  
+    </form>
+  </div>
+</script>
+
+<script type="text/ng-template" id="ticketResource.html">
+  <div class="modal-common">
+    <form name="resourceForm" novalidate>
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{"aws.workflow.resTitle"|translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">{{"aws.workflow.department"|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="tickets.depart.selected" ng-disabled="departDisabled" ng-change="changedepart(tickets.depart.selected)">
+              <ui-select-match placeholder="{{'aws.workflow.departName'|translate}}">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat=" depart in tickets.deparList | filter:{name:$select.search}">
+                <div ng-bind-html="depart.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.workflow.project"|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="tickets.pro.selected" ng-disabled="proDisabled" required name="proName" ng-change="changePro(tickets.pro.selected)">
+              <ui-select-match placeholder="{{'aws.workflow.projectName'|translate}}">{{$select.selected.projectname}}</ui-select-match>
+              <ui-select-choices repeat="pro in tickets.projectsList | filter:{projectname:$select.search}">
+                <div ng-bind-html="pro.projectname | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="(submitValid || resourceForm.proName.$dirty) && resourceForm.proName.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-repeat="quota in quotas">
+          <label class="control-label">{{'aws.quota.'+quota.name | translate}}：</label>
+          <div class="controls">
+            <input type="text" ng-model="quota.num" ng-pattern="/^([1-9][0-9]*|0)$/" name="{{quota.name}}" class="form-controls" required/>
+            <div class="error" ng-messages="(submitValid ||resourceForm[quota.name].$dirty) && resourceForm[quota.name].$error">
+              <form-validate pattern-msg="'aws.errors.integerAndZero'|translate"></form-validate>
+              <div ng-message="quotaLimit">{{"aws.workflow.qutaError"|translate}}</div> 
+            </div>
+          </div>
+        </div>
+        <!-- <div class="control-group">
+          <label class="control-label">cpu核(个)：</label>
+          <div class="controls">
+            <input type="text" ng-model="tickets.cpu" ng-pattern="/^([1-9][0-9]*|0)$/" name="cpu" class="form-controls" required />
+            <div class="error" ng-messages="(submitValid ||resourceForm.cpu.$dirty) && resourceForm.cpu.$error">
+              <form-validate pattern-msg="'aws.errors.integerAndZero'|translate"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">公网IP(个)：</label>
+          <div class="controls">
+            <input type="text" ng-model="tickets.floatingips" ng-pattern="/^([1-9][0-9]*|0)$/" name="floatingips" class="form-controls" required />
+            <div class="error" ng-messages="(submitValid ||resourceForm.floatingips.$dirty) && resourceForm.floatingips.$error">
+              <form-validate pattern-msg="'aws.errors.integerAndZero'|translate"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">虚拟机(个)：</label>
+          <div class="controls">
+            <input type="text" ng-model="tickets.vm" ng-pattern="/^([1-9][0-9]*|0)$/" name="vm" class="form-controls" required/>
+            <div class="error" ng-messages="(submitValid ||resourceForm.vm.$dirty) && resourceForm.vm.$error">
+              <form-validate pattern-msg="'aws.errors.integerAndZero'|translate"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">内存(M)：</label>
+          <div class="controls">
+            <input type="text" ng-model="tickets.mem" ng-pattern="/^([1-9][0-9]*|0)$/" name="mem" class="form-controls" required />
+            <div class="error" ng-messages="(submitValid ||resourceForm.mem.$dirty) && resourceForm.mem.$error">
+              <form-validate pattern-msg="'aws.errors.integerAndZero'|translate"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">磁盘快照(个)：</label>
+          <div class="controls">
+            <input type="text" ng-model="tickets.snapshots" ng-pattern="/^([1-9][0-9]*|0)$/" name="snapshots" class="form-controls" required />
+            <div class="error" ng-messages="(submitValid ||resourceForm.snapshots.$dirty) && resourceForm.snapshots.$error">
+              <form-validate pattern-msg="'aws.errors.integerAndZero'|translate"></form-validate>
+            </div>
+          </div>
+        </div> -->
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info ng-binding" ng-click="resourceConfirm(resourceForm)">{{"aws.action.ok"| translate}}</button>
+        <button class="btn btn-default ng-binding" type="button" ng-click="$dismiss()">{{"aws.action.cancel"| translate}}</button>
+      </div>
+    </form>
+  </div>  
+</script>
+
+

@@ -1,0 +1,33 @@
+<div>
+	<div class="total clearfix" ng-if='progressValue.icon'>
+		<i class="{{progressValue.icon}}"></i>
+		<div class="quotaNum">
+			<!-- <input class="dep-quota-total" id="quotaNumber" ng-if="progressValue.isEdit" ng-model="progressValue.total" /> -->
+			
+			<!-- <input class="dep-quota-total dep-quota-total-css" disabled ng-model="progressValue.total" /> -->
+			<span class="quota-total">{{progressValue.total}}</span> 
+			<span class="quotaName">{{progressValue.type}}</span>
+		</div>
+	</div>
+	<div class='progress {{barType}}'>
+		<div class='progress-bar {{progressValue.bar_style}}'>
+		</div>
+	</div> 
+	<div class="used" ng-if="progressValue.icon">已使用：{{progressValue.used}}</div>
+	<div class="resBox" ng-if='!progressValue.icon'>
+		<div class="insTitle clearfix">
+			<span class="instype">{{progressValue.name}}: </span>
+			<span class="insnum">100</span>
+		</div>
+		<ul>
+			<li class="clearfix">
+				<span class="instype">正常: </span>
+				<span class="insnum {{type}}">{{progressValue.normal}} </span>
+			</li>
+			<li class="clearfix">
+				<span class="instype">异常: </span>
+				<span class="insnum {{type}}">{{progressValue.abnormal}} </span>
+			</li>
+		</ul>
+	</div>
+</div>

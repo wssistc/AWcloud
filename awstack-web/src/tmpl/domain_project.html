@@ -1,0 +1,24 @@
+<div class="region-domain-project clearFix" ng-show="isDomainProjectShow">
+    <div class="domain-project-group">
+    	<div class="group-display">
+	    	<i class="icon-aw-xmgl"></i>
+	    	<span class="domain-name">{{tops.depart.selected.disDomainName}}</span>/
+	    	<span class="project-name">{{tops.pro.selected.disProjectName}}</span>
+    	</div>
+    	<div class="domain-list" ng-show="showListTips&&!MEM_ADMIN">
+    		<i class="tip-arrow"></i>
+    		<div class="dp-title">部门&nbsp;/&nbsp;项目</div>
+    		<ul class="domain-lists">
+    			<li class="domain-item" ng-repeat="dom in tops.deparList"  ng-mouseenter="domainMouse(dom)" title="{{dom.disDomainName}}" >
+    				<span class="length-limit">{{dom.disDomainName}}</span>
+    				<i class="icon-aw-angle-right-1" ng-show="dom.projects.length>0"></i>
+    				<ul class="projects-list" ng-show="dom.projects.length>0">
+    					<li ng-repeat="pro in dom.projects" ng-click="changeproject(pro)" title="{{pro.disProjectName}}">
+    						<span class="length-limit">{{pro.disProjectName}}</span>
+    					</li>
+    				</ul>
+    			</li>
+    		</ul>
+    	</div>
+    </div>
+</div>

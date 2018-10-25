@@ -1,0 +1,63 @@
+<div ng-controller="systemVolumesCtrl">
+    <div class="table-action">
+            <button type="button" data-toggle="modal" ng-disabled="!btn.canEdit" ng-click="openVolumeModel('systemEdit',editData,getData)" class="btn btn-normal"  licence-type="btn" id="resource-sysVol-edit"><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+            <button type="button" data-toggle="modal" ng-disabled="!btn.canDelSys" ng-click="deleteVolumes(checkedItems)" class="btn btn-normal" licence-type="btn" id="resource-sysVol-delSever"><i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+            <button class="btn btn-normal" ng-click="DistStockTransfer(checkedItems,'fromData',getData)"
+            ng-class="{'disabled':!btn.canStockTransfer}"
+            ng-disabled="!ADMIN"
+            uib-popover="{{!btn.limit['os-retype']?storageTypeTip:stockTransferTip}}"
+            popover-enable="!btn.canStockTransfer" popover-trigger="mouseenter" popover-placement = "bottom">
+            <i class="icon-aw-qy"></i>&nbsp{{'aws.volumes.stockTransfer'|translate}}</button>
+            <button  ng-show="ADMIN" class="btn btn-normal" ng-click="resetVolumeStatus(editData)"
+                ng-class="{'disabled':!btn.resetVol}"
+                uib-popover="{{isDisabled?('aws.volumes.tip.tip10'|translate):resetVolumeStatusTip}}"
+                popover-enable="!btn.resetVol " popover-trigger="mouseenter" popover-placement = "left">
+                重置状态
+            </button>
+        <div class="pull-right">
+            <into-information modular="'volumesSystem'"></into-information>
+            <search-refresh  class="rs" refresh-fuc="getData" context= "context" table-content="'systemTableParams'" table-data="system_data" status-list="searchList" btn-type="checkbox"></search-refresh>  
+            <!-- <setting-col  title-data="tableCols" site-title="titleName" table-data="system_data" config-search="configSearch" ></setting-col> -->
+        </div>
+    </div>
+        
+    <div class="table-content">
+        <table ng-table-dynamic="systemTableParams with tableCols" class="table" show-filter="false">
+            <tr ng-repeat="obj in $data">
+                <td ng-repeat="item in $columns" ng-switch="item.field" >
+                    <label class="checkbox" ng-switch-when="check">
+                        <input name="check" type="checkbox" value={{obj.id}} ng-model="checkboxessystemTableParams.items[obj.id]" >
+                        <i class="iconfont"></i>
+                    </label>
+                    <span ng-switch-when="name" >
+                        <div class="edit-name">
+                            <a ng-href="#/cvm/volumes?id={{obj.id}}" title="{{obj.name}}">{{obj.name}}</a>
+                        </div>
+                    </span>
+                    <span ng-switch-when="statusCopy" ng-class="{'bg-green':(obj.status=='downloading'||obj.status=='available'||obj.status=='in-use'),
+                    'bg-blue':(obj.status=='uploading'||obj.status=='creating'||obj.status=='deleting'||obj.status=='attaching'||obj.status=='detaching'
+                    ||obj.status=='extending'||obj.status=='retyping'|| obj.status=='backing-up' || obj.status=='restoring-backup' || obj.status=='rollbacking'),
+                    'bg-orange':(obj.status=='inavailable'||obj.status=='unrecognized'||obj.status=='error-deleting'|| obj.status=='error_restoring' || obj.status=='error-restoring'),
+                    'bg-red':(obj.status=='error')}">{{"aws.volumes.table.status."+obj.status | translate}}
+                    <i ng-class="{'icon-aw-refresh':(obj.status=='creating' || obj.status=='deleting'|| obj.status=='attaching'|| obj.status=='detaching' || obj.status=='retyping'
+                    || obj.status=='backing-up' || obj.status=='restoring-backup')}" class="aw-spin"></i>
+                    </span>
+                    <span ng-switch-when="description" class="des des-sm">
+                        {{obj[item.field]}}
+                    </span>
+                    <span ng-switch-default>{{obj[item.field]}}</span>
+                </td>
+            </tr>
+        </table>
+        <service-tip service = "'cinder'"  menus="menuGuide"  menu-href="'/system/storageManagement'"></service-tip>
+        <loading-data  data="system_data"></loading-data>
+        
+    </div>
+</div>
+
+<script type="text/ng-template" id="systemheaderCheckbox.html">
+    <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxessystemTableParams.checked" class="select-all-systemTableParams" value="" />
+        <i class="iconfont"></i>
+    </label>
+</script>

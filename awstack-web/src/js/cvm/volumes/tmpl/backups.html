@@ -1,0 +1,324 @@
+<div class="page-inner">
+	<div class="tab-offset-right">
+		<ul class="nav nav-tabs nav-justified">
+			<li ng-class="{active:!showSystemBackups}" class="uib-tab nav-item" ng-click="getBackupsChain(false)">
+				<a href="">{{'aws.backups.dataBackup' | translate}}</a>
+			</li>
+			<li ng-class="{active:showSystemBackups}" class="uib-tab nav-item " ng-click="getBackupsChain(true)">
+				<a href="">{{'aws.backups.systemBackup' | translate}}</a>
+			</li>
+			
+		</ul>
+	</div>
+	<div ng-if="showSystemBackups">
+		<div class="table-action">
+			<button type="button" ng-if = "false" class="btn btn-normal" ng-click="importBackupsChain()" licence-type="btn" id="resource-sysBackups-lead">{{'aws.backups.import' | translate}}</button>
+			<button type="button" ng-if = "false" class="btn btn-normal"
+			uib-popover="{{delisDisabled?('aws.backups.table.placeholder.plsSelItem' | translate):exp_tip}}"
+			popover-enable="exp_btn" popover-trigger="mouseenter" popover-placement = "bottom" 
+			ng-click="exportBackupsChain(checkedItems)" licence-type="btn" id="resource-sysBackups-leadOut">{{'aws.backups.export' | translate}}</button>
+			<button type="button" ng-class="{'disabled':chain_del_btn}" class="btn btn-normal"
+			uib-popover="{{chain_uibpopover}}"
+			popover-enable="chain_del_btn" popover-trigger="mouseenter" popover-placement = "bottom-left" 
+			ng-click="delBackupsChain(checkedItems)" licence-type="btn" id="resource-sysBackups-del" ><i class="icon-aw-delete"></i> {{'aws.action.del' | translate}}</button>
+			<div class="pull-right">
+				<into-information modular="'backups'"></into-information>
+				<setting title-data="backupTableTitleData" site-title="backupTableTitleName" table-data="backupChainTable.data" search-tearm="backupSearchTearm(obj)"></setting>
+				<button class="btn btn-renovat right-ports" ng-click="getBackupsChain(true,'refresh')"><i class="icon-aw-refresh"></i></button>
+				<div class="search-box right-ports">
+					<form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+						<button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+						<input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="option.globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div ng-if="!showSystemBackups">
+		<div class="table-action">
+			<button type="button" ng-if = "false" class="btn btn-normal" ng-click="importBackupsChain()" licence-type="btn" id="resource-dataBackups-lead">{{'aws.backups.import' | translate}}</button>
+			<button type="button" ng-if = "false" ng-class="{disabled':!exp_btn}" class="btn btn-normal"
+			uib-popover="{{delisDisabled?('aws.backups.table.placeholder.plsSelItem' | translate):exp_tip}}"
+			popover-enable="exp_btn" popover-trigger="mouseenter" popover-placement = "bottom" 
+            ng-click="exportBackupsChain(checkedItems)" licence-type="btn" id="resource-dataBackups-leadOut">{{'aws.backups.export' | translate}}</button>
+			<button type="button" ng-class="{'disabled':chain_del_btn}" class="btn btn-normal"
+			uib-popover="{{chain_uibpopover}}"
+			popover-enable="chain_del_btn" popover-trigger="mouseenter" popover-placement = "bottom-left" 
+			ng-click="delBackupsChain(checkedItems)" licence-type="btn" id="resource-dataBackups-del" ><i class="icon-aw-delete"></i> {{'aws.action.del' | translate}}</button>
+			<div class="pull-right">
+				<setting title-data="backupTableTitleData" site-title="backupTableTitleName" table-data="backupChainTable.data" search-tearm="backupSearchTearm(obj)"></setting>
+				<button class="btn btn-renovat  right-ports" ng-click="getBackupsChain(false,'refresh')"><i class="icon-aw-refresh"></i></button>
+				<div class="search-box right-ports">
+					<form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+						<button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+						<input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="option.globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="table-content">
+		<table ng-table="backupChainTable" class="table">
+			<tr ng-repeat="item in $data">
+				<td header="'headerCheckboxBackupChainTable.html'" class="check-td">
+					<label class="checkbox">
+						<input type="checkbox" name="r" ng-model="checkboxesbackupChainTable.items[item.id]" value="{{item.id}}" />
+						<i class="iconfont"></i>
+					</label>
+				</td>
+				<td data-title="translateChain.chainName" sortable="'name'" ng-if="backupTableTitleData[0].value">
+					<div class="edit-name">
+						<a ng-href="#/cvm/backups?id={{item.volumeId}}&type={{showSystemBackups}}" title="{{item.name}}">{{item.name}}</a>
+					</div>
+				</td>
+				<td data-title="translateChain.volumeName" sortable="'volumeName'" ng-if="backupTableTitleData[1].value" >{{item.volumeName}}</td>
+				<td data-title="translateChain.chainStatus" sortable="'status'" ng-if="backupTableTitleData[2].value" >
+					<span ng-class="{'bg-green':(item.status=='normal'),
+					'bg-orange':(item.status=='warning'),'bg-red':(item.status=='error')}">
+						{{"aws.backups.table.status.chain."+item.status | translate}}
+						<i ng-class="{'icon-aw-refresh':(item.status=='creating' || item.status=='deleting'|| item.status == 'restoring' )}" class="aw-spin"></i>
+					</span>
+				</td>
+				
+				<td data-title="translateChain.size" sortable="'size'" ng-if="backupTableTitleData[3].value" >{{item.size+' GB'}}</td>
+				<td data-title="translateChain.backupPoint" sortable="'num'" ng-if="backupTableTitleData[4].value" >{{item.num}}</td>
+				<td data-title="translateChain.createAt" sortable="'createdAt'" ng-if="backupTableTitleData[5].value" >{{item.createdAt |date:'yyyy-MM-dd HH:mm:ss'}}</td>
+			</tr>
+		</table>
+		<service-tip service = "'backups'"  menus=['系统管理','运维管理','存储管理']  menu-href="'/system/storageManagement'"></service-tip>
+		<loading-data  data="chaintabledata"></loading-data>
+	</div>
+	
+</div>
+<script type="text/ng-template" id="headerCheckboxBackupChainTable.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-model="checkboxesbackupChainTable.checked" class="select-all-backupChainTable" value="" />
+		<i class="iconfont"></i>
+	</label>
+</script>
+<div class="detailIns-box">
+	<div class= 'animateContent  {{insAnimation}} '>
+		<div class='detailInner'>
+			<div class="tab-content">
+				<div class="detail-title">
+				<a class="an-close" ng-click="closeNewIns()"><i class=" icon-aw-mail-reply"></i></a>
+				<span>{{'aws.instances.addinstances.newInstance'|translate}}</span>
+				</div>
+				<div class="detail-info"  ng-if="insAnimation == 'animateIn'">
+				<div ng-controller ="createInsCtrl" ng-include = "'js/shortcuts/instances/tmpl/createIns.html'"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class='animate-backup'></div>
+</div>
+<div ng-controller="detailCtrl">
+	<div ng-contorller="backupsCtrl">
+		<pane class="detail-body" animation="animation">
+			<div class="tab-content">
+				<div class="detail-row">
+					<div class="detail-title">
+						<a class="an-close" ng-click = "closeDetail()" ng-href="#/cvm/backups?type={{showSystemBackups}}"><i class="icon-aw-mail-reply"></i></a>
+						<span>{{'aws.backups.backupDetail.detail' | translate}}</span>
+					</div>
+					<div class="detail-info">
+						<div class="tab-content-line"></div>
+						<div class="table-action">
+							<button type="button" ng-class="{'disabled':!isbackupVolume||hasTask}"
+							class="btn btn-normal" uib-popover="{{(!isbackupVolume || hasTask)?newBackupTip:''}}"
+							popover-enable="!isbackupVolume || hasTask" popover-trigger="mouseenter" 
+							popover-placement = "bottom-left" ng-click="volumeBackup(backupVolumeDetailData)"><i class="icon-aw-add-to2"></i>{{'aws.backups.backupDetail.addBackup' | translate}}</button>
+							
+							<button type="button"ng-class="{'disabled':!volume_btn,}" 
+							class="btn btn-normal" uib-popover="{{!btn.limit['volumes_backup']?storageTypeTip:backupVolumeTip}}"
+							popover-enable="!volume_btn" popover-trigger="mouseenter" popover-placement = "bottom"  ng-click="newVolume(editDatabackupTable)"  ng-show="ListApplication">
+							<i class="icon-aw-add-to2"></i>{{'aws.backups.backupDetail.addVolume' | translate}}</button>
+							
+							<button type="button" ng-click="newInstance(editDatabackupTable)" ng-class="{'disabled':!vm_btn}" 
+							class="btn btn-normal" uib-popover="{{isDisabled?checkedItemsbackupTable.length==0?('aws.backups.table.placeholder.plsSelSigItem' | translate):('aws.backups.table.placeholder.createInstanceMultipleChoice' | translate):('aws.backups.tips.tip6'| translate)}}"
+							popover-enable="!vm_btn" popover-trigger="mouseenter" 
+							popover-placement = "bottom" ng-show="showSystemBackups&&ListApplication"><i class="icon-aw-add-to2"></i>{{'aws.backups.backupDetail.addvm' | translate}}</button>
+							
+							<button type="button"  ng-click="restoreBackup(checkedItemsbackupTable)" ng-class="{'disabled':restore_btn||isDisabled || restoreStatus_btn}" 
+							class="btn btn-normal" uib-popover="{{isDisabled?checkedItemsbackupTable.length==0?('aws.backups.table.placeholder.plsSelSigItem' | translate):('aws.backups.table.placeholder.restoreMultipleChoice' | translate):restoreBackupTip}}"
+							popover-enable="restore_btn  || restoreStatus_btn" popover-trigger="mouseenter" 
+							popover-placement = "bottom"><i class="icon-aw-hy"></i>{{'aws.backups.backupDetail.restore' | translate}}</button>
+							
+							<button type="button"  ng-click="resetBackup(editDatabackupTable)" ng-class="{'disabled':!reset_btn}" 
+							class="btn btn-normal" uib-popover="{{isDisabled?checkedItemsbackupTable.length==0?('aws.backups.table.placeholder.plsSelSigItem' | translate):('aws.backups.table.placeholder.resetMultipleChoice' | translate):('aws.backups.tips.tip5'| translate)}}"
+							popover-enable="!reset_btn" popover-trigger="mouseenter" 
+							popover-placement = "bottom" ng-if="ADMIN"><i class="icon-aw-cz"></i>{{'aws.backups.resetStatus' | translate}}</button>
+							
+							<button type="button" ng-class="{'disabled':del_btn}" 
+							class="btn btn-normal" uib-popover="{{isDisabled?checkedItemsbackupTable.length==0?('aws.backups.table.placeholder.plsSelSigItem' | translate):('aws.backups.table.placeholder.multipleChoice' | translate):del_tip}}"
+							popover-enable="del_btn" popover-trigger="mouseenter" popover-placement = "bottom" 
+                            ng-click="delBackups(checkedItemsbackupTable)"><i class="icon-aw-delete"></i>{{'aws.action.del' | translate}}</button>
+                            
+                            <setting title-data="titleData" site-title="titleName" table-data="backuptabledata" ></setting>
+                            <!-- <setting title-data="titleData" site-title="titleName"></setting>  -->
+                            
+                            <div type="button" class="btn btn-renovat right-ports" ng-click="refreshBackups()">
+                                <i class="icon-aw-refresh"></i>
+                            </div>
+                        </div>
+                        
+						<div class="table-content">
+							<table ng-table="backupTable" class="table">
+								<tr ng-repeat="item in $data">
+									<td header="'headerCheckboxBackupTable.html'" class="check-td">
+										<label class="checkbox">
+											<input type="checkbox" name="r" ng-model="checkboxesbackupTable.items[item.id]" value="{{item.id}}" />
+											<i class="iconfont"></i>
+										</label>
+									</td>
+									<td data-title="translate.name" ng-if="titleData[0].value">
+										<i  class ="ars" ng-class="{
+										'all':(item.isIncremental && item.hasDependentBackups),
+										'half-top':(item.isIncremental && !item.hasDependentBackups),
+										'half-bottom':(!item.isIncremental && item.hasDependentBackups ),
+										}"></i>
+										<div class="edit-name " title="{{item.name}}" ng-class="{'show':item.isIncremental}">
+											<div class="arrow-right">
+												<i class="icon-aw-wrong error" ng-show="item.status == 'error'&&item.isIncremental" ></i>
+												<i class="line"></i>
+												<i class="arr"></i>
+											</div>
+											
+											{{item.name}}
+											<!-- <a ng-href="#/cvm/backups?id={{item.volumeId}}&type={{showSystemBackups}}&deepId={{item.id}}" title="{{item.name}}">{{item.name}}</a> -->
+										</div>
+									</td>
+									<td data-title="translate.vm"  ng-if="titleData[1].value">
+										<span ng-repeat="insName in item.serverNames track by $index">{{insName}}<br></span>
+									</td>
+									<td data-title="translate.createAt" ng-if="titleData[2].value">{{item.createdAt |date:'yyyy-MM-dd HH:mm:ss'}}</td>
+									<td data-title="translate.size"  ng-if="titleData[3].value">{{item.size+' GB'}}</td>
+									<td data-title="translate.backupStatus" ng-if="titleData[4].value">
+										<span ng-class="{'bg-green':(item.status=='available'||item.status=='in-use'),
+										'bg-blue':(item.status=='creating'||item.status=='deleting'|| item.status == 'restoring' ),
+										'bg-orange':(item.status=='inavailable'),
+										'bg-red':(item.status=='error')}">
+											{{"aws.backups.table.status."+item.status | translate}}
+											<i ng-class="{'icon-aw-refresh':(item.status=='creating' || item.status=='deleting' || item.status == 'restoring' )}" class="aw-spin"></i>
+										</span>
+									</td>
+									<td data-title="translate.backupType"  ng-if="titleData[5].value">{{"aws.backups.table.isIncremental."+item.isIncremental | translate}}</td>
+								</tr>
+							</table>
+							<loading-data  data="backuptabledata"></loading-data>
+						</div>
+					</div>
+				</div>
+			</div>
+		</pane>
+	</div>
+</div>
+
+<script type="text/ng-template" id="headerCheckboxBackupTable.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-model="checkboxesbackupTable.checked" class="select-all-backupTable" value="" />
+		<i class="iconfont"></i>
+	</label>
+</script>
+<script  type="text/ng-template" id="resetBackup.html">
+	<div class=" modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" ng-click="$close()">×</button>
+			<h3 class="modal-title">{{'aws.backups.resetStatus' | translate}}</h3>
+		</div>
+		<div class="modal-body ">
+			<form name="resetBackupForm">
+				<div class="control-group">
+					<label class="control-label">{{'aws.backups.selectStatus' | translate}}：</label>
+					<div class="controls">
+					  <ui-select ng-model="reset.toStatus" name="status" required>
+						<ui-select-match>{{$select.selected.name}}</ui-select-match>
+						<ui-select-choices repeat="item in toStatuseList | propsFilter: {name: $select.search}">
+						  <div ng-bind-html="item.name | highlight: $select.search"></div>
+						</ui-select-choices>
+					  </ui-select>
+					  <div class="error" ng-messages="(submitInValid ||resetBackupForm.status.$dirty) && resetBackupForm.status.$error">
+						<form-validate></form-validate>
+					  </div>
+					</div>
+				</div> 
+			</form>
+		</div>
+		<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-disabled = "" ng-click="resetBackupConfirm(resetBackupForm)">{{'aws.instances.addinstances.ok'|translate}}</button>
+			<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+		</div>
+	</div>
+</script>
+
+<script type="text/ng-template" id="importBackups.html">
+  	<div class=" modal-common">
+    	<div class="modal-header">
+      		<button type="button" class="close" ng-click="$close()">×</button>
+      		<h3 class="modal-title">{{'aws.backups.importTitle' | translate}}</h3>
+    	</div>
+	    <div class="modal-body">
+	      	<form name="impBackupsForm">
+	        	<div class="control-group">
+	          		<label class="control-label">{{'aws.backups.backupFile' | translate}}：</label>
+	          		<div class="controls">
+	            		<div class="file-box clearfix">
+	              			<input type="text" class="form-left" name="license" required ng-model="selected_file" ng-readonly='true'>
+	              			<div class="file-item">
+	                			<a href="javascript:void(0);" class="file-btn">
+	                				<input  name="file" type="file" id="upload" class="file-input" onchange="angular.element(this).scope().fileNameChanged()">
+	                			</a>
+	                			<button type="button" class="file-choose-bg" >{{'aws.backups.chooseFile' | translate}}</button>
+	              			</div>
+	            		</div>
+	            		<div class="error" ng-messages="(submitInValid ||impBackupsForm.license.$dirty) && impBackupsForm.license.$error">
+	              			<form-validate></form-validate>
+	            		</div>
+	            		<div class="error" ng-if="fileCheck">
+	              			{{"aws.backups.tips.fileCheck"|translate}}
+	            		</div>
+	          		</div>
+	        	</div>
+	      	</form>
+	    </div>
+	    <div class="modal-footer">
+	      	<button class="btn btn-primary" type="button" ng-click="importConfirm(impBackupsForm)">{{'aws.action.ok'|translate}}</button>
+	      	<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+	    </div>
+  	</div>
+</script>
+
+<!-- <div ng-controller="detailCtrl">
+	<pane class="detail-body detail" animation="animation">
+		<div class="tab-content">
+			<div class="detail-row">
+			<div class="detail-title">
+				<a class="an-close" ng-href="#/cvm/backups?id={{volumeId}}&type={{showSystemBackups}}"><i class="icon-aw-mail-reply"></i></a>
+				<span>备份详情</span>
+			</div>
+			<div class="detail-info">
+				<table class="table table-info column">
+				<tr>
+					<td>备份名称</td>
+					<td>{{detailData.name}}</td>
+					<td>云硬盘名称</td>
+					<td>{{detailData.volumeName}}</td>
+				</tr>
+				<tr>
+					<td>云主机名称</td>
+					<td>{{detailData.serverName}}</td>
+					<td>备份状态</td>
+					<td>{{detailData.status}}</td>
+				</tr>
+				<tr>
+					<td>大小</td>
+					<td>{{detailData.size}}</td>
+					<td>备份类型</td>
+					<td>{{detailData.isIncremental}}</td>
+				</tr>
+				</table>
+			</div>
+			</div>
+		</div>
+	</pane>
+</div> -->

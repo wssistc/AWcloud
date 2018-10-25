@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>容器集群</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <h3>
+	删除副本</h3>
+<p>
+	进入容器集群详情页面，在副本列表区选择需要删除的副本，单击&ldquo;删除集群副本&rdquo;按钮，在弹出的确认框里单击&ldquo;确定&rdquo;按钮。</p>
+<p>
+	<strong>说明</strong>：<br />
+	删除任意一个副本，集群负责重新启动一个副本，并将云硬盘重新挂载到新的容器里面，实现了容器的生命周期与持久化存储的生命周期的分离。</p>
+<h3>
+	集群动态伸缩</h3>
+<p>
+	<strong>注意</strong>：<br />
+	如果容器集群使用了云硬盘作为持久化存储，则副本数只能为1，而且不支持动态伸缩。</p>
+<ol>
+	<li>
+		在集群列表区，选择待操作的集群，单击&ldquo;动态伸缩&rdquo;按钮。</li>
+	<li>
+		根据需要增加或减少集群副本数。<br />
+		当实际的Pod数目少于预期值时，副本控制器会根据模板重新创建缺少的Pod，当实际的Pod多于预期值的时候，副本控制器会删除一定数目的Pod。</li>
+	<li>
+		单击&ldquo;确定&rdquo;按钮。</li>
+	<li>
+		在集群列表区查看集群状态。<br />
+		当&ldquo;期望的副本数&rdquo;、&ldquo;当前的副本数&rdquo;和&ldquo;运行中的副本数&rdquo;三个值相同，则容器集群为正常状态。</li>
+</ol>
+<h3>
+	删除容器集群</h3>
+<p>
+	<strong>注意</strong>：<br />
+	集群删除之后，部署在集群上的应用也会同步删除，无法恢复，请慎重删除集群。</p>
+<p>
+	在集群列表区，选择待删除的集群，单击&ldquo;删除&rdquo;按钮，在弹出的确认框里单击&ldquo;确定&rdquo;按钮。</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

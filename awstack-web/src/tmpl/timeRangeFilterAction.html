@@ -1,0 +1,40 @@
+<div class="table-action directive-action-wrap clearfix">
+    <div class="tab-group" ng-show = "query">
+        <div class="time-tab">
+            <span class="btn btn-time" type="button" ng-repeat="item in timeType.options" ng-class="{'active':filterData.timeStep == item.value }" ng-click="timeSelectTab(item.value)">
+                      {{item.name}}
+                    </span>
+            <div class="calendar-select " id="config-demo">
+                <span ng-class="{'active':filterData.timeStep == 'defined' }" ng-click="timeSelectTab('defined')">{{filterData.definedTimeText}}</span>
+                <input type="text" class="form-control time-input">
+                <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+            </div>
+        </div>
+    </div>
+    <div class="btn-group" ng-if = "query">
+        <button class="btn btn-info" ng-disabled="filterData.timeStep == 'defined' && !filterData.definedTime" ng-click="query()"><i class="icon-aw-search"></i>{{'aws.bill.search'|translate}}</button>
+        <button type="button" class="btn btn-default" ng-csv="downloadData()" charset="utf-8" add-bom="true" csv-header="csvHeader" filename="{{fileName}}" ng-if="downloadData"><i class="icon-aw-dc"></i>{{'aws.bill.export'|translate}}</button>
+        <button type="button" class="btn btn-default" ng-if="definedDownloadData" ng-click="definedDownloadData()"><i class="icon-aw-dc"></i>{{'aws.bill.export'|translate}}</button>
+    </div>
+    <div class="dropdown show-title pull-right" ng-if="colsConfig">
+        <button type="button" class="btn btn-renovat dropdown-toggle" data-toggle="dropdown"><i class="icon-aw-list"></i></button>
+        <ul class="dropdown-menu">
+            <li ng-repeat="col in colsConfig track by $index">
+                <div class="check-left">
+                    <label class="checkbox">
+                        <input type="checkbox" class="form-controls chk" name="col_show" ng-disabled="col.disable" ng-model="col.show" ng-change="selectCol()" />
+                        <i class="iconfont"></i>
+                    </label>
+                </div>
+                <span>{{col.title}}</span>
+            </li>
+        </ul>
+    </div>
+    <div type="button" class="btn btn-renovat pull-right" ng-click="refresh()" ng-if="refresh">
+        <i class="icon-aw-refresh"></i>
+    </div>
+    <div class="search-box pull-right" ng-if="search">
+        <button class="btn" type="submit"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="filterData.searchTerm" placeholder="{{'aws.action.search'|translate}}" ng-keyup="search()" />
+    </div>
+</div>

@@ -1,0 +1,890 @@
+<div class="billing page-inner">
+    <div class="setting-box" ng-show="billingSwitchPage">
+        <div class="set-wrap">
+            <div class="control-group">
+                <label class="control-label"><span class="red"> * </span>{{'aws.bill.billAction'|translate}}：</label>
+                <div class="controls">
+                    <div class="checkbox switch-btn">
+                        <label>
+                            <input type="checkbox" class="form-controls" ng-model="billingActive" ng-disabled="!ADMIN">
+                            <i class="iconfont"></i>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div>
+                {{'aws.bill.billActionDescription'|translate}}
+            </div>
+        </div>
+        <div class="btn-wrap text-center">
+            <button class="btn btn-primary" ng-click="billingSwitch()">{{'aws.action.save'|translate}}</button>
+        </div>
+    </div>
+    <div class="billing-box tab-offset-right" ng-show="billingPage">
+        <div class="control-group top">
+            <label class="control-label">{{'aws.bill.billAction'|translate}}：</label>
+            <div class="controls">
+                <div class="checkbox switch-btn">
+                    <label>
+                        <input type="checkbox" class="form-controls" ng-model="billingActive" ng-change="billingSwitch()" ng-disabled="!ADMIN">
+                        <i class="iconfont"></i>
+                    </label>
+                    <span class="orange">{{'aws.bill.billStartTip_1'|translate}} {{billingStartTime}} {{'aws.bill.billStartTip_2'|translate}}</span>
+                </div>
+            </div>
+        </div>
+        <ul class="nav nav-tabs top-nav" ng-init="tab.index=0" ng-show="ADMIN">
+            <li ng-class="{active: tab.index == 0}">
+                <a ng-click="tab.index = 0">{{'aws.bill.consumeStatistic'|translate}}</a>
+            </li>
+            <li ng-class="{active: tab.index == 1}">
+                <a ng-click="tab.index =1">{{'aws.bill.priceManage'|translate}}</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane" ng-class="{active: tab.index == 0}" ng-controller="billingStatisticCtrl">
+                <div my-daterangepicker filter-data="filterData" query="query()" defined-download-data="downloadConsumeData()"></div>
+                <div class="box">
+                    <div class="col-6">
+                        <div class="title">{{'aws.bill.regionCost'|translate}}</div>
+                        <div class="panels clearfix" ng-class="{'res-media':resMedia}">
+                            <div class="pie-wrap">
+                                <div class="pie" chart-pie panel='regionConsumeChart.panels'></div>
+                                <div class="pie-center" ng-show="regionConsumeChart.panels.data.length>0">
+                                    <div class="num">{{miliFormat(regionConsumeTotal)}}</div>
+                                    <div class="text">{{'aws.bill.totalCost'|translate}}</div>
+                                </div>
+                                <div class="pie-center-message" ng-show="regionConsumeChart.panels.data.length>0">
+                                    <span>{{'aws.bill.region'|translate}}<br/>{{'aws.bill.costRatio'|translate}}</span>
+                                </div>
+                            </div>
+                            <div class="pie-legend" ng-show="regionConsumeChart.panels.data.length>0">
+                                <div ng-class="{'roll':regionConsumeChart.panels.data.length>6}">
+                                    <table class="table">
+                                        <tr>
+                                            <th></th>
+                                            <th>{{'aws.bill.region'|translate}}</th>
+                                            <th>{{'aws.bill.cost'|translate}}</th>
+                                            <th>{{'aws.bill.ratio'|translate}}</th>
+                                        </tr>
+                                        <tr ng-repeat="item in regionConsumeChart.panels.data">
+                                            <td><i style="background-color:{{regionConsumeChart.panels.colors[$index]}}"></i></td>
+                                            <td><span class="blue nowrap"><a href="/#/system/billingManagement?id={{item.name}}&&type=region">{{item.name}}</a></span></td>
+                                            <td><span class="num">{{miliFormat(item.value)}}</span></td>
+                                            <td>{{item.percent}}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="title">{{'aws.bill.resourceCost'|translate}}</div>
+                        <div class="panels clearfix res" ng-class="{'twocol':resConsumeChart.panels.data.length>6,'res-media':resMedia}">
+                            <div class="pie-wrap">
+                                <div class="pie" chart-pie panel='resConsumeChart.panels'></div>
+                                <div class="pie-center" ng-show="resConsumeChart.panels.data.length>0">
+                                    <div class="num">{{miliFormat(resConsumeTotal)}}</div>
+                                    <div class="text">{{'aws.bill.totalCost'|translate}}</div>
+                                </div>
+                                <div class="pie-center-message" ng-show="regionConsumeChart.panels.data.length>0">
+                                    <span><span class="block-min">{{'aws.bill.resource'|translate}}</span>{{'aws.bill.costRatio'|translate}}</span>
+                                </div>
+                            </div>
+                            <div class="pie-legend" ng-show="resConsumeChart.panels.data.length>0">
+                                <div ng-class="{'roll':resConsumeChart.panels.data.length>6 && resMedia}">
+                                    <table class="table">
+                                        <tr>
+                                            <th></th>
+                                            <th>{{'aws.bill.resourceType'|translate}}</th>
+                                            <th>{{'aws.bill.cost'|translate}}</th>
+                                            <th>{{'aws.bill.ratio'|translate}}</th>
+                                        </tr>
+                                        <tr ng-repeat="item in resConsumeChart.panels.data" ng-if="$index<6" ng-class="{'last-tr':$index==5 && !resMedia}">
+                                            <td><i style="background-color:{{resConsumeChart.panels.colors[$index]}}"></i></td>
+                                            <td><span class="nowrap">{{item.name}}</span></td>
+                                            <td><span>{{miliFormat(item.value)}}</span></td>
+                                            <td>{{item.percent}}</td>
+                                        </tr>
+                                        <tr ng-repeat="item in resConsumeChart.panels.data" ng-if="$index>=6 && resMedia">
+                                            <td><i style="background-color:{{resConsumeChart.panels.colors[$index]}}"></i></td>
+                                            <td><span class="nowrap">{{item.name}}</span></td>
+                                            <td><span>{{miliFormat(item.value)}}</span></td>
+                                            <td>{{item.percent}}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="pie-legend" ng-show="resConsumeChart.panels.data.length>6 && !resMedia">
+                                <table class="table">
+                                    <tr>
+                                        <th></th>
+                                        <th>{{'aws.bill.resourceType'|translate}}</th>
+                                        <th>{{'aws.bill.cost'|translate}}</th>
+                                        <th>{{'aws.bill.ratio'|translate}}</th>
+                                    </tr>
+                                    <tr ng-repeat="item in resConsumeChart.panels.data" ng-if="$index>=6">
+                                        <td><i style="background-color:{{resConsumeChart.panels.colors[$index]}}"></i></td>
+                                        <td><span class="nowrap">{{item.name}}</span></td>
+                                        <td>{{miliFormat(item.value)}}</span>
+                                        </td>
+                                        <td>{{item.percent}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="">
+                    <!-- <div my-daterangepicker filter-data="filterData" query="query()" download-data="downloadConsumeData()" search="applyGlobalSearch()" refresh="refreshConsumeStatisticTable()" csv-header="csvHeader" file-name="fileName"></div> -->
+                    <div class="table-action">
+                        <div type="button" class="btn btn-renovat pull-right" ng-click="refreshConsumeStatisticTable()">
+                            <i class="icon-aw-refresh"></i>
+                        </div>
+                        <div class="search-box pull-right">
+                            <button class="btn" type="submit"><i class="icon-aw-search"></i></button>
+                            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="filterData.searchTerm" placeholder="{{'aws.action.search'|translate}}" ng-keyup="applyGlobalSearch()" />
+                        </div>
+                    </div>
+                    <div class="table-content" id="consumeStatisticTable">
+                        <script type="text/ng-template" id="headerDropMenu.html">
+                            <div>
+                                {{col_title}}
+                                <div class="dropdown">
+                                    <i class="icon-aw-angle-down dropdown-toggle" data-toggle="dropdown"></i>
+                                    <ul class="dropdown-menu ">
+                                        <li ng-repeat="col in colsList track by $index">
+                                            <a ng-click="selectCol(col.value)">{{col.title}}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </script>
+                    </div>
+                </div>
+                <div>
+                    <div class='animateContent {{animation}} '>
+                        <div class="inner-wrap" ng-class="{'left0':currPage=='region',left1:currPage=='dep','left2':currPage == 'pro'}">
+                            <div class='detailInner' ng-controller="regionConsumeDetailCtrl">
+                                <div class="tab-content">
+                                    <div class="detail-row">
+                                        <!-- <div class="detail-title">
+                                            <a class="an-close" ng-href="/system/billingManagement"><i class="icon-aw-mail-reply"></i></a>
+                                            <span><span class="blue">{{regionName}} </span> <strong> {{'aws.bill.region'|translate}}</strong></span>
+                                        </div> -->
+                                        <div class="detail-info">
+                                            <div class="control-box clearfix">
+                                                <a class="an-close" ng-href="/system/billingManagement"><i class="icon-aw-mail-reply"></i></a>
+                                                <div billing-detail-select bill-options="billOptions" filter-data="filterData" curr-page="currPage" in-billing-module="inBillingModule" change-bill-filter="changeBillFilter(data, type)"></div>
+                                            </div>
+                                            <div my-daterangepicker filter-data="filterData" query="query()" download-data="downloadConsumeData()" csv-header="csvHeader" file-name="fileName"></div>
+                                            <div class="box">
+                                                <div class="col-6">
+                                                    <div class="title">{{'aws.bill.domainCost'|translate}}</div>
+                                                    <div class="panels clearfix" ng-class="{'res-media':resMedia}">
+                                                        <div class="pie-wrap">
+                                                            <div class="pie" chart-pie panel='depConsumeChart.panels' detail="true"></div>
+                                                            <div class="pie-center" ng-show="depConsumeChart.panels.data.length>0">
+                                                                <div class="num">{{miliFormat(depConsumeTotal)}}</div>
+                                                                <div class="text">{{'aws.bill.totalCost'|translate}}</div>
+                                                            </div>
+                                                            <div class="pie-center-message" ng-show="depConsumeChart.panels.data.length>0">
+                                                                <span><span class="block-min">{{'aws.bill.domain'|translate}}</span>{{'aws.bill.costRatio'|translate}}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="pie-legend" ng-show="depConsumeChart.panels.data.length>0">
+                                                            <div ng-class="{'roll':depConsumeChart.panels.data.length>6}">
+                                                                <table class="table">
+                                                                    <tr>
+                                                                        <th></th>
+                                                                        <th>{{'aws.bill.domain'|translate}}</th>
+                                                                        <th>{{'aws.bill.cost'|translate}}</th>
+                                                                        <th>{{'aws.bill.ratio'|translate}}</th>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in depConsumeChart.panels.data">
+                                                                        <td><i style="background-color:{{regionConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                        <td><span class="blue"><a href="/#/system/billingManagement?id={{item.deptId}}&&name={{item.name}}&&regionName={{item.region}}&&type=dep" title="{{item.name}}">{{item.name}}</a></span></td>
+                                                                        <td><span class="num">{{miliFormat(item.value)}}</span></td>
+                                                                        <td>{{item.percent}}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title">{{'aws.bill.resourceCost'|translate}}</div>
+                                                    <div class="panels clearfix res" ng-class="{'twocol':dep_resConsumeChart.panels.data.length>6,'res-media':resMedia}">
+                                                        <div class="pie-wrap">
+                                                            <div class="pie" chart-pie panel='dep_resConsumeChart.panels' detail="true"></div>
+                                                            <div class="pie-center" ng-show="dep_resConsumeChart.panels.data.length>0">
+                                                                <!-- <div class="num">{{dep_resConsumeTotal}}</div> -->
+                                                                <!-- <div class="text">{{'aws.bill.resCostDistribution'|translate}}</div> -->
+                                                            </div>
+                                                            <div class="pie-center-message" ng-show="dep_resConsumeChart.panels.data.length>0">
+                                                                <span><span class="block-min">{{'aws.bill.resource'|translate}}</span>{{'aws.bill.costRatio'|translate}}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="pie-legend" ng-show="dep_resConsumeChart.panels.data.length>0">
+                                                            <div ng-class="{'roll':dep_resConsumeChart.panels.data.length>6 && resMedia}">
+                                                                <table class="table">
+                                                                    <tr>
+                                                                        <th></th>
+                                                                        <th>{{'aws.bill.resourceType'|translate}}</th>
+                                                                        <!-- <th>费用（元）</th> -->
+                                                                        <th>{{'aws.bill.ratio'|translate}}</th>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in dep_resConsumeChart.panels.data" ng-if="$index<6" ng-class="{'last-tr':$index==5 && !resMedia}">
+                                                                        <td><i style="background-color:{{dep_resConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                        <td><span class="nowrap">{{item.name}}</span></td>
+                                                                        <!-- <td><span class="num">{{item.value}}</span></td> -->
+                                                                        <td>{{item.percent}}</td>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in dep_resConsumeChart.panels.data" ng-if="$index>=6 && resMedia">
+                                                                        <td><i style="background-color:{{dep_resConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                        <td><span class="nowrap">{{item.name}}</span></td>
+                                                                        <!-- <td><span class="num">{{item.value}}</span></td> -->
+                                                                        <td>{{item.percent}}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                        <div class="pie-legend" ng-show="dep_resConsumeChart.panels.data.length>6 && !resMedia ">
+                                                            <table class="table">
+                                                                <tr>
+                                                                    <th></th>
+                                                                    <th>{{'aws.bill.resourceType'|translate}}</th>
+                                                                    <!-- <th>费用（元）</th> -->
+                                                                    <th>{{'aws.bill.ratio'|translate}}</th>
+                                                                </tr>
+                                                                <tr ng-repeat="item in dep_resConsumeChart.panels.data" ng-if="$index>=6">
+                                                                    <td><i style="background-color:{{dep_resConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                    <td><span class="nowrap">{{item.name}}</span></td>
+                                                                    <!-- <td><span class="num">{{item.value}}</span></td> -->
+                                                                    <td>{{item.percent}}</td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="box">
+                                                <!-- <div my-daterangepicker filter-data="filterData" query="query()" download-data="downloadConsumeData()" search="applyGlobalSearch()" refresh="refreshConsumeStatisticTable()" csv-header="csvHeader" file-name="fileName"></div> -->
+                                                <div class="table-content">
+                                                    <empty-tip empty-type="loadResofRegionConsumeTableData" tip-id="'resofregion-consume-tip-msg'"></empty-tip>
+                                                    <table class="table" ng-table="resOfRegionConsumeStatisticTable">
+                                                        <tr ng-repeat="item in $data track by $index">
+                                                            <td data-title="'aws.bill.name'|translate" sortable="'_resourceName'">{{item._resourceName}}</td>
+                                                            <td data-title="'aws.bill.cost'|translate" sortable="'consumptionAmount'">{{miliFormat(item.consumptionAmount)}}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='detailInner' ng-controller="depConsumeDetailCtrl">
+                                <div class="tab-content">
+                                    <div class="detail-row">
+                                        <!-- <div class="detail-title">
+                                            <a class="an-close" ng-href="/system/billingManagement"><i class="icon-aw-mail-reply"></i></a>
+                                            <span><span class="blue">{{depName}} </span> <strong> {{'aws.bill.domain'|translate}}</strong></span>
+                                        </div> -->
+                                        <div class="detail-info">
+                                            <div class="control-box clearfix">
+                                                <a class="an-close" ng-href="/system/billingManagement"><i class="icon-aw-mail-reply"></i></a>
+                                                <div billing-detail-select bill-options="billOptions" filter-data="filterData" curr-page="currPage" in-billing-module="inBillingModule" change-bill-filter="changeBillFilter(data, type)"></div>
+                                            </div>
+                                            <div my-daterangepicker filter-data="filterData" query="query()" download-data="downloadConsumeData()" csv-header="csvHeader" file-name="fileName"></div>
+                                            <div class="box">
+                                                <div class="col-6">
+                                                    <div class="title">{{'aws.bill.projectCost'|translate}}</div>
+                                                    <div class="panels clearfix" ng-class="{'res-media':resMedia}">
+                                                        <div class="pie-wrap">
+                                                            <div class="pie" chart-pie panel='proConsumeChart.panels' detail="true"></div>
+                                                            <div class="pie-center" ng-show="proConsumeChart.panels.data.length>0">
+                                                                <div class="num">{{miliFormat(proConsumeTotal)}}</div>
+                                                                <div class="text">{{'aws.bill.totalCost'|translate}}</div>
+                                                            </div>
+                                                            <div class="pie-center-message" ng-show="proConsumeChart.panels.data.length>0">
+                                                                <span><span class="block-min">{{'aws.bill.project'|translate}}</span>{{'aws.bill.costRatio'|translate}}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="pie-legend" ng-show="proConsumeChart.panels.data.length>0">
+                                                            <div ng-class="{'roll':proConsumeChart.panels.data.length>6}">
+                                                                <table class="table">
+                                                                    <tr>
+                                                                        <th></th>
+                                                                        <th>{{'aws.bill.project'|translate}}</th>
+                                                                        <th>{{'aws.bill.cost'|translate}}</th>
+                                                                        <th>{{'aws.bill.ratio'|translate}}</th>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in proConsumeChart.panels.data">
+                                                                        <td><i style="background-color:{{proConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                        <td><span class="blue"><a href="/#/system/billingManagement?id={{item.projectId}}&&name={{item.name}}&&regionName={{item.region}}&&deptId={{item.deptId}}&&type=pro" title="{{item.name}}">{{item.name}}</a></span></td>
+                                                                        <td><span class="num">{{miliFormat(item.value)}}</span></td>
+                                                                        <td>{{item.percent}}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title">{{'aws.bill.resourceCost'|translate}}</div>
+                                                    <div class="panels clearfix res" ng-class="{'twocol':pro_resConsumeChart.panels.data.length>6,'res-media':resMedia}">
+                                                        <div class="pie-wrap">
+                                                            <div class="pie" chart-pie panel='pro_resConsumeChart.panels' detail="true"></div>
+                                                            <div class="pie-center" ng-show="pro_resConsumeChart.panels.data.length>0">
+                                                                <!-- <div class="text">{{'aws.bill.resCostDistribution'|translate}}</div> -->
+                                                            </div>
+                                                            <div class="pie-center-message" ng-show="pro_resConsumeChart.panels.data.length>0">
+                                                                <span><span class="block-min">{{'aws.bill.resource'|translate}}</span>{{'aws.bill.costRatio'|translate}}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="pie-legend" ng-show="pro_resConsumeChart.panels.data.length>0">
+                                                            <div ng-class="{'roll':pro_resConsumeChart.panels.data.length>6 && resMedia}">
+                                                                <table class="table">
+                                                                    <tr>
+                                                                        <th></th>
+                                                                        <th>{{'aws.bill.resourceType'|translate}}</th>
+                                                                        <th>{{'aws.bill.ratio'|translate}}</th>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in pro_resConsumeChart.panels.data" ng-if="$index<6" ng-class="{'last-tr':$index==5 && !resMedia}">
+                                                                        <td><i style="background-color:{{pro_resConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                        <td><span class="nowrap">{{item.name}}</span></td>
+                                                                        <td>{{item.percent}}</td>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in pro_resConsumeChart.panels.data" ng-if="$index>=6 && resMedia">
+                                                                        <td><i style="background-color:{{pro_resConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                        <td><span class="nowrap">{{item.name}}</span></td>
+                                                                        <td>{{item.percent}}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                        <div class="pie-legend" ng-show="pro_resConsumeChart.panels.data.length>6 && !resMedia">
+                                                            <table class="table">
+                                                                <tr>
+                                                                    <th></th>
+                                                                    <th>{{'aws.bill.resourceType'|translate}}</th>
+                                                                    <th>{{'aws.bill.ratio'|translate}}</th>
+                                                                </tr>
+                                                                <tr ng-repeat="item in pro_resConsumeChart.panels.data" ng-if="$index>=6">
+                                                                    <td><i style="background-color:{{pro_resConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                    <td><span class="nowrap">{{item.name}}</span></td>
+                                                                    <td>{{item.percent}}</td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="box">
+                                                <!-- <div my-daterangepicker filter-data="filterData" query="query()" download-data="downloadConsumeData()" search="applyGlobalSearch()" refresh="refreshConsumeStatisticTable()" csv-header="csvHeader" file-name="fileName"></div> -->
+                                                <div class="table-content">
+                                                    <empty-tip empty-type="loadResofDepConsumeTableData" tip-id="'resofdep-consume-tip-msg'"></empty-tip>
+                                                    <table class="table" ng-table="resOfDepConsumeStatisticTable">
+                                                        <tr ng-repeat="item in $data track by $index">
+                                                            <td data-title="'aws.bill.name'|translate" sortable="'_resourceName'">{{item._resourceName}}</td>
+                                                            <td data-title="'aws.bill.cost'|translate" sortable="'consumptionAmount'">{{miliFormat(item.consumptionAmount)}}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='detailInner' ng-controller="proConsumeDetailCtrl">
+                                <div class="tab-content">
+                                    <div class="detail-row">
+                                        <!-- <div class="detail-title">
+                                            <a class="an-close" ng-href="/system/billingManagement"><i class="icon-aw-mail-reply"></i></a>
+                                            <span><span class="blue">{{proName}} </span> <strong> {{'aws.bill.project'|translate}}</strong></span>
+                                        </div> -->
+                                        <div class="detail-info">
+                                            <div class="control-box clearfix">
+                                                <a class="an-close" ng-href="/system/billingManagement"><i class="icon-aw-mail-reply"></i></a>
+                                                <div billing-detail-select bill-options="billOptions" filter-data="filterData" curr-page="currPage" in-billing-module="inBillingModule" change-bill-filter="changeBillFilter(data, type)"></div>
+                                            </div>
+                                            <div my-daterangepicker filter-data="filterData" query="query()" download-data="downloadConsumeData()" csv-header="csvHeader" file-name="fileName"></div>
+                                            <div class="box">
+                                                <div class="col-6">
+                                                    <div class="title">{{'aws.bill.userCost'|translate}}</div>
+                                                    <div class="panels clearfix" ng-class="{'res-media':resMedia}">
+                                                        <div class="pie-wrap">
+                                                            <div class="pie" chart-pie panel='usersConsumeChart.panels' detail="true"></div>
+                                                            <div class="pie-center" ng-show="usersConsumeChart.panels.data.length>0">
+                                                                <div class="num">{{miliFormat(users_resConsumeTotal)}}</div>
+                                                                <div class="text">{{'aws.bill.totalCost'|translate}}</div>
+                                                            </div>
+                                                            <div class="pie-center-message" ng-show="usersConsumeChart.panels.data.length>0">
+                                                                <span><span class="block-min">{{'aws.bill.user'|translate}}</span>{{'aws.bill.costRatio'|translate}}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="pie-legend" ng-show="usersConsumeChart.panels.data.length>0">
+                                                            <div ng-class="{'roll':usersConsumeChart.panels.data.length>6}">
+                                                                <table class="table">
+                                                                    <tr>
+                                                                        <th></th>
+                                                                        <th>{{'aws.bill.user'|translate}}</th>
+                                                                        <th>{{'aws.bill.cost'|translate}}</th>
+                                                                        <th>{{'aws.bill.ratio'|translate}}</th>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in usersConsumeChart.panels.data">
+                                                                        <td><i style="background-color:{{usersConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                        <td><span class="blue"><a href="/#/system/billingManagement?consumeUserId={{item.userId}}&&name={{item.name}}&&regionName={{regionName}}&&deptId={{deptId}}&&projectId={{projectId}}&&type=user" title="{{item.name}}">{{item.name}}</a></span></td>
+                                                                        <td><span class="num">{{miliFormat(item.value)}}</span></td>
+                                                                        <td>{{item.percent}}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title">{{'aws.bill.resourceCost'|translate}}</div>
+                                                    <div class="panels clearfix res" ng-class="{'twocol':users_resConsumeChart.panels.data.length>6,'res-media':resMedia}">
+                                                        <div class="pie-wrap">
+                                                            <div class="pie" chart-pie panel='users_resConsumeChart.panels' detail="true"></div>
+                                                            <div class="pie-center" ng-show="users_resConsumeChart.panels.data.length>0">
+                                                                <!-- <div class="num">{{users_resConsumeTotal}}</div> -->
+                                                                <!-- <div class="text">{{'aws.bill.resCostDistribution'|translate}}</div> -->
+                                                            </div>
+                                                            <div class="pie-center-message" ng-show="users_resConsumeChart.panels.data.length>0">
+                                                                <span><span class="block-min">{{'aws.bill.resource'|translate}}</span>{{'aws.bill.costRatio'|translate}}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="pie-legend" ng-show="users_resConsumeChart.panels.data.length>0">
+                                                            <div ng-class="{'roll':users_resConsumeChart.panels.data.length>6 && resMedia}">
+                                                                <table class="table">
+                                                                    <tr>
+                                                                        <th></th>
+                                                                        <th>{{'aws.bill.resourceType'|translate}}</th>
+                                                                        <!-- <th>费用（元）</th> -->
+                                                                        <th>{{'aws.bill.ratio'|translate}}</th>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in users_resConsumeChart.panels.data" ng-if="$index<6" ng-class="{'last-tr':$index==5 && !resMedia}">
+                                                                        <td><i style="background-color:{{users_resConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                        <td><span class="nowrap">{{item.name}}</span></td>
+                                                                        <!-- <td><span class="num">{{item.value}}</span></td> -->
+                                                                        <td>{{item.percent}}</td>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in users_resConsumeChart.panels.data" ng-if="$index>=6 && resMedia">
+                                                                        <td><i style="background-color:{{users_resConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                        <td><span class="nowrap">{{item.name}}</span></td>
+                                                                        <!-- <td><span class="num">{{item.value}}</span></td> -->
+                                                                        <td>{{item.percent}}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                        <div class="pie-legend" ng-show="users_resConsumeChart.panels.data.length>6 && !resMedia">
+                                                            <table class="table">
+                                                                <tr>
+                                                                    <th></th>
+                                                                    <th>{{'aws.bill.resourceType'|translate}}</th>
+                                                                    <!-- <th>费用（元）</th> -->
+                                                                    <th>{{'aws.bill.ratio'|translate}}</th>
+                                                                </tr>
+                                                                <tr ng-repeat="item in users_resConsumeChart.panels.data" ng-if="$index>=6">
+                                                                    <td><i style="background-color:{{users_resConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                    <td><span class="nowrap">{{item.name}}</span></td>
+                                                                    <!-- <td><span class="num">{{item.value}}</span></td> -->
+                                                                    <td>{{item.percent}}</td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="box">
+                                                <!-- <div my-daterangepicker filter-data="filterData" query="query()" download-data="downloadConsumeData()" search="applyGlobalSearch()" refresh="refreshConsumeStatisticTable()" csv-header="csvHeader" file-name="fileName"></div> -->
+                                                <div class="table-content">
+                                                    <empty-tip empty-type="loadResofProConsumeTableData" tip-id="'resofpro-consume-tip-msg'"></empty-tip>
+                                                    <table class="table" ng-table="resOfProConsumeStatisticTable">
+                                                        <tr ng-repeat="item in $data track by $index">
+                                                            <td data-title="'aws.bill.name'|translate" sortable="'_resourceName'">{{item._resourceName}}</td>
+                                                            <td data-title="'aws.bill.cost'|translate" sortable="'consumptionAmount'">{{item.consumptionAmount}}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class='detailInner' ng-controller="userConsumeDetailCtrl">
+                                <div class="tab-content">
+                                    <div class="detail-row">
+                                        <div class="detail-title">
+                                            <a class="an-close" ng-click="returnOrgPath('user')"><i class="icon-aw-mail-reply"></i></a>
+                                            <span><span class="blue">{{userName}} </span> <strong> {{'aws.bill.user'|translate}}</strong></span>
+                                        </div>
+                                        <div class="detail-info">
+                                            <div class="box">
+                                                <div class="col-12">
+                                                    <div class="title">{{'aws.bill.resourceCost'|translate}}</div>
+                                                    <div class="panels clearfix res" ng-class="{'twocol':user_resConsumeChart.panels.data.length>6,'res-media':resMedia}">
+                                                        <div class="pie-wrap">
+                                                            <div class="pie" chart-pie panel='user_resConsumeChart.panels' detail="true"></div>
+                                                            <div class="pie-center" ng-show="user_resConsumeChart.panels.data.length>0">
+                                                                <div class="num">{{user_resConsumeTotal}}</div>
+                                                                <div class="text">{{'aws.bill.totalCost'|translate}}</div>
+                                                            </div>
+                                                            <div class="pie-center-message">
+                                                                <span><span class="block-min">{{'aws.bill.resource'|translate}}</span>{{'aws.bill.costRatio'|translate}}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="pie-legend" ng-show="user_resConsumeChart.panels.data.length>0">
+                                                            <table class="table">
+                                                                <tr>
+                                                                    <th></th>
+                                                                    <th>{{'aws.bill.resourceType'|translate}}</th>
+                                                                    <th>{{'aws.bill.cost'|translate}}</th>
+                                                                    <th>{{'aws.bill.ratio'|translate}}</th>
+                                                                </tr>
+                                                                <tr ng-repeat="item in user_resConsumeChart.panels.data" ng-if="$index<6" ng-class="{'last-tr':$index==5 && !resMedia}">
+                                                                    <td><i style="background-color:{{user_resConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                    <td><span class="nowrap">{{item.name}}</span></td>
+                                                                    <td><span class="num">{{miliFormat(item.value)}}</span></td>
+                                                                    <td>{{item.percent}}</td>
+                                                                </tr>
+                                                                <tr ng-repeat="item in user_resConsumeChart.panels.data" ng-if="$index>=6 && resMedia">
+                                                                    <td><i style="background-color:{{user_resConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                    <td><span class="nowrap">{{item.name}}</span></td>
+                                                                    <td><span class="num">{{miliFormat(item.value)}}</span></td>
+                                                                    <td>{{item.percent}}</td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                        <div class="pie-legend" ng-show="user_resConsumeChart.panels.data.length>6 && !resMedia">
+                                                            <table class="table">
+                                                                <tr>
+                                                                    <th></th>
+                                                                    <th>{{'aws.bill.resourceType'|translate}}</th>
+                                                                    <th>{{'aws.bill.cost'|translate}}</th>
+                                                                    <th>{{'aws.bill.ratio'|translate}}</th>
+                                                                </tr>
+                                                                <tr ng-repeat="item in user_resConsumeChart.panels.data" ng-if="$index>=6 ">
+                                                                    <td><i style="background-color:{{user_resConsumeChart.panels.colors[$index]}}"></i></td>
+                                                                    <td><span class="nowrap">{{item.name}}</span></td>
+                                                                    <td><span class="num">{{miliFormat(item.value)}}</span></td>
+                                                                    <td>{{item.percent}}</td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="box">
+                                                <div my-daterangepicker filter-data="filterData" query="query()" download-data="downloadConsumeData()" search="applyGlobalSearch()" refresh="refreshConsumeStatisticTable()" csv-header="csvHeader" file-name="fileName"></div>
+                                                <div class="table-content">
+                                                    <empty-tip empty-type="loadResofUserConsumeTableData" tip-id="'resofuser-consume-tip-msg'"></empty-tip>
+                                                    <table class="table" ng-table="resOfUserConsumeStatisticTable">
+                                                        <tr ng-repeat="item in $data track by $index">
+                                                            <td data-title="'aws.bill.name'|translate" sortable="'_resourceName'">{{item._resourceName}}</td>
+                                                            <td data-title="'aws.bill.cost'|translate" sortable="'consumptionAmount'">{{miliFormat(item.consumptionAmount)}}</td>
+                                                            <td data-title="'aws.bill.operate'|translate" sortable="''"><a ng-click="viewUserResConsumeDetail(item)">{{'aws.bill.detail'|translate}}</a></td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='detailInner' ng-controller="userResConsumeDetailCtrl">
+                                <div class="tab-content">
+                                    <div class="detail-row">
+                                        <div class="detail-title text-nav">
+                                            <a class="an-close" ng-click="returnOrgPath('userRes')">{{'aws.bill.userDetail'|translate}}</a>
+                                            <span> > {{'aws.bill.billDetail'|translate}}</span>
+                                        </div>
+                                        <div class="detail-info">
+                                            <div class="box">
+                                                <div my-daterangepicker filter-data="filterData" query="query()" download-data="downloadConsumeData()" search="applyGlobalSearch()" refresh="refreshConsumeStatisticTable()" csv-header="csvHeader" file-name="fileName"></div>
+                                                <div class="table-content">
+                                                    <empty-tip empty-type="loadResBillDetailTableData" tip-id="'resbilldetail-tip-msg'"></empty-tip>
+                                                    <table class="table" ng-table="resBillDetailTable">
+                                                        <tr ng-repeat="item in $data track by $index">
+                                                            <td data-title="'aws.bill.productName'|translate" sortable="'_resourceName'">{{item._resourceName}}</td>
+                                                            <td data-title="'aws.bill.region'|translate" sortable="'region'">{{item.region}}</td>
+                                                            <td data-title="'aws.bill.domain'|translate" sortable="'deptName'">{{item.deptName}}</td>
+                                                            <td data-title="'aws.bill.project'|translate" sortable="'projectName'">{{item.projectName}}</td>
+                                                            <td data-title="'aws.price.price_unit_hour'|translate" sortable="'unitPrice'">{{miliFormat(item.unitPrice)}}</td>
+                                                            <td data-title="'aws.bill.moneyAmount_yuan'|translate" sortable="'amount'">{{miliFormat(item.amount)}}</td>
+                                                            <td data-title="'aws.bill.billStartTime'|translate" sortable="'chargeTime'">{{item.chargeTime}}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> -->
+                        </div>
+                    </div>
+                    <div class='animate-backup'></div>
+                </div>
+            </div>
+            <div class="tab-pane" ng-class="{active: tab.index == 1}" ng-controller="priceManageCtrl" ng-show="ADMIN">
+                <div class="table-action price">
+                    <button type="button" data-toggle="modal" ng-click="priceManageModal('new')" class="btn btn-new"><i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}</button>
+                    <button type="button" data-toggle="modal" ng-click="priceManageModal('edit',editData)" ng-disabled="isDisabled" class="btn btn-normal"><i class="icon-aw-modify"></i>{{"aws.action.edit"|translate}}</button>
+                    <button type="button" data-toggle="modal" ng-click="deleteChargingItem(priceManageTable.checkedItems)" ng-disabled="delisDisabled" class="btn btn-normal"><i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+                    <div class="dropdown show-title pull-right">
+                        <button type="button" class="btn btn-renovat dropdown-toggle" data-toggle="dropdown">
+                            <i class="icon-aw-list"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li ng-repeat="col in colsList track by $index">
+                                <div class="check-left">
+                                    <label class="checkbox">
+                                        <input type="checkbox" class="form-controls chk" name="col_show" ng-disabled="col.disable" ng-model="col.show" />
+                                        <i class="iconfont"></i>
+                                    </label>
+                                </div>
+                                <span>{{col.title}}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div type="button" class="btn btn-renovat pull-right" ng-click="refreshChargingItem()">
+                        <i class="icon-aw-refresh"></i>
+                    </div>
+                    <div class="search-box pull-right">
+                        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch('priceManageTable','chargeItemTerm')">
+                            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm.chargeItemTerm" placeholder="{{'aws.action.search'|translate}}" />
+                        </form>
+                    </div>
+                    <div class="control-group  pull-right">
+                        <div class="controls">
+                            <ui-select ng-model="queryLimit.chargingType" ng-change="query(queryLimit.chargingType)">
+                                <ui-select-match placeholder="{{'aws.price.choicePriceType'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.chargingTypeList">
+                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group  pull-right">
+                        <div class="controls">
+                            <ui-select ng-model="queryLimit.productType" ng-change="query(queryLimit.productType)">
+                                <ui-select-match placeholder="{{'aws.price.choiceProdType'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.productTypeList">
+                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group  pull-right">
+                        <div class="controls">
+                            <ui-select ng-model="queryLimit.region" ng-change="query(queryLimit.region)">
+                                <ui-select-match placeholder="{{'aws.price.choiceRegion'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.regionList">
+                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-content">
+                    <empty-tip empty-type="loadPriceManageTableData" tip-id="'priceM-tip-msg'"></empty-tip>
+                    <table class="table" ng-table="priceManageTable">
+                        <tr ng-repeat="item in $data track by $index">
+                            <td header="'headerCheckbox.html'">
+                                <label class="checkbox">
+                                    <input type="checkbox" ng-model="checkboxes.items[item.id]" />
+                                    <i class="iconfont"></i>
+                                </label>
+                            </td>
+                            <td data-title="'aws.price.serialNumber'|translate" sortable="'id'">{{$index + 1}}</td>
+                            <td data-title="'aws.price.region'|translate" sortable="'_region'">{{item.region}}</td>
+                            <td data-title="'aws.price.prodType'|translate" sortable="'_resourceName'" ng-if="colsList[2].show">{{item._resourceName}}</td>
+                            <td data-title="'aws.price.unit'|translate" sortable="'unit'" ng-if="colsList[3].show">{{item.unit}}</td>
+                            <td data-title="'aws.price.billingType'|translate" sortable="'_priceType'" ng-if="colsList[4].show">{{item._priceType}}</td>
+                            <td data-title="'aws.price.price_unit'|translate" sortable="'unitPrice'" ng-if="colsList[5].show">{{miliFormat(item.unitPrice)}}</td>
+                        </tr>
+                    </table>
+                    <script type="text/ng-template" id="headerCheckbox.html">
+                        <label class="checkbox">
+                            <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+                            <i class="iconfont"></i>
+                        </label>
+                    </script>
+                </div>
+                <script type="text/ng-template" id="createPriceManageModal.html">
+                    <div class="modal-common">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+                            <h3 class="modal-title">{{modal_title}}</h3>
+                        </div>
+                        <div class="modal-body">
+                            <form name="priceManage_form" novalidate>
+                                <div ng-if="addPriceManage">
+                                    <div class="control-group">
+                                        <label class="control-label">{{'aws.price.region'|translate}}：</label>
+                                        <div class="controls">
+                                            <ui-select name="region" ng-model="priceManageForm.region" required>
+                                                <ui-select-match placeholder="{{'aws.price.choiceRegion'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                                <ui-select-choices repeat="item.value as item in regionList">
+                                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <div class="error" ng-messages='priceManage_form.region.$error' ng-if="interacted(priceManage_form.region)">
+                                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">{{'aws.price.prodType'|translate}}：</label>
+                                        <div class="controls">
+                                            <ui-select name="productType" ng-model="priceManageForm.productType" ng-change="changeProductType(priceManageForm.productType)" required>
+                                                <ui-select-match placeholder="{{'aws.price.choiceProdType'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                                <ui-select-choices repeat="item.value as item in productTypeList">
+                                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <div class="error" ng-messages='priceManage_form.productType.$error' ng-if="interacted(priceManage_form.productType)">
+                                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">{{'aws.price.unit'|translate}}：</label>
+                                        <div class="controls">
+                                            <ui-select name="unit" ng-model="priceManageForm.unit" required>
+                                                <ui-select-match placeholder="{{'aws.price.choiceUnit'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                                <ui-select-choices repeat="item.value as item in options.unitsList">
+                                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <div class="error" ng-messages='priceManage_form.unit.$error' ng-if="interacted(priceManage_form.unit)">
+                                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">{{'aws.price.billingType'|translate}}：</label>
+                                        <div class="controls">
+                                            <ui-select name="chargingType" ng-model="priceManageForm.chargingType" required>
+                                                <ui-select-match placeholder="{{'aws.price.choiceBillingType'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                                <ui-select-choices repeat="item.value as item in chargingTypeList">
+                                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <div class="error" ng-messages='priceManage_form.chargingType.$error' ng-if="interacted(priceManage_form.chargingType)">
+                                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.price.price_unit'|translate}}：</label>
+                                    <div class="controls">
+                                        <input type="text" class="form-controls" name="unitPrice" ng-model="priceManageForm.unitPrice" placeholder="{{'aws.price.PleaseEnterPrice'|translate}}" required gt-zero-num max="999999.99" />
+                                        <div class="error" ng-messages='priceManage_form.unitPrice.$error' ng-if="interacted(priceManage_form.unitPrice)">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            <div ng-message="gtZeroNum">{{'aws.price.error.gtZeroNumTip'|translate}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-info" type="button" ng-click="priceManageCfm(priceManage_form,priceManageForm)">{{"aws.action.ok"|translate}}</button>
+                            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+                        </div>
+                    </div>
+                </script>
+                <script type="text/ng-template" id="editPriceManageModal.html">
+                    <div class="modal-common modal-smallest">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+                            <h3 class="modal-title">{{modal_title}}</h3>
+                        </div>
+                        <div class="modal-body">
+                            <form name="priceManage_form" novalidate>
+                                <div ng-if="addPriceManage">
+                                    <div class="control-group">
+                                        <label class="control-label">{{'aws.price.region'|translate}}：</label>
+                                        <div class="controls">
+                                            <ui-select name="region" ng-model="priceManageForm.region" required>
+                                                <ui-select-match placeholder="{{'aws.price.choiceRegion'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                                <ui-select-choices repeat="item.value as item in regionList">
+                                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <div class="error" ng-messages='priceManage_form.region.$error' ng-if="interacted(priceManage_form.region)">
+                                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">{{'aws.price.prodType'|translate}}：</label>
+                                        <div class="controls">
+                                            <ui-select name="productType" ng-model="priceManageForm.productType" ng-change="changeProductType(priceManageForm.productType)" required>
+                                                <ui-select-match placeholder="{{'aws.price.choiceProdType'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                                <ui-select-choices repeat="item.value as item in productTypeList">
+                                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <div class="error" ng-messages='priceManage_form.productType.$error' ng-if="interacted(priceManage_form.productType)">
+                                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">{{'aws.price.unit'|translate}}：</label>
+                                        <div class="controls">
+                                            <ui-select name="unit" ng-model="priceManageForm.unit" required>
+                                                <ui-select-match placeholder="{{'aws.price.choiceUnit'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                                <ui-select-choices repeat="item.value as item in options.unitsList">
+                                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <div class="error" ng-messages='priceManage_form.unit.$error' ng-if="interacted(priceManage_form.unit)">
+                                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">{{'aws.price.billingType'|translate}}：</label>
+                                        <div class="controls">
+                                            <ui-select name="chargingType" ng-model="priceManageForm.chargingType" required>
+                                                <ui-select-match placeholder="{{'aws.price.choiceBillingType'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                                <ui-select-choices repeat="item.value as item in chargingTypeList">
+                                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <div class="error" ng-messages='priceManage_form.chargingType.$error' ng-if="interacted(priceManage_form.chargingType)">
+                                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.price.price_unit'|translate}}：</label>
+                                    <div class="controls">
+                                        <input type="text" class="form-controls" name="unitPrice" ng-model="priceManageForm.unitPrice" placeholder="{{'aws.price.PleaseEnterPrice'|translate}}" required gt-zero-num max="999999.99" />
+                                        <div class="error" ng-messages='priceManage_form.unitPrice.$error' ng-if="interacted(priceManage_form.unitPrice)">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            <div ng-message="gtZeroNum">{{'aws.price.error.gtZeroNumTip'|translate}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-info" type="button" ng-click="priceManageCfm(priceManage_form,priceManageForm)">{{"aws.action.ok"|translate}}</button>
+                            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+                        </div>
+                    </div>
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

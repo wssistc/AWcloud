@@ -1,0 +1,77 @@
+<div class="page-inner">
+  <div class="table-action">
+    <!-- <button type="button" class="btn btn-info" ng-click="" ng-disabled="isDisabled">
+      <i class="fa fa-qrcode"></i>{{"aws.system.hypervisor.vmHA"|translate}}
+    </button> -->
+    <button class="btn btn-refresh" ng-click="refreshHypervisors()"><i class="icon-aw-refresh"></i></button>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+          <i class="icon-aw-search"></i>
+        </button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm"
+               ng-model="globalSearchTerm" placeholder="{{'aws.action.search'|translate}}"/>
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="tableParams" class="table " show-filter="false">
+      <tr ng-repeat="hypervisor in $data">
+        <td header="'headerCheckbox.html'">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[hypervisor.id]"/>
+            <i class="iconfont"></i>
+          </label>
+        </td>
+       <!--  <td data-title="'ID'" sortable="'id'"><span>{{hypervisor.id}}</span></td> -->
+        <td data-title="'aws.system.hypervisor.hypervisorHostname'|translate" sortable="'hypervisorHostname'">
+          <span>{{hypervisor.hypervisorHostname}}</span>
+        </td>
+        <td data-title="'aws.system.hypervisor.type'|translate" sortable="'type'">
+          <span>{{hypervisor.type}}</span>
+        </td>
+        <td data-title="'aws.system.hypervisor.runningVM'|translate" sortable="'runningVM'">
+          <span>{{hypervisor.runningVM}}</span>
+        </td>
+        <td data-title="'aws.system.hypervisor.virtualCPU'|translate" sortable="'virtualCPU'">
+          <span>{{hypervisor.virtualCPU}}</span>
+        </td>
+        <td data-title="'aws.system.hypervisor.virtualUsedCPU'|translate" sortable="'virtualUsedCPU'">
+          <span>{{hypervisor.virtualUsedCPU}}</span>
+        </td>
+        <td data-title="'aws.system.hypervisor.localMemory'|translate" sortable="'localMemory'">
+          <span>{{hypervisor.localMemory}}</span>
+        </td>
+        <td data-title="'aws.system.hypervisor.localMemoryUsed'|translate" sortable="'localMemoryUsed'">
+          <span>{{hypervisor.localMemoryUsed}}</span>
+        </td>
+        <td data-title="'aws.system.hypervisor.freeRam'|translate" sortable="'freeRam'">
+          <span>{{hypervisor.freeRam}}</span>
+        </td>
+        <td data-title="'aws.system.hypervisor.localDisk'|translate" sortable="'localDisk'">
+          <span>{{hypervisor.localDisk}}</span>
+        </td>
+        <td data-title="'aws.system.hypervisor.localDiskUsed'|translate" sortable="'localDiskUsed'">
+          <span>{{hypervisor.localDiskUsed}}</span>
+        </td>
+        <td data-title="'aws.system.hypervisor.freeDisk'|translate" sortable="'freeDisk'">
+          <span>{{hypervisor.freeDisk}}</span>
+        </td>
+        <td data-title="'aws.system.hypervisor.currentWorkload'|translate" sortable="'currentWorkload'">
+          <span>{{hypervisor.currentWorkload}}</span>
+        </td>
+        <td data-title="'aws.system.hypervisor.leastDiskAvailable'|translate" sortable="'leastDiskAvailable'">
+          <span>{{hypervisor.leastDiskAvailable}}</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value=""/>
+    <i class="iconfont"></i>
+  </label>
+</script>

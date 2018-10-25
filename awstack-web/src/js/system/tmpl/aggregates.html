@@ -1,0 +1,325 @@
+<div class="page-inner">
+  <div class="table-action">
+    <button type="button" class="btn btn-new" ng-click="aggregate('new')" licence-type="btn" id="system-pm-createHostset">
+      <i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}
+    </button>
+    <button class="btn btn-normal" ng-disabled="isDisabled" ng-click="aggregate('edit',editData)" licence-type="btn" id="system-pm-editHostset">
+      <i class="icon-aw-modify"></i></i>{{"aws.action.edit"|translate}}
+    </button>
+    <!-- <button class="btn btn-info" ng-disabled="isDisabled" ng-click="resetAggregate(editData)">
+      <i class="icon-aw-modify"></i>{{"aws.system.aggregate.resetMetadata"|translate}}
+    </button> -->
+    <button class="btn btn-normal" ng-disabled="isDisabled" ng-click="setAggregateMetadata(editData)" licence-type="btn" id="system-pm-setData">
+      <i class="icon-aw-gear"></i>{{"aws.system.aggregate.setMetadata"|translate}}
+    </button>
+    <button class="btn btn-normal" ng-disabled="isDisabled" ng-click="manageHost(editData)" licence-type="btn" id="system-pm-manageHost">
+      <i class="icon-aw-glzj"></i>{{"aws.system.aggregate.manageHost"|translate}}
+    </button>
+    <button class="btn btn-normal" ng-disabled="delisDisabled" ng-click="deleteAggregate()" title="{{cannotDel_tip}}" licence-type="btn" id="system-pm-delHost">
+      <i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}
+    </button>
+    <!-- <button class="btn btn-refresh" ng-click="refreshAggregates()">
+      <i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}
+    </button>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+          <i class="icon-aw-search"></i>
+        </button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm"
+               ng-model="globalSearchTerm" placeholder="{{'aws.action.search'|translate}}"/>
+      </form>
+    </div> -->
+    <div class="pull-right">
+      <into-information modular="'aggregates'"></into-information>
+      <!-- <setting title-data="titleData" site-title="titleName" table-data="networksTableData" search-tearm="networkSearchTearm(obj)"></setting> -->
+      <button class="btn btn-renovat right-ports" ng-click="refreshAggregates()">
+        <i class="icon-aw-refresh"></i>
+      </button>
+      <div class="search-box right-ports">
+        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+          <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+            <i class="icon-aw-search"></i>
+          </button>
+          <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm"
+                  ng-model="globalSearchTerm" placeholder="{{'aws.action.search'|translate}}"/>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class ="table-content" > 
+    <empty-tip empty-type="zoneHostsTableData"></empty-tip>
+    
+    <table ng-table="tableParams" class="table " show-filter="false">
+      <colgroup>
+        <col width="5%">
+        <col width="20">
+        <col width="20%">
+        <col width="20%">
+        <col width="35%">
+      </colgroup>
+      <tr ng-repeat="aggregate in $data">
+        <td header="'headerCheckbox.html'">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[aggregate.id]"/>
+            <i class="iconfont"></i>
+          </label>
+        </td>
+        <!-- <td data-title="'ID'" sortable="'id'"><span>{{aggregate.id}}</span></td> -->
+        <td data-title="'aws.system.aggregate.name'|translate" sortable="'name'">
+          <div class="edit-name edit-lg">
+            <span title="{{aggregate.name}}">{{aggregate.name}}</span>
+          </div>
+        </td>
+        <td data-title="'aws.system.aggregate.availability_zone'|translate" sortable="'availZone'">
+          {{aggregate.availZone}}
+        </td>
+        <td data-title="'aws.system.aggregate.hosts'|translate" sortable="'hosts'">
+          <span ng-repeat="host in aggregate.hosts">{{host}}<i ng-if="$index < aggregate.hosts.length-1" >，</i></span>
+        </td>
+        <td data-title="'aws.system.aggregate.metadata'|translate">
+            <div ng-repeat="(key, value) in aggregate.metadata">
+              <span ng-if="key=='setaggregate_instance_extra_specs:pinned'">CPU绑定={{value=='true'?'启用':'禁用'}}</span>
+              <span ng-if="key!='setaggregate_instance_extra_specs:pinned'">{{key}}={{value}}</span>
+            </div>
+        </td>
+      </tr>
+    </table>
+    </div>
+    <!-- <p ng-if="showData" style="margin-bottom: 10px">{{"aws.system.aggregate.noData"|translate}}</p> -->
+    <div class="table-content">
+        <table ng-table="zoneHostsTable" class="table " show-filter="false">
+        <colgroup>
+            <col width="30%">
+            <col width="50%">
+            <col width="20%">
+        </colgroup>
+        <tr ng-repeat="zoneHost in $data">
+            <td data-title="'aws.system.availZone.zoneName'|translate" sortable="zoneName">
+            {{zoneHost.zoneName}}
+            </td>
+            <td data-title="'aws.system.availZone.hosts'|translate" sortable="hosts">
+            <span ng-repeat="host in zoneHost.hosts">{{host}}<i ng-if="$index < zoneHost.hosts.length-1" >，</i></span>
+            </td>
+            <td data-title="'aws.system.availZone.available'|translate" sortable="available">
+            {{zoneHost.available}}
+            </td>
+        </tr>
+        </table>
+    </div>
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value=""/>
+    <i class="iconfont"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="aggregate.html">
+    <div class="modal-common aggregate-modal modal-smallest">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{aggregateTitle}}</h3>
+        </div>
+        <div class="modal-body">
+            <form name="aggregateForm">
+                <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.system.aggregate.name"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" name="name" class="form-controls" ng-model="aggregateData.name" placeholder="{{'aws.system.aggregate.inputAggregateName'|translate}}" ng-maxlength="32" required />
+                        <div class="error" ng-messages="aggregateForm.name.$error" ng-if="interacted(aggregateForm.name)">
+                            <div ng-message="required">{{"aws.message.required"|translate}}</div>
+                            <div ng-message="maxlength">{{"aws.message.textLength"|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.system.aggregate.availability_zone"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" name="availability_zone_name" class="form-controls" ng-model="aggregateData.availability_zone" placeholder="{{'aws.system.aggregate.inputAvailabilityzoneName'|translate}}" ng-maxlength="32" required />
+                        <div class="error" ng-messages="aggregateForm.availability_zone_name.$error" ng-if="interacted(aggregateForm.availability_zone_name)">
+                            <div ng-message="required">{{"aws.message.required"|translate}}</div>
+                            <div ng-message="maxlength">{{"aws.message.textLength"|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="meta-group clearfix" ng-if="editAggregateModal && hasProps">
+                    <label class="control-label">{{'aws.system.aggregate.metadata'|translate}}：</label>
+                    <div ng-repeat="(key, value) in metadataSet" class="group clearfix" >
+                        <div class="control-group clearfix">
+                            <label class="control-label">键：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="metadata_key_{{$index}}" ng-model="keyMap[key]" disabled="true">
+                            </div>
+                        </div>
+                        <div class="control-group clearfix">
+                            <label class="control-label">值：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="{{key}}" ng-model="aggregateData.metadata[key]" ng-maxlength="32" check-type="checkType[key]" ng-disabled="key=='filter_tenant_id'" placeholder="{{placeholder[key]}}" ng-if="key!='setaggregate_instance_extra_specs:pinned' ">
+                                <ui-select ng-model="aggregateData.metadata[key]" ng-if="key=='setaggregate_instance_extra_specs:pinned' ">
+                                    <ui-select-match placeholder="{{placeholder.setaggregate_instance_extra_specs}}">
+                                        {{$select.selected.name}}
+                                    </ui-select-match>
+                                    <ui-select-choices repeat="cpuSelect.value as cpuSelect in cpuSelectList">
+                                        <div ng-bind-html="cpuSelect.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <div class="error" ng-messages="aggregateForm[key].$dirty && aggregateForm[key].$error" ng-if="interacted(aggregateForm[key])">
+                                    <span ng-message="required">{{"aws.message.required"|translate}}</span>
+                                    <span ng-message="checkRamType">{{"aws.message.inputRamNum"|translate}}</span>
+                                    <span ng-message="checkCpuType">{{"aws.message.inputCpuNum"|translate}}</span>
+                                    <span ng-message="maxlength">{{"aws.message.textLength"|translate}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="del">
+                            <a ng-click="delMetadata(key,$index)"><i class="icon-aw-wrong"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-info" type="button" ng-click="confirmAggregate(aggregateData)">{{"aws.action.ok"|translate}}
+            </button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="setAggregateMetadata.html">
+  <div class="modal-common modal-smallest">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.system.aggregate.setMetadata"|translate}}</h3>
+    </div>
+    <div class="modal-body metdata-body">
+      <div class="alert alert-info alert-setAggregateMeta" ng-if="metadata.key == 'filter_tenant_id' ">
+        {{"aws.system.aggregate.metadataInfo"|translate}}
+      </div>
+      <form name="aggregateForm">
+        <div class="control-group">
+          <label class="control-label">{{"aws.system.aggregate.key"|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="metadata
+            .key" ng-change="changekey(metadata.key)">
+              <ui-select-match placeholder="{{'aws.system.aggregate.choseKeys'|translate}}">
+                {{$select.selected}}
+              </ui-select-match>
+              <ui-select-choices repeat="option in keyOptions">
+                <div ng-bind-html="option | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group" ng-if="metadata.key=='CPU绑定'">
+          <label class="control-label">{{"aws.system.aggregate.value"|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="metadata.value">
+              <ui-select-match placeholder="{{valuePlaceholder}}">
+                {{$select.selected.name}}
+              </ui-select-match>
+              <ui-select-choices repeat="cpuSelect in cpuSelectList">
+                <div ng-bind-html="cpuSelect.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div ng-if="metadata.key=='自定义'">
+          <div class="control-group" >
+            <label class="control-label">{{"aws.system.aggregate.selfDefinedKey"|translate}}：</label>
+            <div class="controls">
+              <input type="text" name="selfkey" class="form-controls" required placeholder="{{'aws.system.aggregate.selfKeyPlaceholder'|translate}}"
+                  ng-maxlength="128" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-model="metadata.selfkey"/>
+              <div class="error" ng-messages="aggregateForm.selfkey.$dirty && aggregateForm.selfkey.$error">
+                  <span ng-message="required">{{"aws.message.required"|translate}}</span>           
+                  <span ng-message="maxlength">{{"aws.system.aggregate.selfLengthErrorMsg"|translate}}</span>
+                  <span ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{"aws.system.aggregate.value"|translate}}：</label>
+            <div class="controls">
+              <input type="text" name="selfvalue" class="form-controls" required placeholder="{{'aws.system.aggregate.selfValuePlaceholder'|translate}}"
+                  ng-maxlength="128" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-model="metadata.selfvalue"/>
+              <div class="error" ng-messages="aggregateForm.selfvalue.$dirty && aggregateForm.selfvalue.$error">
+                  <span ng-message="required">{{"aws.message.required"|translate}}</span>          
+                  <span ng-message="maxlength">{{"aws.system.aggregate.selfLengthErrorMsg"|translate}}</span>
+                  <span ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-if="(metadata.key!='CPU绑定')&&(metadata.key!='自定义')">
+          <label class="control-label">{{"aws.system.aggregate.value"|translate}}：</label>
+          <div class="controls" ng-if="metadata.key!='filter_tenant_id'">
+            <input type="text" name="value" class="form-controls" required placeholder="{{valuePlaceholder}}"
+                ng-maxlength="32" ng-model="metadata.value" check-type="checkType"/>
+            <div class="error" ng-messages="aggregateForm.value.$dirty && aggregateForm.value.$error">
+                <span ng-message="required">{{"aws.message.required"|translate}}</span>
+                <span ng-message="checkRamType" ng-if="metadata.key=='ram_allocation_ratio'">{{"aws.message.inputRamNum"|translate}}</span>  
+                <span ng-message="checkCpuType" ng-if="metadata.key=='cpu_allocation_ratio'">{{"aws.message.inputCpuNum"|translate}}</span>            
+                <span ng-message="maxlength">{{"aws.message.textLength"|translate}}</span>
+            </div>
+          </div>
+          <div class="controls" ng-if="metadata.key=='filter_tenant_id'">
+            <ui-select name="tenant" ng-model="metadata.value">
+              <ui-select-match placeholder="请选择项目">
+                {{$select.selected.name}}
+              </ui-select-match>
+              <ui-select-choices repeat="project.projectUid as project in projectList">
+                <div ng-bind-html="project.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="aggregateForm.tenant.$dirty && aggregateForm.tenant.$error">
+                <span ng-message="required">{{"aws.message.required"|translate}}</span>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="aggregateForm.$invalid" ng-click="$close(metadata)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="manageHost.html">
+  <div class="modal-common modal-smallest">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.system.aggregate.manageHost"|translate}}</h3>
+    </div>
+    <div class="modal-body manageHost-body">
+      <div class="alert alert-info alert-manageHost">
+        <div>{{"aws.system.aggregate.explain"|translate }}</div>
+        <div>{{"aws.system.aggregate.manageHostInfoOne"|translate }}</div>
+        <div>{{"aws.system.aggregate.manageHostInfoTwo"|translate }}</div>
+      </div>
+      <form name="aggregateForm">
+        <div class="control-group">
+          <label class="control-label">{{"aws.system.aggregate.chosenHosts"|translate}}：</label>
+          <div class="controls">
+            <ui-select multiple close-on-select="false" ng-model="manageHostData.hosts" theme="bootstrap">
+              <ui-select-match placeholder="{{selectHostplaceholder}}">{{$item}}
+              </ui-select-match>
+              <ui-select-choices repeat="option in availableHosts">
+                <div ng-bind-html="option | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <!--<div ng-messages="aggregateForm.value.$dirty && aggregateForm.value.$error">-->
+              <!--<span class="error" ng-message="required">{{"aws.message.required"|translate}}</span>-->
+            <!--</div>-->
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="aggregateForm.$invalid" ng-click="$close(manageHostData)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>

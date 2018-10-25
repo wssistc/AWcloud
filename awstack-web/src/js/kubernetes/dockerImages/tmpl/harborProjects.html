@@ -1,0 +1,346 @@
+<div class="page-inner">
+    <div class="detail-info">
+        <uib-tabset active="0" justified="true" class="tab-offset-right">
+            <uib-tab index="0" heading='{{"aws.k8s.dockerImages.myProjects"|translate}}' select="setPublicity(0)">
+                <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='2'}">
+                    <div class="table-action">
+                        <button type="button" class="btn btn-new" disabled="disabled"><i class="icon-aw-add-to2"></i> {{"aws.k8s.dockerImages.createProject" |translate}}</button>
+                        <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-delete"></i> {{"aws.k8s.dockerImages.deleteProjects" |translate}}</button>
+                        <div class="pull-right">
+                            <into-information modular="'k8sprojects'"></into-information>
+                            <button class="btn btn-renovat right-ports" disabled="disabled"><i class="icon-aw-refresh"></i></button>
+                            <div class="search-box right-ports">
+                                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <table class="table">
+                            <colgroup>
+                                <col width="10%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <label class="checkbox">
+                                            <input type="checkbox" name="r" disabled="disabled" />
+                                            <i class="iconfont"></i>
+                                        </label>
+                                    </th>
+                                    <th>{{"aws.k8s.dockerImages.projectName"|translate}}</th>
+                                    <th>{{"aws.k8s.dockerImages.imageRepoCount"|translate}}</th>
+                                    <th>{{"aws.k8s.dockerImages.roles"|translate}}</th>
+                                    <th>{{"aws.k8s.dockerImages.createTime"|translate}}</th>
+                                    <th>{{"aws.k8s.dockerClusters.labels"|translate}}</th>
+                                    <th>{{"aws.k8s.dockerImages.isPublic"|translate}}</th>
+                                </tr>
+                            </thead>
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    如需使用容器管理块功能，请打开”系统管理 > 系统设置 > <a href="/#/system/plugin">功能管理</a> “界面添加”容器管理”模块
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='1'}">
+                  <div class="table-action">
+                    <button type="button" data-toggle="modal" ng-click="createProject()" class="btn btn-new">
+                        <i class="icon-aw-add-to2"></i>{{"aws.k8s.dockerImages.createProject" |translate}}
+                    </button>
+                    <button type="button" data-toggle="modal" class="btn btn-normal" ng-disabled="!selectedItemsAllCanDelete" ng-click="deleteHarborProjects()">
+                        <i class="icon-aw-delete"></i>{{"aws.k8s.dockerImages.deleteProjects" |translate}}
+                    </button>
+                    <div class="pull-right">
+                        <!-- <setting title-data="titleData" site-title="titleName" table-data="dockerClustersData" ></setting> -->
+                        <div type="button" class="btn btn-renovat right-ports" ng-click="refresh()">
+                            <i class="icon-aw-refresh"></i>
+                        </div>
+                        <div class="search-box right-ports">
+                            <div class="search-box">
+                                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(harborProject_search.globalSearchTerm)">
+                                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i>
+                                    </button>
+                                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="harborProject_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-content">
+                    <table ng-table="tableParams" class="table" show-filter="false">
+                        <colgroup>
+                            <col width="10%">
+                            <col width="15%">
+                            <col width="15%">
+                            <col width="15%">
+                            <col width="15%">
+                            <col width="15%">
+                            <col width="15%">
+                        </colgroup>
+                        <tr ng-repeat="item in $data">
+                            <td header="'headerCheckbox.html'">
+                                <label class="checkbox">
+                                    <input type="checkbox" ng-model="checkboxes.items[item.project_id]" />
+                                    <i class="icon-aw-square"></i>
+                                </label>
+                            </td>
+                            <td data-title='"aws.k8s.dockerImages.projectName"|translate' sortable="'name'">
+                                <a ng-click="showDetails(item.project_id,item.name)">{{item.name}}</a>
+                                <!-- ng-href="#/k8s/projects/{{item.project_id}}" -->
+                            </td>
+                            <td data-title='"aws.k8s.dockerImages.imageRepoCount"|translate' sortable="'repo_count'">
+                                <span>{{item["repo_count"]}}</span>
+                            </td>
+                            <td data-title='"aws.k8s.dockerImages.roles"|translate' sortable="'name'">
+                                <span>{{item["owner_id"] === userId ? "项目拥有者" : "项目使用者"}}</span>
+                            </td>
+                            <td data-title='"aws.k8s.dockerImages.createTime"|translate' sortable="'creation_time'">
+                                <span>{{item["creation_time"] | localDate}}</span>
+                            </td>
+                            <td data-title='"aws.k8s.dockerImages.isPublic"|translate' sortable="'public'">
+                                <span ng-class="{
+                        'bg-green':(item.public == 1),
+                        'bg-orange':(item.public != 1)
+                        }">
+                        {{item["public"] == 1 ? "是" : "否"}}
+                    </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                </div>
+                
+            </uib-tab>
+            <uib-tab index="1" heading='{{"aws.k8s.dockerImages.publicProjects"|translate}}' select="setPublicity(1)">
+                <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='2'}">
+                    <div class="table-action">
+                        <button type="button" class="btn btn-new" disabled="disabled"><i class="icon-aw-add-to2"></i> {{"aws.k8s.dockerImages.createProject" |translate}}</button>
+                        <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-delete"></i> {{"aws.k8s.dockerImages.deleteProjects" |translate}}</button>
+                        <div class="pull-right">
+                            <button class="btn btn-renovat right-ports" disabled="disabled"><i class="icon-aw-refresh"></i></button>
+                            <div class="search-box right-ports">
+                                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <table class="table">
+                            <colgroup>
+                                <col width="10%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <label class="checkbox">
+                                            <input type="checkbox" name="r" disabled="disabled" />
+                                            <i class="iconfont"></i>
+                                        </label>
+                                    </th>
+                                    <th>{{"aws.k8s.dockerImages.projectName"|translate}}</th>
+                                    <th>{{"aws.k8s.dockerImages.imageRepoCount"|translate}}</th>
+                                    <th>{{"aws.k8s.dockerImages.roles"|translate}}</th>
+                                    <th>{{"aws.k8s.dockerImages.createTime"|translate}}</th>
+                                    <th>{{"aws.k8s.dockerClusters.labels"|translate}}</th>
+                                    <th>{{"aws.k8s.dockerImages.isPublic"|translate}}</th>
+                                </tr>
+                            </thead>
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    如需使用容器管理块功能，请打开”系统管理 > 系统设置 > <a href="/#/system/plugin">功能管理</a> “界面添加”容器管理”模块
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='1'}">
+                  <div class="table-action">
+                    <button type="button" data-toggle="modal" ng-click="createProject()" class="btn btn-new">
+                        <i class="icon-aw-add-to2"></i>{{"aws.k8s.dockerImages.createProject" |translate}}
+                    </button>
+                    <button type="button" data-toggle="modal" class="btn btn-normal" ng-disabled="!selectedItemsAllCanDelete" ng-click="deleteHarborProjects()">
+                        <i class="icon-aw-delete"></i>{{"aws.k8s.dockerImages.deleteProjects" |translate}}
+                    </button>
+                    <div class="pull-right">
+                        <!-- <setting title-data="titleData" site-title="titleName" table-data="dockerClustersData" ></setting> -->
+                        <div type="button" class="btn btn-renovat right-ports" ng-click="refresh()">
+                            <i class="icon-aw-refresh"></i>
+                        </div>
+                        <div class="search-box right-ports">
+                            <div class="search-box">
+                                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(harborProject_search.globalSearchTerm)">
+                                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="harborProject_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-content">
+                    <table ng-table="tableParams" class="table" show-filter="false">
+                        <colgroup>
+                            <col width="20%">
+                            <col width="20%">
+                            <col width="20%">
+                            <col width="20%">
+                            <col width="20%">
+                        </colgroup>
+                        <tr ng-repeat="item in $data">
+                            <td header="'headerCheckbox.html'">
+                                <label class="checkbox">
+                                    <input type="checkbox" ng-disabled="userId != item.owner_id" ng-model="checkboxes.items[item.project_id]">
+                                    <i class="icon-aw-square"></i>
+                                </label>
+                            </td>
+                            <td data-title='"aws.k8s.dockerImages.projectName"|translate' sortable="'name'">
+                                <a ng-click="showDetails(item.project_id,item.name)">{{item.name}}</a>
+                            </td>
+                            <td data-title='"aws.k8s.dockerImages.imageRepoCount"|translate' sortable="'repo_count'">
+                                <span>{{item["repo_count"]}}</span>
+                            </td>
+                            <td data-title='"aws.k8s.dockerImages.roles"|translate' sortable="'name'">
+                                <span>{{item["owner_id"] === userId ? "项目拥有者" : "项目使用者"}}</span>
+                            </td>
+                            <td data-title='"aws.k8s.dockerImages.createTime"|translate' sortable="'creation_time'">
+                                <span>{{item["creation_time"] | localDate}}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                </div>
+                
+            </uib-tab>
+        </uib-tabset>
+    </div>
+    <div ng-controller="detailCtrl" class="dockerCluster-content">
+        <pane class="detail-body" animation="animation">
+            <div class="cluster-box">
+                <div class="move-content clearfix" ng-class="{'to-left':moveTo,'to-move-left':moveToLeft}">
+                    <div class="tab-content detail-content">
+                        <div class="detail-row">
+                            <div class="detail-title">
+                                <a class="an-close" ng-click="handleDetail()"><i class="icon-aw-mail-reply"></i></a>
+                                <span class="region-title">{{imgTitle}}{{'aws.cluster.detailMessage' | translate}}</span>
+                            </div>
+                            <div class="detail-info">
+                                <div class="tab-content-line"></div>
+                                <div>
+                                    <div ng-include="'js/kubernetes/dockerImages/tmpl/harborProjectDetails.html'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content detail-content" ng-if="showImgWarehouse">
+                        <div class="detail-row">
+                            <div class="detail-title">
+                                <span class="title-cluster" ng-click="toRightOnce()">{{imgTitle}} 详情</span>
+                                <span class="point-to">></span>
+                                <span class="title-node">{{imgWarehouseTitle}} 详情</span>
+                            </div>
+                            <div class="detail-info">
+                                <div class="tab-content-line"></div>
+                                <div>
+                                    <div class="tab-content-line"></div>
+                                    <div ng-include="'js/kubernetes/dockerImages/tmpl/dockerImages.html'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content detail-content" ng-if="showImgLog">
+                        <div class="detail-row">
+                            <div class="detail-title">
+                                <span class="title-cluster" ng-click="toRight()">{{imgTitle}} 详情</span>
+                                <span class="point-to">></span>
+                                <span class="title-cluster" ng-click="toRightAgain()">{{imgWarehouseTitle}} 详情</span>
+                                <span class="point-to">></span>
+                                <span class="title-node">{{imgLogTitle}} 详情</span>
+                            </div>
+                            <div class="detail-info">
+                                <div class="tab-content-line"></div>
+                                <div>
+                                    <div ng-include="'js/kubernetes/dockerImages/tmpl/dockerImageManifests.html'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </pane>
+    </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+        <i class="icon-aw-square"></i>
+    </label>
+</script>
+<script type="text/ng-template" id="createProject.html">
+    <div class="modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{"aws.k8s.dockerImages.createProject" |translate}}</h3>
+        </div>
+        <div class="modal-body">
+            <form name="createProjectForm">
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.dockerImages.projectName" |translate}}：</label>
+                    <div class="controls">
+                        <input type="text" name="projectName" class="form-controls" placeholder="{{'aws.k8s.dockerImages.projectNameTips'|translate}}" ng-model="createProjectData.name" ng-maxlength="32" required ng-pattern="/^[a-z]([-a-z0-9]*[a-z0-9])?$/" />
+                        <div class="error" ng-show="createProjectForm.projectName.$invalid &&
+                                         createProjectForm.projectName.$dirty">
+                            <span ng-show="createProjectForm.projectName.$error.required">
+                {{"aws.k8s.dockerImages.projectNameNotEmpty"|translate}}
+              </span>
+                            <span ng-show="createProjectForm.projectName.$error.maxlength">
+                {{"aws.k8s.dockerImages.projectNameTooLong"|translate}}
+              </span>
+                            <span ng-show="createProjectForm.projectName.$error.pattern">
+                {{"aws.k8s.dockerImages.projectNameMismatchPattern"|translate}}
+              </span>
+                        </div>
+                        <div class="error" ng-show="createProjectForm.projectName.$valid && projectNameRepeated">
+                            <span>
+                {{"aws.k8s.dockerImages.projectNameRepeated"|translate}}
+              </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.dockerImages.isPublic"|translate}}：</label>
+                    <div class="controls">
+                        <div class="radio-item clearFix">
+                            <label class="radio">
+                                <input type="radio" ng-model="createProjectData.isPublic" name="isPublic" value="1" /><i class="iconfont"></i>{{'aws.common.yes'|translate}}</label>
+                            <label class="radio">
+                                <input type="radio" ng-model="createProjectData.isPublic" name="isPublic" value="0" /><i class="iconfont"></i>{{'aws.common.no'|translate}}</label>
+                        </div>
+                        <!-- <input type="checkbox" ng-model="createProjectData.isPublic"> -->
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-info" type="button" ng-disabled="createProjectForm.$invalid" ng-click="$close(createProjectData)">{{"aws.action.ok" |translate}}
+            </button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel" |translate}}</button>
+        </div>
+    </div>
+</script>

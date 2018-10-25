@@ -1,0 +1,202 @@
+@charset "utf-8";
+
+/* 进度条 */
+.progress {
+	.progress-bar{
+		box-shadow: none;
+		-webkit-transition: all 0.3s linear 0s;
+		-ms-transition: all 0.3s linear 0s;
+		transition: all 0.3s linear 0s;
+		/* 96-100 */
+		&.progress-bar-redDark{
+			background-color: @redDark;
+			fill: @redDark;
+			&.value{
+				color:@redDark;
+				fill:none;
+				background: none;
+			}
+		}
+
+		/* 86-95 */
+		&.progress-bar-red{
+			background-color: @red;
+			fill: @red;
+			&.value{
+				color:@red;
+				fill:none;
+				background: none;
+			}
+		}
+		&.progress-bar-redLight{
+			background-color: @redLight;
+			fill: @redLight;
+			&.value{
+				color:@redLight;
+				fill:none;
+				background: none;
+			}
+		}
+
+		/* 76-85 */
+		&.progress-bar-orangeDark{
+			background-color: @orangeDark;
+			fill: @orangeDark;
+			&.value{
+				color:@orangeDark;
+				fill:none;
+				background: none;
+			}
+		}
+
+		/* 66-75 */
+		&.progress-bar-orange{
+			background-color: @orange;
+			fill: @orange;
+			&.value{
+				color:@orange;
+				fill:none;
+				background: none;
+			}
+		}
+		&.progress-bar-orangeLight{
+			background-color: @orangeLight;
+			fill: @orangeLight;
+			&.value{
+				color:@orangeLight;
+				fill:none;
+				background: none;
+			}
+		}
+
+		/* 51-65 */
+		&.progress-bar-blueDark{
+			background-color: @blueDark;
+			fill: @blueDark;
+			&.value{
+				color:@blueDark;
+				fill:none;
+				background: none;
+			}
+		}
+
+		/* 31-50 */
+		&.progress-bar-blue{
+			background-color: @blue;
+			fill: @blue;
+			&.value{
+				color:@blue;
+				fill:none;
+				background: none;
+			}
+		}
+		&.progress-bar-blueLight{
+			background-color: @blueLight;
+			fill: @blueLight;
+			&.value{
+				color:@blueLight;
+				fill:none;
+				background: none;
+			}
+		}
+
+		/* 0-30 */
+		&.progress-bar-green{
+			background-color: @green;
+			fill: @green;
+			&.value{
+				color:@green;
+				fill:none;
+				background: none;
+			}
+		}
+		&.progress-bar-DarkgreenLight{
+			background-color: @greenLight;
+			fill: @greenLight;
+			&.value{
+				color:@greenLight;
+				fill:none;
+				background: none;
+			}
+		}
+	}
+	&.width{
+		height:8px;
+		margin-bottom: 0;
+		background: @ivory;
+		box-shadow: none;
+		border-radius:@borderRadius;
+		.progress-bar{
+			-webkit-transition:width 1s ease;
+			-moz-transition:width 1s ease;
+			-ms-transition:width 1s ease;
+			transition:width 1s ease;
+		}
+	}
+	&.height{
+		width: 30px;
+		height: 200px;
+		position: relative;
+		margin: 0;
+		float: left;
+		background: @blueDark;
+		.progress-bar{
+			width: 100%;
+			height:0%;
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			-webkit-transition:height 1s ease;
+			-moz-transition:height 1s ease;
+			-ms-transition:height 1s ease;
+			transition:height 1s ease;
+		}
+	}
+}
+
+/* 重复样式 */
+.bar-group{
+    padding: 7px 0;
+    > .ng-isolate-scope {
+    	height: @inputHeight;
+    	margin-bottom: 10px;
+    }
+  	.left{
+    	float: left;
+  	}
+  	.right{
+    	float: right;
+    	&.legend{
+    		margin-left: 20px;
+    	}
+  	}
+  	.rate{
+  		margin-right: 10px;
+  	}
+  	.progress.active{
+    	width: 100%;
+    	margin-top: 19px;
+  	}
+}
+
+/* 重复样式 */
+.ins-quota{
+	min-height: 320px;
+	&.addpInstanceQuota{
+		min-height:180px;
+	}
+	li{
+		margin-bottom: 5px;
+		.wrap-box{
+			.left{
+				float: left;
+			}
+			.right{
+				float:right;
+			}
+		}
+		.quota-total, .used {
+			display:none;
+		}
+	}
+}

@@ -1,0 +1,103 @@
+<div class="box operating-box">
+	<div class="general-box">
+		<div class="page-inner">
+			<span class="settings-title">{{'aws.general.timeout' | translate}}</span>
+			<div class="settings-box">
+				<div class="control-group control-choose">
+					<label class="control-label ">
+						<span class="red">*</span>{{'aws.general.timeout' | translate}}：
+					</label>
+					<div class="controls">
+						<div class="choose-item">
+							<ui-select ng-model="general.timeout">
+								<ui-select-match placeholder="{{'aws.general.selecTimeout' | translate}}">{{$select.selected.name}}</ui-select-match>
+								<ui-select-choices repeat="time in timeList | propsFilter: {name: $select.search}">
+									<div ng-bind-html="time.name | highlight: $select.search"></div>
+								</ui-select-choices>
+							</ui-select>
+						</div>
+					</div>
+				</div>
+				<div class="generalDesc">
+					<span>{{'aws.general.timeout' | translate}}</span>
+					<p>{{'aws.general.timeoutDesc' | translate}}</p>
+				</div>
+			</div>
+			<span class="settings-title">{{'aws.general.expirationTime' | translate}}</span>
+			<div class="settings-box">
+				<form name="generalForm" novalidate>
+					<div class="control-group control-choose ups-choose">
+						<label class="control-label ">{{'aws.general.dataCenter' | translate}}：</label>
+						<div class="controls">
+							<div class="choose-item">
+								<ui-select ng-model="general.dataCenter" ng-change="changeRegion(general.dataCenter)" ng-disabled="canEdit || canSelect">
+									<ui-select-match placeholder="{{'aws.general.selectDataCenter' | translate}}">{{$select.selected.regionName}}</ui-select-match>
+									<ui-select-choices repeat="region in regionList | propsFilter: {regionName: $select.search}">
+										<div ng-bind-html="region.regionName | highlight: $select.search"></div>
+									</ui-select-choices>
+								</ui-select>
+							</div>
+						</div>
+					</div>
+					<div class="control-group control-choose">
+						<label class="control-label ">
+							<span class="red">*</span>{{'aws.general.expirationTimeLabel' | translate}}：
+						</label>
+						<div class="controls">
+							<div class="table-action">
+							    <button class="btn btn-refresh" ng-disabled="canSub" ng-click="timeSub()">-</button>
+							    <input type="text" name="expirationTime" ng-disabled="canEdit" ng-model="expirationTime" ng-change="expirationTimeChanged()" class="form-controls" min="1" max="720" limitnumrange required />
+							    <button class="btn btn-refresh" ng-disabled="canAdd" ng-click="timeAdd()">+</button>
+							    <span class="rangeText loadingText">填写范围：1-720</span>
+							    <span ng-if = "canEdit" class="loadingText">{{'aws.general.modifying'|translate}} <i class="aw-spin icon-aw-refresh"></i></span>
+							    <span ng-if = "expTipShow" class="tipText">{{modifyTips}}</span>
+							</div>
+							<div class="error" ng-messages="generalForm.expirationTime.$dirty && generalForm.expirationTime.$error">
+								<span ng-message="limitnumrange">{{'aws.errors.limit_1_720'|translate}}</span>
+								<span ng-message="required">{{'aws.errors.required'|translate}}</span>
+							</div>
+						</div>
+					</div>
+				</form>
+				<div class="generalDesc">
+					<span>{{'aws.general.expirationTime' | translate}}</span>
+					<p>{{'aws.general.expirationTimeDesc' | translate}}</p>
+				</div>
+			</div>
+			<span class="settings-title">{{'aws.general.upsType' | translate}}</span>
+			<div class="settings-box">
+				<div class="control-group control-choose ups-choose">
+					<label class="control-label ">{{'aws.general.dataCenter' | translate}}：</label>
+					<div class="controls">
+						<div class="choose-item">
+							<ui-select ng-model="general.dataCenter" ng-change="changeRegion(general.dataCenter)" ng-disabled="canEdit || canSelect">
+								<ui-select-match placeholder="{{'aws.general.selectDataCenter' | translate}}">{{$select.selected.regionName}}</ui-select-match>
+								<ui-select-choices repeat="region in regionList | propsFilter: {regionName: $select.search}">
+									<div ng-bind-html="region.regionName | highlight: $select.search"></div>
+								</ui-select-choices>
+							</ui-select>
+						</div>
+					</div>
+				</div>
+				<div class="control-group control-choose ups-choose">
+					<label class="control-label ">{{'aws.general.upsType' | translate}}：</label>
+					<div class="controls">
+						<div class="choose-item ups-item">
+							<ui-select ng-model="general.upsType" ng-disabled="canSelect">
+								<ui-select-match placeholder="{{'aws.general.selectUpsType' | translate}}">{{$select.selected.name}}</ui-select-match>
+								<ui-select-choices repeat="ups in upsTypeList | propsFilter: {name: $select.search}">
+									<div ng-bind-html="ups.name | highlight: $select.search"></div>
+								</ui-select-choices>
+							</ui-select>
+						</div>
+						<span ng-if = "canSelect" class="loadingText">{{'aws.general.modifying'|translate}} <i class="aw-spin icon-aw-refresh"></i></span>
+						<span ng-if = "upsTipShow" class="tipText">{{modifyTips}}</span>
+					</div>
+				</div>
+			</div>
+			<div class="text-center">
+				<button class="btn btn-info"  ng-click="saveGeneral(generalForm)" ng-disabled="generalForm.$invalid || canTimeout || canExpiration || canUps">{{'aws.action.save'|translate}}</button>
+			</div>
+		</div>
+	</div>
+</div>

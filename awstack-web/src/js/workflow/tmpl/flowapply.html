@@ -1,0 +1,97 @@
+<div class="page-inner">
+ <div class="table-action">
+    <!--<button type="button" ng-click="createJob()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}</button>-->
+    <button type="button" ng-click="editJob(editData)" ng-disabled="isDisabled" class="btn btn-info"><i class="icon-aw-modify"></i>{{"aws.action.bind"|translate}}</button>
+   <!--<button type="button" ng-click="startJob(editData)" ng-disabled="isDisabled" class="btn btn-info"><i class="icon-aw-start-up"></i>{{"aws.action.start"|translate}}</button>
+   <button class="btn btn-refresh" ng-click="refresh()"><i class="icon-aw-refresh"></i></button>-->
+    <!--<button type="button" ng-click="deleteJob(checkedItems)" ng-disabled="delisDisabled" class="btn btn-info"> <i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>-->
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="flow.globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <table ng-table="tableParams" class="table">
+      <colgroup>
+        <col width="4%">
+        <col width="32%">
+        <col width="32%">
+        <col width="32%">
+      </colgroup>
+      <tr ng-repeat="item in $data | searchFilter:{name:SearchTerm,description:SearchTerm,version:SearchTerm}" >
+            <td header="'headerCheckbox.html'">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="checkboxes.items[item.paramId]"/>
+                <i class="iconfont"></i>
+              </label>
+            </td>
+            <td data-title="headers.modelName">
+                <div class="edit-name edit-lg">
+                  <span title="{{item.dataValue}}">{{item.paramValue}}</span>
+                </div>
+            </td>
+            <td data-title="headers.name">{{item.paramName}}</td>
+            <td data-title="headers.description">
+                <span class="des des-lg">{{item.paramDesc}}</span>
+            </td>
+        </tr>
+    </table>
+    <loading-data  data="Jobdatas"></loading-data>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="createJob.html">
+  <div class=" modal-common">
+    <form name="createJobForm" novalidate>
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{'aws.workflow.bind'|translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">{{'aws.workflow.tiName'|translate}}：</label>
+          <div class="controls">
+            <span class="text text-wfname">{{name}}</span>
+            <!--<input type="text" ng-model="name" readonly ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" name="name" class="form-controls" required />
+            <div class="error" ng-messages="(submitValid ||createJobForm.name.$dirty) && createJobForm.name.$error">
+              <form-validate></form-validate>
+            </div>-->
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.workflow.bindwork'|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="jobname.selected" name="jobname" title="{{'aws.workflow.type'|translate}}" required>
+              <ui-select-match placeholder="{{'aws.workflow.type'|translate}}">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="item.key as item in jobData | filter:{name:$select.search}">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="(submitValid ||createJobForm.jobname.$dirty) && createJobForm.jobname.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.workflow.description'|translate}}：</label>
+          <div class="controls">
+            <textarea type="text" ng-model="decription" name="decription" maxlength="50" class="form-controls"/></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info ng-binding" ng-click="createJobconfirm(createJobForm)">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default ng-binding" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+      </div>
+    </form>
+  </div>  
+</script>
+
+

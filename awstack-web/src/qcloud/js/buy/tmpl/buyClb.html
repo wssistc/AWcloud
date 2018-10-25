@@ -1,0 +1,116 @@
+<div class="page-inner">
+  <div class="shop-title">
+    <a ng-href="#/clb/instance">返回<i class="icon-aw-angle-left"></i></a><span>购买负载均衡实例</span>
+  </div>
+  <div class="shop-body">
+    <form name="buyCLBForm">
+      <div class="control-group">
+        <label class="control-label">计费模式：</label>
+        <div class="controls">
+          <span>按实际天数每月结算</span>
+          <!--
+          <a class="blue"
+             href="https://www.qcloud.com/document/product/214/6575#.E8.AE.A1.E8.B4.B9.E8.AF.B4.E6.98.8E"
+             target="_blank">
+            <i class="icon-aw-link"></i>
+            计费示例
+          </a>
+          -->
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">实例类型：</label>
+        <div class="controls">
+          <div class="btn-item-group">
+            <button type="button" class="type-btn" ng-class='{"active": item.code === postData.loadBalancerType}'
+                    ng-click="selectLBType(item)" ng-repeat="item in loadBalancerTypeList">
+              <span title="{{item.tips}}">{{item.name}}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">选择地域：</label>
+        <div class="controls">
+          <div class="btn-item-group">
+            <button type="button" class="type-btn" ng-class='{"active": item.code === postData.Region}'
+                    ng-click="selectRegion(item)" ng-repeat="item in availableRegionList">
+              <span>{{item.name}}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">网络类型：</label>
+        <div class="controls">
+          <div class="btn-item-group">
+            <button type="button" class="type-btn" ng-class='{"active": item.code === postData.vpcType}'
+                    ng-click="selectVpcType(item)" ng-repeat="item in vpcTypeList">
+              <span>{{item.name}}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="control-group" ng-if="ShowVpcList">
+        <label class="control-label">私有网络：</label>
+        <div class="controls">
+          <ui-select ng-model="postData.vpcId" name="vpcName" required>
+            <ui-select-match placeholder="请选择私有网络">{{$select.selected["vpcName"]}}</ui-select-match>
+            <ui-select-choices repeat="vpc.vpcId as vpc in vpcList | filter: $select.search">
+              <div ng-bind-html="vpc.vpcName | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+          <div class="error" ng-if="postData.vpcId === undefined">
+            <div>您选择的地域中没有私有网络，请选择“基础网络”或者新建私有网络。</div>
+          </div>
+        </div>
+      </div>
+      <!--
+      <div class="control-group">
+        <label class="control-label">所属项目：</label>
+        <div class="controls">
+          <ui-select ng-model="postData.projectId" name="projectName" required>
+            <ui-select-match placeholder="请选择项目">{{$select.selected.name}}</ui-select-match>
+            <ui-select-choices repeat="project.id as project in projectsList | filter: $select.search">
+              <div ng-bind-html="project.name | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+        </div>
+      </div>
+      -->
+      <div class="control-group">
+        <label class="control-label">购买数量：</label>
+        <div class="controls">
+          <div class="count-box">
+            <input type="button" ng-disabled="postData.number < 2" class="minus" value="-"
+                   ng-click="reduceNumber()">
+            <input type="text" name="clbNumber" class="button-num" required
+                   ng-pattern="/^[1-9][0-9]*$/" ng-model="postData.number">
+            <input type="button" class="add" value="+"
+                   ng-click="addNumber()">
+            <div class="error" ng-if="buyCLBForm.clbNumber.$invalid">
+              <div ng-if="buyCLBForm.clbNumber.$error.required">必填项</div>
+              <div ng-if="buyCLBForm.clbNumber.$error.pattern">请输入正整数</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">总计费用：</label>
+        <div class="controls">
+          <span class="unit-box">{{getTotalPrice()}}
+            <span class="unit-txt">元/天</span>
+          </span>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">&nbsp;</label>
+        <div class="controls">
+          <button class="btn btn-info" type="button" ng-disabled="buyCLBForm.$invalid" ng-click="confirmBuyCLB()">
+            确定
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,35 @@
+<div class="region-domain-project clearFix">
+    <div class="control-group control-group-region" ng-if="isRegionShow">
+        <label class="control-label">数据中心:</label>
+        <div class="controls">
+            <ui-select ng-model="regionModel.selected" ng-change="changeRegion(regionModel.selected)">
+                <ui-select-match placeholder="请选择数据中心" title="{{$select.selected.regionName}}">{{$select.selected.regionName}}</ui-select-match>
+                <ui-select-choices repeat=" item in regionList | filter:{regionName:$select.search}">
+                    <div ng-bind-html="item.regionName | highlight: $select.search" title="{{item.regionName}}" class="ui-select-item-ellips"></div>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </div>
+    <div class="dep-box control-group" ng-if="isDomainProjectShow">
+        <label class="control-label">部门:</label>
+        <div class="controls">
+            <ui-select ng-model="tops.depart.selected" ng-change="changedepart(tops.depart.selected)" ng-disabled="!REGION_ADMIN">
+                <ui-select-match placeholder="部门名称" title="{{$select.selected.domainName}}">{{$select.selected.disDomainName}}</ui-select-match>
+                <ui-select-choices repeat=" depart in tops.deparList | filter:{domainName:$select.search}">
+                    <div ng-bind-html="depart.disDomainName | highlight: $select.search" class="ui-select-item-ellips"  title="{{depart.disDomainName}}"></div>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </div>
+    <div class="control-group" ng-if="isDomainProjectShow">
+        <label class="control-label">项目:</label>
+        <div class="controls">
+            <ui-select ng-model="tops.pro.selected" ng-disabled="options.disabled" ng-change="changeproject(tops.pro.selected)">
+                <ui-select-match placeholder="{{ noProjectHolder ||'项目名称'}}" title="{{$select.selected.projectName}}">{{$select.selected.disProjectName}}</ui-select-match>
+                <ui-select-choices repeat="pro in tops.projectsList | filter:{projectName:$select.search}">
+                    <div ng-bind-html="pro.disProjectName | highlight: $select.search" class="ui-select-item-ellips"  title="{{pro.disProjectName}}"></div>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </div>
+</div>

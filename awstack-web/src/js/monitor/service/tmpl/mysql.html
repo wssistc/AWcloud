@@ -1,0 +1,76 @@
+<div class="page-inner monitor-view">
+    <div class="host-list clearfix">
+        <div class="control-group pull-left">
+            <div class="control-label">{{"aws.monitor.mysql.phyHost" | translate }}:</div>
+            <div class="controls">
+                <ui-select ng-model="queryLimit.selectedMysql" ng-change="changeMysql()">
+                    <ui-select-match placeholder="{{'aws.monitor.mysql.chosePhyHost' | translate }}">{{$select.selected.host}}</ui-select-match>
+                    <ui-select-choices repeat="mysql in mysqls.options">
+                        <div ng-bind-html="mysql.host | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="control-group pull-left">
+            <div class="detail"><span>{{"aws.monitor.mysql.port" | translate}} : </span><span>{{queryLimit.selectedMysql.port}}</span></div>
+            <div class="detail"><span>{{"aws.monitor.mysql.version" | translate}} : </span><span>{{queryLimit.selectedMysql.version}}</span></div>
+            <!-- api没有返回数据，暂时隐藏 -->
+            <!-- <div class="detail"><span>数据库实例名称 : </span><span>{{queryLimit.selectedMysql.port}}</span></div>
+            <div class="detail"><span>状态 : </span><span>{{queryLimit.selectedMysql.port}}</span></div> -->
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="col-title">{{"aws.monitor.mysql.mysqlConnection" | translate}}</div>
+        <div class="box layout-grid areaChart" >
+            <div class="col-4" ng-repeat="item in panels.connection | orderBy:'priority' " >
+                <div class="inner">
+                    <div class="panels clearfix">
+                        <div class="area-chart-title">{{item.title}}</div>
+                        <div class="area-chart-wrap" chart-area panel="item"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="col-title">{{"aws.monitor.mysql.mysqlTableSpaceInfo" | translate}}</div>
+        <div class="box layout-grid areaChart" >
+            <div class="col-4" ng-repeat="item in panels.space | orderBy:'priority' " >
+                <div class="inner">
+                    <div class="panels clearfix">
+                        <div class="area-chart-title">{{item.title}}</div>
+                        <div class="area-chart-wrap" chart-area panel="item"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="col-title">{{"aws.monitor.mysql.mysqlVisitInfo" | translate}}</div>
+        <div class="box layout-grid areaChart repeat" >
+            <div class="col-4"  ng-repeat="item in panels.visit | orderBy:'priority' " > <!--ng-class="{'col-6':panels.visit.length%3==2 && $index>=panels.visit.length-2}"-->
+                <div class="inner">
+                    <div class="panels clearfix">
+                        <div class="area-chart-title">{{item.title}}</div>
+                        <div class="area-chart-wrap" chart-area panel="item"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <div lazy-loading  lazy-parent="window" >
+        <div class="col-12" ng-if="!lazyOnType.visit">
+            <div class="col-title">{{"aws.monitor.mysql.mysqlVisitInfo" | translate}}</div>
+            <div class="box layout-grid areaChart" >
+                <div class="col-4"  ng-repeat="item in panels.visit | orderBy:'priority' " > ng-class="{'col-6':panels.visit.length%3==2 && $index>=panels.visit.length-2}"
+                    <div class="inner">
+                        <div class="panels clearfix">
+                            <div class="area-chart-title">{{item.title}}</div>
+                            <div class="area-chart-wrap" chart-area panel="item"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+</div>

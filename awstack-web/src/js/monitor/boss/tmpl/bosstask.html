@@ -1,0 +1,405 @@
+<div class="resource-wrap" >
+    <div class="tab-box ">
+        <div class="tab-content report">
+            <div class="alact">
+                <div class="table-tools">
+                    <div class="table-action">
+                        <button  id="#createtask"  class="btn btn-primary" ng-click="initData()"><i class="fa fa-plus"></i>新建</button>
+                        <button  class="btn btn-primary" ng-disabled="isDisabled" ng-click="disable(checkedItems)"><i class="fa fa-remove"></i>禁用</button>
+                        <button type="button"  class="btn btn-primary" ng-disabled="isDis_enable" ng-click="enable(checkedItems)"><i class="fa fa-circle-thin"></i>启用</button>
+                        <button type="button" class="btn btn-danger" data-toggle="modal" ng-disabled="delisDisabled" ng-click="del(checkedItems)"><i class="fa fa-trash"></i>删除</button>
+                        <div class="table-action">
+                            <form class="form-inline date-box" role="form" name="logFilter_form">
+                                <div class="form-group time-picker start">
+                                  <div class="input-group date form_date col-md-5">
+                                    <input class="form-control fromTime" name="startTime" type="text" size="16" ng-model="filterData.dateStart" placeholder="{{'aws.log.start_at'|translate}}">
+                                    <!-- <span class="input-group-addon">
+                                                  <span class="glyphicon glyphicon-remove fa fa-remove"></span>
+                                    </span> -->
+                                    <span class="input-group-addon calendar-cont">
+                                                    <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                                    </span>
+                                  </div>
+                                </div>
+                                <div class="form-group time-picker end">
+                                  <div class="input-group date form_date col-md-5">
+                                    <input class="form-control endTime" name="endTime" type="text" size="16" ng-model="filterData.dateEnd" placeholder="{{'aws.log.end_at'|translate}}">
+                                    <!-- <span class="input-group-addon">
+                                                  <span class="glyphicon glyphicon-remove fa fa-remove"></span>
+                                    </span> -->
+                                    <span class="input-group-addon calendar-cont">
+                                                    <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                                    </span>
+                                  </div>
+                                </div>
+                                <div class="form-group">
+                                  <button type="submit" class="btn btn-default" ng-click="queryFun()">{{'aws.log.search'|translate}}</button>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                    <table ng-table="tableParams" class="table" show-filter="false">
+                        <colgroup>
+                            <col width="5%" />
+                            <col width="25%" />
+                            <col width="10%" />
+                            <col width="20%" />
+                            <col width="30%" />
+                            <col width="10%" />
+                        </colgroup>
+                        <tr ng-repeat="item in $data">
+                            <td header="'headerCheckbox.html'">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="r" ng-model="checkboxes.items[item.task_id]" value="{{item.task_id}}" />
+                                    <i class="fa"></i>
+                                </label>
+                            </td>
+                            <td data-title="text.taskName" sortable="'task_name'">
+                                <a href="" ng-click="showtaskdetail(item.task_id)">{{item.task_name}}</a>
+                            </td>
+                            <td data-title="text.taskCycle" sortable="'task_period'">
+                                {{item.task_period}}
+                            </td>
+                            <td data-title="text.taskTime" sortable="'task_createtime'">
+                                {{item.task_createtime}}
+                            </td>
+                            <td data-title="text.taskOperate" sortable="'operate'">
+                                <a href="" class="link-del" ng-click="del(item)"><i class="fa fa-remove"></i>{{text.operate_del}}</a>
+                                <a href="" class="link-edit" ng-click="openEdit(item)"><i class="fa fa-edit"></i>{{text.operate_edit}}</a>
+                            </td>
+                            <td data-title="text.taskEnabled" sortable="'task_status'">
+                                {{item.task_status}}
+                            </td>
+
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="taskform ">
+                <div class="{{deleteAnimateIn}} {{formAnimateOut}}" style="background: #f5f5f5;text-align:center">
+                    <div class="modal-close" ng-click="closeForm();">
+                        <i class="fa fa-remove"></i>
+                    </div>
+                    <div class="confirm-modal-icon">
+                        <i class="icon-aw-delete"></i>
+                    </div>
+                    <div>
+                    <h3>删除报表任务</h3>
+                    </div>
+                    <div>
+                    <h3>确定删除所选报表任务</h3>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-danger ng-binding " ng-click="closeForm()">取消</button>
+                        <button type="button" class="btn btn-inverse ng-binding" ng-click="confirmdeleteForm(deletedata)">确认</button>
+                    </div>
+                </div>
+            </div>
+            <div class="taskform ">
+                <div class="table {{detailAnimateIn}} {{formAnimateOut}}">
+                    <div class="form-header">
+                        <button type="button" class="close " ng-click="closeForm()">&times;</button>
+                        <h3>报表任务详情</h3>
+                    </div>
+                    <div class="form-body">
+                        <div class="content_detail task_detail">
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <td>报表名称</td>
+                                    <td>{{detail.task_name}}</td>
+                                    <td>创建时间</td>
+                                    <td>{{detail.task_createtime}}</td>
+                                </tr>
+                                <tr>
+                                    <td>报表类型</td>
+                                    <td>{{detail.task_type}}</td>
+                                    <td>更新时间</td>
+                                    <td>{{detail.task_updatetime}}</td>
+                                </tr>
+                                <tr>
+                                    <td>报表内容</td>
+                                    <td><span ng-repeat="value in detail.task_content.meterlist">{{value}} </span></td>
+                                    <td>下次执行时间</td>
+                                    <td>{{detail.task_next_rtime}}</td>
+                                </tr>
+                                <tr>
+                                    <td>语言</td>
+                                    <td>{{detail.task_language}}</td>
+                                    <td>文件类型</td>
+                                    <td>pdf</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="taskform ">
+                <div class="table {{formAnimateIn}} {{formAnimateOut}}">
+                    <div class="form-header">
+                    </div>
+                    <div class="form-body">
+                        <button type="button" class="close " ng-click="closeForm()">&times;</button>
+                                <label class="control-label labe-info form_title">编辑报表任务</label>
+                                <div class="controls"></div>
+                            </div>
+                            <div class="control-group formname">
+                                <label class="control-label">基础信息</label>
+                                <div class="controls">
+                                    <input type="text" name="titlename" ng-model="creat_task_name" class="form-controls" ng-blur="show_msg()"
+                                           required ng-maxlength=255 ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"/>
+                                    <div ng-messages="name_msg">
+                                        <span class="help-block" ng-message="pattern">{{::'zeus.errors.multiType'|translate}}</span>
+                                    </div>
+                            <div class="control-group">
+                                <label class="control-label">周期</label>
+                                <div class="controls">
+                                    <div class="radio-item">
+                                        <label class="radio">
+                                            <input type="radio" ng-model="creat_task_period" value="day"/><i class="fa"></i>日报
+                                        </label>
+                                        <label class="radio">
+                                            <input type="radio" ng-model="creat_task_period" value="week"/><i class="fa"></i>周报
+                                        </label>
+                                        <label class="radio">
+                                            <input type="radio" ng-model="creat_task_period" value="month"/><i class="fa"></i>月报
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">状态</label>
+                                <div class="controls btn_status">
+                                    <div ng-model="enabled" >
+                                    </div><i class="fa fa-toggle-on {{enabled}}"  ng-click="changeStatus(enabled)"></i>
+                                </div>
+                            </div>
+                                <div class="controls">
+                                    <div class="radio-item">
+                                        </label>
+                                        </label>
+                                        </label>
+                                <div class="controls">
+                                    <div class="checkbox-item" ng-show="creat_task_type=='meter'">
+                                        </label>-->
+                                        <label class="checkbox">
+                                        </label>
+                                        <label class="checkbox">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="controls">
+                                    <div class="checkbox-item" ng-show="creat_task_type=='monitor'">
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-model="creat_task_cup" ng-click="getContent()" /><i class="fa"></i>CPU
+                                        </label>
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-model="creat_task_mem" ng-click="getContent()"/><i class="fa"></i>内存
+                                        </label>
+                                        <label class="checkbox">
+                                        </label>
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-model="creat_task_swap" ng-click="getContent()"/><i class="fa"></i>磁盘分区
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="controls">
+                                    <div class="checkbox-item" ng-show="creat_task_type=='alarm'">
+                                        <label class="checkbox">
+                                        </label>
+                                        <label class="checkbox">
+                                        </label>
+                                        <label class="checkbox">
+                                        </label>
+                                        <label class="checkbox">
+                                        </label>
+                                        <label class="checkbox">
+                                        </label>
+                                        <label class="checkbox">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="controls" ng-show="contentValidate">
+                                    <span class="help-block">{{'zeus.errors.required' | translate}}</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <div class="control-label content">报表内容</div>
+                                <div class="controls content_detail" ng-show="creat_task_type=='meter'">
+                                    <table>
+                                        <thead></thead>
+                                        <tbody>
+                                          <!--<tr>
+                                              <td rowspan="2"><span>资源统计</span></td>
+                                              <td>
+                                                  <span>物span理资源类型</span>
+                                                  <span>计算、存储、网络总的资源池容量，随时间使用量的趋势变化</span>
+                                                  <span>1、计算资源CPU/内存使用量变化趋势</span>
+                                                  <span>2、存储资源已使用存储空间的变化趋势</span>
+                                                  <span>3、网络资源。</span>
+                                              </td>
+                                          </tr>
+                                          <tr>
+                                              <td>
+                                                  <div><span>虚拟机资源统计</span></div>
+                                                  <div><span>虚拟机、交换机、路由器、负载均衡、云硬盘</span></div>
+                                              </td>
+                                          </tr>-->
+                                          <tr>
+                                              <td rowspan="2"><span>openstack_a</span></td>
+                                              <td><span>openstack_b</span></td>
+                                          </tr>
+                                          <tr>
+                                              <td>
+                                                  <span>openstack_c</span>
+                                                  <span>openstack_d</span>
+                                                  <span>openstack_e</span>
+                                              </td>
+                                          </tr>
+                                         <!-- <tr>
+                                              <td><span>{{::'zeus.report.task.explainText.openstack_f'|translate}}</span></td>
+                                          </tr>
+                                          <tr>
+                                              <td><span>{{::'zeus.report.task.explainText.openstack_g'|translate}}</span></td>
+                                          </tr>-->
+                                          <tr>
+                                              <td rowspan="3"><span>openstack_h</span></td>
+                                              <td><span>openstack_i</span></td>
+                                          </tr>
+                                          <tr>
+                                              <td><span>openstack_j</span></td>
+                                          </tr>
+                                          <tr>
+                                              <td><span>openstack_k</span></td>
+                                          </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="control-group" ng-if="creat_task_type=='monitor'">
+                                <div class="control-label content">报表任务</div>
+                                <div class="controls content_detail">
+                                    <table>
+                                        <thead></thead>
+                                        <tbody>
+                                        <tr>
+                                            <td rowspan="2"><span>CPU</span></td>
+                                            <td>
+                                                <span>resource_a</span>
+                                                <span>resource_b</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span>resource_c</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td rowspan="2"><span>resource_d</span></td>
+                                            <td>
+                                                <span>resource_e</span>
+                                                <span>resource_f</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span>resource_g</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>resource_h</td>
+                                            <td>resource_i</td>
+                                        </tr>
+                                        <tr>
+                                            <td>resource_j</td>
+                                            <td>resource_k</td>
+                                        </tr>
+
+
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+                            <div class="control-group" ng-if="creat_task_type=='alarm'">
+                                <div class="control-label content">报表任务</div>
+                                <div class="controls content_detail">
+                                    <table>
+                                        <thead></thead>
+                                        <tbody>
+                                           <!--<tr>
+                                               <td>
+                                                   <span>{{::'zeus.report.task.explainText.alarm_a'|translate}}</span>
+                                                   <span>{{::'zeus.report.task.explainText.alarm_b'|translate}}</span>
+                                               </td>
+                                           </tr>-->
+                                        <tr><td><span>alarm_c</span></td></tr>
+                                        <tr><td><span>alarm_c</span></td></tr>
+                                        <tr><td><span>alarm_c</span></td></tr>
+                                        <tr><td><span>alarm_c</span></td></tr>
+                                        <tr><td><span>alarm_c</span></td></tr>
+                                        <tr><td><span>alarm_c</span></td></tr>
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label labe-info">邮件</label>
+                                <div class="controls"></div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">邮件</label>
+                                <div class="controls btn_status">
+                                    <div ng-model="btnstatus"><i  ng-class="{'Active':btnstatus,'Inactive':!btnstatus}" class="fa fa-toggle-on" ng-click="btnstatus=!btnstatus"></i></div>
+                                </div>
+                            </div>
+                            <div class="control-group addressee" ng-show="btnstatus">
+                                <label class="control-label">地址</label>
+                                <div class="controls">
+                                    <textarea name="name" ng-model="to_maillist" class="form-controls" cols="30" rows="10" ng-blur="show_addrmsg()"
+                                           allisemailrequired required placeholder="{{::'zeus.report.task.createTask.addresseeTip'|translate}}" ></textarea>
+                                    <div ng-messages="name_addrmsg">
+                                        <span class="help-block" ng-message="required">{{'zeus.errors.required' | translate}}</span>
+                                        <span class="help-block" ng-message="allisemailrequired">{{'zeus.errors.email' | translate}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--<div class="control-group">
+                                <label class="control-label">{{::'zeus.report.task.createTask.taskFormat'|translate}}</label>
+                                <div class="controls">
+                                    <div class="radio-item">
+                                        <label class="radio">
+                                            <input type="radio" ng-model="file_type" value="excel" /><i class="fa"></i>Excel
+                                        </label>
+                                        <label class="radio">
+                                            <input type="radio" ng-model="file_type" value="word"/><i class="fa"></i>Word
+                                        </label>
+                                        <label class="radio">
+                                            <input type="radio" ng-model="file_type" value="pdf"/><i class="fa"></i>Pdf
+                                        </label>
+                                    </div>
+                                </div>-->
+                                <!--<div class="controls format">
+                                    <span class="excel"><i class="fa fa-file-excel-o"></i></span>
+                                    <span class="pdf"><i class="fa fa-file-pdf-o"></i></span>
+                                    <span class="doc"><i class="fa fa-file-word-o"></i></span>
+                                </div>-->
+
+                        </form>
+                    </div>
+                    <div class="form-footer">
+                        <button type="button" class="btn" ng-click="createTask()" ng-if="canCreat">新建</button>
+                        <button type="button" class="btn" ng-click="editTask()" ng-if="!canCreat">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+        <i class="fa"></i>
+    </label>
+</script>

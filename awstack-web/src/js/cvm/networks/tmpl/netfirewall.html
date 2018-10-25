@@ -1,0 +1,664 @@
+<div class="page-inner">
+    <div class="table-action">
+        <button type="button" data-toggle="modal" ng-click="createNetFirewall()" class="btn btn-new" licence-type="btn" id="resource-firewall-create"><i class="icon-aw-add-to2" ></i>{{"aws.action.create"|translate}}</button>
+        <button type="button" data-toggle="modal" ng-click="editNetFirewall(firewallCheckedItems[0])" ng-disabled="!canEdit||firewallEditing" class="btn btn-normal" licence-type="btn" id="resource-firewall-edit"><i class="icon-aw-modify"></i>{{"aws.action.edit"|translate}}</button>
+        <button type="button" data-toggle="modal" ng-click="deleteNetfirewall(firewallCheckedItems)" ng-disabled="!canDel||firewallDeleting" class="btn btn-normal" licence-type="btn" id="resource-firewall-del"> <i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+        <div class="dropdown" licence-type="btn-group">  
+            <button type="button" class="btn btn-normal dropdown-toggle" data-toggle="dropdown" ng-disabled="!canMoreHandle">{{'aws.networks.moreAction'|translate}}<i class="icon-aw-angle-down"></i></button>
+            <ul class="dropdown-menu">
+                <li id="associateRouter-add-btn" licence-type="btn">
+                    <button ng-click="relationRouter(checkedItems[0])" ng-disabled="!canRelation||firewallRelating">{{'aws.networks.associationRouter'|translate}}</button>
+                </li>
+                <li id="associateRouter-del-btn"  licence-type="btn">
+                    <button ng-click="relieveRouter(checkedItems[0])" ng-disabled="!canRelieve||firewallRelieving">{{'aws.networks.disassociationRouter'|translate}}</button></li>
+            </ul>
+        </div>
+        <div class="pull-right">
+            <into-information modular="'firewall'"></into-information>
+          <ui-select ng-model="statusList.selectedStatus"  ng-change="changeStatus(statusList.selectedStatus)" name="selectStatus" required>
+            <ui-select-match placeholder='{{"aws.firewall.selectStatus"|translate}}' >{{$select.selected.name}}</ui-select-match>
+            <ui-select-choices repeat="status in statusList.options">
+              <div ng-bind-html="status.name | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+          <div class="search-box">
+            <form name="searchForm" novalidate ng-keyup="applyGlobalSearch('netFirewallTable','fireWallTerm')">
+              <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+              <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm.fireWallTerm" placeholder="{{'aws.action.search'|translate}}" />
+            </form>
+          </div>
+          <div type="button" class="btn btn-renovat" ng-click="refreshFireWallList()">
+            <i class="icon-aw-refresh"></i>
+          </div>
+          <!-- <setting title-data="ruleTitleData" site-title="ruleTitleName" table-data="ruleListData" search-tearm="ruleSearchTerm(obj)"></setting> -->
+        </div>
+    </div>
+    <script type="text/ng-template" id="firewallHeaderCheckbox.html">
+        <label class="checkbox">
+            <input type="checkbox" ng-model="checkFirst.checked" class="select-all-netFirewallTable" value="" />
+            <i class="iconfont"></i>
+        </label>
+    </script>
+    <script type="text/ng-template" id="relationRouterCheckbox.html">
+        <label class="checkbox">
+            <input type="checkbox" ng-model="routerCheck.checked" class="select-all-routerTable" value="" />
+            <i class="iconfont"></i>
+        </label>
+    </script> 
+    <script type="text/ng-template" id="relieveRouterCheckbox.html">
+        <label class="checkbox">
+            <input type="checkbox" ng-model="relieveRouterCheck.checked" class="select-all-relieveRouterTable" value="" />
+            <i class="iconfont"></i>
+        </label>
+    </script>
+    <script type="text/ng-template" id="firewallRuleCheckbox.html">
+        <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.checked" class="select-all-firewallRuleTable" value="" />
+            <i class="iconfont"></i>
+        </label>
+    </script>
+    <div class="table-content">
+        <empty-tip empty-type="netFirewallLoadData" tip-id="'firewall-tip-msg'"></empty-tip>
+        <table ng-table="netFirewallTable" class="table" show-filter="false">
+            <colgroup>
+                <col width="8%">
+                <col width="23%">
+                <col width="23%">
+                <col width="23%">
+                <col width="23%">
+            </colgroup>
+            <tr ng-repeat="netFirewall in $data">
+            <td header="'firewallHeaderCheckbox.html'">
+                <label class="checkbox">
+                <input type="checkbox" ng-model="checkFirst.items[netFirewall.id]" />
+                <i class="iconfont"></i>
+                </label>
+            </td>
+            <td data-title="'aws.networks.firewallName'|translate" sortable="'name'">
+                <div class="edit-name">
+                <a ng-href="/cvm/firewall?id={{netFirewall.id}}" title="{{netFirewall.name}}">{{netFirewall.name}}</a>
+                </div>
+            </td>
+            <td data-title="'aws.networks.associationRouter'|translate">
+                <div ng-repeat="allocationRoute in netFirewall.routers">
+                    <span>{{allocationRoute.name}}</span><br/>
+                </div>
+            </td>
+            <td data-title="'aws.networks.status'|translate" sortable="'status'">
+                <span ng-class="{'bg-green':(netFirewall.status=='created'||netFirewall.status=='active'),'bg-orange':(netFirewall.status=='inactive'||netFirewall.status=='down'),'bg-blue':(netFirewall.status=='pending_create'||netFirewall.status=='pending_update'||netFirewall.status=='pending_delete'),'bg-red':(netFirewall.status=='error')}">{{netFirewall._status}}</span>
+            </td>
+            <td data-title="'aws.firewall.description'|translate" sortable="'description'">
+                <span class="des">{{netFirewall.description}}</span>
+            </td> 
+            </tr>
+        </table>
+    </div>
+    <div ng-controller="detailCtrl">
+        <pane class="detail-body" animation="animation" >
+            <div class="tab-content">
+                <div class ="detail-row firewall-row">
+                    <div class="detail-header"></div>
+                    <div class="detail-title">
+                        <a class="an-close" ng-href="/cvm/firewall"><i class="icon-aw-mail-reply"></i></a>
+                        <span>{{netfirewallDetail.name}}{{'aws.firewall.detail'|translate}}</span>
+                    </div>
+                    <div class="detail-info tab-offset-right">
+                        <div ng-show="showBaseMsgOfDetail">
+                            <ul class="nav nav-tabs nav-justified">
+                                <li ng-class="{active:showBaseMsgOfDetail}" class="uib-tab nav-item"  ng-click="activeBaseTab()">
+                                    <a href="">{{'aws.networks.basicsInfo'|translate}}</a>
+                                </li>
+                                <li ng-class="{active:showRuleOfDetail}" class="uib-tab nav-item" ng-click="getFirewallRulesList()">
+                                    <a href="">{{'aws.networks.ruleManage'|translate}}</a>
+                                </li>
+                            </ul>
+                            <div class="table-content table-small">
+                               <h4 class="tabName"><span>{{'aws.networks.basicsInfo'|translate}}</span></h4>
+                               <table class="table table-info column">
+                                    <tr>
+                                        <td>{{'aws.networks.firewallName'|translate}}</td>
+                                        <td>{{netfirewallDetail.name}}</td>
+                                        <td>{{'aws.networks.description'|translate}}</td>
+                                        <td>{{netfirewallDetail.description}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>ID</td>
+                                        <td>{{netfirewallDetail.id}}</td>
+                                        <td>{{'aws.networks.tenant_id'|translate}}</td>
+                                        <td>{{netfirewallDetail.tenant_id}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{'aws.networks.status'|translate}}</td>
+                                        <td>{{netfirewallDetail.state}}</td>
+                                        <td>{{'aws.networks.router'|translate}}</td>
+                                        <td><span ng-repeat="route in netfirewallDetail.routers">{{route.name}}<br/></span></td>
+                                    </tr>
+                               </table>
+                            </div>
+                        </div>
+                        <div ng-show="showRuleOfDetail" class="showRuleOfDetail">
+                            <ul class="nav nav-tabs nav-justified">
+                                <li ng-class="{active:showBaseMsgOfDetail}" class="uib-tab nav-item"  ng-click="activeBaseTab()">
+                                    <a href="">{{'aws.networks.basicsInfo'|translate}}</a>
+                                </li>
+                                <li ng-class="{active:showRuleOfDetail}" class="uib-tab nav-item" ng-click="getFirewallRulesList()">
+                                    <a href="">{{'aws.networks.ruleManage'|translate}}</a>
+                                </li>
+                            </ul>
+                            <div>
+                                <h4 class="tabName"><span>{{'aws.networks.ruleManage'|translate}}</span></h4>
+                                <div class="table-action">
+                                        <button type="button" data-toggle="modal" ng-click="createNetFirewallRules()" class="btn btn-new" licence-type="btn" id="resource-firewall-rules-create"><i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}</button>
+                                        <button type="button" data-toggle="modal" ng-click="enabledNetFirewallRules(checkedItems)" class="btn btn-normal" ng-disabled="!canEnableRule||ruleEnabling" licence-type="btn" id="resource-firewall-rules-enable"><i class="icon-aw-start-up"></i>{{"aws.action.enabled"|translate}}</button>
+                                        <button type="button" data-toggle="modal" ng-click="forbiddenNetFirewallRules(checkedItems)" class="btn btn-normal" ng-disabled="!canForbiddenRoule||ruleDisabling" licence-type="btn" id="resource-firewall-rules-disable"><i class="icon-aw-jy"></i>{{"aws.action.forbidden"|translate}}</button>
+                                        <button type="button" data-toggle="modal" ng-click="deleteNetfirewallRule(checkedItems)" class="btn btn-normal" ng-disabled="!canDelRoule||ruleDeleting" licence-type="btn" id="resource-firewall-rules-del"> <i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+                                        <div class="pull-right">
+                                           <div class="search-box">
+                                                <form name="searchRuleForm" novalidate ng-keyup="ruleApplyGlobalSearch('firewallRuleTable','ruleTerm')">
+                                                  <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                                                  <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchRuleTerm" ng-model="globalSearchTerm.ruleTerm" placeholder="{{'aws.action.search'|translate}}" />
+                                                </form>
+                                           </div>
+                                           <div type="button" class="btn btn-renovat" ng-click="refreshFireRuleList()">
+                                            <i class="icon-aw-refresh"></i>
+                                           </div>
+                                           <setting title-data="ruleTitleData" site-title="ruleTitleName" table-data="ruleListData" search-tearm="ruleSearchTerm(obj)" class="fireRuleSet"></setting>
+                                        </div>
+                                </div>
+                                <div class="table-content">
+                                    <empty-tip empty-type="fireRuleData" tip-id="'rule-tip-msg'"></empty-tip>
+                                    <table ng-table="firewallRuleTable" class="table" show-filter="false">
+                                        <!-- <colgroup>
+                                            <col width="10%">
+                                            <col width="15%">
+                                            <col width="15%">
+                                            <col width="15%">
+                                            <col width="15%">
+                                            <col width="15%">
+                                            <col width="15%">
+                                        </colgroup> -->
+                                        <tr ng-repeat="netFirewall in $data">
+                                            <td header="'firewallRuleCheckbox.html'">
+                                                <label class="checkbox" ng-if="netFirewall.name!='default'">
+                                                    <input type="checkbox" ng-model="checkboxes.items[netFirewall.id]" />
+                                                    <i class="iconfont"></i>
+                                                </label>
+                                            </td>
+                                            <!-- <td header="'firewallRuleCheckbox.html'">
+                                                <label class="checkbox">
+                                                    <input type="checkbox" ng-model="checkboxes.items[netFirewall.id]" ng-disabled="netFirewall.name=='default'"/>
+                                                    <i class="iconfont"></i>
+                                                </label>
+                                            </td> -->
+                                            <td data-title="'aws.networks.protocol'|translate" sortable="'_protocol'" ng-if="ruleTitleData[0].value">
+                                                  {{netFirewall._protocol}}
+                                            </td>
+                                            <td data-title="'aws.networks.action'|translate"  sortable="'_action'" ng-if="ruleTitleData[1].value">
+                                                {{netFirewall._action}}
+                                            </td>
+                                            <td data-title="'aws.networks.source_ip_subnet_title'|translate" header="'source_ip_subnet_title.html'" ng-if="ruleTitleData[2].value">
+                                                <div>{{netFirewall._source_ip_address}}</div>
+                                                <div ng-if="netFirewall._protocol!='任意'&&netFirewall._protocol!='ICMP'">{{netFirewall._source_port}}</div>
+                                            </td>
+                                            <td data-title="'aws.networks.destination_ip_subnet_title'|translate" header="'destination_ip_subnet_title.html'" ng-if="ruleTitleData[3].value">
+                                                <div>{{netFirewall._destination_ip_address}}</div>
+                                                <div ng-if="netFirewall._protocol!='任意'&&netFirewall._protocol!='ICMP'">{{netFirewall._destination_port}}</div>
+                                            </td>
+                                            <td data-title="'aws.networks.status'|translate" sortable="'status'" ng-if="ruleTitleData[4].value">
+                                                <span ng-class="{'bg-green':(netFirewall.enabled==true),'bg-orange':(netFirewall.enabled==false)}">{{netFirewall.status}}</span>
+                                            </td> 
+                                            <td data-title="'aws.firewall.description'|translate" sortable="'description'" ng-if="ruleTitleData[5].value">
+                                                <span class="des">{{netFirewall.description}}</span>
+                                            </td> 
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </pane>
+    </div>
+    <script type="text/ng-template" id="source_ip_subnet_title.html">
+        <div>{{source_ip_msg}}</div>
+        <div>{{port_msg}}</div>
+    </script>
+    <script type="text/ng-template" id="destination_ip_subnet_title.html">
+        <div>{{destination_ip_msg}}</div>
+        <div>{{port_msg}}</div>
+    </script>
+    <!-- 新建编辑 -->
+    <script type="text/ng-template" id="netFirewallModal.html">
+        <div class="network-modal modal-common">
+            <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{netFirewallModal_title}}</h3>
+            </div>
+            <div class="modal-body">
+                <form name="createNetfirewallForm" novalidate>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.networks.name'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="name" ng-model="netFirewall.name" placeholder={{'aws.networks.inputFirewallName'|translate}} ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required />
+                            <div class="error" ng-messages="(submitInValid ||createNetfirewallForm.name.$dirty) && createNetfirewallForm.name.$error">
+                                <form-validate></form-validate>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.networks.description'|translate}}：</label>
+                        <div class="controls">
+                            <textarea type="text" class="form-controls" name="description" ng-model="netFirewall.description" placeholder={{'aws.networks.inputFirewallDes'|translate}} ng-maxlength="80" ></textarea>
+                            <div class="error" ng-messages="(submitInValid ||createNetfirewallForm.description.$dirty) && createNetfirewallForm.description.$error">
+                                <form-validate pattern-msg="'aws.errors.description'|translate" max-num="80"></form-validate>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-click="netFirewallConfirm(createNetfirewallForm,netFirewall)" ng-disabled= "formSubmitted" >{{"aws.action.ok"|translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+            </div>
+        </div>
+    </script>
+    <!-- 关联解除 -->
+    <script type="text/ng-template" id="associateRouteModal.html">
+        <div class="modal-common relate-modal">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+                <h3 class="modal-title">{{associateRouteModal_title}}</h3>
+            </div>
+            <div class="modal-body">
+                <!-- 关联列表 -->
+                <div class="table-content" ng-if="isAssociate">
+                    <empty-tip empty-type="routerData"></empty-tip>
+                    <table ng-table="routerTable" class="table" >
+                        <colgroup>
+                            <col width="5%">
+                            <col width="19%">
+                            <col width="19%">
+                            <col width="19%">
+                            <col width="19%">
+                            <col width="19%">
+                        </colgroup>
+                        <tr ng-repeat="item in $data | filter:globalSearchTerm">
+                            <td header="'relationRouterCheckbox.html'">
+                                <label class="checkbox">
+                                    <input type="checkbox" ng-model="routerCheck.items[item.id]" />
+                                    <i class="iconfont"></i>
+                                </label>
+                            </td>
+                            <td data-title="'aws.networks.routerName'|translate" sortable="'name'">
+                                <span>{{item.name}}</span>
+                            </td>
+                            <td data-title="'aws.networks.status'|translate"  sortable="'_status'">
+                                <span ng-class="{'bg-green':(item.status=='YES'||item.status=='ACTIVE'||item.status=='inUsed'||item.status=='AVAILABLE'),'bg-blue':(item.status=='LOADING'),'bg-orange':(item.status=='NO'||item.status=='DOWN'||router.status=='EMPTY'||item.status=='UNREASONABLE')}">
+                                {{'aws.routers.status.'+item.status.toString().toLowerCase() | translate}}
+                                </span>
+                            </td>
+                            <td data-title="'aws.networks.external'|translate" sortable="'network'">
+                                <span>{{item.network}}</span>
+                            </td>
+                            <td data-title="'aws.firewall.routeGateway'|translate" sortable="'gatewayIp'">
+                                <span>{{item.gatewayIp}}</span>
+                            </td>
+                            <td data-title="'aws.networks.enableSnat'|translate" sortable="'_enableSnat'">
+                                <span>{{item._enableSnat}}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                    <!-- 解除列表 -->
+                <div class="table-content" ng-if="!isAssociate">
+                    <empty-tip empty-type="relieveRouterData"></empty-tip>
+                    <table ng-table="relieveRouterTable" class="table">
+                        <colgroup>
+                            <col width="6%">
+                            <col width="16%">
+                            <col width="16%">
+                            <col width="16%">
+                            <col width="16%">
+                            <col width="16%">
+                            <col width="16%">
+                        </colgroup>
+                        <tr ng-repeat="item in $data | filter:globalSearchTerm">
+                            <td header="'relieveRouterCheckbox.html'">
+                                <label class="checkbox">
+                                    <input type="checkbox" ng-model="relieveRouterCheck.items[item.id]" />
+                                    <i class="iconfont"></i>
+                                </label>
+                            </td>
+                            <td data-title="'aws.networks.routerName'|translate" sortable="'name'">
+                                <span>{{item.name}}</span>
+                            </td>
+                            <td data-title="'aws.networks.status'|translate"  sortable="'_status'">
+                                <span ng-class="{'bg-green':(item.status=='YES'||item.status=='ACTIVE'||item.status=='inUsed'||item.status=='AVAILABLE'),'bg-blue':(item.status=='LOADING'),'bg-orange':(item.status=='NO'||item.status=='DOWN'||router.status=='EMPTY'||item.status=='UNREASONABLE')}">
+                                {{'aws.routers.status.'+item.status.toString().toLowerCase() | translate}}
+                                </span>
+                            </td>
+                            <td data-title="'aws.networks.external'|translate" sortable="'network'">
+                                <span>{{item.network}}</span>
+                            </td>
+                            <td data-title="'aws.firewall.routeGateway'|translate" sortable="'gatewayIp'">
+                                <span>{{item.gatewayIp}}</span>
+                            </td>
+                            <td data-title="'aws.networks.enableSnat'|translate" sortable="'_enableSnat'">
+                                <span>{{item._enableSnat}}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-click="relationRouterConfirm()" ng-if="isAssociate" ng-disabled="!routerData||!routerCheckedIds.length">{{"aws.action.ok"|translate}}</button>
+                <button class="btn btn-primary" type="button" ng-click="relieveRouterConfirm()" ng-if="!isAssociate" ng-disabled="!relieveRouterData||!relieveRouterCheckedIds.length">{{"aws.action.ok"|translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+            </div>
+        </div>
+    </script>
+    <!-- 新建防火墙规则 -->
+    <script type="text/ng-template" id="netFirewallRuleModal.html">
+        <div class="network-modal modal-common networkFireRules-modal">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+                <h3 class="modal-title">{{netFirewallRule_title}}</h3>
+            </div>
+            <div class="modal-body">
+                <div class="book-left">
+                    <h5>{{'aws.networks.createRule'|translate}}</h5>
+                    <form name="creatNetfirewallRuleForm" novalidate>
+                        <!-- 协议 -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.networks.protocol'|translate}}：</label>
+                            <div class="controls">
+                                <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.firewall.info.protocol'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                                <ui-select ng-model="createNetworkRule.protocol" name="protocol" >
+                                    <ui-select-match placeholder={{'aws.networks.choseProtocol'|translate}} >{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="protocol in list.protocolList">
+                                        <div>{{protocol.name}}</div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <!-- 动作 -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.networks.action'|translate}}：</label>
+                            <div class="controls">
+                                <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.firewall.info.action'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                                <ui-select ng-model="createNetworkRule.action" name="action" >
+                                <ui-select-match placeholder={{'aws.networks.choseAction'|translate}} >{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="action in list.ationList">
+                                    <div ng-bind-html="action.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <!-- 源ip/子网 -->
+                        <div class="control-group">
+                            <label class="control-label">{{'aws.networks.source_ip_subnet'|translate}}：</label>
+                            <div class="controls">
+                                <div class="radio-item clearFix">
+                                    <label class="radio">
+                                        <input type="radio" ng-model="allRedio.sourceIpOrSubnet" name="sourceIpOrSubnet" value="1"  ng-click=""/>
+                                        <i class="iconfont"></i>{{'aws.networks.source_ip_address'|translate}}
+                                    </label>
+                                    <label class="radio">
+                                        <input type="radio" ng-model="allRedio.sourceIpOrSubnet" name="sourceIpOrSubnet" value="0"  ng-click=""/>
+                                        <i class="iconfont"></i>{{'aws.networks.subnet'|translate}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="allRedio.sourceIpOrSubnet=='1'">
+                            <label class="control-label">&nbsp</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="source_ip" ng-model="createNetworkRule.source_ip" placeholder={{'aws.networks.input_source_ip'|translate}}  ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" />
+                                <div class="error" ng-messages="(submitInValid ||creatNetfirewallRuleForm.source_ip.$dirty) && creatNetfirewallRuleForm.source_ip.$error">
+                                    <form-validate pattern-msg="'aws.errors.source_ip_address'|translate"></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="allRedio.sourceIpOrSubnet=='0'">
+                            <label class="control-label">&nbsp</label>
+                            <div class="controls">       
+                                <input type="text" class="form-controls" name="source_subnet" ng-model="createNetworkRule.source_subnet" placeholder={{'aws.networks.input_source_subnet'|translate}}  ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))[\/]([1-9]|[1-2][0-9]|[3][0]|[3][1])$/" />
+                                <div class="error" ng-messages="(submitInValid ||creatNetfirewallRuleForm.source_subnet.$dirty) && creatNetfirewallRuleForm.source_subnet.$error">
+                                    <form-validate  pattern-msg="'aws.errors.source_subnet_address'|translate" ></form-validate>
+                                </div>
+                            </div>                               
+                        </div>
+                        <!-- 源端口 -->
+                        <div ng-if="createNetworkRule.protocol.value!=null&&createNetworkRule.protocol.value!='icmp'">
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.networks.source_port'|translate}}：</label>
+                                <div class="controls">
+                                    <div class="radio-item clearFix">
+                                        <label class="radio">
+                                            <input type="radio" ng-model="allRedio.sourcePort" name="sourcePort" value="1"  ng-click=""/>
+                                            <i class="iconfont"></i>{{'aws.networks.port'|translate}}
+                                        </label>
+                                        <label class="radio">
+                                            <input type="radio" ng-model="allRedio.sourcePort" name="sourcePort" value="0"  ng-click=""/>
+                                            <i class="iconfont"></i>{{'aws.networks.portLimit'|translate}}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group" ng-if="allRedio.sourcePort=='1'">
+                                <label class="control-label">&nbsp</label>
+                                <div class="controls">
+                                    <input type="text" class="form-controls" name="source_port" ng-model="createNetworkRule.source_port" placeholder={{'aws.networks.input_source_port'|translate}} min="1" max="65535" limitnumrange ng-disabled="createNetworkRule.protocol.value==null"/>
+                                    <div class="error" ng-messages="(submitInValid ||creatNetfirewallRuleForm.source_port.$dirty) && creatNetfirewallRuleForm.source_port.$error">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_1_65535'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group" ng-if="allRedio.sourcePort=='0'">
+                                <label class="control-label">&nbsp</label>
+                                <div class="controls choice-port">
+                                    <input type="text" class="form-controls" name="source_port_start" ng-model="createNetworkRule.source_port_start" id="startport" support="createNetworkRule.source_port_end" port-required placeholder={{'aws.networks.input_source_port_start'|translate}} ng-pattern="/(^[1-9]\d{0,3}$)|(^[1-5]\d{4}$)|(^6[0-4]\d{3}$)|(^65[0-4]\d{2}$)|(^655[0-2]\d$)|(^6553[0-5]$)/"/>
+                                    <div class="error port_start" ng-messages="(submitInValid ||creatNetfirewallRuleForm.source_port_start.$dirty) && creatNetfirewallRuleForm.source_port_start.$error">
+                                      <div ng-message="pattern">{{'aws.errors.limit_1_65535'|translate}}</div>
+                                      <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                      <div ng-message="portsupport">请输入起始端口号</div>
+                                    </div> 
+                                </div>
+                                <div class="tip">
+                                    <span>~</span>
+                                </div>
+                                <div class="controls choice-port">
+                                    <input type="text" class="form-controls" name="source_port_end" start="startport" startport="createNetworkRule.source_port_start" support="createNetworkRule.source_port_start" port-limit ng-model="createNetworkRule.source_port_end" placeholder={{'aws.networks.input_source_port_end'|translate}} ng-pattern="/(^[1-9]\d{0,3}$)|(^[1-5]\d{4}$)|(^6[0-4]\d{3}$)|(^65[0-4]\d{2}$)|(^655[0-2]\d$)|(^6553[0-5]$)/"/>
+                                    <div class="error port_end" class="source_port_end" ng-messages="(submitInValid ||creatNetfirewallRuleForm.source_port_end.$dirty) && creatNetfirewallRuleForm.source_port_end.$error">
+                                        <div ng-message="pattern">{{'aws.errors.limit_1_65535'|translate}}</div>
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="portlimit">{{'aws.firewall.endPortBiggerStartPort'|translate}}</div>
+                                        <div ng-message="portsupport">请输入结束端口号</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                
+                        <!-- 目的ip -->
+                        <div class="control-group">
+                            <label class="control-label">{{'aws.networks.destination_ip_subnet'|translate}}：</label>
+                            <div class="controls">
+                                <div class="radio-item clearFix">
+                                    <label class="radio">
+                                        <input type="radio" ng-model="allRedio.destinationIpOrsubnet" name="destinationIpOrsubnet" value="1"  ng-click=""/>
+                                        <i class="iconfont"></i>{{'aws.networks.destination_ip_address'|translate}}
+                                    </label>
+                                    <label class="radio">
+                                        <input type="radio" ng-model="allRedio.destinationIpOrsubnet" name="destinationIpOrsubnet" value="0"  ng-click=""/>
+                                        <i class="iconfont"></i>{{'aws.networks.subnet'|translate}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="allRedio.destinationIpOrsubnet=='1'">
+                            <label class="control-label">&nbsp</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="destination_ip" ng-model="createNetworkRule.destination_ip" placeholder={{'aws.networks.input_destination_ip'|translate}}   ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/"/>
+                                <div class="error" ng-messages="(submitInValid ||creatNetfirewallRuleForm.destination_ip.$dirty) && creatNetfirewallRuleForm.destination_ip.$error">
+                                    <form-validate pattern-msg="'aws.errors.direction_iP_address'|translate"></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="allRedio.destinationIpOrsubnet=='0'" >
+                            <label class="control-label">&nbsp</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="destination_subnet" ng-model="createNetworkRule.destination_subnet" placeholder={{'aws.networks.input_source_subnet'|translate}}  ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))[\/]([1-9]|[1-2][0-9]|[3][0]|[3][1])$/" />
+                                <div class="error" ng-messages="(submitInValid ||creatNetfirewallRuleForm.destination_subnet.$dirty) && creatNetfirewallRuleForm.destination_subnet.$error">
+                                    <form-validate pattern-msg="'aws.errors.source_subnet_address'|translate"></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 目的端口 -->
+                        <div ng-if="createNetworkRule.protocol.value!=null&&createNetworkRule.protocol.value!='icmp'">
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.networks.destination_port'|translate}}：</label>
+                                <div class="controls">
+                                    <div class="radio-item clearFix">
+                                        <label class="radio">
+                                            <input type="radio" ng-model="allRedio.destinationPort" name="destinationPort" value="1"  ng-click=""/>
+                                            <i class="iconfont"></i>{{'aws.networks.port'|translate}}
+                                        </label>
+                                        <label class="radio">
+                                            <input type="radio" ng-model="allRedio.destinationPort" name="destinationPort" value="0"  ng-click=""/>
+                                            <i class="iconfont"></i>{{'aws.networks.portLimit'|translate}}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group" ng-if="allRedio.destinationPort=='1'">
+                                <label class="control-label">&nbsp</label>
+                                <div class="controls">
+                                    <input type="text" class="form-controls" name="destination_port" ng-model="createNetworkRule.destination_port" ng-disabled="createNetworkRule.protocol.value==null" min="1" max="65535" limitnumrange placeholder={{'aws.networks.input_destination_port'|translate}}>         
+                                    <div class="error" ng-messages="(submitInValid ||creatNetfirewallRuleForm.destination_port.$dirty) && creatNetfirewallRuleForm.destination_port.$error">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_1_65535'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group" ng-if="allRedio.destinationPort=='0'">
+                                <label class="control-label">&nbsp</label>
+                                <div class="controls choice-port">
+                                    <input type="text" class="form-controls" name="destination_port_start" id="desPortStart" ng-model="createNetworkRule.destination_port_start" support="createNetworkRule.destination_port_end" port-required placeholder={{'aws.networks.input_destination_port_start'|translate}} ng-disabled="createNetworkRule.protocol.value==null" ng-pattern="/(^[1-9]\d{0,3}$)|(^[1-5]\d{4}$)|(^6[0-4]\d{3}$)|(^65[0-4]\d{2}$)|(^655[0-2]\d$)|(^6553[0-5]$)/"/>
+                                    <div class="error port_start" ng-messages="(submitInValid ||creatNetfirewallRuleForm.destination_port_start.$dirty) && creatNetfirewallRuleForm.destination_port_start.$error">
+                                        <div ng-message="portsupport">请输入起始端口号</div>
+                                        <div ng-message="pattern">{{'aws.errors.limit_1_65535'|translate}}</div>
+                                    </div>
+                                </div>
+                                <span class="tip">~</span>
+                                <div class="controls choice-port">
+                                    <input type="text" class="form-controls" name="destination_port_end" ng-model="createNetworkRule.destination_port_end" support="createNetworkRule.destination_port_start" port-limit startport="createNetworkRule.destination_port_start" start="desPortStart" placeholder={{'aws.networks.input_destination_port_end'|translate}} ng-disabled="createNetworkRule.protocol.value==null" ng-pattern="/(^[1-9]\d{0,3}$)|(^[1-5]\d{4}$)|(^6[0-4]\d{3}$)|(^65[0-4]\d{2}$)|(^655[0-2]\d$)|(^6553[0-5]$)/" />
+                                    <div class="error port_end" class="source_port_end" ng-messages="(submitInValid ||creatNetfirewallRuleForm.destination_port_end.$dirty) && creatNetfirewallRuleForm.destination_port_end.$error">
+                                        <div ng-message="pattern">{{'aws.errors.limit_1_65535'|translate}}</div>
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="portlimit">{{'aws.firewall.endPortBiggerStartPort'|translate}}</div>
+                                        <div ng-message="portsupport">请输入结束端口号</div>
+                                    </div>
+                                </div>    
+                                <div class="part-p" ng-if="destinationPortLimitBiger">
+                                    <p>{{'aws.errors.start-biger-end'|translate}}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 描述 -->
+                        <div class="control-group">
+                            <label class="control-label">{{'aws.networks.description'|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="description" ng-model="createNetworkRule.description" placeholder={{'aws.networks.input_firewallRuleDes'|translate}} ng-maxlength="80" />
+                                <div class="error" ng-messages="(submitInValid ||creatNetfirewallRuleForm.description.$dirty) && creatNetfirewallRuleForm.description.$error">
+                                    <form-validate pattern-msg="'aws.errors.description'|translate" max-num="80"></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 创建按钮 -->
+                        <div class="control-group establish">
+                            <label class="control-label">&nbsp</label>
+                            <div class="controls">
+                                <button class="btn btn-primary" type="button" ng-click="addfireWallRule(creatNetfirewallRuleForm)">{{"aws.firewall.create"|translate}}</button> 
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="book-right">
+                    <h5>{{'aws.networks.ruleList'|translate}}</h5>
+                    <div class="table-content">
+                        <table ng-table="addRuleTable" class="table" show-filter="false">
+                            <colgroup>
+                                <col width="10%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                            </colgroup>
+                            <tr ng-repeat="rule in $data">
+                                <td data-title="">
+                                    <label class="radiobox" ng-if="rule.name!='default'">
+                                        <input name="flavor" type="radio" ng-model="selectRule.rule" ng-change="changeRule(rule)" value={{rule.id}} required>
+                                        <i class="iconfont"></i>
+                                    </label>
+                                </td>
+                                <td data-title="'aws.networks.protocol'|translate">{{rule._protocol}}
+                                </td>
+                                <td data-title="'aws.networks.action'|translate">{{rule._action}}
+                                </td>
+                                <td data-title="'aws.networks.source_ip_subnet_title'|translate" header="'source_ip_subnet_title_rule.html'">
+                                   <div>{{rule._source_ip_address}}</div>
+                                   <div ng-if="rule._protocol!='任意'&&rule._protocol!='ICMP'">{{rule._source_port}}</div>
+                                </td>
+                                <td data-title="'aws.networks.destination_ip_subnet_title'|translate" header="'destination_ip_subnet_title_rule.html'">
+                                    <div>{{rule._destination_ip_address}}</div>
+                                    <div ng-if="rule._protocol!='任意'&&rule._protocol!='ICMP'">{{rule._destination_port}}</div>
+                                </td>
+                                <td data-title="'aws.networks.operate'|translate"><span><a ng-click = "delFireRule(rule,$index)" ng-if="rule.name!='default'">{{'aws.action.del'|translate}}</a></span></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="order-box">
+                        <button type="button" class="btn btn-default"  ng-click="ruleMove(editData,'up')" ng-disabled="!canMoveUp"><span>{{'aws.firewall.moveUp'|translate}}</span></button>
+                        <button type="button" class="btn btn-default"  ng-click="ruleMove(editData,'down')" ng-disabled="!canMoveDown"><span>{{'aws.firewall.moveDown'|translate}}</span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+		       <button class="btn btn-info" type="button" ng-click="firewallRuleConfirm()" ng-disabled="netFirewallRulesList.length==0" >{{"aws.action.ok"|translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+            </div>
+        </div>
+    </script>
+    <script type="text/ng-template" id="source_ip_subnet_title_rule.html">
+        <div>{{source_ip_msg}}</div>
+        <div>{{port_msg}}</div>
+    </script>
+    <script type="text/ng-template" id="destination_ip_subnet_title_rule.html">
+        <div>{{destination_ip_msg}}</div>
+        <div>{{port_msg}}</div>
+    </script>
+    <!-- 防火墙新建成功-->
+    <script type="text/ng-template" id="jumpToRuleModal.html">
+        <div class="jumpRule-modal modal-common">
+            <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{"aws.firewall.newFireWallSuccess"|translate}}</h3>
+            </div>
+            <div class="modal-body">
+                <div class="configInfo">
+                   <span class="circle"><i class="icon-aw-yes"></i></span>
+                   <span class="info">{{"aws.firewall.effectConfigureRule"|translate}}</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-click="clickToCreateRule()" ng-disabled= "formSubmitted" >{{"aws.networks.createFirewallRule"|translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.firewall.createThen"|translate}}</button>
+            </div>
+        </div>
+    </script>
+</div>
+
+
+

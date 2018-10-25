@@ -1,0 +1,177 @@
+<div class="page-inner">
+  <div class="box operating-box">
+    <div class="col-8">
+      <div class="table-action">
+        <!--  <a ng-href="/monitor/newstrategy?newstrategy=new" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新建策略</a> -->
+        <button type="button" data-toggle="modal" ng-click="openStrategyModel('new',editData)" class="btn btn-primary"><i class="icon-aw-add-to2"></i>添加策略</button>
+        <button type="button" ng-click="editStrategyModel('edit',editData)" ng-disabled="isDisabled" class="btn btn-info"><i class="icon-aw-modify"></i>编辑</button>
+        <button type="button" data-toggle="modal" ng-click="del(checkedItems)" ng-disabled="delisDisabled" class="btn btn-info" title="{{notDelTip}}"><i class="icon-aw-delete"></i>删除</button>
+        <div class="search-box">
+          <form name="searchForm" novalidate>
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="SearchTerm" placeholder="{{'aws.action.search' | translate}}" />
+          </form>
+        </div>
+      </div>
+      <div class="table-content">
+        <table ng-table="tableParams" class="table" show-filter="false">
+          <colgroup>
+            <col width="10%" />
+            <col width="30%" />
+            <col width="30%" />
+            <col width="30%" />
+          </colgroup>
+          <tr ng-repeat="item in $data | searchFilter:{dataName:SearchTerm,dataDsc:SearchTerm,dataValue:SearchTerm}">
+            <td header="'headerCheckbox.html'">
+              <!--  <input type="checkbox" name="r" ng-model="checkboxes.items[item.id]" value="{{item.id}}" /> -->
+              <label class="checkbox">
+                <input type="checkbox" name="r" ng-model="checkboxes.items[item.id]" value="{{item.dataName}}" />
+                <i class="iconfont"></i>
+              </label>
+            </td>
+            <td data-title="'策略项'" sortable="'dataName'">
+              <a href="">{{item.dataName}}</a>
+            </td>
+            <td data-title="'监控周期(s)'" sortable="'dataValue'">
+              {{item.dataValue.cycle}}
+            </td>
+            <!--                 <td data-title="'aws.role.table.role_createTime' | translate" sortable="''">
+                    {{item.dataValue}}
+                </td> -->
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="col-4">
+      <!-- <ul class="text-list">
+        <li>说明信息</li>
+        <li>Lcpu</li>
+        <li>Ldisk</li>
+        <li>Lmem</li>
+        <li>Lnic</li>
+        <li>ceph_pools</li>
+        <li>ceph_status</li>
+        <li>cpu</li>
+        <li>disk</li>
+        <li>diskio</li>
+        <li>kernel</li>
+        <li>mem</li>
+        <li>memcached</li>
+        <li>mysql</li>
+        <li>net</li>
+        <li>processes</li>
+        <li>rabbitmq_node</li>
+        <li>rabbitmq_overview</li>
+        <li>rabbitmq_queue</li>
+        <li>swap</li>
+        <li>system</li>
+      </ul> -->
+    </div>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<!-- 新建策略弹出层 -->
+<script type="text/ng-template" id="strategyModel.html">
+  <div class="router-modal modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+      <h3 class="modal-title">添加策略</h3>
+    </div>
+    <div class="modal-body">
+      <form name="createStrategyForm">
+        <!--         <div class="control-group">
+          <label class="control-label">策略名称：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="dataDsc" ng-model="strategyForm.dataDsc" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='请输入策略名称' style="width:100%;" required>
+            <div class="error" ng-messages='createStrategyForm.dataDsc.$error' ng-if="interacted(createStrategyForm.dataDsc)">
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+              <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+            </div>
+          </div>
+        </div> -->
+        <div class="control-group" ng-hide="editrouter">
+          <label class="control-label">策略项：</label>
+          <div class="controls">
+            <ui-select ng-model="strategyForm.selectStrategyList" ng-disabled="options.disabled" title=''>
+              <ui-select-match placeholder=''>{{$select.selected.dataName}}</ui-select-match>
+              <ui-select-choices repeat="strategyList in strategyLists.options | propsFilter:{dataName:$select.search}">
+                <div ng-bind-html="strategyList.dataName | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">监控周期(s)：</label>
+          <div class="controls">
+            <input type="number" min=1 max=300 class="form-controls" name="cycle" ng-model="strategyForm.cycle" placeholder='' style="width:100%;" required>
+            <div class="error" ng-messages='createStrategyForm.cycle.$error' ng-if="interacted(createStrategyForm.cycle)">
+              <div ng-message="required">请输入监控周期</div>
+              <div ng-message="min">请输入0-300的数字</div>
+              <div ng-message="max">请输入0-300的数字</div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="strategyConfirm()">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<!-- 编辑策略弹出层 -->
+<script type="text/ng-template" id="strategyUpdateModel.html">
+  <div class="router-modal modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+      <h3 class="modal-title">编辑策略</h3>
+    </div>
+    <div class="modal-body">
+      <form name="createStrategyForm">
+        <!--         <div class="control-group">
+          <label class="control-label">策略名称：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="dataDsc" ng-model="strategyForm.dataDsc" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='' style="width:100%;" required>
+            <div class="error" ng-messages='createStrategyForm.dataDsc.$error' ng-if="interacted(createStrategyForm.dataDsc)">
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+              <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+            </div>
+          </div>
+        </div> -->
+        <div class="control-group">
+          <label class="control-label">监控周期(s)：</label>
+          <div class="controls">
+            <input type="number" min=1 max=300 class="form-controls" name="cycle" ng-model="strategyForm.dataValue.cycle" placeholder='' style="width:100%;" required>
+            <div class="error" ng-messages='createStrategyForm.cycle.$error' ng-if="interacted(createStrategyForm.cycle)">
+              <div ng-message="required">请输入监控周期</div>
+              <div ng-message="min">请输入0-300的数字</div>
+              <div ng-message="max">请输入0-300的数字</div>
+            </div>
+          </div>
+        </div>
+        <!--         <div class="control-group" ng-hide="editrouter">
+          <label class="control-label">策略项：</label>
+          <div class="controls">
+            <ui-select ng-model="strategyForm.selectStrategyList" ng-disabled="options.disabled" title=''>
+              <ui-select-match placeholder=''>{{$select.selected.dataName}}</ui-select-match>
+              <ui-select-choices repeat="strategyList in strategyLists.options | propsFilter:{dataName:$select.search}">
+                <div ng-bind-html="strategyList.dataName | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div> -->
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="strategyConfirm()">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>

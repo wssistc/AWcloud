@@ -1,0 +1,83 @@
+<div>
+    <div class=" modal-common" ng-show="stepOne">
+        <div class="modal-header">
+                <button type="button" class="close" ng-click="$close()">×</button>
+                <h3 class="modal-title">{{"aws.cephView.tips.tip14" | translate}}</h3>
+        </div>
+        <div class="modal-body" >
+            <uib-alert  type="info" >
+                <span>{{"aws.cephView.tips.tip13" | translate}}</span>
+            </uib-alert>
+            <form name="balanceForm">
+                <div class="control-group">
+                    <label class="control-label">
+                        {{"aws.cephView.maxBackfills" | translate}}：
+                    </label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.cephview.tip1' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                        <input  class="form-control" ng-model="balance.maxBackfills"  ng-pattern = "/^([1-9]|(10))?$/" name="maxBackfills" type="text" required>
+                        <div class="error" ng-messages="(submitInValid ||balanceForm.maxBackfills.$dirty) && balanceForm.maxBackfills.$error">
+                            <form-validate pattern-msg="'aws.errors.limit_1_10'|translate"></form-validate>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.cephView.excuteType" | translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.cephview.tip1' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                        <div class="radio-item clearFix">
+                            <label class="radio"><input type="radio" ng-model="balance.execute"  value="immediately" /><i class="iconfont"></i>{{"aws.cephView.immExcute" | translate}}</label>
+                            <label class="radio"><input type="radio" ng-model="balance.execute"  value="timing" /><i class="iconfont"></i>{{"aws.cephView.timedBalance" | translate}}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group" ng-if = "balance.execute=='timing'">
+                    <label class="control-label">&nbsp</label>
+                    <div class="controls">
+                        <label class="control-label">{{"aws.cephView.timeSet" | translate}}：</label>
+                        <div class="controls">
+                            <div class="control-items2 ">
+                                <div class="control-group">
+                                    <div class="form-group" range-time>
+                                        <div class="input-group date form_date">
+                                            <input class="form-control" type="text" name="startTime" ng-model="balance.startTime" required lt-curr-time
+                                            ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])\s(([0-1][0-9])|([2][0-3])):([0-5][0-9])$/"  placeholder="{{'aws.log.start_at'|translate}}">
+                                            <span class="input-group-addon calendar-cont">
+                                                <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="error" ng-messages="(submitInValid ||balanceForm.startTime.$dirty) && balanceForm.startTime.$error">
+                                <form-validate pattern-msg="'aws.errors.timeSecondPattern'|translate"></form-validate>
+                                <div ng-message="ltCurrTime">{{'aws.errors.ltCurrentTimeError'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center red" ng-show="showClusterStatusTip">{{"aws.cephView.tips.tip3" | translate}}</div>
+             </form>
+        </div>
+        <div class="modal-footer">
+             <button class="btn btn-info" type="button"  ng-click="confirmBefore(balanceForm)">{{'aws.action.ok'|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+    </div>
+    
+    <div class=" modal-common modal-del" ng-show="!stepOne">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$close()">×</button>
+        </div>
+        <div class="modal-body ">
+            <div class="box">
+                <span class = "del"> {{"aws.instances.tipMsg.delSever" | translate}} </span>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info del-btn" type="button" ng-disabled="doubleClick" ng-click="balanceConfirm()">{{'aws.action.ok'|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="close()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+    </div>
+</div>
+

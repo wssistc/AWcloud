@@ -1,0 +1,64 @@
+
+<div ng-controller="dockerClusterDetailCtrl">
+    <div class="table-action">
+        <!--<button type="button" data-toggle="modal" ng-click="" class="btn btn-primary">-->
+        <!--<i class="icon-aw-start-up"></i>{{"aws.k8s.dockerClusters.restartClusterReplica" |translate}}-->
+        <!--</button>-->    
+        <button type="button" data-toggle="modal" class="btn btn-normal"
+                ng-click="deleteClusterReplicas()" ng-disabled="!canDelete">
+            <i class="icon-aw-delete"></i>{{"aws.k8s.dockerClusters.deleteClusterReplica" |translate}}
+        </button>
+        <div class="pull-right">
+            <div type="button" class="btn btn-renovat right-ports" ng-click="refresh()">
+                <i class="icon-aw-refresh"></i>
+            </div>
+            <div class="search-box">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearchDetails(dockerClusters_search_details.globalSearchTerm)">
+                <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="dockerClusters_search_details.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <table ng-table="tableParams" class="table" show-filter="false">
+        <colgroup>
+            <col width="8%">
+            <col width="20%">
+            <col width="16%">
+            <col width="20%">
+            <col width="20%">
+            <col width="16%">
+        </colgroup>
+        <tr ng-repeat="item in $data">
+            <td header="'headerCheckbox.html'">
+            <label class="checkbox">
+                <input type="checkbox" ng-model="checkboxes.items[item.name]"/>
+                <i class="icon-aw-square"></i>
+            </label>
+            </td>
+            <td data-title='"aws.k8s.dockerClusters.clusterReplicaName"|translate' sortable="'name'">
+                    <!-- ng-href="#/k8s/clusters/{{clusterName}}/replicas/{{item.name}}" -->
+                <a ng-click="modifyClusterReplicaData(item.name,item.status.phase)" >{{item.name}}</a>
+            </td>
+            <td data-title='"aws.k8s.dockerClusters.clusterReplicaIp"|translate' sortable="'status.podIP'">
+                {{item.status.podIP}}
+            </td>
+            <td data-title='"aws.k8s.dockerClusters.clusterReplicaHostIp"|translate' sortable="'status.hostIP'">
+                {{item.status.hostIP}}
+            </td>
+            <td data-title='"aws.k8s.dockerClusters.clusterReplicaStartTime"|translate'>
+                {{item.status.startTime | localDate}}
+            </td>
+            <td data-title='"aws.k8s.dockerClusters.clusterReplicaStatus"|translate' sortable="'phase'">
+                {{item.status.phase}}
+            </td>
+        </tr>
+    </table>
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value=""/>
+    <i class="icon-aw-square"></i>
+  </label>
+</script>

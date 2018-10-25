@@ -1,0 +1,99 @@
+<div class="box operating-box">
+    <div class="cloud-box">
+        <div class="page-inner" >
+            <form name="mailSrvForm" novalidate>
+                <div class="mailServer-box">
+                    <!-- <p class="mailServer-tips"><i class='icon-aw-prompt2'></i>{{'aws.system.mailServer.tips'|translate}}</p> -->
+                    <div class="alert alert-warning" role="alert">
+                        <div class="alert-content">
+                            <div class="alert-text">
+                                {{'aws.system.mailServer.tips'|translate}}
+                            </div>
+                        </div>
+                    </div>
+                    <fieldset class="mail-srv">
+                        <div class="mail-group clearfix">
+                            <div class="control-group pull-left host">
+                                <label class="control-label">{{"aws.system.mailServer.server"|translate}}：</label>
+                                <div class="controls">
+                                    <input type="text" name="host" ng-model="mail.host" class="form-controls" placeholder={{"aws.system.mailServer.inputServer"|translate}} ng-pattern="/^([a-zA-Z0-9-_@]{1,63}\.){1,8}[a-zA-Z0-9]{1,63}$/" required />
+                                    <div class="error" ng-messages="(submitValid || mailSrvForm.host.$dirty) && mailSrvForm.host.$error">
+                                        <span ng-message="pattern">{{"aws.errors.emailServer"|translate}}</span>
+                                        <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group pull-right port">
+                                <label class="control-label">{{'aws.system.mailServer.port'|translate}}：</label>
+                                <div class="controls">
+                                    <input type="text" name="port" ng-model="mail.smtp.port" min="1" max="65535" limitnumrange class="form-controls" required />
+                                    <div class="error" ng-messages="(submitValid || mailSrvForm.port.$dirty) && mailSrvForm.port.$error">
+                                        <span ng-if="mailSrvForm.port.$error.limitnumrange">{{'aws.errors.limit_1_65535
+                                        '|translate}}</span>
+                                        <span ng-if="mailSrvForm.port.$error.required">{{'aws.errors.required'|translate}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">{{'aws.system.mailServer.account'|translate}}：</label>
+                            <div class="controls">
+                                <input type="email" name="username" ng-model="mail.username" class="form-controls" autocomplete="off" placeholder={{"aws.system.mailServer.inputAccount"|translate}} ng-pattern="/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/"  required />
+                                <div class="error" ng-messages="(submitValid ||mailSrvForm.username.$dirty) && mailSrvForm.username.$error">
+                                    <span ng-message="pattern" >{{'aws.errors.email'|translate}}</span>
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                    </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">{{'aws.system.mailServer.password'|translate}}：</label>
+                            <div class="controls">
+                                <input type="password" name="password" ng-model="mail.password" class="form-controls" placeholder={{"aws.system.mailServer.inputPassword"|translate}} autocomplete="new-password" ng-minlength="8" ng-maxlength="30" required />
+                                <div class="error" ng-messages="(submitValid || mailSrvForm.password.$dirty) && mailSrvForm.password.$error">
+                                    <span ng-message="minlength">{{'aws.errors.minlength'|translate}}</span>
+                                    <span ng-message="maxlength">{{'aws.errors.passmaxlength'|translate}}</span>
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                    </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">{{'aws.system.mailServer.sender'|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" name="sender" ng-model="mail.smtp.sender" class="form-controls" placeholder={{'aws.system.mailServer.sender'|translate}} ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  />
+                                <div class="error" ng-messages="(submitValid || mailSrvForm.sender.$dirty) && mailSrvForm.sender.$error">
+                                    <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+                                    </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">{{'aws.system.mailServer.safeConnection'|translate}}：</label>
+                            <div class="controls">
+                                <label class="checkbox">
+                                    <input type="checkbox" class="form-controls chk" name="saveConnection" ng-model="mail.smtp.auth" ng-click="isSaveConnection(mail.smtp.auth)"/>
+                                    <i class="iconfont"></i>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">{{"aws.system.weChatAlarm.active"|translate}}：</label>
+                            <div class="controls">
+                                <div class="checkbox switch-btn">
+                                    <label>
+                                        <input type="checkbox" class="form-controls" ng-model="mail.isUse">
+                                        <i class="iconfont"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="save-btn">
+                    <button class="btn btn-info" ng-click="saveMailServer(mail,mailSrvForm)" ng-bind="'aws.action.save'|translate" ng-disabled="mailSrvForm.$invalid||canSubmit"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+ 

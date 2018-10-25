@@ -1,0 +1,23 @@
+<div class="modal-common">
+	<div class="modal-header">
+		<h3>编辑虚拟机</h3>
+	</div>
+	<div class="modal-body">
+		<div class="control-group">
+			<label class="control-label">内存(MB)：</label>
+			<div class="controls">
+				<input type="text" class="form-controls" name="" ng-model="selectedvm.memoryMB" placeholder="必须是4的倍数" ng-blur="multiple_of_four()" required />
+			</div>
+		</div>
+    <div class="control-group">
+    	<label class="control-label">硬盘(MB)：</label>
+    	<div class="controls">
+					<input  class="form-controls" ng-model="selectedvm.disk.size" placeholder="请输入硬盘大小" ng-blur="number_func(disk.size)"  required />
+			</div>
+    </div>
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-primary" type="button" ng-click="cancel()">确定</button>
+		<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+	</div>
+</div>

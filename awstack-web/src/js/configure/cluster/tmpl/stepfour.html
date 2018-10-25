@@ -1,0 +1,161 @@
+<div class="page-inner deploy-box" ng-controller="stepfourCtrl">
+  <div class="step-box">
+    <ul class="text-list clearfix">
+      <li class="first active">
+        <i class="icon-aw-pc"></i>
+        <p>{{'aws.register.info.hostChoice'|translate}}</p>
+      </li>
+      <li class="active">
+        <i class="icon-aw-internet"></i>
+        <p>{{'aws.register.info.netSetting'|translate}}</p>
+        <div class="state-items">
+          <span class="icon-aw-angle-right"></span>
+          <span class="icon-aw-correct"></span>
+        </div>
+      </li>
+      <!-- <li class="active">
+        <i class="icon-aw-user"></i>
+        <p>{{'aws.register.info.accSetting'|translate}}</p>
+        <div class="state-items">
+          <span class="icon-aw-angle-right"></span>
+          <span class="icon-aw-correct"></span>
+        </div>
+      </li> -->
+      <li class="last active">
+        <i class="icon-aw-information"></i>
+        <p>{{'aws.register.info.infoSummary'|translate}}</p>
+        <div class="state-items">
+          <span class="icon-aw-angle-right"></span>
+          <span class="icon-aw-correct"></span>
+        </div>
+      </li>
+    </ul>
+  </div>
+    <div class="infor-box">
+      <form name="detailForm">
+      <div>
+        <span>{{'aws.register.info.area'|translate}}： {{curRegionName}}</span>
+      </div>
+      <table class="table border">
+        <thead>
+          <tr>
+            <th>{{'aws.register.info.hostName'|translate}}</th>
+            <!-- <th>{{'aws.register.info.area'|translate}}</th> -->
+            <th>{{'aws.register.info.ManagementNetwork'|translate}}</th>
+            <th>{{'aws.register.info.cpu'|translate}}</th>
+            <th>{{'aws.register.info.mem'|translate}}</th>
+            <th>SSD <span ng-if="fourModule.checkedList[0].hostInfoMap.ssdUnit">({{fourModule.checkedList[0].hostInfoMap.ssdUnit}})</span></th>
+            <th>SATA <span ng-if="fourModule.checkedList[0].hostInfoMap.sataUnit">({{fourModule.checkedList[0].hostInfoMap.sataUnit}})</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in fourModule.checkedList">
+            <td class="col-2">
+              <span>{{item.hostName}}</span>
+            </td>
+            <!-- <td>{{item.regionName}}</td> -->
+            <td>{{item.hostInfoMap.ip}}</td>
+            <td>{{item.hostInfoMap.cpu.ht}}</td>
+            <td>{{item.hostInfoMap.mem | unitFilter | number:1}}</td>
+            <td>{{item.hostInfoMap.ssdAll}}</td>
+            <td>{{item.hostInfoMap.sataAll}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="table border">
+        <caption>{{'aws.register.info.netSetting'|translate}}</caption>
+        <thead>
+          <tr>
+            <th>{{'aws.register.info.type'|translate}}</th>
+            <th>CIDR</th>
+            <th>{{'aws.register.info.IPaddresses'|translate}}</th>
+            <th>{{'aws.register.info.vlantag'|translate}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in fourModule.usedList">
+            <td>{{'aws.register.info.'+item.name|translate}}</td>
+            <td>{{item.cidr}}</td>
+            <td><span ng-repeat="ip in item.iprange">{{ip.start}}-{{ip.end}}<i ng-if="!$last">,</i></span></td>
+            <td>{{item.vlan}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="checkbox ha" ng-if="fourModule.usedHa&&fourModule.usedHa>2">
+        <label>
+          <span>是否高可用</span>
+          <input type="checkbox" name="ha" ng-model="fourModule.ha"><i class="icon-aw-square"></i>
+        </label>
+      </div>
+      <div class="pool-size" ng-if="fourModule.enable_ceph">
+        <div class="form-group">
+          <label class="control-label">虚拟机系统盘副本数</label>
+          <div class="control-item">
+            <input type="text" class="form-control" ng-model="fourModule.ceph_nova_pool_size" name="ceph_nova_pool_size" ng-pattern="/^[1-9]\d*$/" required />
+            <div ng-if="detailForm.ceph_nova_pool_size.$invalid  && detailForm.ceph_nova_pool_size.$dirty">
+                <span class="help-block" ng-if="detailForm.ceph_nova_pool_size.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                <span class="help-block" ng-if="detailForm.ceph_nova_pool_size.$error.pattern">{{'aws.register.info.inputint'|translate}}</span>
+            </div>
+            <div ng-if="fourModule.novaSize && !detailForm.ceph_nova_pool_size.$error.required">
+              <span class="help-block">必须在2~{{fourModule.nodeList}}之间</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label">镜像副本数</label>
+          <div class="control-item">
+            <input type="text" class="form-control" ng-model="fourModule.ceph_glance_pool_size" name="ceph_glance_pool_size" ng-pattern="/^[1-9]\d*$/" required/>
+            <div ng-if="detailForm.ceph_glance_pool_size.$invalid  && detailForm.ceph_glance_pool_size.$dirty">
+                <span class="help-block" ng-if="detailForm.ceph_glance_pool_size.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                <span class="help-block" ng-if="detailForm.ceph_glance_pool_size.$error.pattern">{{'aws.register.info.inputint'|translate}}</span>
+            </div>
+            <div ng-if="fourModule.glanceSize && !detailForm.ceph_glance_pool_size.$error.required">
+              <span class="help-block">必须在2~{{fourModule.nodeList}}之间</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label">块存储副本数</label>
+          <div class="control-item">
+            <input type="text" class="form-control" ng-model="fourModule.ceph_cinder_pool_size" name="ceph_cinder_pool_size" ng-pattern="/^[1-9]\d*$/" required/>
+            <div ng-if="detailForm.ceph_cinder_pool_size.$invalid  && detailForm.ceph_cinder_pool_size.$dirty">
+                <span class="help-block" ng-if="detailForm.ceph_cinder_pool_size.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                <span class="help-block" ng-if="detailForm.ceph_cinder_pool_size.$error.pattern">{{'aws.register.info.inputint'|translate}}</span>
+            </div>
+            <div ng-if="fourModule.cinderSize && !detailForm.ceph_cinder_pool_size.$error.required">
+              <span class="help-block">必须在2~{{fourModule.nodeList}}之间</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- <table class="table">
+        <caption>{{'aws.register.info.EAdministrator'|translate}}</caption>
+        <tfoot>
+          <tr>
+            <td>{{'aws.register.info.account'|translate}}： {{fourModule.username}} </td>
+            <td>{{'aws.register.info.passwd'|translate}}:
+              <input type="password" readonly ng-model="fourModule.password" class="inline-block form-control" />
+            </td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+        </tfoot>
+      </table> -->
+      
+      <br>
+      <div class="text-center">
+        <a ng-href="/configure/cluster/steptwo" class="btn btn-default">{{'aws.register.info.last'|translate}}</a>
+        <button class="btn btn-info" ng-click="fourModule.completeFour()" type="button">{{'aws.register.info.deployment'|translate}}</button>
+      </div>
+    </form>
+    </div>
+</div>

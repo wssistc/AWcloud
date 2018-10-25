@@ -1,0 +1,182 @@
+<div class="modal-common" ng-class="{'modal-middle':getQuotaInfo}">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{"aws.instances.backups.title" | translate}}</h3>
+    </div>
+    <div class="modal-body" >
+        <div class="clearfix">
+            <div class="left-modal">
+                <uib-alert  type="info" ng-show="backupForm.timedSnap">
+                    <span>在您第一次创建云硬盘备份时，系统会默认进行全量备份，之后您可以选择全量或者增量备份来保存您的数据。</span>
+                </uib-alert>
+                <uib-alert ng-if="beyondQuota_pro.backups" type="danger">项目备份配额数不足</uib-alert>
+                <uib-alert ng-if="beyondQuota_dep.backups" type="danger">部门备份配额数不足</uib-alert>
+                <uib-alert ng-if="beyondQuota_pro.backup_gigabytes" type="danger">项目备份容量配额数不足</uib-alert>
+                <uib-alert ng-if="beyondQuota_dep.backup_gigabytes" type="danger">部门备份容量配额数不足</uib-alert>
+                <form name="backupForm" novalidate>
+                    <div class="control-group"  >
+                        <label class="control-label">
+                            {{"aws.instances.backups.systemDisk" | translate}}：
+                        </label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip10' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <ui-select multiple ng-model="newObj.systemDisk" theme="bootstrap" sortable="true" ng-change="changeDisk()" close-on-select="false" >
+                                <ui-select-match placeholder="{{system_disk_list.length>0?('aws.instances.backups.systemDiskPlace' | translate):systemDiskTip}}">{{$item.name}}</ui-select-match>
+                                <ui-select-choices repeat="disk in system_disk_list | propsFilter:  {name: $select.search}">
+                                    <div ng-bind-html="disk.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select> 
+                        </div>
+                    </div>
+                    <div class="control-group" >
+                        <label class="control-label">
+                            {{"aws.instances.backups.dataDisk" | translate}}：
+                        </label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip10' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <ui-select multiple ng-model="newObj.dataDisk" theme="bootstrap" sortable="true" ng-change="changeDisk()" close-on-select="false" >
+                                <ui-select-match placeholder="{{data_disk_list.length>0?('aws.instances.backups.dataDiskPlace' | translate):('aws.instances.backups.nodataDiskPlace' | translate)}}">{{$item.name}}</ui-select-match>
+                                <ui-select-choices repeat="disk in data_disk_list | propsFilter:  {name: $select.search}">
+                                        <div ng-bind-html="disk.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select> 
+                            <div class="error" ng-show="chooseSnapTipShow">{{"aws.instances.backups.leastchooseDisk" | translate}}</div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" >定时备份：</label>
+                        <div class="controls" >
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip47' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <div class="checkbox switch-btn">
+                                <label  popover-enable ="newObj.hasElastic" uib-popover="弹性扩展创建的虚拟机不支持定时任务"  popover-trigger="mouseenter" popover-placement = "bottom">
+                                    <input type="checkbox" class="form-controls" ng-click="timeTaskFun(backupForm.timedSnap)" ng-model="backupForm.timedSnap" ng-disabled="newObj.hasElastic">
+                                    <i class="iconfont"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group radio-wrap" ng-if="!backupForm.timedSnap">
+                        <label class="control-label">类型：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip48' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <div class="radio-item clearFix">
+                                <label class="radio">
+                                    <input type="radio" ng-model="newObj.type" value="true" />
+                                    <i class="iconfont"></i>全量备份
+                                </label>
+                                <label class="radio" uib-popover="{{newObj.canIncremental?'':'aws.instances.backups.cannotIncrementalTip'| translate}}"
+                                    popover-enable="!newObj.canIncremental" popover-trigger="mouseenter" popover-placement = "bottom">
+                                    <input type="radio" ng-model="newObj.type" value="false" ng-disabled="!newObj.canIncremental"/>
+                                    <i class="iconfont"></i>增量备份
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if = "backupForm.timedSnap">
+                        <div class="control-group">
+                            <label class="control-label">执行频率：</label>
+                            <div class="controls">
+                                <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip49' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                <ui-select ng-model="newObj.unit" ng-change="change_unit(newObj.unit.unit)">
+                                    <ui-select-match >{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="unit in newObj.unit_list | propsFilter: {name: $select.search}">
+                                        <div ng-bind-html="unit.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="newObj.unit.unit">
+                            <label class="control-label">{{"aws.instances.snapshot.timeInterval" | translate}}：</label>
+                            <div class="controls">
+                                <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip50' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                <div class="control-items2 ">
+                                    <div class="control-group no-margin">
+                                        <input type="text" class="form-controls" name="frequency" ng-model="newObj.frequency" placeholder="请输入执行快照周期" limitnumrange min="backupMin" max="backupMax" required />
+                                    </div>
+                                    <div class="control-group no-margin">
+                                        <span class="control-span">{{"aws.instances.snapshot.frequencyUnit."+newObj.unit.unit | translate}}</span>
+                                    </div>
+                                </div>
+                                <div class="error" ng-messages="(submitInValid ||backupForm.frequency.$dirty) && backupForm.frequency.$error">
+                                    <div ng-if="newObj.unit.unit=='hour'" ng-message="limitnumrange">{{"aws.errors.snap_0_168" | translate}}</div>
+                                    <div ng-if="newObj.unit.unit=='day'" ng-message="limitnumrange">{{"aws.errors.snap_1_31" | translate}}</div>
+                                    <div ng-if="newObj.unit.unit=='month'||newObj.unit.unit=='week'" ng-message="limitnumrange">{{"aws.errors.snap_1_99" | translate}}</div>
+                                    <div ng-if="newObj.unit.unit=='minute'" ng-message="limitnumrange">{{"aws.errors.snap_0_59" | translate}}</div>
+                                    <form-validate></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" title="{{'aws.instances.snapshot.firstTimedSnap' | translate}}">{{"aws.instances.snapshot.firstTimedSnap" | translate}}：</label>
+                            <div class="controls" >
+                                <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip51' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                <div class="control-items2 ">
+                                    <div class="control-group no-margin">
+                                        <div range-time>
+                                            <div class="input-group date form_date">
+                                                <input class="form-control" type="text" name="startTime" ng-model="newObj.startTime" ng-change="changeTime()" required lt-curr-time
+                                                ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])\s(([0-1][0-9])|([2][0-3])):([0-5][0-9])$/"  placeholder="{{'aws.log.start_at'|translate}}">
+                                                <span class="input-group-addon calendar-cont">
+                                                    <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="error" ng-messages="(submitInValid ||backupForm.startTime.$dirty) && backupForm.startTime.$error">
+                                    <form-validate pattern-msg="'aws.errors.timeSecondPattern'|translate"></form-validate>
+                                    <div ng-message="ltCurrTime">{{'aws.errors.ltCurrentTimeError'|translate}}</div>
+                                </div>
+                                <div class="red" ng-show="chkCurrentTimeTip">{{'aws.errors.ltCurrentTimeError'|translate}}</div>
+                            </div>
+                        </div>     
+                        <div class="control-group"  ng-if="newObj.unit.unit">
+                            <label class="control-label" title="保留最新备份份数">保留最新备份份数：</label>
+                            <div class="controls">
+                                <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip52' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                <ui-select ng-model="newObj.holdNumber" ng-change="change_snap_number(newObj.holdNumber)"  >
+                                    <ui-select-match >{{$select.selected}}</ui-select-match>
+                                    <ui-select-choices repeat="number in newObj.backup_number_list">
+                                        <div ng-bind-html="number | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class= "control-group no-margin">
+                        <label class="control-label">&nbsp</label>
+                        <div class="controls">
+                            <a class="info-right" ng-click="getQuotaInfo =! getQuotaInfo">
+                                <i ng-class="{'icon-aw-angle-double-left':getQuotaInfo,'icon-aw-angle-double-right':!getQuotaInfo}"></i>
+                                配额信息 
+                            </a>
+                        </div>
+                    </div>
+                    
+                </form>
+            </div>
+            <div class="right-modal" ng-show="getQuotaInfo">
+                    <div class="control-group">
+                        <div>备份个数配额：</div>
+                        <div class="clearfix bar-group">
+                            <div quota-bar bardata="project_data.backups"></div>
+                            <div quota-bar bardata="domain_data.backups"ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div>备份容量配额：</div>
+                        <div class="clearfix bar-group">
+                            <div quota-bar bardata="project_data.backup_gigabytes"></div>
+                            <div quota-bar bardata="domain_data.backup_gigabytes" ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <source-price></source-price>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button"  ng-disabled = "cannot_Confirm ||beyondQuota_pro.backup_gigabytes || beyondQuota_dep.backup_gigabytes || beyondQuota_pro.backups || beyondQuota_dep.backups"  ng-click="createBackups(backupForm)">{{'aws.action.ok' | translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+    
+</div>

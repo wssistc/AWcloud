@@ -1,0 +1,304 @@
+<div class = "max-pc clearfix">
+    <div class="left">
+        <div class="box min-box">
+            <i class="ra left-top-right"></i>
+            <i class="ra left-top-bottom"></i>
+            <i class="ra right-top-left"></i>
+            <i class="ra right-top-bottom"></i>
+            <i class="ra left-bottom-right"></i>
+            <i class="ra left-bottom-top"></i>
+            <i class="ra right-bottom-left"></i>
+            <i class="ra right-bottom-top"></i>
+            <span class="title">当前时间</span>
+            <div class = "day">
+                <span>{{nowDay}}</span> 
+                <span>星期{{week}}</span>
+            </div>
+            <div class = "time">
+                <span>{{nowTime[0][0]}}</span>
+                <span>{{nowTime[0][1]}}</span> 时
+                <span>{{nowTime[1][0]}}</span>
+                <span>{{nowTime[1][1]}}</span> 分
+                <span>{{nowTime[2][0]}}</span>
+                <span>{{nowTime[2][1]}}</span> 秒
+                
+            </div>
+        </div>
+        <div class="box middile-box clearfix">
+            <i class="ra left-top-right"></i>
+            <i class="ra left-top-bottom"></i>
+            <i class="ra right-top-left"></i>
+            <i class="ra right-top-bottom"></i>
+            <i class="ra left-bottom-right"></i>
+            <i class="ra left-bottom-top"></i>
+            <i class="ra right-bottom-left"></i>
+            <i class="ra right-bottom-top"></i>
+            <div class="title">云主机</div>
+            <div>
+                <div class="left">
+                    <div aws-pie  id="1" pie-data="vmdataValue" style="height:180px;"></div>
+                </div>
+                <div class ="right">
+                    <div class="vm">
+                        <i class="bg-blue"></i>
+                        <span>运行中的云主机</span>
+                        <span class="num">{{vmcountData.active}}</span>
+                    </div>
+                    <div class="vm"> 
+                        <i class="bg-orange"></i>
+                        <span>待确认的云主机</span>
+                        <span class="num">{{vmcountData.total - vmcountData.active-vmcountData.error}}</span>
+                    </div>
+                    <div class="vm">
+                        <i class="bg-red"></i>
+                        <span>错误的云主机</span>
+                        <span class="num">{{vmcountData.error}}</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        <div class="box middile-box">
+            <i class="ra left-top-right"></i>
+            <i class="ra left-top-bottom"></i>
+            <i class="ra right-top-left"></i>
+            <i class="ra right-top-bottom"></i>
+            <i class="ra left-bottom-right"></i>
+            <i class="ra left-bottom-top"></i>
+            <i class="ra right-bottom-left"></i>
+            <i class="ra right-bottom-top"></i>
+            <div class="title">存储集群IOPS <span>单位:iops</span></div>
+            <div aws-area id="2"  name="存储集群IOPS" unit="iops"  area-data="data_iops" time-model= "time" color=["#019fd5","#051d4e","#035184"] style="height:180px;"></div>
+        </div>
+        <div class="box middile-box">
+            <i class="ra left-top-right"></i>
+            <i class="ra left-top-bottom"></i>
+            <i class="ra right-top-left"></i>
+            <i class="ra right-top-bottom"></i>
+            <i class="ra left-bottom-right"></i>
+            <i class="ra left-bottom-top"></i>
+            <i class="ra right-bottom-left"></i>
+            <i class="ra right-bottom-top"></i>
+            <div class="title">
+                <span class="title">存储集群读写吞吐量</span>
+                <div class="rwBandwidth">
+                    <span><i class="r"></i>读带宽</span>
+                    <span><i class="w"></i>写带宽</span>
+                </div>
+            </div>
+            <div aws-area id="3"  name="存储集群读写吞吐量" unit="B" area-data="data_rwBandWidth" time-model= "time" color="color_rwBandWidth" style="height:180px;"></div>
+        </div>
+    </div>
+    <div class = "middle">
+        <div class="earth clearfix">
+            <div class="data-center">
+                <div class="title">{{regionName}}</div>
+                <div class="img"></div>
+            </div>
+            <div class="data-info">
+                <ul>
+                    <li>
+                        <i class="icon icon-aw-cpu"></i>
+                        <div  class="info-box">
+                            <div class="info">
+                                <i></i>
+                                <i class="rect"></i>
+                                <span class="name">可用CPU数量</span>
+                                <span class="num">{{unAlloactedCpu}}</span>
+                            </div>
+                            <i class="triangle-topright"></i>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="icon icon-aw-ram"></i>
+                        <div  class="info-box">
+                            <div class="info">
+                                <i></i>
+                                <i class="rect"></i>
+                                <span class="name">可用内存(GB)</span>
+                                <span class="num">{{unAllocatedRam}}</span>
+                            </div>
+                            <i class="triangle-topright"></i>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="icon icon-aw-hdd"></i>
+                        <div  class="info-box">
+                            <div class="info">
+                                <i></i>
+                                <i class="rect"></i>
+                                <span class="name">可用磁盘(TB)</span>
+                                <span class="num">{{total_free_disk}}</span>
+                            </div>
+                            <i class="triangle-topright"></i>
+                        </div>
+                    </li>
+                </ul>
+                <div class="disk-info">
+                    <i class="triangle-left-bottom"></i>
+                    <i class="triangle-left-top"></i>
+                    <i class="link"></i>
+                    <ul>
+                        <li ng-repeat="item in free_disk">
+                            <div  class="info-box">
+                                <div class="info">
+                                    <i></i>
+                                    <i class="rect"></i>
+                                    <span class="name">{{item.name}}(TB)</span>
+                                    <span class="num">{{item.free}}</span>
+                                </div>
+                                <i class="triangle-topright"></i>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="box-2 box">
+            <i class="ra left-top-right"></i>
+            <i class="ra left-top-bottom"></i>
+            <i class="ra right-top-left"></i>
+            <i class="ra right-top-bottom"></i>
+            <i class="ra left-bottom-right"></i>
+            <i class="ra left-bottom-top"></i>
+            <i class="ra right-bottom-left"></i>
+            <i class="ra right-bottom-top"></i>
+            <div class="node">
+                <span class="name">{{nodeSelect.hostName}}</span>
+                <span class="address">{{nodeSelect.hostInfoMap.ip}}</span>
+                <span ng-class="{'active':nodeSelect.useStatus}">{{"aws.node.useStatus."+nodeSelect.useStatus | translate}}</span>
+                <span>
+                    <i ng-repeat="node in nodeList track by $index" ng-class="{'chk':node.nodeUid == nodeSelect.nodeUid}"></i>
+                </span>
+            </div>
+            <div class="resource clearfix">
+                <span class="title">单位:%</span>
+                <div class="pie-box clearfix">
+                    <div class="col-3 clearfix">
+                        <div class="pie">
+                            <div  aws-pie  id="4"  pie-data="cpudataValue" style="height:130px;"></div>
+                        </div>
+                        <div class="info">
+                            <span class="name">CPU</span>
+                            <span class="num">{{cpudataValue[0].percent}}<em>%</em></span>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="pie">
+                            <div  aws-pie id="5"  pie-data="ramdataValue" style="height:130px;"></div>
+                        </div>
+                        <div class="info">
+                            <span class="name">内存</span>
+                            <span class="num">{{ramdataValue[0].percent}}<em>%</em></span>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="pie">
+                            <div aws-pie id="6"  pie-data="diskdataValue" style="height:130px;"></div>
+                        </div>
+                        <div class="info">
+                            <span class="name">磁盘</span>
+                            <span class="num">{{diskdataValue[0].percent}}<em>%</em></span>
+                        </div>                      
+                    </div>
+                    
+                </div>
+                
+            </div>
+        </div>
+        <div class = "box2">
+            <div class="box middile-box">
+                <i class="ra left-top-right"></i>
+                <i class="ra left-top-bottom"></i>
+                <i class="ra right-top-left"></i>
+                <i class="ra right-top-bottom"></i>
+                <i class="ra left-bottom-right"></i>
+                <i class="ra left-bottom-top"></i>
+                <i class="ra right-bottom-left"></i>
+                <i class="ra right-bottom-top"></i>
+                <div class="title">物理主机CPU使用率Top5</div>
+                <div  aws-hbar id="7"  name='物理主机CPU使用率Top5' xaxis-data="phycpuTop_xaxis"  yaxis-data= "phycpuTop_yaxis"  style="height:200px;"></div>
+            </div>
+            <div class="box middile-box">
+                <i class="ra left-top-right"></i>
+                <i class="ra left-top-bottom"></i>
+                <i class="ra right-top-left"></i>
+                <i class="ra right-top-bottom"></i>
+                <i class="ra left-bottom-right"></i>
+                <i class="ra left-bottom-top"></i>
+                <i class="ra right-bottom-left"></i>
+                <i class="ra right-bottom-top"></i>
+                <div class="title">云主机CPU使用率Top5</div>
+                <div  aws-hbar id="8" name ='云主机CPU使用率Top5' xaxis-data="vmcpuTop_xaxis"  yaxis-data= "vmcpuTop_yaxis" style="height:200px;"></div>
+            </div>
+        </div>
+    
+    </div>
+    <div class="right">
+        <div class="box min-box">
+                <i class="ra left-top-right"></i>
+                <i class="ra left-top-bottom"></i>
+                <i class="ra right-top-left"></i>
+                <i class="ra right-top-bottom"></i>
+                <i class="ra left-bottom-right"></i>
+                <i class="ra left-bottom-top"></i>
+                <i class="ra right-bottom-left"></i>
+                <i class="ra right-bottom-top"></i>
+            <ul class="cluster-info clearfix">
+                <li>
+                    <span class="title">告警信息</span>
+                    <span class="num orange">{{alarm_total}}</span>
+                </li>
+                <li>
+                    <span class="title">集群物理机</span>
+                    <span class="num white">{{nodeList.length}}</span>
+                </li>
+                <li>
+                    <span class="title">异常物理机</span>
+                    <span class="num white">{{clusterAbnormaNum}}</span>
+                </li>
+                <li>
+                    <span class="title">健康状态</span>
+                    <span ng-class="{'green': !clusterAbnormaNum}" class="num green">{{clusterAbnormaNum ? "异常":"健康"}}</span>
+                </li>
+            </ul>
+        </div>
+        <div class="box middile-box">
+            <i class="ra left-top-right"></i>
+            <i class="ra left-top-bottom"></i>
+            <i class="ra right-top-left"></i>
+            <i class="ra right-top-bottom"></i>
+            <i class="ra left-bottom-right"></i>
+            <i class="ra left-bottom-top"></i>
+            <i class="ra right-bottom-left"></i>
+            <i class="ra right-bottom-top"></i>
+            <div class="title">CPU使用率 <span> 单位:%</span></div>
+            <div aws-area id="9"  name= "CPU使用率" unit="%" area-data="data_cpu" time-model= "day" color=["#99806a","#4b4353","#0d1440"]  style="height:180px;"></div>
+        </div>
+        <div class="box middile-box">
+            <i class="ra left-top-right"></i>
+            <i class="ra left-top-bottom"></i>
+            <i class="ra right-top-left"></i>
+            <i class="ra right-top-bottom"></i>
+            <i class="ra left-bottom-right"></i>
+            <i class="ra left-bottom-top"></i>
+            <i class="ra right-bottom-left"></i>
+            <i class="ra right-bottom-top"></i>
+            <div class="title">内存使用率 <span> 单位:%</span></div>
+            <div aws-area id="10"  name= "内存使用率" unit="%" area-data="data_mem"  time-model= "day" color=["#99806a","#4b4353","#0d1440"] style="height:180px;"></div>
+        </div>
+        <div class="box middile-box">
+            <i class="ra left-top-right"></i>
+            <i class="ra left-top-bottom"></i>
+            <i class="ra right-top-left"></i>
+            <i class="ra right-top-bottom"></i>
+            <i class="ra left-bottom-right"></i>
+            <i class="ra left-bottom-top"></i>
+            <i class="ra right-bottom-left"></i>
+            <i class="ra right-bottom-top"></i>
+            <div class="title">存储使用率 <span> 单位:%</span></div>
+            <div aws-area  id="11" name= "存储使用量" unit="%" area-data="data_disk"  time-model= "day" color=["#99806a","#4b4353","#0d1440"] style="height:180px;"></div>
+        </div>
+    </div>
+</div>
+

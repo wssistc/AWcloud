@@ -1,0 +1,79 @@
+<div class="page-inner"> 
+  <div class="page-title">
+    <h2>任务管理</h2>
+    <!-- <div class="btn-item-group">
+      <button ng-repeat="region in regions.options" ng-click="changeRegion(region.region)" ng-class="{'active':queryLimit.regionId==region.region}" ng-bind="region.regionName"></button>
+    </div> -->
+  </div>
+  <div class="table-action">
+    <div class="tab-select pull-left clearfix">
+      <span class="btn" ng-class="{'active':queryLimit.timeStep=='today'}" type="button" ng-click="timeSelectTab('today')">今天</span>
+      <span class="btn" ng-class="{'active':queryLimit.timeStep=='yesterday'}" type="button" ng-click="timeSelectTab('yesterday')">昨天</span>
+      <span class="btn" ng-class="{'active':queryLimit.timeStep=='7d'}" type="button" ng-click="timeSelectTab('7d')">最近7天</span>
+      <span class="btn" ng-class="{'active':queryLimit.timeStep=='30d'}" type="button" ng-click="timeSelectTab('30d')">最近30天</span>
+    </div>
+    <div class="pull-left">
+        <button class="btn btn-default" ng-click="showLimit=!showLimit;"><i ng-class=" {'icon-aw-angle-down':!showLimit,'icon-aw-angle-up':showLimit}" ></i>筛选</button>
+    </div>
+    <div class="search-box">
+      <form name="searchForm" novalidate >
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search" ng-click="applyGlobalSearch()"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" ng-enter="applyGlobalSearch()" placeholder='根据实例名称搜索' />
+      </form>
+    </div>
+    <button class="btn btn-refresh" ng-click="refreshtasklist()"><i class="icon-aw-refresh"></i>刷新</button>
+  </div>
+  <div class="table-content">
+    <div class="chk-group" ng-show="showLimit">
+      <div class="control-group">
+        <label class="control-label">任务类型</label>
+        <div class="controls">
+          <label class="checkbox" ng-repeat="type in typeOptions" class="clearfix">
+            <input type="checkbox" class="form-controls chk" name="{{type.value}}" ng-model="checkLimit.taskType[type.value]" value="{{type.value}}" />
+            <i class="iconfont"></i>
+            <span>{{type.name}}</span>
+          </label>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">处理结果</label>
+        <div class="controls">
+          <label class="checkbox" ng-repeat="status in taskStatusOptions" class="clearfix">
+            <input type="checkbox" class="form-controls chk" name="{{status.value}}" ng-model="checkLimit.taskStatus[status.value]" value="{{status.value}}" />
+            <i class="iconfont"></i>
+            <span>{{status.name}}</span>
+          </label>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="controls">
+          <button class="btn btn-info" type="button"  ng-click="limitConfirm()">确定</button>
+          <button class="btn btn-default" type="button" ng-click="showLimit=false;">关闭</button>
+        </div>
+      </div>
+    </div>
+    <table class="table" >
+      <thead>
+        <th>开始时间</th>
+        <th>任务类型</th>
+        <th>所在实例名称</th>
+        <th>处理进度</th>
+        <th>处理结果</th>
+      </thead>
+      <tbody>
+        <tr ng-repeat="task in redisTaskData">
+          <td>{{task.startTime}}</td>
+          <td>
+            <span>{{"CN.redis.taskType." + task.taskName | translate}}</span>
+          </td>
+          <td>{{task.redisName}}</td>
+          <td>
+            <div class="basic-bar" type="basic" chart-bar bardata='{"data":task.progress*100,"type":"basic"}'></div>
+          </td>
+          <td>{{"CN.redis.taskStatus." + task.status | translate}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <page-component total="totalDataCount" change-page="changePage(obj)" step="pageStep"></page-component>  
+  </div>
+</div>

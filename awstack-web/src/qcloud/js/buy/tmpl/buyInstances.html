@@ -1,0 +1,689 @@
+<div class="page-inner ">
+  <div class="page-title">
+    <h2>云服务器 CVM</h2>
+  </div>
+  
+  <div class="instance-box">
+    <ul class="nav nav-tabs">
+      <li ng-class="{'active':stepOne}" ng-click="stepTwoItem.toStepOneFunc()"><a>1.选择地域与机型</a></li>
+      <li ng-class="{'active':stepTwo}" ng-click="stepOneItem.toStepTwoFunc()"><a>2.选择镜像</a></li>
+      <li ng-class="{'active':stepThree}" ng-click="ngFlag || stepTwoItem.toStepThreeFunc(stepTwoForm)" ng-disabled="ngFlag"><a>3.选择存储与网络</a></li>
+      <li ng-class="{'active':stepFour}" ng-click="ngFlag || stepThreeItem.toStepFourFunc(stepThreeForm)"  ng-disabled="ngFlag"><a>4.设置信息</a></li>
+    </ul>
+    <div class="stepbug-box">
+      <form name="stepOneForm" ng-show="stepOne">
+        <fieldset class="field">
+          <div class="control-group">
+            <label class="control-label"><i class="icon-aw-prompt" uib-tooltip-template="'zoneTooltipTemplate.html'"></i>计费模式</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn"  ng-class='{"active":item.value === options.paymodes.value}' ng-click="stepOneItem.payMode(item)" ng-repeat="item in stepOneItem.paymodes"><span>{{item.name}}</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">地域</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn"  ng-class='{"active":item.value === options.region.value}' ng-click="stepOneItem.chooseRegion(item)" ng-repeat="item in stepOneItem.availableRegion"><span>{{item.name}}</span></button>
+              </div>
+              <span class="tips">不同地域云产品之间内网不互通；选择最靠近您客户的地域，可降低访问时延、提高下载速度，<a ng-href="#/" class="blue">查看我的云服务器地域</a>
+              </span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label"><i class="icon-aw-prompt" uib-tooltip="可用区是同一地域下，电力和网络互相独立的物理区域（一般是一个物理机房）单可用区故障不会影响其他可用区云服务的正常运行"></i>可用区</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn"  ng-class='{"active":item.zoneId === options.zone.zoneId}' ng-click="stepOneItem.changeZone(item)" ng-repeat="item in stepOneItem.zones"><span>{{item.zonename}}</span></button>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="field">
+        <div class="control-group">
+          <label class="control-label">系列</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn"  ng-class='{"active":item.typename === options.chkSeriesType.typename}' ng-click="stepOneItem.chkSeries(item)" ng-repeat="item in stepOneItem.seriesType"><span>{{item.typename}}</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">机型</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn"  ng-class='{"active":item.instancetype === options.chkType.instancetype}' ng-click="stepOneItem.chkVmType(item,options.chkSeriesType.instancetypes[0].instances)" ng-repeat="item in stepOneItem.vmType"><span>{{item.instancetypename}}</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <div class="controls">
+              <table class="table table-check">
+                <colgroup>
+                  <col width="41">
+                  <col span="5">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>机型</th>
+                    <th>CPU</th>
+                    <th>内存</th>
+                    <th>是否支持云硬盘</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="item in stepOneItem.vmTypeList">
+                    <td class="check-td">
+                      <label class="radio">
+                        <!-- <input type="radio" name="" ng-model="options.chkTypeItemId" ng-if ="item.gpu" value="{{item.cpu +'/' + item.mem + '/' + item.gpu}}" /> -->
+                        <input type="radio" name="" ng-model="options.chkTypeItemId" ng-if ="item.category" value="{{item.id}}" />
+                        <i class="iconfont"></i>
+                      </label>
+                    </td>
+                    <td>{{item.name}}</td>
+                    <td>{{item.cpu}}</td>
+                    <td>{{item.mem}}</td>
+                    <td>{{item.isvol}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </fieldset>
+        <div class="control-group">
+          <div class="controls">
+            <button class="btn btn-info" ng-click="stepOneItem.toStepTwoFunc()">下一步：选择镜像</button>
+          </div>
+        </div>
+      </form>
+
+      <form class="stepTwoForm" name="stepTwoForm" ng-show="stepTwo">
+        <fieldset class="field">
+          <h5 class="title">已选配置</h5>
+          <div class="control-group">
+            <label class="control-label">计费模式</label>
+            <div class="controls"> 
+              {{options.paymodes.name}}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">地域</label>
+            <div class="controls"> 
+              {{options.region.name}}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">可用区</label>
+            <div class="controls"> 
+              {{options.zone.zonename}}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">机型</label>
+            <div class="controls"> 
+              {{options.chkSeriesType.typename}}、{{options.chkType.instancetypename}}、{{options.chkTypeItem.cpu}}核CPU、{{options.chkTypeItem.mem}}G内存
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="field">
+          <div class="control-group">
+            <label class="control-label"><i class="icon-aw-prompt" uib-tooltip-template="'imageTooltipTemplate.html'"></i>镜像提供方</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn" ng-class='{"active":item=== options.imgType}' ng-click="stepTwoItem.choosenImgSupply(item,'local')"  ng-repeat="item in stepTwoItem.imgType">
+                  <span>{{item.name}}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-show = "options.imgType.value==2">
+            <label class="control-label">操作系统</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn" ng-class='{"active":item === options.osType}' ng-disabled="imageTypeDisabled" ng-click="stepTwoItem.choosenOsType(item)"  ng-repeat="item in stepTwoItem.osType">
+                  <span>{{item}}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-show = "options.imgType.value==2 || options.imgType.value==1">
+            <label class="control-label"><i class="red">*</i> 系统版本</label>
+            <div class="controls">
+              <ui-select ng-model="options.os" name="imageName" required>
+                <ui-select-match placeholder="请选择系统版本">{{saveValue || $select.selected.imageName}}</ui-select-match>
+                <ui-select-choices repeat="os in stepTwoItem.osListFilter | filter:{imageName:$select.search}">
+                  <div ng-bind-html="os.imageName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+              <div  class="error" ng-messages="(submitform ||stepTwoForm.imageName.$dirty) && stepTwoForm.imageName.$error">
+                <form-validate ></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-show = "options.imgType.value==3 && !showInfo">
+            <label class="control-label">&nbsp</label>
+            <div class="controls">
+              <a href="" class="blue" ng-click="stepTwoItem.chooseInMark()"><i class="red">*</i> 从服务市场选择</a>
+            </div>
+          </div>
+          <div class="control-group" ng-show = "options.imgType.value==3 && showInfo">
+            <label class="control-label">&nbsp</label>
+            <div class="controls">
+              <span>{{saveValue || options.os.imageName}}</span>
+              <a href="" class="blue" ng-click="stepTwoItem.chooseInMark()">重新选择</a>
+            </div>
+          </div>
+        </fieldset>
+        <div class="control-group">
+          <div class="controls">
+            <button type="button" class="btn btn-info" ng-click="stepTwoItem.toStepOneFunc()">上一步</button>
+            <button type="button" class="btn btn-info" ng-click="stepTwoItem.toStepThreeFunc(stepTwoForm)">下一步：选择存储与网络</button>
+          </div>
+        </div>
+      </form>
+
+      <form name="stepThreeForm" ng-show="stepThree">
+        <fieldset class="field">
+          <h5 class="title">已选配置</h5>
+          <div class="control-group">
+            <label class="control-label">计费模式</label>
+            <div class="controls"> 
+              {{options.paymodes.name}}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">地域</label>
+            <div class="controls"> 
+              {{options.region.name}}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">可用区</label>
+            <div class="controls"> 
+              {{options.zone.zonename}}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">机型</label>
+            <div class="controls"> 
+              {{options.chkSeriesType.typename}}、{{options.chkType.instancetypename}}、{{options.chkTypeItem.cpu}}核CPU、{{options.chkTypeItem.mem}}G内存
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">镜像</label>
+            <div class="controls"> 
+              {{options.os.imageName}}
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="field">
+          <div class="control-group">
+            <label class="control-label">系统盘</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn" ng-class='{"active":item.value=== options.systemDisk.value}' ng-click="stepThreeItem.choosSystemDisk(item)"  ng-repeat="item in stepThreeItem.systemDisk">
+                  <span>{{item.name}}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" >
+              <label class="control-label">&nbsp;</label>
+              <div class="controls" ng-if="options.systemDisk.value == '2'&&options.os.osName.indexOf('Xserver')<0">
+                <div class="rzslider-box">
+                  <rzslider rz-slider-model="slider.sysDisValue" rz-slider-options="slider.options_root"></rzslider>
+                  <input type="text" ng-model="slider.sysDisValue" max="slider.options_root.ceil" num-range min="slider.options_root.floor"  ng-model-options="{ updateOn: 'blur' }"/>
+                  <span class="unit">GB</span>
+                </div>
+              </div>
+              <div class="controls" ng-if="options.systemDisk.value != '2'&&options.os.osName.indexOf('Xserver')<0">
+                <span class="tips">Linux送20G</span>
+              </div>
+              <div class="controls" ng-if="options.os.osName.indexOf('Xserver')>-1">
+                <span class="tips">Windows送50G</span>
+              </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">数据盘</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn" ng-class='{"active":item.value=== options.dataDisk.value}' ng-click="stepThreeItem.chooseDataDisk(item)"  ng-repeat="item in stepThreeItem.dataDisk">
+                  <span>{{item.name}}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+              <label class="control-label">&nbsp;</label>
+              <div class="controls">
+                <div class="rzslider-box">
+                  <rzslider rz-slider-model="slider.dataDisValue" rz-slider-options="slider.options" ></rzslider>
+                  <input type="text" ng-model="slider.dataDisValue" step="slider.options.step" max="slider.options.ceil" num-range min="slider.options.floor" ng-model-options="{ updateOn: 'blur' }"/>
+                  <span class="unit">GB</span>
+                </div>
+                <span class="tips" ng-show="options.dataDisk.value == '2'">云盘容量大于等于10GB支持调整云硬盘</span>
+                <span class="tips" ng-show="options.dataDisk.value == '4' ">峰值性能：  随机IO 6000 IOPS   吞吐量 150.0 MB/s <a href="">用快照创建磁盘</a></span>
+              </div>
+              
+          </div>
+        </fieldset>
+        <fieldset class="field">
+          <div class="control-group">
+            <label class="control-label"><i class="icon-aw-prompt" uib-tooltip-template="'netTooltipTemplate.html'"></i>网络类型</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn" ng-class='{"active":item.value=== options.netType.value}' ng-click="stepThreeItem.chooseNet(item)"  ng-repeat="item in stepThreeItem.netType">
+                  <span>{{item.name}}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="control-items clearFix" ng-if="options.netType.value == '2'">
+            <div class="control-group">
+              <label class="control-label"></label>
+              <div class="controls">
+                <ui-select ng-model="options.net" name="network"  ng-change="stepThreeItem.changetosunbet()" >
+                  <ui-select-match placeholder="请选择网络">{{$select.selected.vpcName}}</ui-select-match>
+                  <ui-select-choices repeat="net in netList | filter: {vpcName: $select.search}">
+                    <div ng-bind-html="net.vpcName | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <div  class="error" ng-messages="(submitform ||stepThreeForm.network.$dirty) && stepThreeForm.network.$error">
+                  <form-validate ></form-validate>
+                </div>
+                <ui-select ng-model="options.subnet" name="subnet" >
+                  <ui-select-match placeholder="请选择子网">{{$select.selected.subnetName}}</ui-select-match>
+                  <ui-select-choices repeat="subnet in subnetList | filter: {subnetName: $select.search}">
+                    <div ng-bind-html="subnet.subnetName | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <div  class="error" ng-messages="(submitform ||stepThreeForm.subnet.$dirty) && stepThreeForm.subnet.$error">
+                  <form-validate ></form-validate>
+                </div>
+              </div>
+            </div>
+          </div> 
+          <div class="control-group">
+            <label class="control-label"><i class="icon-aw-prompt" uib-tooltip-template="'bandwidthTooltipTemplate.html'"></i>公网宽带</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn" ng-class='{"active":item.value=== options.bandwidthType.value}' ng-click="stepThreeItem.chooseBandwidthType(item)"  ng-repeat="item in stepThreeItem.bandwidthType">
+                  <span>{{item.name}}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group"  ng-if = "options.bandwidthType.value == 'PayByTraffic'">
+              <label class="control-label">带宽上限</label>
+              <div class="controls">
+                <div class="rzslider-box">
+                  <rzslider rz-slider-model="slider.bandwidthValue" rz-slider-options="slider.options_bw"  ></rzslider>
+                  <input type="text" ng-model="slider.bandwidthValue"  max="slider.options_bw.ceil" num-range min="slider.options_bw.floor" ng-model-options="{ updateOn: 'blur' }" />
+                  <span class="unit">Mbps</span>
+                </div>
+                <div class="slider-text">
+                  <span class="tips" ng-show = "options.bandwidthType.value == 'PayByTraffic'">注意：流量费用每小时结算一次，当账户余额不足时，两小时内将被停止流量服务。</span>
+                </div>
+              </div> 
+          </div>
+          <div class="control-group" ng-if = "options.bandwidthType.value != 'PayByTraffic'">
+              <label class="control-label">带宽</label>
+              <div class="controls">
+                <div class="rzslider-box">
+                  <rzslider rz-slider-model="slider.bandwidthValue" rz-slider-options="slider.options_bw"  ></rzslider>
+                  <input type="text" ng-model="slider.bandwidthValue"  max="slider.options_bw.ceil" num-range min="slider.options_bw.floor"  />
+                  <span class="unit">Mbps</span>
+                </div>
+                <div class="slider-text">
+                  <span class="tips" ng-show = "options.bandwidthType.value == 'PayByTraffic'">注意：流量费用每小时结算一次，当账户余额不足时，两小时内将被停止流量服务。</span>
+                </div>
+              </div> 
+          </div>
+          <div class="control-group">
+            <label class="control-label">分配免费公网IP</label>
+            <div class="controls">
+              <label class="checkbox">
+                  <input type="checkbox" name="r" ng-model="options.wanIp" value="" class="" />
+                  <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="field">
+          <div class="control-group">
+            <label class="control-label"><i class="red">*</i> 服务器数量</label>
+            <div class="controls">
+              <div class="count-box" count-box count="num" count-min="1" count-max="{{regionMaxNum[options.region.value]}}" method="stepThreeItem.rePrice()">
+                <span class="minus">-</span>
+                <input type="text" ng-model="num" class="button-num" ng-blur="stepThreeItem.rePrice()" required/>
+                <span class="add">+</span>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-show="options.paymodes.value == '1'">
+            <label class="control-label">购买时长</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn" ng-class='{"active":item.value=== options.period.value}' ng-click="stepThreeItem.choosePeriod(item)"  ng-repeat="item in stepThreeItem.period">
+                  <span>{{item.name}}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label"><i class="icon-aw-prompt" uib-tooltip="账户余额足够时，设备到期后按月自动续费"></i>自动续费</label>
+            <div class="controls">
+              <label class="checkbox">
+                <input type="checkbox" name="r" ng-model="options.autoRenew" value="" class="" />
+                <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="field">
+          <div class="control-group" ng-if ="options.paymodes.value != '2'">
+            <label class="control-label">费用</label>
+            <div class="controls">
+              <span ng-if="priceIng" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+              <div class="price-tips" ng-class="{'in':!priceIng}">
+                <span class="unit-box">{{price}}<span class="unit-txt">元</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-if ="options.paymodes.value == '2'">
+            <label class="control-label">配置费用</label>
+            <div class="controls">
+              <span ng-if="priceIng" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+              <div class="price-tips" ng-class="{'in':!priceIng}">
+                <span class="unit-box">{{price}}<span class="unit-txt">元/小时</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-if ="options.paymodes.value == '2'">
+            <label class="control-label">网络费用</label>
+            <div class="controls">
+              <span ng-if="priceIng" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+              <div class="price-tips" ng-class="{'in':!priceIng}">
+                <span class="unit-box " ng-show="options.bandwidthType.value == 'PayByHour'">{{netPrice}}<span class="unit-txt">元/GB</span></span>
+                <span class="unit-box" ng-show="options.bandwidthType.value == 'PayByTraffic'">0.80<span class="unit-txt">元/GB</span></span>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <div class="control-group">
+          <div class="controls">
+            <button class="btn btn-info" ng-click="stepThreeItem.toStepTwoFunc()">上一步</button>
+            <button class="btn btn-info" ng-click="stepThreeItem.toStepFourFunc(stepThreeForm)">下一步：设置信息</button>
+          </div>
+        </div>
+      </form>
+
+      <form name="stepFourForm" ng-show="stepFour" novalidate>
+        <fieldset class="field">
+          <h5 class="title">已选配置</h5>
+          <div class="control-group">
+            <label class="control-label">计费模式</label>
+            <div class="controls"> 
+              {{options.paymodes.name}}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">地域</label>
+            <div class="controls"> 
+              {{options.region.name}}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">可用区</label>
+            <div class="controls"> 
+              {{options.zone.zonename}}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">机型</label>
+            <div class="controls"> 
+              {{options.chkSeriesType.typename}}、{{options.chkType.instancetypename}}、{{options.chkTypeItem.cpu}}核CPU、{{options.chkTypeItem.mem}}G内存
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">镜像</label>
+            <div class="controls"> 
+              {{options.os.imageName}}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">存储</label>
+            <div class="controls"> 
+              系统盘(<span ng-if="options.systemDisk.value =='2'">{{slider.sysDisValue}}GB</span>{{options.systemDisk.name}})、数据盘({{slider.dataDisValue}}GB{{options.dataDisk.name  || '无'}})
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">所属网络</label>
+            <div class="controls"> 
+              <span ng-if="options.netType.value == '1'">{{options.netType.name}}</span>
+              <span ng-if="options.netType.value == '2'">{{options.subnet.subnetName}}</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">宽带</label>
+            <div class="controls"> 
+              <span ng-if="options.bandwidthType.value != 'PayByTraffic'">{{options.bandwidthType.name}}(宽带{{slider.bandwidthValue}}Mbps) </span>
+              <span ng-if="options.bandwidthType.value == 'PayByTraffic'"> {{options.bandwidthType.name}}(宽带上线{{slider.bandwidthValue}}Mbps)</span>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="field">
+          <!-- <div class="control-group">
+            <label class="control-label">所属项目</label>
+            <div class="controls"> 
+              <input class="form-control input-sm" ng-model="options.project" ng-init="options.project='默认项目'" ng-disabled="true"></input>
+            </div>
+          </div> -->
+          <div class="control-group">
+            <label class="control-label">主机名</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn" ng-class='{"active":item.value=== options.nameStyle.value}' ng-click="stepFourItem.chooseNameStyle(item)"  ng-repeat="item in stepFourItem.nameStyle">
+                  <span>{{item.name}}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-if="options.nameStyle.value == 2">
+            <label class="control-label">&nbsp;</label>
+            <div class="controls"> 
+              <input type="text" class="form-control input-lg" ng-model="options.vmName"></input>
+              <span class="tips">你还可以输入{{60-options.vmName.length}}个字符</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">登录方式</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" class="type-btn" ng-class='{"active":item.value=== options.loginStyle.value}' ng-click="stepFourItem.chooseLoginStyle(item)"  ng-repeat="item in stepFourItem.loginStyle">
+                  <span>{{item.name}}</span>
+                </button>
+              </div>
+              <span class="tips">注：请牢记您所设置的密码，如遗忘可登录CVM控制台重置密码。</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">用户名</label>
+            <div class="controls"> 
+              root
+            </div>
+          </div>
+          <div class="control-group" ng-if="options.loginStyle.value == 1 && stepFour">
+              <label class="control-label"><i class="red">*</i> 密码</label>
+              <div class="controls">
+                  <input type="password" class="form-controls input-sm" name="password" ng-model="options.password"  id="user_pass"  
+                  ng-pattern="passpattern" ng-minlength="passminnum" ng-maxlength="16" placeholder="请输入主机密码"  ng-required="options.loginStyle.value == 1" />
+                  <div class="error" ng-messages="(submitform ||stepFourForm.password.$dirty) && stepFourForm.password.$error" >
+                    <div ng-message="minlength">请最少输入{{passminnum}}个字符</div>
+                    <div ng-message="maxlength">请最多输入16个字符</div>
+                    <div ng-message="pattern">{{passtip}}</div>
+                    <div ng-message="required">必填项</div>
+                  </div>
+                  <!-- <div class="error" ng-messages="(submitform ||stepFourForm.password.$dirty) && stepFourForm.password.$error">
+                      <form-validate  min-num="passminnum" max-num="16" pattern-msg="passtip"></form-validate>
+                  </div> -->
+              </div>
+          </div>
+          <div class="control-group"  ng-if="options.loginStyle.value == 1  && stepFour">
+              <label class="control-label"><i class="red">*</i> 确认密码</label>
+              <div class="controls">
+                  <input type="password" class="form-controls input-sm" name="confirmPassWord" ng-model="options.cfmPassword"  
+                  ng-pattern="passpattern" ng-minlength="passminnum" ng-maxlength="16" placeholder="请再次输入主机密码"  ng-required="options.loginStyle.value == 1" pw-check="user_pass" />
+                  <div class="error" ng-messages="(submitform ||stepFourForm.confirmPassWord.$dirty) && stepFourForm.confirmPassWord.$error" >
+                    <div ng-message="minlength">请最少输入{{passminnum}}个字符</div>
+                    <div ng-message="maxlength">请最多输入16个字符</div>
+                    <div ng-message="pattern">{{passtip}}</div>
+                    <div ng-message="required">必填项</div>
+                  </div>
+                  <!-- <div class="error" ng-messages="(submitform ||stepFourForm.confirmPassWord.$dirty) && stepFourForm.confirmPassWord.$error" >
+                      <form-validate min-num="passminnum" max-num="16" pattern-msg="passtip"></form-validate>
+                  </div> -->
+              </div>
+          </div>
+          <div class="control-group" ng-if="options.loginStyle.value == 2">
+            <label class="control-label">SSH密钥</label>
+            <div class="controls">
+              <ui-select ng-model="options.ssh" >
+                <ui-select-match placeholder="SSH密钥">{{$select.selected.keyName}}</ui-select-match>
+                <ui-select-choices repeat="ssh in shhKeypaire | filter: {keyName: $select.search}">
+                  <div ng-bind-html="ssh.keyName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">安全组</label>
+            <div class="controls">
+              <ui-select ng-model="options.secGroup"  >
+                <ui-select-match placeholder="安全组">{{$select.selected.sgName}}</ui-select-match>
+                <ui-select-choices repeat="sec in secGroups | filter: {sgName: $select.search}">
+                  <div ng-bind-html="sec.sgName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <!-- <div class="control-group">
+              <label class="control-label">云安全</label>
+              <div class="controls">
+                <label class="checkbox">
+                  <input type="checkbox" name="r" ng-model="options.needSecurityAgent" value="" class="" />
+                  <i class="iconfont"></i>
+                  <span>免费开通</span>
+                </label>
+              </div>
+          </div> -->
+          <!-- <div class="control-group">
+            <label class="control-label">云监控</label>
+            <div class="controls">
+              <label class="checkbox">
+                <input type="checkbox" name="r" ng-model="options.needMonitorAgent" value="" class="" />
+                <i class="iconfont"></i>
+                <span>免费开通</span>
+              </label>
+            </div>
+          </div> -->
+        </fieldset>
+        <fieldset class="field">
+          <div class="control-group" ng-if ="options.paymodes.value != '2'">
+            <label class="control-label">费用</label>
+            <div class="controls">
+               <span class="unit-box">{{price}}<span class="unit-txt">元</span></span>
+            </div>
+          </div>
+          <div class="control-group" ng-if ="options.paymodes.value == '2'">
+            <label class="control-label">配置费用</label>
+            <div class="controls">
+               <span class="unit-box">{{price}}<span class="unit-txt">元/小时</span></span>
+            </div>
+          </div>
+          <div class="control-group" ng-if ="options.paymodes.value == '2'">
+            <label class="control-label">网络费用</label>
+            <div class="controls">
+               <span class="unit-box">{{netPrice}}<span class="unit-txt">元/GB</span></span>
+            </div>
+          </div>
+          <div class="control-group">
+            <div class="controls">
+              <button class="btn btn-info" ng-click="stepFourItem.toStepThreeFunc()">上一步</button>
+              <button class="btn btn-info" ng-click="buyVm(stepFourForm)" ng-disabled = "stepFourForm.wating">立即购买</button>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+</div>
+<script type="text/ng-template" id="imageMark.html">
+  <div class="modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">选择镜像</h3>
+      </div>
+      <div class="modal-body clearfix image-box">
+        <div class="left-box">
+          <h4>服务市场</h4>
+          <ul >
+            <li ng-repeat="item in category"><a href="" ng-class="{'blue':iscategory == item.value}" ng-click="iscategoryFunc(item)">{{item.name}}</a></li>
+          </ul>
+        </div>
+        <div class="right-box">
+          <table ng-table="tableParams" class="table">
+            <tr ng-repeat="os in $data">
+              <td>
+                <a class="blue">{{os.imageName}}</a>
+                <span class="ycx">操作系统：{{os.osDescription}}</span>
+                <span class="ycx" uib-popover="{{os.software}}" popover-trigger="mouseenter" popover-placement = "bottom">集成软件：{{os.software}}</span>
+                <span class="ycx">提供商家：{{os.creator}}</span>
+              </td>
+              <td>
+                <button class="btn btn-info" ng-click="confirmUse(os)">免费使用</button>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+</script>
+<script type="text/ng-template" id="zoneTooltipTemplate.html">
+  <div class="control-group"><strong>包年包月 </strong><span> 是以月 / 年为计费周期的云服务器计费模式。此种计费方式适合长期稳定的成熟业务。</span>
+  </div>
+  <div class="control-group"><strong>按量计费 </strong><span> 是按秒计费按小时结算的弹性计费模式。此种计费方式适用于电商抢购等设备需求量瞬间大幅波动的场景。</span>
+  </div>
+</script>
+<script type="text/ng-template" id="imageTooltipTemplate.html">
+  <div class="control-group">
+    <strong>公共镜像 </strong><span> 腾讯云官方提供的基础环境，包含必须的操作系统和初始化组件。您可自行配置应用环境和相关软件。</span>
+  </div>
+  <div class="control-group">
+    <strong> 自定义镜像 </strong><span> 您在过去某时刻创建的系统模板，包含该时刻的操作系统、应用和软件。您可使用自定义镜像快速批量地部署相同配置的云服务器。</span>
+  </div>
+  <div class="control-group">
+    <strong> 服务市场 </strong><span> 腾讯云严格审核的第三方服务商提供的镜像，除了常规的操作系统等预安装环境，通常还集成了如PHP、Java、FTP、Nginx、Docker、WordPress、Discuz等常用的热门软件环境。</span>
+  </div>
+</script>
+<script type="text/ng-template" id="netTooltipTemplate.html">
+  <div class="control-group">
+    <strong>网络类型 </strong><span> 网络类型与运营商公网接入网络质量无关，任何网络类型的运营接入均为BGP路线，请您放心使用。</span>
+  </div>
+  <div class="control-group">
+    <strong>基础网络 </strong><span> IP地址由腾讯云默认分配，配置简便，使用方便，适合对操作易用性要求比较高，需要快速使用CVM的场景。</span>
+  </div>
+  <div class="control-group">
+    <strong>私有网络 </strong><span> 是指逻辑隔离的网络空间，您可以自定义网段划分和IP地址、路由，支持VPN连接/专线接入等。适合于有一定网络自定义配置需求的场景。</span>
+  </div>
+</script>
+<script type="text/ng-template" id="bandwidthTooltipTemplate.html">
+    <div class="control-group">
+      <strong>&nbsp;&nbsp;固定带宽 </strong><span>  需指定公网出方向的带宽的大小。您选择单台服务器最大带宽值，带宽费用与主机、硬盘费用一起合并至总价格中。</span>
+    </div>
+    <div class="control-group">
+      <strong>按使用流量 </strong><span> 按流量计费的网络费用仅取决于单台云服务器的出流量，与云服务器模式无关。为了防止突然爆发的流量产生较高的费用，您可选择一个带宽上限，但此带宽上限的选择对于网络单价完全无影响。注意：流量费用每小时结算一次，当账户余额不足时，两小时内将被停止流量服务。</span>
+    </div>
+</script>

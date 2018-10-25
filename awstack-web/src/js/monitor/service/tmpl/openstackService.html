@@ -1,0 +1,52 @@
+<div class="page-inner">
+    <div class="service-heade">
+        <div class="node-box">
+            <form name="selectNodeForm">
+                <div class="control-group">
+                   <label class="control-label">{{"aws.monitor.openstackService.nodeSelect"|translate}}：</label> 
+                   <div class="controls">
+                      <ui-select ng-model="selectedNode" ng-change="changeNode(selectedNode)" required>
+                            <ui-select-match placeholder='{{"aws.monitor.openstackService.selectNode"|translate}}'>{{$select.selected.hostName}}</ui-select-match>
+                            <ui-select-choices repeat="item in nodeList">
+                                <div ng-bind-html="item.hostName | highlight: $select.search"></div>
+                            </ui-select-choices>
+                       </ui-select>
+                       <div class="error" ng-messages="selectNodeForm.selectedNode.$error" ng-if="interactedNode(selectNodeForm.selectedNode)" >
+                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                       </div>
+                   </div>
+                </div>
+            </form>
+        </div>
+        <div class="node-help">
+            <into-information modular="'openstackService'"></into-information>
+        </div>
+    </div>
+    <div class="table-content">
+       <empty-tip empty-type="loadServiceData" tip-id="'nodeServer-tip-msg'"></empty-tip>
+       <table ng-table="serverTable" class="table" show-filter="false">
+           <colgroup>
+              <col width="25%">
+              <col width="25%">
+              <col width="25%">
+              <col width="25%">
+           </colgroup>
+           <tr ng-repeat="server in $data">
+                <td data-title="'aws.monitor.openstackService.serviceName'|translate" sortable="'Service'">
+                  <div class="edit-name edit-huge">
+                    <span title="{{server.Service}}">{{server.Service}}</span>
+                  </div>
+                </td>
+                <td data-title="'aws.monitor.openstackService.node'|translate" sortable="'hostName'">
+                    {{selectedNode.hostName}}
+                </td>
+                <td data-title="'aws.monitor.openstackService.statusTitle'|translate" sortable="'status'">
+                    <span class="bg-green">{{"aws.monitor.openstackService.active"|translate}}</span>
+                </td>
+                <td data-title="'aws.monitor.openstackService.description'|translate" sortable="'description'">
+                    {{server.description}}
+                </td>
+           </tr>
+       </table>  
+    </div>
+</div>

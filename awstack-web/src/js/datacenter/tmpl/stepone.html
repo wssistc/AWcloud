@@ -1,0 +1,349 @@
+<div id="main">
+  <div class="container">
+    <div class="host-box">
+      <!-- 表格 start -->
+      <div class="config-pattern">
+        <div class="config-row clearfix">
+          <div class="row-item faultdomain-item">
+            <label class="conf-label">启用故障域:</label>
+            <div class="checkbox conf-item">
+              <label>
+                <input type="checkbox" name="faultdomain" value="vlan" ng-model="oneModule.faultdomain"  ng-change="oneModule.chooseFault(oneModule.faultdomain)"/>
+                <i class="icon-aw-square"></i>
+              </label>
+              <label class="control-label" ng-if="oneModule.faultdomain">
+                <i class="icon-aw-question-mark"  uib-popover="故障域每级有效数为1~99，故障域的分级格式为：1, 3-1, 2-1-1，每个集群节点的故障域级别设置应该保持一致，例如:2-1-1三级故障域格式。"
+                    popover-enable="true" popover-trigger="mouseenter" popover-placement = "right" ></i>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="config-row clearfix" ng-if="oneModule.patternselected.value=='hyper'&&stepOneData.length>0">
+          <div class="row-item">
+            <label class="conf-label">超融合型号选择:</label>
+            <div class="conf-item">
+              <ui-select ng-model="oneModule.configselected" ng-change="changeConfig(oneModule.configselected)">
+                <ui-select-match placeholder="请选择型号">{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="data in oneStepType.config_type | filter:{name:$select.search}">
+                  <div ng-bind-html="data.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="table-action">
+        <button class="btn btn-next" ng-click="disksconfigure(checkedItems)" ng-disabled="diskDisable" ng-if="oneModule.patternselected.value=='deliver'">
+          本地盘配置
+        </button>
+        <button class="btn btn-next" ng-click="cardconfigure(checkedItems)" ng-disabled="cardDisable" ng-if="oneModule.patternselected.value=='deliver'">
+          网卡配置
+        </button>
+        <button class="btn btn-default" ng-click="oneModule.init()"><i class=""></i>获取节点</button>
+      </div>
+      <table class="table border">
+        <thead>
+          <tr>
+            <th class="check-all">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="checkboxes.checked" class="select-all">
+                <i class="iconfont"></i>
+              </label>
+            </th>
+            <th>{{'aws.register.info.hostName'|translate}}</th>
+            <th>{{'aws.register.info.area'|translate}}</th>
+            <th>{{'aws.register.info.ManagementNetwork'|translate}}</th>
+            <th>{{'aws.register.info.cpu'|translate}}</th>
+            <th>{{'aws.register.info.mem'|translate}}</th>
+            <th>SSD<span ng-if="stepOneData[0].hostInfoMap.ssdUnits">({{stepOneData[0].hostInfoMap.ssdUnit}})</span></th>
+            <th>SATA<span ng-if="stepOneData[0].hostInfoMap.sataUnits">({{stepOneData[0].hostInfoMap.sataUnit}})</span></th>
+            <th>磁盘状态</th>
+            <th ng-if="oneModule.faultdomain">{{'aws.register.info.fault'|translate}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-if="stepOneData.length=='0'">
+            <td colspan="9" class="add-node">
+              <p>当前无节点数据，请先灌装可用节点！</p>
+            </td> 
+          </tr>
+          <tr ng-repeat="item in stepOneData">
+            <td class="check-td">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="checkboxes.items[item.nodeUid]">
+                <i class="iconfont"></i>
+              </label>
+            </td>
+            <td class="col-2">
+              <span class="host-name" ng-click="oneModule.detailOut(true,item)" >{{item.hostName}}</span> 
+              <!-- <span ng-dblclick="oneModule.edit(item)" ng-if="oneModule.editActive!==item.id">{{item.hostName}}</span>
+              <div class="edit-input" ng-if="oneModule.editActive===item.id">
+                <input type="text" ng-model="item.hostName" ng-blur="oneModule.save(item)" class="form-control" />
+                <i class="icon-aw-storage" ng-click="oneModule.save(item)"></i>
+              </div> -->
+            </td>
+            <td>{{item.regionName}}</td>
+            <td>{{item.hostInfoMap.ip}}</td>
+            <td>{{item.hostInfoMap.cpu.ht}}</td>
+            <td>{{item.hostInfoMap.mem | unitFilter | number:1}}</td>
+            <td>{{item.hostInfoMap.ssdAll}}{{item.hostInfoMap.ssdUnit}}</td>
+            <td>{{item.hostInfoMap.sataAll}}{{item.hostInfoMap.sataUnit}}</td>
+            <td><span ng-class="{'bg-green':item.diskStatus==0,'bg-orange':item.diskStatus==1}">{{'aws.node.diskStatus.'+item.diskStatus|translate}}</span></td>
+            <td ng-if="oneModule.faultdomain" class="td-fault">
+              <input class="form-controls fault-item" type="text" ng-model="item.hostInfoMap.fault_domain" ng-change="isErrorFunc(item)" ng-blur="editFault(item)"></input>
+              <div class="help-block">{{item.errorMessage}}</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <br>
+      <span ng-if="isChecked">{{'aws.errors.disunity'|translate}}</span>
+      <span ng-if="isfaultChecked">{{'aws.errors.disfault'|translate}}</span>
+      <span ng-if="isfaultFormat">每级故障域的取值范围为1~99</span>
+      <span ng-if="isDiskChecked">硬盘信息不统一无法批量配置！</span>
+      <span ng-if="isCardChecked">网卡信息不统一无法批量配置！</span>
+      <span ng-if="isConfigChecked">请保证网卡配置完整再操作！</span>
+      <span ng-if="hyperCard">超融合模式下请保证每个节点网卡数大于3张其中万兆网卡至少2张</span>
+      <span ng-if="limitFault">两节点安装部署不支持故障域选用</span>
+      <span ng-if="isTwoNodesChecked">两节点安装部署请确保node-1节点被勾选</span>
+      <span ng-if="isCustomChecked">节点存在两种交付模式！</span>
+      <div class="text-center">
+        <button class="btn btn-next" ng-click="oneModule.completeOne()" ng-disabled="oneModule.isDisabled || isChecked||faultError||isCustomChecked" type="button">{{'aws.register.info.next'|translate}}</button>
+      </div>
+    </div>
+  </div>
+  <div class="animateContent" ng-class="{'animateIn':logOut,'animateOut':!logOut}">
+    <div class="detailInner">
+      <div class="tab-content">
+        <div class ="detail-row">
+          <div class="detail-title">
+            <a class="an-close"  ng-click="oneModule.detailOut(false)"><i class="icon-aw-mail-reply"></i></a>
+            <span>{{detailItem.hostName}}详情</span>
+          </div>
+          <div class="detail-info">
+              <uib-tabset active="" justified="true">
+                <uib-tab index="0" heading="基础信息" ng-click="oneModule.chartDisplay(0)">
+                  <div ng-if="oneModule.chartNum==0">
+                    <table class="table table-info column">
+                      <tr>
+                        <td>主机名称</td>
+                        <td>{{detailItem.hostName}}</td>
+                        <td>区域</td>
+                        <td>{{detailItem.regionName}}</td>
+                      </tr>
+                      <tr>
+                        <td>管理网</td>
+                        <td>{{detailItem.hostInfoMap.ip}}</td>
+                        <td>CPU(核)</td>
+                        <td>{{detailItem.hostInfoMap.cpu.core}}</td>
+                      </tr>
+                       <tr>
+                        <td>内存(GB)</td>
+                        <td>{{(detailItem.hostInfoMap.mem/1024).toFixed(2)}}GB</td>
+                        <td>硬盘</td>
+                        <td>{{(detailItem.hostInfoMap.totalAll).toFixed(2)}}TB</td>
+                      </tr>
+                    </table>
+                    <div class="config-title">硬盘配置</div>
+                    <div class="disks-content">
+                      <ul class="disks-group">
+                        <li ng-repeat="item in disksJson.configGroup">
+                          <div class="scale" ng-click="showConfDetail(item)">
+                            <span class="caching-disk"  ng-style="{width:item.cachingRatio}" ng-if="item.caching.length>0">
+                              <em class="name">{{item.selected.name}}</em>
+                              <i class="scale-num">{{item.cachingSum}}G</i>
+                            </span>
+                            <span class="data-disk" ng-style="{width:item.dataRatio}" ng-if="item.data.length>0">
+                              <em class="name">数据盘</em>
+                              <i class="scale-num">{{item.dataSum}}G</i>
+                            </span>
+                            <span class="no-disk" ng-if="item.caching.length==0&&item.data.length==0">
+                              <em class="name">未分配</em>
+                              <i class="scale-num">0G</i>
+                            </span>
+                          </div>
+                          <div class="group-content clearfix" ng-if="item.show" ng-class="{'is-deliver':oneModule.patternselected.value=='deliver'}">
+                            <div class="caching-content">
+                              <div class="name-item">日志盘：</div>
+                              <ul class="caching clearfix" indexNum="{{$index}}">
+                                <span class="tips" ng-if="item.caching.length==0">暂无数据</span>
+                                <li ng-repeat = "v in item.caching">
+                                  <div class="disks-item">
+                                    <div class="disk-out">
+                                      <span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+                                      <span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+                                      <span class="disk-name">{{v.name}}</span>
+                                    </div>
+                                  </div>
+                                  <div class="disks-detail">
+                                    <i></i>
+                                    <div class="detail-item">
+                                      <span class="title">硬盘名称：</span>
+                                      <span>{{v.name}}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                      <span class="title">状态：</span>
+                                      <span class="bg-green" ng-if="v.status">健康</span>
+                                      <span class="bg-red" ng-if="!v.status">不可用</span>
+                                    </div>
+                                    <div class="detail-item">
+                                      <span class="title">硬盘类型：</span>
+                                      <span ng-if="v.ssd">SSD </span>
+                                      <span ng-if="!v.ssd">HDD</span>
+                                    </div>
+                                    <div class="detail-item">
+                                      <span class="title">硬盘容量：</span>
+                                      <span>{{v.capacity}}</span>
+                                    </div>
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                            <div class="data-content">
+                              <div class="name-item">数据盘：</div>
+                              <ul class="data clearfix" indexNum="{{$index}}">
+                                <span class="tips" ng-if="item.data.length==0">暂无数据</span>
+                                <li ng-repeat = "v in item.data">
+                                  <div class="disks-item">
+                                    <div class="disk-out">
+                                      <span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+                                      <span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+                                      <span class="disk-name">{{v.name}}</span>
+                                    </div>
+                                  </div>
+                                  <div class="disks-detail">
+                                    <i></i>
+                                    <div class="detail-item">
+                                      <span class="title">硬盘名称：</span>
+                                      <span>{{v.name}}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                      <span class="title">状态：</span>
+                                      <span class="bg-green" ng-if="v.status">健康</span>
+                                      <span class="bg-red" ng-if="!v.status">不健康</span>
+                                    </div>
+                                    <div class="detail-item">
+                                      <span class="title">硬盘类型：</span>
+                                      <span ng-if="v.ssd">SSD </span>
+                                      <span ng-if="!v.ssd">HDD</span>
+                                    </div>
+                                    <div class="detail-item">
+                                      <span class="title">硬盘容量：</span>
+                                      <span>{{v.capacity}}</span>
+                                    </div>
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </li>
+                      </ul> 
+                    </div>
+                    <div class="config-title">网卡配置</div>
+                    <ul class="nics-choose carddetail-choose">
+                      <li class="cluster">
+                        <div class="inner nic-item">
+                          <div class="text">集群网</div>
+                          <div class="addr netcontent" name="cluster">
+                            <span class="text-tip" ng-class="{'hide':cardJson.nic_map.cluster.bonds}">使用拖拽移动组合</span>
+                            <div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.cluster.bonds}">
+                              <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                              <div class="nic-info">
+                                <span class="nic-name" title="{{cardJson.nic_map.cluster.bonds}}">{{cardJson.nic_map.cluster.bonds}}</span>
+                                <span class="nic-speed">{{cardJson.nic_map.cluster.speed}}Mbps</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                      <li class="mgmt">
+                        <div class="inner nic-item">
+                          <div class="text">管理网</div>
+                          <div class="addr netcontent" name="mgmt">
+                            <span class="text-tip" ng-class="{'hide':cardJson.nic_map.mgmt.bonds}">使用拖拽移动组合</span>
+                            <div class="nic-out"  ng-class="{'nic1000':cardJson.nic_map.mgmt.bonds}">
+                              <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                              <div class="nic-info">
+                                <span class="nic-name" title="{{cardJson.nic_map.mgmt.bonds}}">{{cardJson.nic_map.mgmt.bonds}}</span>
+                                <span class="nic-speed">{{cardJson.nic_map.mgmt.speed}}Mbps</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                      <li class="storage">
+                        <div class="inner nic-item">
+                          <div class="text">存储网</div>
+                          <div class="addr netcontent" name="storage">
+                            <span class="text-tip" ng-class="{'hide':cardJson.nic_map.storage.bonds}">使用拖拽移动组合</span>
+                            <div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.storage.bonds}">
+                              <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                              <div class="nic-info">
+                                <span class="nic-name" title="{{cardJson.nic_map.storage.bonds}}">{{cardJson.nic_map.storage.bonds}}</span>
+                                <span class="nic-speed">{{cardJson.nic_map.storage.speed}}Mbps</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                      <li class="tenant">
+                        <div class="inner nic-item">
+                          <div class="text">租户网</div>
+                          <div class="addr netcontent" name="tenant">
+                            <span class="text-tip" ng-class="{'hide':cardJson.nic_map.tenant.bonds}">使用拖拽移动组合</span>
+                            <div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.tenant.bonds}">
+                              <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                              <div class="nic-info">
+                                <span class="nic-name" title="{{cardJson.nic_map.tenant.bonds}}">{{cardJson.nic_map.tenant.bonds}}</span>
+                                <span class="nic-speed">{{cardJson.nic_map.tenant.speed}}Mbps</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                      <li class="public">
+                        <div class="inner nic-item">
+                          <div class="text">业务网</div>
+                          <div class="addr netcontent" name="public">
+                            <span class="text-tip" ng-class="{'hide':cardJson.nic_map.public.bonds}">使用拖拽移动组合</span>
+                            <div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.public.bonds}">
+                              <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                              <div class="nic-info">
+                                <span class="nic-name" title="{{cardJson.nic_map.public.bonds}}">{{cardJson.nic_map.public.bonds}}</span>
+                                <span class="nic-speed">{{cardJson.nic_map.public.speed}}Mbps</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </uib-tab>
+                <uib-tab index="1" heading="硬件检测报告"  ng-click="oneModule.chartDisplay(1)">
+                  <div ng-if="oneModule.chartNum==1">
+                    <table class="table border">
+                      <thead>
+                        <tr>
+                          <th>硬盘名称</th>
+                          <th>读取速率（mb/s）</th>
+                          <th>写入速率（mb/s）</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr ng-repeat="item in detailItem.hostInfoMap.disks">
+                          <td>{{item.name}}</td>
+                          <td>{{item.read_io}}</td>
+                          <td>{{item.write_io}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </uib-tab>
+              </uib-tabset>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

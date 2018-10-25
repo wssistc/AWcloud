@@ -1,0 +1,397 @@
+<div class="page-inner">
+	<h3 class="page-title">伸缩集群</h3>
+	<div class="table-action">
+		<button type="button" data-toggle="modal" ng-click="newEE('new')" class="btn btn-primary"><i class="icon-aw-add-to2"></i>创建伸缩集群</button>
+		<button type="button" data-toggle="modal" ng-disabled="!can_edit" ng-click="newEE('edit',editData)" class="btn btn-info"><i class="icon-aw-modify"></i>修改</button>
+		<button type="button" data-toggle="modal" ng-disabled="!can_enabled" ng-click="enable_cluster(1,editData)" class="btn btn-info"><i class="icon-aw-time-out"></i>启用</button>
+		<button type="button" data-toggle="modal" ng-disabled="!can_stop" ng-click="enable_cluster(2,editData)" class="btn btn-info"><i class="icon-aw-time-out"></i>停用</button>
+		<button type="button" data-toggle="modal" ng-disabled="!can_del" ng-click="del_cluster(checkedItems)" class="btn btn-warning"><i class="icon-aw-delete"></i>删除</button>
+		<button class="btn btn-refresh" ng-click="refresh()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button> 
+	</div>
+	
+	<div class="table-content">
+		<table ng-table="tableParams" class="table" show-filter="false">
+			<!--<empty-tip empty-type="loadData"></empty-tip>-->
+			<loading-data data="loadData"></loading-data>
+			<tr ng-repeat="item in $data">
+				<td header="'headerCheckbox.html'">
+					<label class="checkbox">
+						<input type="checkbox" ng-model="checkboxes.items[item.id]" />
+						<i class="iconfont"></i>
+					</label>
+				</td>
+				<td data-title="'伸缩集群'" sortable="'name'"><!-- {{item.name}} -->
+					<div class="edit-name edit-lg">
+						<a ng-click="look_detail(item)">{{item.name}}</a>
+					</div>
+				</td> 
+				<td data-title="'状态'" sortable="'statusName'">
+					<span ng-class="{'bg-green':item.statusName=='已启用','bg-red':item.statusName=='已禁用'}">{{item.statusName}}</span>
+				</td>
+				<td data-title="'伸缩配置'" sortable="'configName'">{{item.configName}}
+
+				</td>
+				<td data-title="'当前云主机数量'" sortable="'current_host_num'">{{item.currentHostSize}}</td>
+				<td data-title="'最小云主机数量'" sortable="'minHostSize'">{{item.minHostSize}}</td>
+				<td data-title="'最大云主机数量'" sortable="'maxHostSize'">{{item.maxHostSize}}</td>
+				<td data-title="'默认冷却时间（秒）'" sortable="'defaultCoolingTime'">{{item.defaultCoolingTime}}</td>
+			</tr>
+		</table>
+	</div>
+	<!-- 详情页面 -->
+	<div class="detail-info-two" ng-if="showDetail">
+		<uib-tabset active=detailActive justified="true" class="detail-tab" >
+			<uib-tab index="0" heading="基本信息"select="selectIndex(0)">
+				<div class="detail-info">
+					<table class="table table-info column">
+						<caption>{{select_cluster_baseinfo_show.name}} 的详情</caption>
+						<tr>
+							<td>集群标识</td>
+							<td>{{select_cluster_baseinfo_show.id}}</td>
+							<td>创建时间</td>
+							<td>{{select_cluster_baseinfo_show.creationTime}}</td>
+						</tr>
+						<tr>
+							<td>集群名称</td>
+							<td>{{select_cluster_baseinfo_show.name}}</td>
+							<td>默认冷却时间（S）</td>
+							<td>{{select_cluster_baseinfo_show.defaultCoolingTime}}</td>
+						</tr>
+						<tr>
+							<td>最小云主机数</td>
+							<td>{{select_cluster_baseinfo_show.minHostSize}}</td>
+							<td>移除策略</td>
+							<td>{{select_cluster_baseinfo_show.removeStrategyName}}</td>
+						</tr>
+						<tr>
+							<td>最大云主机数</td>
+							<td>{{select_cluster_baseinfo_show.maxHostSize}}</td>
+							<td>负载均衡器</td>
+							<td>{{select_cluster_baseinfo_show.loadbalancerName}}</td>
+						</tr>
+					</table>
+				</div>
+			</uib-tab>
+			<uib-tab index="1" heading="云主机列表" select="selectIndex(1)" >
+				<div class="table-action">
+					<button type="button" data-toggle="modal" ng-disabled="!can_remove()" ng-click="del_hosts()" class="btn btn-warning"><i class="icon-aw-delete"></i>移除伸缩集群并释放</button>
+				</div>
+				<div class="table-content">
+					<table ng-table="insTableParams" class="table" show-filter="false">
+						<loading-data data="select_cluster_table_show"></loading-data>
+						<tr ng-repeat="item in $data">
+							<td header="'newHeaderCheckbox.html'">
+								<label class="checkbox">
+									<input type="checkbox" ng-model="item._checked" />
+									<i class="iconfont"></i>
+								</label>
+							</td>
+							<td data-title="'云主机名称'" sortable="'name'">{{item.name}}</td> 
+							<td data-title="'伸缩配置'" sortable="'configName'">{{item.configName}}</td>
+							<td data-title="'健康检查状态'" sortable="'statusName'">
+								<span ng-class="{'bg-green':item.statusName=='健康','bg-red':item.statusName=='不健康'}">{{item.statusName}}</span>
+							</td>
+							<td data-title="'负载均衡权重'" sortable="'loadbalancerWeight'">{{item.loadbalancerWeight}}</td>
+							<td data-title="'加入时间'" sortable="'joinTime'">{{item.joinTime}}</td>
+						</tr>
+					</table>
+				</div>
+			</uib-tab>
+			<uib-tab index="2" heading="伸缩活动日志" select="selectIndex(2)">
+				<div class="table-content">
+					<table ng-table="activityTableParams" class="table" show-filter="false">
+						<loading-data data="log_data"></loading-data>
+						<tr ng-repeat="item in $data">
+							<td data-title="'伸缩前云主机数量'" sortable="'name'">{{item.beforeHostNumber}}</td> 
+							<td data-title="'伸缩后云主机数量'" sortable="'configName'">{{item.afterHostNumber}}</td>
+							<td data-title="'活动开始时间'" sortable="'statusName'">{{item.startTime}}</td>
+							<td data-title="'活动结束时间'" sortable="'loadbalancerWeight'">{{item.endTime}}</td>
+							<td data-title="'活动日志'" sortable="'joinTime'">{{item.description}}</td>
+							<td data-title="'活动起因'" sortable="'joinTime'">{{item.typeName}}</td>
+							<td data-title="'活动结果'" sortable="'joinTime'">
+								<span ng-class="{'bg-green':item.resultName=='成功','bg-red':item.resultName=='失败'}">{{item.resultName}}</span>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<!--<div ng-if="show_log">
+					<div class="detail-info">
+						<table class="table">
+							<thead>
+								<tr>
+	   								<th>活动标识</th>
+	    							<th>伸缩前云主机数量</th>
+	    							<th>伸缩后云主机数量</th>
+	    							<th>活动开始时间</th>
+	    							<th>活动结束时间</th>
+	    							<th>活动结果</th>
+	  							</tr>
+	  						</thead>
+	  						<tbody>
+  								<tr ng-repeat="item in log_data">
+		    						<td>
+		    							<div class="edit-name edit-lg">
+											<a ng-click="log_detail(item)">{{item.id}}</a>
+										</div>
+		    						</td>
+		    						<td>{{item.beforeHostNumber}}</td>
+		    						<td>{{item.afterHostNumber}}</td>
+		    						<td>{{item.startTime}}</td>
+		    						<td>{{item.endTime}}</td>
+		    						<td>
+		    							<span ng-class="{'bg-green':item.resultName=='成功','bg-red':item.resultName=='失败'}">{{item.resultName}}</span>
+		    						</td>
+		 				 		</tr>
+  							</tbody>
+						</table>
+					</div>
+				</div>
+				<div ng-if="!show_log">
+					<div class="tab-content">
+						<div class="detail-row">
+							<div class="detail-title">
+								<a class="an-close" ng-click="return_log_page()" ><i class="icon-aw-mail-reply"></i></a>
+								<span>伸缩活动日志详情</span>
+							</div>
+							<div class="detail-info">
+								<table class="table table-info column">
+									<tr>
+										<td>活动标识</td>
+										<td>{{selected_log.id}}</td>
+										<td>活动开始时间</td>
+										<td>{{selected_log.startTime}}</td>
+									</tr>
+									<tr>
+										<td>伸缩前云主机数量</td>
+										<td>{{selected_log.beforeHostNumber}}</td>
+										<td>活动结束时间</td>
+										<td>{{selected_log.endTime}}</td>
+									</tr>
+									<tr>
+										<td>伸缩后云主机数量</td>
+										<td>{{selected_log.afterHostNumber}}</td>
+										<td>活动日志</td>
+										<td>{{selected_log.description}}</td>
+									</tr>
+									<tr>
+										<td>活动起因</td>
+										<td>{{selected_log.typeName}}</td>
+										<td>活动结果</td>
+										<td>{{selected_log.resultName}}</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>-->
+			</uib-tab>
+			<uib-tab index="3" heading="伸缩配置" select="selectIndex(3)">
+				<div ng-if="show_config">
+					<div class="table-action">
+						<button type="button" data-toggle="modal" ng-click="creteEEConfig()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>创建伸缩配置</button>
+						<button type="button" data-toggle="modal" ng-disabled="!can_select()" ng-click="updateConfig()" class="btn btn-info"><i class="icon-aw-modify"></i>选用</button>
+						<button type="button" data-toggle="modal" ng-disabled="!can_remove() || !can_del_config()" ng-click="delconf()" class="btn btn-warning"><i class="icon-aw-delete"></i>删除</button>
+					</div>
+					<div class="table-content">
+						<table ng-table="confTableParams" class="table" show-filter="false">
+							<loading-data data="select_cluster_table_show"></loading-data>
+							<tr ng-repeat="item in $data">
+								<td header="'newHeaderCheckbox.html'">
+									<label class="checkbox">
+										<input type="checkbox" ng-model="item._checked" />
+										<i class="iconfont"></i>
+									</label>
+								</td>
+								<td data-title="'伸缩配置名称'" sortable="'name'">
+									<div class="edit-name edit-lg">
+										<a ng-click="config_detail(item)">{{item.name}}</a>
+									</div>
+								</td> 
+								<td data-title="'CPU（核）'" sortable="'coreNumber'">{{item.coreNumber}}</td>
+								<td data-title="'内存（MB）'" sortable="'memorySize'">{{item.memorySize}}</td>
+								<td data-title="'状态'" sortable="'statusName'">
+									<span ng-class="{'bg-green':item.statusName=='已启用','bg-red':item.statusName=='已禁用'}">{{item.statusName}}</span>
+								</td>
+								<td data-title="'镜像'" sortable="'imageName'">{{item.imageName}}</td>
+								<td data-title="'负载均衡权重'" sortable="'weight'">{{item.weight}}</td>
+								<td data-title="'创建时间'" sortable="'creationTime'">{{item.creationTime}}</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<div ng-if="!show_config">
+					<div class="tab-content">
+						<div class="detail-row">
+							<div class="detail-title">
+								<a class="an-close" ng-click="return_list_page()" ><i class="icon-aw-mail-reply"></i></a>
+								<span>伸缩配置详情</span>
+							</div>
+							<div class="detail-info">
+								<table class="table table-info column">
+									<tr>
+										<td>伸缩配置名称</td>
+										<td>{{selected_conf.name}}</td>
+										<td>镜像</td>
+										<td>{{selected_conf.imageName}}</td>
+									</tr>
+									<tr>
+										<td>CPU核数</td>
+										<td>{{selected_conf.coreNumber}} 核</td>
+										<td>负载均衡权重</td>
+										<td>{{selected_conf.weight}}</td>
+									</tr>
+									<tr>
+										<td>内存大小</td>
+										<td>{{selected_conf.memorySize}} MB</td>
+										<td>安全组</td>
+										<td>{{selected_conf.securityGroupName}}</td>
+									</tr>
+									<tr>
+										<td>实例规格</td>
+										<td>{{selected_conf.flavorName}}</td>
+										<td>网络</td>
+										<td>{{selected_conf.networkName}}</td>
+									</tr>
+									<tr>
+										<td>状态</td>
+										<td>{{selected_conf.statusName}}</td>
+										<td></td>
+										<td></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</uib-tab>
+			<uib-tab index="4" heading="伸缩规则" select="selectIndex(4)">
+				<div ng-if="show_rules">
+					<div class="table-action">
+						<button type="button" data-toggle="modal" ng-click="createRule()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>创建伸缩规则</button>
+						<button type="button" data-toggle="modal" ng-disabled="!can_select()" ng-click="updateRule()" class="btn btn-info"><i class="icon-aw-modify"></i>修改</button>
+						<button type="button" data-toggle="modal" ng-disabled="!can_select()" ng-click="delRule()" class="btn btn-warning"><i class="icon-aw-delete"></i>删除</button>
+					</div>
+					<div class="table-content">
+						<table ng-table="ruleTableParams" class="table" show-filter="false">
+							<loading-data data="select_cluster_table_show"></loading-data>
+							<tr ng-repeat="item in $data">
+								<td header="'newHeaderCheckbox.html'">
+									<label class="checkbox">
+										<input type="checkbox" ng-model="item._checked" />
+										<i class="iconfont"></i>
+									</label>
+								</td>
+								<td data-title="'伸缩规则名称'" sortable="'name'">
+									<div class="edit-name edit-lg">
+										<a ng-click="rule_detail(item)">{{item.xx}}</a>
+									</div>
+								</td> 
+								<td data-title="'调整类型'" sortable="''">{{item.xx}}</td>
+								<td data-title="'调整值'" sortable="''">{{item.xx}}</td>
+								<td data-title="'冷却时间'" sortable="''">{{item.xx}}</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<div ng-if="!show_rules">
+					<div class="tab-content">
+						<div class="detail-row">
+							<div class="detail-title">
+								<a class="an-close" ng-click="return_list_page_rule()" ><i class="icon-aw-mail-reply"></i></a>
+								<span>伸缩配置详情</span>
+							</div>
+							<div class="detail-info">
+								<table class="table table-info column">
+									<tr>
+										<td>伸缩规则ID</td>
+										<td>{{selected_rule.name}}</td>
+										<td>规则</td>
+										<td>{{selected_rule.imageName}}</td>
+									</tr>
+									<tr>
+										<td>伸缩规则名称</td>
+										<td>{{selected_rule.coreNumber}} 核</td>
+										<td>冷却时间</td>
+										<td>{{selected_rule.weight}}</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</uib-tab>
+		</uib-tabset>
+	</div>
+</div>
+<script type="text/ng-template" id="newHeaderCheckbox.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-click="checkAllClick(new_checkboxes.checked)" ng-model="new_checkboxes.checked" ng-checked="checkAll()"/>
+		<i class="iconfont"></i>
+	</label>
+</script>
+<script type="text/ng-template" id="headerCheckbox.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+		<i class="iconfont"></i>
+	</label>
+</script>
+<script type="text/ng-template" id="delcluster.html">
+  <div class=" modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="cancelCluster()">×</button>
+        <h3 class="modal-title">删除弹性伸缩集群</h3>
+      </div>
+      <div class="modal-body">
+		<div class="control-group">
+				<label class="control-label"><span class="orange" style="font-size: 30px;"><i class="icon-aw-delete"></i></span></label>
+				<div class="controls">
+					您确定要删除弹性伸缩集群：<span class="orange"> {{delName}} </span>吗？</br> 确定后，将删除弹性伸缩集群及相对应的伸缩配置和伸缩规则。
+				</div>
+		</div>
+	 </div>
+      <div class="modal-footer" >
+		<button class="btn btn-primary" type="button"  ng-click="confirmCluster()">确定</button>
+		<button class="btn btn-default" type="button" ng-click="cancelCluster()">取消</button>
+	 </div>
+  </div>
+</script>
+<script type="text/ng-template" id="delhost.html">
+  <div class=" modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="cancelHost()">×</button>
+        <h3 class="modal-title"删除云主机</h3>
+      </div>
+      <div class="modal-body">
+		<div class="control-group">
+				<label class="control-label"><span class="orange"  style="font-size: 30px;"><i class="icon-aw-delete"></i></span></label>
+				<div class="controls">
+					您确定要删除云主机：<span class="orange"> {{delName}} </span>吗？</br> 确定后，被删除的云主机将不可恢复。
+				</div>
+		</div>
+	 </div>
+      <div class="modal-footer" >
+		<button class="btn btn-primary" type="button"  ng-click="confirmHost()">确定</button>
+		<button class="btn btn-default" type="button" ng-click="cancelHost()">取消</button>
+	 </div>
+  </div>
+</script>
+<script type="text/ng-template" id="delconfig.html">
+  <div class=" modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="cancelConf()">×</button>
+        <h3 class="modal-title"删除伸缩配置</h3>
+      </div>
+      <div class="modal-body">
+		<div class="control-group">
+				<label class="control-label"><span class="orange" style="font-size: 30px;"><i class="icon-aw-delete"></i></span></label>
+				<div class="controls">
+					您确定要删除伸缩配置：<span class="orange"> {{delName}} </span>吗？</br>确定后，被删除的伸缩配置将不可恢复。
+				</div>
+		</div>
+	 </div>
+      <div class="modal-footer" >
+		<button class="btn btn-primary" type="button"  ng-click="confirmConf()">确定</button>
+		<button class="btn btn-default" type="button" ng-click="cancelConf()">取消</button>
+	 </div>
+  </div>
+</script>

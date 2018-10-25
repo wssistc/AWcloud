@@ -1,0 +1,565 @@
+<div class="page-inner ticketApply-page" >
+  <div class="res-apply-box" ng-if="!ADMIN&&applyTyps_res.length>0">
+    <div class="apply-box" ng-repeat="data in applyTyps_res" id='order-apply_{{data.type}}' licence-type="btn">
+      <div class="apply-type">
+        <div class="icon-box">
+          <i class="{{data.icon}}"></i>
+        </div>
+        <div class="name-box">
+          {{"aws.ticket.applyTypes."+data.type|translate}}
+        </div>
+        <div class="apply-click-box">
+          <span ng-click="apply(data.type)">
+            由此申请
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info-refer-box">
+    <h6>其他</h6>
+    <div class="apply-box" ng-repeat="data in applyTyps_info" id='order-apply_{{data.type}}' licence-type="btn">
+      <div class="apply-type">
+        <div class="icon-box">
+          <i class="{{data.icon}}"></i>
+        </div>
+        <div class="name-box">
+          {{"aws.ticket.applyTypes."+data.type|translate}}
+        </div>
+        <div class="apply-click-box">
+          <span ng-click="apply(data.type)">
+            由此申请
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 配额申请 -->
+<script type="text/ng-template" id="applyQuota.html">
+  <div class="modal-common">
+    <form name="resourceForm" novalidate>
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">配额申请</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>{{"aws.workflow.department"|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="tickets.depart.selected" ng-disabled="true" ng-change="changedepart(tickets.depart.selected)">
+              <ui-select-match placeholder="{{'aws.workflow.departName'|translate}}">{{$select.selected.disDomainName}}</ui-select-match>
+              <ui-select-choices repeat="depart in tickets.deparList | filter:{disDomainName:$select.search}">
+                <div ng-bind-html="depart.disDomainName | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group" ng-if="showProjectChoose">
+          <label class="control-label"> <span class="red">*</span>{{"aws.workflow.project"|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="tickets.pro.selected" required name="proName" ng-change="changePro(tickets.pro.selected)">
+              <ui-select-match placeholder="{{'aws.workflow.projectName'|translate}}">{{$select.selected.disProjectName}}</ui-select-match>
+              <ui-select-choices repeat="pro in tickets.depart.selected.projects | filter:{disProjectName:$select.search}">
+                <div ng-bind-html="pro.disProjectName | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="(submitValid || resourceForm.proName.$dirty) && resourceForm.proName.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-repeat="quota in quotas">
+          <label class="control-label"><span class="red">*</span>{{'aws.quota.'+quota.name | translate}}：</label>
+          <div class="controls">
+            <input type="text" ng-model="quota.hardLimit" ng-pattern="/^([1-9][0-9]*)$/" name="{{quota.name}}" class="form-controls"
+              ng-maxlength="6" required availquota_/>
+            <div class="error-messages error" ng-messages="(submitValid ||resourceForm[quota.name].$dirty) && resourceForm[quota.name].$error">
+              <div ng-message="required" class="volume-form-size-error">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="pattern" class="volume-form-size-error">请输入大于等于1的正整数</div>
+              <div ng-message="maxlength" class="volume-form-size-error">{{'aws.errors.quota_domain2'|translate}}</div>
+              <div ng-message="availquota">{{'aws.quota.errorMessage.insufficient'|translate}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info ng-binding" ng-disabled="canConfirm" ng-click="resourceConfirm(resourceForm)">{{"aws.action.ok"| translate}}</button>
+        <button class="btn btn-default ng-binding" type="button" ng-click="$dismiss()">{{"aws.action.cancel"| translate}}</button>
+      </div>
+    </form>
+  </div>
+</script>
+<!-- 信息咨询 -->
+<script type="text/ng-template" id="infoApply.html">
+  <div class=" modal-common">
+    <form name="ticketQaForm" novalidate>
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{"aws.workflow.tickTitle"|translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>{{"aws.workflow.addressee"|translate}}：</label>
+          <div class="controls">
+            <div class="choose-box">
+              <ui-select ng-model="Addresseegroup.selected" multiple required>
+                <ui-select-match placeholder="{{'aws.workflow.user'|translate}}">{{$item.name}}</ui-select-match>
+                <ui-select-choices repeat="data in Addressee | filter:{name:$select.search}">
+                  <div class="choose" ng-bind-html="data.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>{{"aws.workflow.title"|translate}}：</label>
+          <div class="controls">
+            <input type="text" ng-model="qa.title" name="title" class="form-controls" placeholder="{{'aws.workflow.informationTitle'|translate}}"
+              required ng-maxlength="32" />
+            <div class="error" ng-messages="(submitValid ||ticketQaForm.title.$dirty)&&ticketQaForm.title.$error">
+              <form-validate max-num="32"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>{{"aws.workflow.description"|translate}}：</label>
+          <div class="controls">
+            <textarea type="text" ng-model="qa.description" name="description" class="form-controls" placeholder="{{'aws.workflow.informationDescription'|translate}}"
+              required ng-maxlength="255"></textarea>
+            <div class="error" ng-messages="(submitValid ||ticketQaForm.description.$dirty) && ticketQaForm.description.$error">
+              <form-validate max-num="255"></form-validate>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info ng-binding" ng-disabled="canConfirm" ng-click="ticketQaconfirm(ticketQaForm)">{{"aws.action.ok"| translate}}</button>
+        <button class="btn btn-default ng-binding" type="button" ng-click="$dismiss()">{{"aws.action.cancel"| translate}}</button>
+      </div>
+    </form>
+  </div>
+</script>
+<!-- 云硬盘申请 -->
+
+<script type="text/ng-template" id="volumesApply.html">
+  <div class=" modal-common">
+    <form name="createVolumeForm" novalidate>
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">云硬盘申请</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>{{'aws.volumes.cv.name'|translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="name" ng-model="volumeForm.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\.)*$/"
+              ng-maxlength="32" placeholder="{{'aws.volumes.cv.pInputName'|translate}}" required="required" />
+            <div class="error-messages error" ng-messages="(submitInValid || createVolumeForm.name.$dirty) && createVolumeForm.name.$error">
+              <div ng-message="required" class="volume-form-size-error">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="pattern" class="volume-form-size-error">{{'aws.errors.nameLimit'|translate}}</div>
+              <div ng-message="maxlength" class="volume-form-size-error">{{'aws.errors.maxlength'|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>云硬盘容量(GB)：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="size" ng-model="volumeForm.size" placeholder="{{'aws.volumes.cv.pInputSize'|translate}}"
+              ng-change="isShowError(volumeForm.size)" ng-pattern="/^[1-9]+[0-9]*$/" required />
+            <div class="error" ng-messages="(submitInValid || createVolumeForm.size.$dirty) && createVolumeForm.size.$error">
+              <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="pattern" class="volume-form-name-error">{{'aws.volumes.cv.pInputNum'|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"><span class="red">*</span>{{'aws.volumes.cv.storagedevice'|translate}}：</label>
+            <div class="controls">
+                <ui-select ng-model="volumeForm.storageDeviceSelected"  name="device" required>
+                    <ui-select-match>{{$select.selected.disPlayName}}</ui-select-match>
+                    <ui-select-choices repeat="storage in storageDeviceList | filter: {disPlayName: $select.search}">
+                        <div ng-bind-html="storage.disPlayName | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+                <div class="error" ng-messages="(submitInValid || createVolumeForm.device.$dirty) && createVolumeForm.device.$error" >
+                    <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}：</label>
+          <div class="controls">
+            <textarea ng-maxlength="255" class="form-controls" name="description" ng-model="volumeForm.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}"></textarea>
+            <div class="error" ng-messages="(submitInValid || createVolumeForm.description.$dirty) && createVolumeForm.description.$error">
+              <div ng-message="maxlength">{{'aws.errors.maxlength_255'|translate}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info ng-binding" ng-disabled="canConfirm" ng-click="volumeConfirm(createVolumeForm)">{{"aws.action.ok"| translate}}</button>
+        <button class="btn btn-default ng-binding" type="button" ng-click="$dismiss()">{{"aws.action.cancel"| translate}}</button>
+      </div>
+    </form>
+  </div>
+</script>
+<!-- 网络申请 -->
+
+<script type="text/ng-template" id="networkApply.html">
+  <div class=" modal-common">
+    <form name="networkForm" novalidate>
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">网络申请</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>网络名称：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="name" ng-model="networkFormData.name" placeholder='{{"aws.networks.placeholder.networkName"|translate}}'
+              ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required />
+            <div class="error" ng-messages="(submitInValid || networkForm.name.$dirty) && networkForm.name.$error">
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+              <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+              <div ng-message="exceptName">{{'aws.networks.except_external_net' | translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group ip_cidr">
+            <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.networks.subnetCidr"|translate}}：</label>
+            <!--需求变更：ip地址段输入放开-->
+            <div class="controls clearfix subnet-controls">
+                <div class="flex">
+                    <div class="ip-text">
+                    <input type="text" class="form-controls" name="ip_1"  ng-model="networkFormData.init_cidr.ip_1" ng-change="setCidr()" ng-focus="setIpIsOverlap()" min="1" max="255" maxlength="3" placeholder="1~255" limitnumrange required />
+                    <div class="error ip_2" ng-messages="(submitInValid || networkForm.ip_1.$dirty) && networkForm.ip_1.$error" >
+                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                        <div ng-message="limitnumrange">{{'aws.errors.limit_1_255'|translate}}</div>
+                    </div>
+                    </div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip-text">
+                    <input type="text" class="form-controls" name="ip_2"  ng-model="networkFormData.init_cidr.ip_2" ng-change="setCidr()" ng-focus="setIpIsOverlap()" min="0" max="255" maxlength="3" placeholder="0~255" limitnumrange required />
+                    <div class="error ip_2" ng-messages="(submitInValid || networkForm.ip_2.$dirty) && networkForm.ip_2.$error" >
+                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                    </div>
+                    </div>
+                    <div class="ip-spilt">.</div> 
+                    <div class="ip-text">
+                    <input type="text" class="form-controls" name="ip_3" ng-model="networkFormData.init_cidr.ip_3" ng-change="setCidr()" ng-focus="setIpIsOverlap()" min="0" max="255" maxlength="3" placeholder="0~255" limitnumrange required/>
+                    <div class="error ip_3" ng-messages="(submitInValid || networkForm.ip_3.$dirty) && networkForm.ip_3.$error" >
+                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                    </div>
+                    </div>
+                    <div class="ip-spilt">.</div> 
+                    <div class="ip-text">
+                    <input type="text" class="form-controls" name="ip_4" ng-model="networkFormData.init_cidr.ip_4" ng-change="setCidr()" ng-focus="setIpIsOverlap()" min="0" max="255" maxlength="3" placeholder="0~255" limitnumrange required/>
+                    <div class="error ip_4" ng-messages="(submitInValid || networkForm.ip_4.$dirty) && networkForm.ip_4.$error" >
+                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                    </div>
+                    </div>
+                    <div class="ip-spilt">/</div>
+                    <div class="ip-text">
+                    <input type="text" class="form-controls" name="ip_5" ng-model="networkFormData.init_cidr.ip_5" ng-change="setCidr()" ng-focus="setIpIsOverlap()" min="8" max="29" maxlength="2" placeholder="8~29" limitnumrange required/>
+                    <div class="error ip_5" ng-messages="(submitInValid || networkForm.ip_5.$dirty) && networkForm.ip_5.$error" >
+                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                        <div ng-message="limitnumrange">{{'aws.errors.limit_8_29'|translate}}</div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">备注信息：</label>
+          <div class="controls">
+            <textarea ng-maxlength="255" class="form-controls" name="description" ng-model="networkFormData.description"></textarea>
+            <div class="error" ng-messages="(submitInValid || networkForm.description.$dirty) && networkForm.description.$error">
+              <div ng-message="maxlength">{{'aws.errors.maxlength_255'|translate}}</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info ng-binding" ng-disabled="canConfirm" ng-click="networkConfirm(networkForm)">{{"aws.action.ok"| translate}}</button>
+        <button class="btn btn-default ng-binding" type="button" ng-click="$dismiss()">{{"aws.action.cancel"| translate}}</button>
+      </div>
+    </form>
+  </div>
+</script>
+
+<!-- 路由器申请 -->
+
+<script type="text/ng-template" id="routerApply.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">申请路由器</h3>
+    </div>
+    <div class="modal-body">
+      <form name="createrouterForm">
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>{{"aws.routers.routerName"|translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="name" ng-model="routerForm.name" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"
+              placeholder='{{"aws.routers.routerName"|translate}}' required>
+            <div class="error" ng-messages="(submitInValid || createrouterForm.name.$dirty) && createrouterForm.name.$error">
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+              <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>{{"aws.routers.routerExtNet"|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="routerForm.selectedNet" ng-change="changeExtNet(routerForm.selectedNet)" name="extnet" ng-disabled="!extNets.length"
+              title='{{"aws.routers.placeholder.routerExtNet"|translate}}' required>
+              <ui-select-match placeholder={{extNetsPlaceholder}}>{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="extNet in extNets | propsFilter:{name:$select.search}">
+                <div ng-bind-html="extNet.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages=" (submitInValid || createrouterForm.extnet.$dirty) && createrouterForm.extnet.$error">
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.routers.assignExternalSubnet"|translate}}：</label>
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" class="form-controls chk" name="assignSub" ng-model="routerForm.assignSub" />
+              <i class="iconfont"></i>
+            </label>
+          </div>
+        </div>
+        <div ng-show="routerForm.assignSub">
+          <div class="control-group">
+            <label class="control-label"><span class="red">*</span>{{"aws.floatingIps.placeholder.choseSubnet"|translate}}：</label>
+            <div class="controls">
+              <ui-select ng-model="routerForm.subnet" name="subnet" ng-disabled="!subnets.length" title='{{"aws.routers.placeholder.routerExtNet"|translate}}'
+                required>
+                <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="subnet in subnets | propsFilter:{name:$select.search}">
+                  <div ng-bind-html="subnet.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-messages=" (submitInValid || createrouterForm.subnet.$dirty) && createrouterForm.subnet.$error">
+                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"><span class="red">*</span>{{"aws.routers.linkSubnet"|translate}}：</label>
+            <div class="controls">
+              <ui-select ng-model="routerForm.selectedTenantSub" name="tenantsub" ng-disabled="!tenantSubs.length" title='{{"aws.routers.choseSubnet"|translate}}' required >
+                <ui-select-match placeholder='请选择关联子网' >{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="tenantSub in tenantSubs | propsFilter:{name:$select.search} ">
+                  <div ng-bind-html="tenantSub.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-messages=" (submitInValid || createrouterForm.tenantsub.$dirty) && createrouterForm.tenantsub.$error" >
+                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              </div>
+            </div>
+          </div>
+        <div class="control-group">
+          <label class="control-label">备注信息：</label>
+          <div class="controls">
+            <textarea ng-maxlength="255" class="form-controls" name="description" ng-model="routerForm.description"></textarea>
+            <div class="error" ng-messages="(submitInValid || createrouterForm.description.$dirty) && createrouterForm.description.$error">
+              <div ng-message="maxlength">{{'aws.errors.maxlength_255'|translate}}</div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="routerConfirm(createrouterForm)" ng-disabled="canConfirm">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<!-- 云主机申请 -->
+
+<script type="text/ng-template" id="applyIns.html">
+  <div class="modal-common insApply-view">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">申请云主机</h3>
+    </div>
+    <div class="modal-body">
+      <form name="createInstanceForm" novalidate>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>云主机名称：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="name" ng-model="instanceForm.name" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"
+              placeholder='请输入云主机的名称' required>
+            <div class="error" ng-messages="(submitInValid || createInstanceForm.name.$dirty) && createInstanceForm.name.$error">
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+              <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="control-group psw-control-group">
+          <label class="control-label">{{'aws.instances.addinstances.passwd'|translate}}：</label>
+          <div class="controls">
+            <input type="password" class="form-controls" name="admin_pass" ng-model="instanceForm.admin_pass" id="pw2" 
+              placeholder="{{'aws.instances.addinstances.password'|translate}}" ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,\/\-\^\%])[0-9a-zA-Z!@._:,\/\-\^\%]{8,16}$/"/>
+            <div ng-messages="createInstanceForm.admin_pass.$error">
+              <span class="error" ng-message="pwCheck">{{'aws.instances.addinstances.notSamePasswd'|translate}}</span>
+              <span class="error" ng-message="pattern">{{'aws.register.info.special_8_16'|translate}}</span>
+            </div> 
+          </div>
+        </div>
+        <div class="control-group psw-control-group">
+          <label class="control-label">确认密码：</label>
+          <div class="controls">
+            <input type="password" class="form-controls" name="admin_comfirmpass" ng-model="instanceForm.admin_comfirmpass" ng-minlength="8"
+              ng-maxlength="30" pw-check="pw2" placeholder="{{'aws.instances.addinstances.comfirmpassword'|translate}}" />
+            <div ng-messages="createInstanceForm.admin_comfirmpass.$error">
+              <span class="error" ng-message="pwCheck">{{'aws.instances.addinstances.notSamePasswd'|translate}}</span>
+            </div>
+          </div>
+        </div>
+        <div class="control-group flavor-control">
+            <label class="control-label"><span class="red">*</span>更多规格：</label>
+            <div class="controls">
+                <ui-select ng-model="instanceForm.flavor" name="flavorName" ng-change="chooseCpuMem(options.flavor)" required ng-disabled="!flavorNormalList.length">
+                    <ui-select-match placeholder="{{baseFlavorIndex == -1?('没有找到可匹配的规格'):('aws.instances.addinstances.choiceConfig'|translate)}}">{{$select.selected.text}}</ui-select-match>
+                    <ui-select-choices repeat="conf in flavorNormalList  | filter: {id: $select.search}">
+                        <div ng-bind-html="conf.text | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+                <div class="error" ng-messages="(submitInValid ||createInstanceForm.flavorName.$dirty) && createInstanceForm.flavorName.$error">
+                    <form-validate></form-validate>
+                </div>
+            </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>选择镜像：</label>
+          <div class="controls">
+            <div class="table-content">
+              <div>
+                <empty-tip empty-type="loadImgData" tip-id="'img-tip-msg'"></empty-tip>
+                <table ng-table="insImgTable" class="table" show-filter="false">
+                  <colgroup>
+                    <col width="10%">
+                    <col width="25%">
+                    <col width="20%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                  </colgroup>
+                  <tr ng-repeat="item in $data track by $index">
+                    <td data-title="">
+                      <label class="radiobox">
+                        <input name="insImg" type="radio" value="{{item.imageUid}}" ng-model="instanceForm.chkImageId" ng-change="imageChange(item)"
+                          required>
+                        <i class="iconfont"></i>
+                      </label>
+                    </td>
+                    <td data-title="'镜像名称'" sortable="'name'">
+                      <div class="edit-name" title={{item.name}}  >
+                        <span>{{item.name}}</span>
+                      </div>
+                    </td>
+                    <!-- <td header="'headerImageName.html'"> -->
+                    <td data-title="'镜像类型'"  header="'headerImageName_.html'" >
+                      <span>{{item._imageType}} </span>
+                    </td>
+                    <!-- <td header="'headerArch.html'"> -->
+                    <td data-title="'系统架构'"  header="'headerArch_.html'">
+                      <span>{{'aws.instances.addinstances.'+ item.arch |translate}}</span>
+                    </td>
+                    <!-- <td header="'headerOs.html'"> -->
+                    <td data-title="'操作系统'"  header="'headerOs_.html'">
+                      <span>{{item.os}} </span>
+                    </td>
+                    <td data-title="'最小磁盘'" sortable="'size'">
+                      <span>{{item.size}} G</span>
+                    </td>
+                  </tr>
+                </table>
+                
+              </div>
+            </div>
+          </div>
+          <div class="text-center red" ng-if="insImgTable.data.length===0">没有可用镜像</div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"><span class="red">*</span>{{'aws.volumes.cv.storagedevice'|translate}}：</label>
+            <div class="controls">
+                <ui-select ng-model="instanceForm.storageDeviceSelected"  name="device" required>
+                    <ui-select-match>{{$select.selected.disPlayName}}</ui-select-match>
+                    <ui-select-choices repeat="storage in storageDeviceList | filter: {disPlayName: $select.search}">
+                        <div ng-bind-html="storage.disPlayName | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+                <div class="error" ng-messages="(submitInValid || createInstanceForm.device.$dirty) && createInstanceForm.device.$error" >
+                    <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"><span class="red">*</span>{{'aws.instances.addinstances.net'|translate}}：</label>
+            <div class="controls">
+                <ui-select ng-model="instanceForm.selectedNet" ng-change="changeExtNet(instanceForm.selectedNet)" name="net" title="选择网络" required>
+                    <ui-select-match placeholder="选择网络">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="net in networkList | propsFilter:{name:$select.search}">
+                        <div ng-bind-html="net.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+                <div class="error"  ng-messages="(submitInValid || createInstanceForm.net.$dirty) && createInstanceForm.net.$error" >
+                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-group" >
+          <label class="control-label"><span class="red">*</span>选择子网：</label>
+          <div class="controls">
+            <ui-select ng-model="instanceForm.selectedSubnet" class="ui-select-tips" ng-change="changeSubnet(network.selectedSubnet)" title='{{"aws.floatingIps.placeholder.choseSubnet"|translate}}'>
+              <ui-select-match placeholder='{{"aws.floatingIps.placeholder.choseSubnet"|translate}}'>{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="sub in instanceForm.selectedNet.subnets">
+                  <div ng-bind-html="sub.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">备注信息：</label>
+          <div class="controls">
+            <textarea ng-maxlength="255" class="form-controls" name="description" ng-model="instanceForm.description"></textarea>
+            <div class="error" ng-messages="(submitInValid || createInstanceForm.description.$dirty) && createInstanceForm.description.$error">
+              <div ng-message="maxlength">{{'aws.errors.maxlength_255'|translate}}</div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="insConfirm(createInstanceForm)" ng-disabled="canConfirm">{{"aws.action.ok"|translate}}</button>
+         <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="headerImageName_.html">
+  <table-filter context="tableContent" curent-filter="tableFilterList.image" table-name="insImgTable" change-select="changeImg"></table-filter>
+</script>
+<script type="text/ng-template" id="headerArch_.html">
+<table-filter context="tableContent" curent-filter="tableFilterList.arch" table-name="insImgTable" change-select="changeImg"></table-filter>
+</script>
+<script type="text/ng-template" id="headerOs_.html">
+<table-filter context="tableContent" curent-filter="tableFilterList.os" table-name="insImgTable" change-select="changeImg"></table-filter>
+</script>

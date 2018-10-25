@@ -1,0 +1,113 @@
+<div class="page-inner monitor-view phy-view">
+    <div class="host-list clearfix">
+        <div class="control-group pull-left">
+            <div class="control-label">{{"aws.monitor.physical.physicalHost"|translate}}：</div>
+            <div class="controls">
+                <ui-select ng-model="queryLimit.selectedZonehost" ng-change="changeHost()">
+                    <ui-select-match placeholder="">{{$select.selected.hostName}}</ui-select-match>
+                    <ui-select-choices repeat="zonehost in zonehosts.options | propsFilter:{hostName:$select.search}">
+                        <div ng-bind-html="zonehost.hostName | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="col-title">CPU</div>
+        <div class="box layout-grid areaChart" >
+            <div class="col-4" ng-repeat="item in panels.cpu | orderBy:'priority' " >
+                <div class="inner">
+                    <div class="panels clearfix">
+                        <div class="area-chart-title">{{item.title}}</div>
+                        <div class="area-chart-wrap" chart-area panel="item"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="col-title">{{"aws.monitor.physical.memory" | translate}}</div>
+        <div class="box layout-grid areaChart" >
+            <div class="col-4"  ng-repeat="item in panels.mem | orderBy:'priority' " ><!--ng-class="{'col-6':panels.mem.length%3==2 && $index>=panels.mem.length-2}"-->
+                <div class="inner">
+                    <div class="panels clearfix">
+                        <div class="area-chart-title">{{item.title}}</div>
+                        <div class="area-chart-wrap" chart-area panel="item" id={{"mem"+$index}}></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div lazy-loading  lazy-parent="window">
+        <div ng-if="!lazyOnType.disk" class="col-12 disk">
+            <div class="col-title">{{"aws.monitor.physical.disk" | translate}}</div>
+            <div class="control-items3 clearfix">
+                <div class="control-group">
+                    <div class="control-label">{{"aws.monitor.physical.diskPartition" | translate}}：</div>
+                    <div class="controls">
+                        <ui-select ng-model="queryLimit.selectedDiskpath" ng-change="changeDiskpath(queryLimit.selectedDiskpath)">
+                            <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat=" diskpath in queryLimit.diskPath">
+                                <div ng-bind-html="diskpath | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">{{"aws.monitor.physical.diskSpace" | translate}}：</div>
+                    <div class="controls">
+                        <ui-select ng-model="queryLimit.selectedDiskio" ng-change="changeDiskio(queryLimit.selectedDiskio)">
+                            <ui-select-match>{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat=" disk in diskio.options">
+                                <div ng-bind-html="disk | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="box layout-grid areaChart" >
+                <div class="col-4 path">
+                    <div class="inner">
+                        <div class="panels clearfix">
+                            <div class="area-chart-title">{{panels.diskPath[0].title}}</div>
+                            <div class="area-chart-wrap" chart-area panel="panels.diskPath[0]" id={{"diskPath"+$index}} ></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4 diskio" ng-repeat="item in panels.diskio | orderBy:'priority' ">
+                    <div class="inner">
+                        <div class="panels clearfix">
+                            <div class="area-chart-title">{{item.title}}</div>
+                            <div class="area-chart-wrap" chart-area panel="item" id={{"diskio"+$index}}></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div ng-if="!lazyOnType.netcard" class="col-12 netcard" style="position:relative">
+            <div class="col-title">{{"aws.monitor.physical.netCard" | translate}}</div>
+                <div class="controls">
+                    <ui-select ng-model="queryLimit.selectedNetCard" ng-change="changeNetCard(queryLimit.selectedNetCard)">
+                        <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                        <ui-select-choices repeat=" netCard in netCard.options">
+                            <div ng-bind-html="netCard | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="box layout-grid areaChart "  >
+                <div class="col-4" ng-repeat="item in panels.netcard | orderBy:'priority' " >
+                    <div class="inner">
+                        <div class="panels clearfix">
+                            <div class="area-chart-title">{{item.title}}</div>
+                            <div class="area-chart-wrap" chart-area panel="item" id={{"netcard"+$index}} ></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

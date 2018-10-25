@@ -1,0 +1,420 @@
+<div class="page-inner vpc-view"> 
+  <div class="page-title">
+    <h2>路由表</h2>
+      <div class="btn-item-group">
+        <button ng-repeat="region in regions.options" ng-click="changeRegion(region.value)" ng-class="{'active':queryLimit.regionId==region.value}" ng-bind="region.name"></button>
+      </div>
+      <ui-select class="sel-lg" ng-model="queryLimit.vpc" ng-change="changeVpc(queryLimit.vpc);"   title="{{queryLimit.vpc.vpcName}}">
+        <ui-select-match>{{$select.selected.vpcName}}</ui-select-match>
+        <ui-select-choices repeat="vpc in vpcs.options">
+          <div class="subnet-ellips" ng-bind-html="vpc.vpcName | highlight: $select.search" title="{{vpc.vpcName}}"></div>
+        </ui-select-choices>
+      </ui-select>
+  </div>
+  
+  <div class="table-action">
+    <button type="button" data-toggle="modal" ng-click="creatRoutetableModal('new')" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新建</button>
+    <!--<button class="btn btn-refresh" ng-click="refreshRoutetableList()"><i class="icon-aw-refresh"></i>刷新</button>-->
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='搜索' />
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <table ng-table="routeTable" class="table " show-filter="false">
+      <colgroup>
+        <col width="20%">
+        <col width="20%">
+        <col width="15%">
+        <col width="15%">
+        <col width="15%">
+        <col width="15%">
+      </colgroup>
+      <tr ng-repeat="item in $data">
+        <td data-title="'ID/名称'" sortable="'routeTableName'">
+          <div class="edit-name name-lg">
+            <a ng-href="#/vpc/route?routeTableId={{item.routeTableId}}">{{item.unRouteTableId}}</a>
+            <span class="ycx">{{item.routeTableName}}</span>
+            <i class="icon-aw-modify blue"  ng-click="creatRoutetableModal('editname',item)"></i>
+          </div>
+        </td>
+        <td data-title="'所属网络'" sortable="'vpcName'">
+          <div><a ng-href="#/vpc/vpc?vpcId={{item.vpcId}}">{{item.unVpcId}}</a></div>
+          <div><span class="ycx">{{item.vpcName}}</span></div>
+        </td>
+        <td data-title="'类型'" sortable="'routeTableType'">
+          <span>{{"CN.vpc.routeTableType." + item.routeTableType | translate}}</span>
+        </td>
+        <td data-title="'关联子网数'" sortable="'subnetNum'">
+          <a ng-href="#/vpc/route?routeTableId={{item.routeTableId}}&&unRouteTableId={{item.unRouteTableId}}">{{item.subnetNum}}</a>
+        </td>
+        <td data-title="'创建时间'" sortable="'routeTableCreateTime'">
+          <span>{{item.routeTableCreateTime}}</span>
+        </td>
+        <td data-title="'操作'" sortable="''">
+          <a ng-click="deleteRoutetable(item)" ng-class="{'disabled':item.routeTableType==1 || item.subnetNum > 0}" uib-popover={{item.delRoutetableTip}} popover-trigger="mouseenter">删除</a>
+          <a ng-click="associateSub(item)">关联子网</a>
+        </td>
+      </tr>
+    </table>
+    <div class="text-center" ng-if="routeTable.data.length==0">列表为空</div>
+  </div>
+  <div class="detail-body" animation="animation">
+    <div class= 'animateContent {{animation}} '>
+      <div class='detailInner'>
+        <div class="detail-tab">
+          <div class="dt-title">
+            <a class="an-close" ng-href="#/vpc/route">返回<i class="icon-aw-angle-left"></i></a>
+            <span>{{routetableDetailItem.routeTableName}}</span>
+          </div>
+          <div class="dt-box">
+            <ul class="nav nav-tabs">
+              <li ng-class="{'active':basicInfoTab==true}"><a ng-click="routetableDetailTab('basic')">基本信息</a></li>
+              <li ng-class="{'active':associateSubTab==true}"><a ng-click="routetableDetailTab('associateSub')">关联子网</a></li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane " ng-class="{'active':basicInfoTab==true}">
+                <strong>基本信息</strong>
+                <dl class="dl-horizontal">
+                  <dt>路由表名称</dt>
+                  <dd>
+                    <span ng-if="routetableDetailItem.routeTableName">
+                      {{routetableDetailItem.routeTableName}}
+                      <a  ng-click="creatRoutetableModal('editname',routetableDetailItem)"><i class="icon-aw-modify blue" ></i></a>
+                    </span>
+                  </dd>
+                  <dt>路由表ID</dt>
+                  <dd>{{routetableDetailItem.routeTableId}}</dd>
+                  <dt>所在地域</dt>
+                  <dd>{{"CN.vpc.region." + queryLimit.regionId | translate }}</dd>
+                  <dt>路由表类型</dt>
+                  <dd>
+                    <span ng-if='routetableDetailItem.routeTableType>=0'>{{"CN.vpc.routeTableType." + routetableDetailItem.routeTableType | translate}}</span>
+                  </dd>
+                  <dt>所属网络</dt>
+                  <dd>
+                    <span ng-if="routetableDetailItem.vpcId"><a href="#/vpc/vpc?vpcId={{routetableDetailItem.vpcId}}" class="blue">{{routetableDetailItem.unVpcId}}</a>( {{routetableDetailItem.vpcName}} | {{routetableDetailItem.vpcCidrBlock}})</span>
+                  </dd>
+                  <dt>创建时间</dt>
+                  <dd>{{routetableDetailItem.routeTableCreateTime}}</dd>
+                </dl>
+                <strong>路由策略</strong>
+                <div class="table-action">
+                  <button type="button" data-toggle="modal" ng-click="creatRoutetableModal('editRoutePolicy',routetableDetailItem)" class="btn btn-primary"><i class="icon-aw-add-to2"></i>编辑</button>
+                  <!-- <button class="btn btn-refresh" ng-click="refresRoutePolicyhList()"><i class="icon-aw-refresh"></i>刷新</button>
+                  <div class="search-box">
+                    <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                      <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                      <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='搜索' />
+                    </form>
+                  </div> -->
+                </div>
+                <div class="table-content">
+                  <table class="table">
+                    <colgroup>
+                        <col width="25%">
+                        <col width="25%">
+                        <col width="25%">
+                        <col width="25%">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>目的端</th>
+                        <th>下一跳类型</th>
+                        <th>下一跳</th>
+                        <th>备注</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="item in routePolicyList">
+                          <td>{{item.destinationCidrBlock}}</td>
+                          <td>
+                            {{"CN.vpc.nextType." + item.nextType | translate}}
+                          </td>
+                          <td>
+                            <div ng-if="item.nextHub=='Local'">
+                              <span >
+                                {{item.nextHub}}
+                                <i class="icon-aw-prompt" uib-popover="Local 路由策略由系统默认下发，表示 VPC 内云主机网络互通" popover-trigger="mouseenter"></i>
+                              </span>
+                            </div>
+                            <div ng-if="item.nextHub!='Local'">
+                              <div><a href="#/vpc/natgateway?natId={{item.unNextHub}}">{{item.unNextHub}}</a></div>
+                              <div>{{item.natName}}</div>
+                            </div>
+                          </td>
+                          <td>
+                            <div ng-if="item.nextHub=='Local'">
+                              <span class="ycx">系统默认下发，表示 VPC 内云主机网络互通<span>
+                            </div>
+                            <div ng-if="item.nextHub!='Local'">
+                              <span class="ycx">{{item.description}}</span>
+                            </div>
+                          </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="text-center" ng-if="routePolicyList.length==0">列表为空</div>
+                </div>
+              </div>
+              <div class="tab-pane" ng-class="{'active':associateSubTab==true}">
+                <strong>关联子网</strong>
+                <div class="table-action">
+                  <button type="button" data-toggle="modal" ng-click="associateSub(routetableDetailItem,'detail')" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新增关联子网</button>
+                  <button class="btn btn-refresh" ng-click="refreshAssociatedSubList(routetableDetailItem.routeTableId)"><i class="icon-aw-refresh"></i>刷新</button>
+                  <!-- <div class="search-box">
+                    <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                      <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                      <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='搜索' />
+                    </form>
+                  </div> -->
+                </div>
+                <div class="table-content">
+                  <table class="table">
+                    <colgroup>
+                      <col width="25%">
+                      <col width="25%">
+                      <col width="25%">
+                      <col width="25%">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>子网ID/名称</th>
+                        <th>可用区</th>
+                        <th>CIDR</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="item in associatedSubList">
+                          <td>
+                            <div class="edit-name">
+                              <a ng-href="#/vpc/subnet?subnetId={{item.subnetId}}&&vpcId={{item.vpcId}}">{{item.unSubnetId}}</a>
+                              <span>{{item.subnetName}}</span>
+                            </div>
+                          </td>
+                          <td>{{"CN.vpc.zoneId." + item.zoneId | translate}}</td>
+                          <td>{{item.vpcCidrBlock}}</td>
+                          <td><a ng-click="dissociateSubnet(item)">解关联</a></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="text-center" ng-if="associatedSubList.length==0">列表为空</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/ng-template" id="createRoutetableModal.html">
+    <div class="modal-common creRoute-modal" >
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{creatRoutetableModal_title}}</h3>
+      </div>
+      <div class="modal-body">
+        <form name="routetableModalForm" novalidate>
+          <div class="control-group" ng-hide="editRoutePolicy">
+            <label class="control-label">路由表名称：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="routeTableName" ng-model="routeTableForm.routeTableName" placeholder="请输入路由表名称" ng-maxlength="20"  required repeat-name /> <!--ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"-->
+              <div class="error" ng-messages="routetableModalForm.routeTableName.$error" ng-if="interacted(routetableModalForm.routeTableName)">
+                <div ng-message="required">*必填项</div>
+                <div ng-message="maxlength">请至多输入20个字符</div>
+                <!--<div ng-message="pattern">只能输入字母、数字、汉字、横线以及下划线</div>-->
+                <div ng-message="repeatName">在该网络下,此路由表名称已存在，请重新输入</div>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-show="createRoutetable">
+            <label class="control-label">所属网络：</label>
+            <div class="controls">
+              <ui-select ng-model="routeTableForm.vpc" title='请选择所属网络' ng-change="changeVpc(routeTableForm.vpc)">
+                  <ui-select-match>{{$select.selected.vpcId}} ( {{$select.selected.vpcName}} | {{$select.selected.cidrBlock}} )</ui-select-match>
+                <ui-select-choices repeat="vpc in vpcsOptions">
+                  <div ng-bind-html="vpc.vpcId +' ( ' + vpc.vpcName + ' | ' +vpc.cidrBlock +' ) ' | highlight: $select.search"></div>
+                  </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-if="vpcsOptions.length == 0" >*无可用私有网络</div>
+            </div>
+          </div>
+          <div ng-hide="editname">
+            <h4>路由策略</h4> 
+            <div class="control-group policy-wrap clearfix">
+              <div class="set-item">目的端</div>
+              <div class="set-item">下一跳类型</div>
+              <div class="set-item">下一跳</div>
+              <div class="set-item">备注</div>
+              <div class="set-item">操作</div>
+            </div>
+            <div class="control-group policy-wrap clearfix" >
+              <div class="set-item" >Local</div>
+              <div class="set-item">Local</div>
+              <div class="set-item">Local</div>
+              <div class="set-item">系统默认下发，表示 VPC 内云主机网络互通</div>
+              <div class="set-item"><a ng-click="addRoutePolicy()" ng-if="creRoutePolicySet.length==0" ><i class="icon-aw-add-to2"></i></a></div>
+            </div>
+            <div class="control-group policy-wrap clearfix" ng-repeat="routePolicy in creRoutePolicySet">
+              <div class="controls" style="width:100%;">
+                <div class="input-text set-item" >
+                  <input type="text" class="form-controls" name="destinationCidrBlock_{{$index}}" ng-model="routePolicy.destinationCidrBlock" placeholder="请输入目的网段"  required cidr repeat-cidr />
+                    <div class="error" ng-messages="routetableModalForm['destinationCidrBlock_'+$index].$error" ng-if="interacted(routetableModalForm['destinationCidrBlock_'+$index],$index)">
+                      <div ng-message="required">*必填项</div>
+                      <div ng-message="cidr">目的端格式必须为网段，如10.10.10.0/24</div>
+                      <div ng-message="repeatCidr">目的端不能为所属私有网络的子集</div>
+                    </div>
+                </div>
+                <div class="select set-item" >
+                  <ui-select ng-model="routePolicy.nextType" ng-change="changeNextType(routePolicy.nextType,$index)">
+                      <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="type.value as type in nextTypeOptions">
+                        <div ng-bind-html="type.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+                <div class="select set-item" >
+                  <ui-select name="nextHub_{{$index}}" ng-model="routePolicy.nextHub" required>
+                      <ui-select-match placeholder={{nextHubOptions[routePolicy.nextType].length==0?nextHubHolder[routePolicy.nextType]:""}}>{{$select.selected.natId}}({{$select.selected.natName}})</ui-select-match>
+                      <ui-select-choices repeat="nextHub.natId as nextHub in nextHubOptions[routePolicy.nextType]">
+                        <div ng-bind-html="nextHub.natId +' ( ' + nextHub.natName + ' ) ' | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                  <div class="error" ng-messages="routetableModalForm['nextHub_'+$index].$error" ng-if="interacted(routetableModalForm['nextHub_'+$index],$index)">
+                    <div ng-message="required">*必填项</div>
+                  </div>
+                </div>
+                <div class="input-text set-item" >
+                  <input type="text" class="form-controls" name="description_{{$index}}" ng-model="routePolicy.description" placeholder="" ng-maxlength="60" />
+                    <div class="error" ng-messages="routetableModalForm['description_'+$index].$error" ng-if="interacted(routetableModalForm['description_'+$index],$index)">
+                      <div ng-message="maxlength">请至多输入60个字符</div>
+                    </div>
+                </div>
+                <div class="action set-item" >
+                  <div class="sub del" ng-if="$index>=0" ><a ng-click="delRoutePolicy($index)"><i class="icon-aw-wrong"></i></a></div>
+                  <div class="sub add" ng-if="$index==(creRoutePolicySet.length-1)">
+                      <a ng-click="addRoutePolicy($index+1)" ><i class="icon-aw-add-to2"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="createRoutetableConfirm(routetableModalForm,creRoutePolicySet)">确认</button>
+         <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </div>
+  </script>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="associateSubnetModal.html">
+  <div class="modal-common creRoute-modal" >
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">关联子网</h3>
+    </div>
+    <div class="modal-body">
+      <h4>选择需要关联的子网</h4>
+      <div class="table-content">
+        <table ng-table="associateSubTable" class="table " show-filter="false">
+          <colgroup>
+            <col width="5%">
+            <col width="30%">
+            <col width="35%">
+            <col width="30%">
+          </colgroup>
+          <tr ng-repeat="subnet in $data" uib-popover={{subnet.cannotBeCheckTip}} popover-trigger="mouseenter" ng-class="{'disabled':subnet.cannotBeCheck}">
+            <td header="'headerCheckbox.html'" class="check-td">
+              <label class="checkbox" >
+                <input type="checkbox" name="" ng-model="checkboxes.items[subnet.subnetId]" value="{{subnet.subnetId}}" ng-disabled="subnet.cannotBeCheck" />
+                <i class="iconfont" ng-class="{'disabled':subnet.cannotBeCheck}" ></i>
+              </label>
+            </td>
+            <td data-title="'ID/名称'" sortable="'name'">
+              <div class="edit-name">
+                <div>{{subnet.unSubnetId}}</div>
+                <div>{{subnet.subnetName}}</div>
+              </div>
+            </td>
+            <td data-title="'子网CIDR'" sortable="'cidrBlock'">
+              <span>{{subnet.cidrBlock}}</span>
+            </td>
+            <td data-title="'已关联关联路由表'" sortable="'routeTableName'">
+              <div>{{subnet.unRouteTableId}}</div>
+              <div>{{subnet.routeTableName}}</div>
+            </td>
+          </tr>
+
+        </table>
+        <div class="text-center" ng-if="canAssociateSubList.length==0 || subnetChkedNone " style="color:red;">没有可用子网</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="associateSubnetConfirm()">确认</button>
+       <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="dissociateSubnetModal.html">
+  <div class="modal-common creRoute-modal" >
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">解除关联子网</h3>
+    </div>
+    <div class="modal-body">
+      <h4>解关联子网后，该子网需要重新关联一个路由表，请选择路由表</h4>
+      <div class="table-content">
+        <table class="table " >
+          <colgroup>
+            <col width="5%">
+            <col width="50%">
+            <col width="45%">
+          </colgroup>
+          <thead>
+            <tr>
+              <th></th>
+              <th>ID/名称</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="item in dissociateRoutetable" ng-class="{'disabled':item.unRouteTableId == routetableDetailItem.unRouteTableId}">
+              <td class="check-td" ng-if="item.unRouteTableId == routetableDetailItem.unRouteTableId">
+                <label class="radio">
+                  <input type="radio" name="" ng-model="item.routeTableId" value="{{item.routeTableId}}" disabled="true" />
+                  <i class="iconfont"></i>
+                </label>
+              </td>
+              <td class="check-td" ng-if="item.unRouteTableId != routetableDetailItem.unRouteTableId">
+                <label class="radio">
+                  <input type="radio" name="" ng-model="checkedRoutetable.routeTableId" value="{{item.routeTableId}}" />
+                  <i class="iconfont"></i>
+                </label>
+              </td>
+              <td>
+                <div>{{item.unRouteTableId}}</div>
+                <div>{{item.routeTableName}}</div>
+              </td>
+              <td>{{item.unRouteTableId == routetableDetailItem.unRouteTableId?"已关联":"可关联"}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="text-center" ng-if="noRouteTableChkTip" style="color:red;">*没有可关联的路由表</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="associateSubnetConfirm()">确认</button>
+       <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+</div>

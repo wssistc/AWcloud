@@ -1,0 +1,168 @@
+<div class="page-inner">
+  <div class="alert alert-warning multi-mes" role="alert" ng-show="showalerttip">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="close()"><span aria-hidden="true">×</span></button>
+        <div class="alert-content">
+            <div class="alert-text">
+              {{"aws.recycle.deltip" | translate : recycle}}
+            </div>
+        </div>
+  </div>
+  <div class="table-action">
+    <button type="button"  ng-click="forceDelRes()"  ng-disabled="!canClear" class="btn btn-new" licence-type="btn" id="resource-recycle-clean"> <i class="icon-aw-delete"></i>{{'aws.recycle.eliminate'|translate}}</button>
+    <button type="button"  ng-click="restoreRes()"  ng-disabled="!canRecovery" class="btn btn-normal" licence-type="btn" id="resource-recycle-reset"> <i class="icon-aw-mail-reply" ></i>{{'aws.recycle.restore'|translate}}</button>
+    <button type="button"  ng-click="forceDelVm()"  ng-disabled="!forceDel"  ng-show="ADMIN" class="btn btn-normal" licence-type="btn" id="resource-recycle-force"> <i class="icon-aw-delete"></i>{{'aws.recycle.forceDelete'|translate}}</button>
+    <div class="pull-right">
+        <into-information modular="'recycle'"></into-information>
+        <search-refresh  class="rs" refresh-fuc="refresh" context= "context" table-content="'tableParams'" table-data="tabledata"  btn-type="checkbox"></search-refresh>  
+        <setting-col  title-data="tableCols" site-title="titleName" table-data="tabledata" config-search="configSearch" ></setting-col>
+    </div>
+  </div>
+  <div class="table-content">
+      <table ng-table-dynamic="tableParams with tableCols" class="table" show-filter="false">
+          <tr ng-repeat="item in $data">
+              <td ng-repeat="col in $columns" ng-switch="col.field" >
+                  <label class="checkbox" ng-switch-when="check">
+                      <input name="check" type="checkbox" value={{item.uid}} ng-model="checkboxes.items[item.uid]" >
+                      <i class="iconfont"></i>
+                  </label>
+                  <span ng-switch-when="name" >
+                      <div class="edit-name">
+                          <a ng-href="#/cvm/recycle?id={{item.uid}}" title="{{item.name}}">{{item.name}}</a>
+                      </div>
+                  </span>
+                  <span ng-switch-when="status_ori" ng-class="{'bg-green':(item.status=='active'),'bg-blue':(item.status=='restoring'||item.status=='deleting'),'bg-orange':(item.status=='unrecognized'||item.status=='soft_deleted'||item.status=='soft-delete'||item.status=='deleted')}">{{'aws.recycle.table.status.'+item.status| translate}}
+                      <i ng-class="{'icon-aw-refresh':(item.status=='restoring' || item.status=='deleting')}" class="aw-spin"></i>
+                    </span>
+                  <span ng-switch-when="fixedIps">
+                      <span ng-repeat="fixedIp in item.fixedIps track by $index">{{fixedIp}}<br></span>
+                  </span>
+                  <span ng-switch-default>{{item[col.field]}}</span>
+              </td>
+          </tr>
+      </table>
+      <loading-data  data="tabledata"></loading-data>
+    <!-- <empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="tableParams" class="table instanceTable"> 
+      <colgroup>
+        <col width="5%" >
+        <col width="15.8%">
+        <col width="15.8%">
+        <col width="15.8%">
+        <col width="15.8%">
+        <col width="15.8%">
+        <col width="15.8%">
+      </colgroup>
+      <tr ng-repeat="item in $data">
+        <td header="'headerCheckbox.html'" class="check-td">
+          <label class="checkbox">
+            <input type="checkbox" name="r" ng-model="checkboxes.items[item.uid]" value="{{item.uid}}" />
+            <i class="iconfont"></i>
+          </label>
+        </td>
+        <td data-title="'aws.instances.cloudInstanceName'|translate" sortable="'name'">
+          <div class="edit-name">
+            <a ng-href="/cvm/recycle?id={{item.uid}}" title="{{item.name}}">{{item.name}}</a>
+          </div>
+        </td>
+        <td data-title="'aws.instances.status'|translate" sortable="'status'">
+          <span ng-class="{'bg-green':(item.status=='active'),'bg-blue':(item.status=='restoring'||item.status=='deleting'),'bg-orange':(item.status=='unrecognized'||item.status=='soft_deleted'||item.status=='soft-delete'||item.status=='deleted')}">{{'aws.recycle.table.status.'+item.status| translate}}
+            <i ng-class="{'icon-aw-refresh':(item.status=='restoring' || item.status=='deleting')}" class="aw-spin"></i>
+          </span>
+        </td>
+        <td data-title="'aws.instances.imgName'|translate" sortable="'imageName'">{{item.imageName}}</td>
+        <td data-title="'aws.instances.privateIP'|translate" sortable="'fixedIps'">
+          <span ng-repeat="fixedIp in item.fixedIps">{{fixedIp}}<br/></span>
+        </td>
+        <td data-title="'aws.instances.createtime'|translate" sortable="'createtime'"><span class="date">{{item.createtime}}</span></td>
+        <td data-title="'aws.instances.deletetime'|translate" sortable="'updatetime'"><span class="date">{{item.updatetime}}</span></td>
+      </tr>
+    </table>   -->
+  </div>
+  <div ng-controller="detailCtrl">
+      <pane class="detail-body" animation="animation">
+        <div class="tab-content">
+          <div class="detail-row ins-info">
+            <div class="detail-header">
+              <table class="table">
+                <tr>
+                  <td><a ng-href="/cvm/recycle">{{insConfigData.name}}</a></td>
+                  <td> {{insConfigData.proName}}</td>
+                  <td> {{insConfigData.name}}</td>
+                  <td> {{insConfigData.imageName}}</td>
+                  <td> {{insConfigData.fixedIps[0]}}</td>
+                  <td> {{insConfigData.floatingIps[0]}}</td>
+                  <td> {{insConfigData.createtime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                  <td> {{'aws.instances.table.status.'+insConfigData.status| translate}}</td>
+                  <td> {{'aws.instances.table.'+insConfigData.startStyle| translate}}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="detail-title">
+              <a class="an-close" ng-href="/cvm/recycle"><i class=" icon-aw-mail-reply"></i></a>
+              <span>{{'aws.instances.cloudInstanceDetail'|translate}}</span>
+            </div>
+            <div class="clear"></div>
+            <div class="detail-info tab-offset-right">
+              <ul class="nav nav-tabs">
+                  <li ng-class="{active:tab.active == 0}" class="uib-tab nav-item " ng-click="chartDisplay(0)">
+                      <a>{{'aws.instances.info.configureInfo'|translate}}</a>
+                  </li>
+                  <li ng-class="{active:tab.active == 2}" class="uib-tab nav-item"  ng-click="chartDisplay(2)">
+                      <a>{{'aws.instances.info.logInfo'|translate}}</a>
+                  </li>
+              </ul>
+              <div class="tab-content">
+                <div class="table-content table-small" ng-if="tab.active == 0">
+                  <table class="table table-info column">
+                    <tr>
+                      <td>{{'aws.instances.cloudInstanceName'|translate}}</td>
+                      <td>{{insConfigData.name}}</td>
+                      <td>{{'aws.instances.image'|translate}}</td>
+                      <td>{{insConfigData.imageName}}</td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.instances.configration'|translate}}</td>
+                      <td>
+                        CPU：{{insConfigData.cpuConfigData}}{{'aws.instances.info.core'|translate}}，{{'aws.instances.info.memory'|translate}}：{{insConfigData.ramConfigData}}GB
+                      </td>
+                      <td>{{'aws.instances.status'|translate}}</td>
+                      <td>{{'aws.recycle.table.status.'+insConfigData.status| translate}}</td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.instances.privateIP'|translate}}</td>
+                      <td><span ng-repeat="ip in insConfigData.fixedIps">{{ip}}</br></span></td>
+                      <td>{{'aws.instances.volume'|translate}}</td>
+                      <td>{{insConfigData.diskNewName}}</td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.instances.securegroup'|translate}}</td>
+                      <td><span ng-repeat="secGroup in insConfigData.secGroups">{{secGroup}}<br/></span></td>
+                      <td>{{'aws.instances.create_at'|translate}}</td>
+                      <td>{{insConfigData.createtime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                    </tr>
+                    <tr>
+                      <td><span ng-if="ADMIN">{{'aws.instances.hostName'|translate}}</span></td>
+                      <td><span ng-if="ADMIN">{{insConfigData.hostName}}</span></td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                    </tr>
+                  </table>
+                </div>
+                <div ng-if ="tab.active == 2 && insConfigDatas.status != 'error' && insConfigDatas.status != 'build'">
+                    <div ng-bind-html="logContent|trust_html">
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </pane>
+    </div>
+  <script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+      <i class="iconfont"></i>
+    </label>
+  </script>
+</div>
+

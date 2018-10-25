@@ -1,0 +1,88 @@
+<div class="page-inner operatelog-main">
+  <div class="table-action" ng-class="{'time-error':logFilter_form.startTime.$error.pattern || logFilter_form.endTime.$error.pattern || logFilter_form.endTime.$error.gtTime }">
+    <form class="form-inline date-box" role="form" name="logFilter_form">
+         <div class="form-group log-search-box">
+          <input type="text" class="form-control" ng-model="filterData.keyWord" placeholder="{{'aws.log.keyword'|translate}}"/>
+        </div>
+        <div class="form-group time-picker start" >
+          <div class="input-group date form_date col-md-5">
+            <input class="form-control fromTime" name="startTime" type="text" size="16" ng-model="filterData.from" placeholder="{{'aws.log.start_at'|translate}}" ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])$/" gtTime >
+            <!-- <span class="input-group-addon">
+                          <span class="glyphicon glyphicon-remove fa fa-remove"></span>
+            </span> -->
+            <span class="input-group-addon calendar-cont">
+							<span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+            </span>
+            <div class="error" ng-messages="logFilter_form.startTime.$error">
+              <div ng-message="pattern">{{"aws.errors.timePattern"|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group time-picker end">
+          <div class="input-group date form_date col-md-5">
+            <input class="form-control endTime" name="endTime" type="text" size="16" ng-model="filterData.to" placeholder="{{'aws.log.end_at'|translate}}" ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])$/" gt-time >
+            <!-- <span class="input-group-addon">
+                          <span class="glyphicon glyphicon-remove fa fa-remove"></span>
+            </span> -->
+            <span class="input-group-addon calendar-cont">
+							<span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+            </span>
+            <div class="error" ng-messages="logFilter_form.endTime.$error" >
+              <div ng-message="pattern">{{"aws.errors.timePattern"|translate}}</div>
+              <div ng-message="gtTime">{{"aws.errors.gtTime"|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-normal" ng-click="queryFun('form')"><i class="icon-aw-search"></i>{{'aws.log.search'|translate}}</button>
+          <div class="dropdown">
+            <button type="button" class="btn btn-new dropdown-toggle" data-toggle="dropdown"><i class="icon-aw-download"></i>{{"aws.log.export"|translate}}</button>
+            <ul class="dropdown-menu">
+              <li><a id="exportcurr" ng-click="exportlogs(filterData,'curr')">{{"aws.log.exportCurrentPage"|translate}}</a></li>
+              <li><a id="exportall" ng-click="exportlogs(filterData,'all')">{{"aws.log.exportAllPage"|translate}}</a></li>
+            </ul>
+          </div>
+          <button class="btn btn-normal" ng-click="queryFun('refresh')"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button>
+          <into-information modular="'operatelogs'"></into-information>
+        </div>
+         
+    </form>
+  </div>
+  <div class="table-content" >
+    <empty-tip empty-type="loadData"></empty-tip>
+    <div id="logTable">
+      <table class="table">
+        <thead>
+          <tr>
+            <th width="10%">{{'aws.log.type'|translate}}</th>
+            <th width="10%">{{'aws.log.oprator'|translate}}</th>
+            <th width="10%">IP </th>
+            <th width="26%">{{'aws.log.detail'|translate}}</th>   
+            <th width="14%">{{'aws.log.status'|translate}}</th>
+            <th width="14%">{{'aws.log.time'|translate}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="log in logsTable">
+            <td><span>{{log.businessName}}</span></td>
+            <td><span>{{log.createUserName}}</span></td>
+            <td><span>{{log.remoteIp}}</span></td>
+            <td><span class="des" title="{{log.description}}">{{log.description}}</span></td>
+            <td>
+              <span ng-class="{'bg-green':(code=='0'),'bg-orange':(code=='1'||code=='-1'||code=='500'||code=='400')}" ng-repeat="code in log.state">
+                {{"aws.statusCode." + code | translate}}</br></span>
+            </td>
+            <td><span class="date">{{log.createTime |date:'yyyy-MM-dd HH:mm:ss'}}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="text-right" ng-show="showPage">
+      <div class="page-wrap">
+        <!-- <a class="first-page" ng-click="goToPage('1')">{{'aws.log.fontPage'|translate}}</a> -->
+        <ul class="pagination clearfix" id="pageNum"></ul>
+        <!-- <a class="last-page" ng-click="goToPage(pages)">{{'aws.log.endPage'|translate}}</a> -->
+      </div>
+    </div>
+  </div>
+</div>

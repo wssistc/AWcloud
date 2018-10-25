@@ -1,0 +1,493 @@
+<div class="page-inner"> 
+  <div class="table-action">
+    <button type="button" class="btn btn-primary" ng-click="createExpansion()" licence-type = "btn" id="resource-vmports-create"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+    <button type="button" class="btn btn-info" ng-click="editPorts(editData)" ng-disabled="!canEdit" licence-type = "btn" id="resource-vmports-edit"><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+    <button type="button" class="btn btn-info" ng-click="editPorts(editData)" ng-disabled="!canEdit" licence-type = "btn" id="resource-vmports-edit">{{'aws.elasticExpansion.extensionalStrategy'|translate}}</button>
+    <button type="button" class="btn btn-info" ng-click="editPorts(editData)" ng-disabled="!canEdit" licence-type = "btn" id="resource-vmports-edit">{{'aws.elasticExpansion.contractileStrategy'|translate}}</button>
+    <div class="dropdown" licence-type="btn-group">
+      <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" ng-disabled="delisDisabled">{{'aws.action.moreAction'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+      <ul class="dropdown-menu">
+        <li>
+          <button ng-click="load(editData)" ng-disabled="!loadEnable||canLoad" licence-type = "btn" id="resource-vmports-load">{{'aws.action.forbidden'|translate}}</button>
+        </li>
+        <li>
+          <button ng-click="unload(editData)" ng-disabled="!unloadEnable||canUnload" licence-type = "btn" id="resource-vmports-unload">{{'aws.action.del'|translate}}</button>
+        </li>
+      </ul>
+    </div>
+    <setting title-data="titleData" site-title="titleName"></setting>
+    <div type="button" class="btn btn-renovat right-ports" ng-click="refreshPorts()">
+      <i class="icon-aw-refresh"></i>
+    </div>
+    <div class="search-box right-ports">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(ports_search.globalSearchTerm)">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="ports_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+      </form>
+    </div> 
+  </div>
+  <div class="table-content">
+    <empty-tip empty-type="loadPortsData"></empty-tip>
+    <table ng-table="portsTable" class="table"> 
+    <colgroup>
+      <col width="10%">
+      <col width="10%">
+      <col width="10%">
+      <col width="10%">
+      <col width="10%">
+      <col width="10%">
+      <col width="10%">
+      <col width="10%">
+      <col width="10%">
+      <col width="10%">
+    </colgroup>
+    <tr ng-repeat="item in $data">
+      <td header="'headerCheckbox.html'" class="check-td">
+        <label class="checkbox">
+          <input type="checkbox" name="r" ng-model="checkboxes.items[item.id]" value="{{item.id}}" />
+          <i class="iconfont"></i>
+        </label>
+      </td>
+      <td data-title="'aws.elasticExpansion.telescopicCluster'|translate" sortable="'name'">
+         <div class="edit-name">
+            <a ng-href="/cvm/vpn?id={{vpn.id}}" title="{{vpn.name}}">{{vpn.name}}</a>
+         </div>
+      </td>
+      <td data-title="'aws.elasticExpansion.status'|translate" sortable="'network_name'">{{item.network_name}}</td>
+      <td data-title="'aws.elasticExpansion.loadbalancer'|translate" sortable="'subnet_name'">{{item.subnet_name}}</td>
+      <td data-title="'aws.elasticExpansion.listener'|translate" sortable="'ip_address'">{{item.ip_address}}</td>
+      <td data-title="'aws.elasticExpansion.expansionSpecification'|translate" sortable="'device_name'">
+          {{item.device_name}}
+      </td>
+      <td data-title="'aws.elasticExpansion.imageName'|translate" sortable="'created_at'">{{item.created_at}}</td>
+      <td data-title="'aws.elasticExpansion.currentInstanceNum'|translate" sortable="'created_at'">{{item.created_at}}</td>
+      <td data-title="'aws.elasticExpansion.maxInstanceNum'|translate" sortable="'created_at'">{{item.created_at}}</td>
+      <td data-title="'aws.elasticExpansion.currentInstanceNum'|translate" sortable="'created_at'">{{item.created_at}}</td>
+    </tr>
+    </table>  
+  </div>
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body expansion-detail" animation="animation">
+      <div class="tab-content">
+        <div class="detail-row ins-info">
+          <div class="detail-title">
+            <a class="an-close" ng-href="/cvm/elasticexpansion"><i class="icon-aw-mail-reply"></i></a>
+            <span>{{baseDetailData.name}}{{"aws.networks.detail"|translate}}</span>
+          </div>
+          <div class="detail-info">
+            <uib-tabset active=detailTabActive justified="true">
+              <uib-tab index="0" heading="{{'aws.elasticExpansion.baseMsg'|translate}}">
+                <h4 class="tabName"><span>{{'aws.elasticExpansion.baseMsg'|translate}}</span></h4>
+                <div class="">
+                  <table class="table table-info column">
+                    <tr>
+                      <td>{{'aws.elasticExpansion.name'|translate}}</td>
+                      <td>{{baseDetailData.name}}</td>
+                      <td>{{'aws.elasticExpansion.createdTime'|translate}}</td>
+                      <td>{{baseDetailData._shared}}</td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.elasticExpansion.loadbalancer'|translate}}</td>
+                      <td>
+                          {{baseDetailData._network_type}}
+                      </td>
+                      <td>{{'aws.elasticExpansion.listener'|translate}}</td>
+                      <td>{{baseDetailData.provider.physical_network}}</td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.elasticExpansion.contactGroup'|translate}}</td>
+                      <td>{{baseDetailData.networkIpAvailability}}</td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </table>
+                </div>
+                <h4 class="tabName"><span>{{'aws.elasticExpansion.extensionalStrategy'|translate}}</span></h4>
+                <div class="outline">当在1分钟监控周期内，满足任意监控项规则时，增加1个虚拟机、1个云主机，整个伸缩集群最大数量10台云主机</div>
+                <div class="">
+                  <table class="table table-info column">
+                    <tr class="tr-title">
+                      <td><strong>{{'aws.elasticExpansion.triggerCondition'|translate}}</strong></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.elasticExpansion.triggerLogic'|translate}}</td>
+                      <td>{{baseDetailData.name}}</td>
+                      <td>{{'aws.elasticExpansion.monitoringCycle'|translate}}</td>
+                      <td>{{baseDetailData._shared}}</td>
+                    </tr>
+                    <tr class="monitor-rule">
+                      <td>{{'aws.elasticExpansion.monitoringRules'|translate}}</td>
+                      <td>
+                          {{baseDetailData._network_type}}
+                      </td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr class="tr-title">
+                      <td><strong>{{'aws.elasticExpansion.triggerAction'|translate}}</strong></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.elasticExpansion.singleIncrease'|translate}}</td>
+                      <td>{{baseDetailData.networkIpAvailability}}</td>
+                      <td>{{'aws.elasticExpansion.maximumQuantity'|translate}}</td>
+                      <td>{{baseDetailData.networkIpAvailability}}</td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.elasticExpansion.instanceConfiguration'|translate}}</td>
+                      <td>{{baseDetailData.networkIpAvailability}}</td>
+                      <td>{{'aws.elasticExpansion.instanceName'|translate}}</td>
+                      <td>{{baseDetailData.networkIpAvailability}}</td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.elasticExpansion.settingPort'|translate}}</td>
+                      <td>{{baseDetailData.networkIpAvailability}}</td>
+                      <td>{{'aws.elasticExpansion.settingWeight'|translate}}</td>
+                      <td>{{baseDetailData.networkIpAvailability}}</td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.elasticExpansion.coolingTime'|translate}}</td>
+                      <td>{{baseDetailData.networkIpAvailability}}</td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </table>
+                </div>
+                <h4 class="tabName"><span>{{'aws.elasticExpansion.contractileStrategy'|translate}}</span></h4>
+                <div class="outline">当在1分钟监控周期内，满足任意监控项规则时，增加1个虚拟机、1个云主机，整个伸缩集群最大数量10台云主机</div>
+                <div class="">
+                  <table class="table table-info column">
+                    <tr class="tr-title">
+                      <td><strong>{{'aws.elasticExpansion.triggerCondition'|translate}}</strong></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.elasticExpansion.triggerLogic'|translate}}</td>
+                      <td>{{baseDetailData.name}}</td>
+                      <td>{{'aws.elasticExpansion.monitoringCycle'|translate}}</td>
+                      <td>{{baseDetailData._shared}}</td>
+                    </tr>
+                    <tr class="monitor-rule">
+                      <td>{{'aws.elasticExpansion.monitoringRules'|translate}}</td>
+                      <td>
+                          {{baseDetailData._network_type}}
+                      </td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr class="tr-title">
+                      <td><strong>{{'aws.elasticExpansion.triggerAction'|translate}}</strong></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.elasticExpansion.singleReduction'|translate}}</td>
+                      <td>{{baseDetailData.networkIpAvailability}}</td>
+                      <td>{{'aws.elasticExpansion.minimumQuantity'|translate}}</td>
+                      <td>{{baseDetailData.networkIpAvailability}}</td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.elasticExpansion.coolingTime'|translate}}</td>
+                      <td>{{baseDetailData.networkIpAvailability}}</td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </table>
+                </div>
+              </uib-tab>
+              <uib-tab index="1" heading="{{'aws.elasticExpansion.instancesList'|translate}}"  ng-click="getNetworkPorts()">
+                <div class='detailInner'>
+                    <h4 class="tabName"><span>{{'aws.elasticExpansion.instancesList'|translate}}</span></h4>
+                    <div class="table-action">
+                      <button type="button" class="btn btn-primary" ng-click="createPorts()" licence-type = "btn" id="resource-vmports-create"><i class="icon-aw-add-to2"></i>{{'aws.action.add'|translate}}</button>
+                      <button type="button" data-toggle="modal" ng-click="deleteNetwork(networkTable.checkedItems)" ng-disabled="netDelBtn" class="btn btn-warning"><i class="icon-aw-delete"></i>{{"aws.elasticExpansion.removeClusterDelete"|translate}}</button>
+                      <div type="button" class="btn btn-renovat right-ports" ng-click="refreshPorts()">
+                        <i class="icon-aw-refresh"></i>
+                      </div>
+                      <div class="search-box right-ports">
+                        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch('networksDetailTable','portTerm')">
+                          <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                          <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm.portTerm" placeholder={{"aws.action.search"|translate}} />
+                        </form>
+                      </div>
+                    </div>
+                    <empty-tip empty-type="loadNetworkDetailData" tip-id="'net-detial-tip-msg'"></empty-tip>
+                    <table ng-table="networksDetailTable" class="table">
+                      <colgroup>
+                        <col width="10%">
+                        <col width="15%">
+                        <col width="15%">
+                        <col width="15%">
+                        <col width="15%">
+                        <col width="15%">
+                        <col width="15%">
+                      </colgroup>
+                      <tr ng-repeat="netDetail in $data track by $index">
+                        <td header="'insListCheckbox.html'">
+                          <label class="checkbox" ><!--ng-if="!subnet.unChecked"-->
+                            <input type="checkbox" ng-model="subnetCheckbox.items[subnet.id]"/>
+                            <i class="iconfont"></i>
+                          </label>
+                        </td>
+                        <td data-title="'aws.elasticExpansion.instanceName'|translate" sortable="'name'">{{netDetail.name}}</td>
+                        <td data-title="'aws.elasticExpansion.specification'|translate" sortable="'subnetIps'">
+                          <span ng-repeat="subnet in netDetail.subnetIps track by $index">{{subnet.ip_address}}<br/></span>
+                        </td>
+                        <td data-title="'aws.elasticExpansion.status'|translate" sortable="'status'" ng-if="ADMIN">{{netDetail._status}}</td>
+                        <td data-title="'aws.elasticExpansion.instanceName'|translate" sortable="'deviceOwner'">{{netDetail.deviceOwner}}</td>
+                        <td data-title="'aws.elasticExpansion.entryMode'|translate" sortable="'adminState'" ng-if="ADMIN">{{netDetail._adminState}}</td>
+                        <td data-title="'aws.elasticExpansion.joinTime'|translate" sortable="'deviceOwner'">{{netDetail.deviceOwner}}</td>
+                      </tr>
+                    </table>
+                </div>
+              </uib-tab>
+              <uib-tab index="2" heading="{{'aws.elasticExpansion.retractableActivityLog'|translate}}" ng-click="getNetworkSubnet()">
+                <div class="table-action">
+                  <div class="tabName"><span>{{'aws.elasticExpansion.retractableActivityLog'|translate}}</span></div>
+                  <setting title-data="subTitleData" site-title="subTitleName"></setting>
+                  <div type="button" class="btn btn-renovat right-ports" ng-click="refreshSubnets()">
+                    <i class="icon-aw-refresh"></i>
+                  </div>
+                  <div class="search-box right-ports">
+                    <form name="searchSubForm" novalidate  ng-keyup="applyGlobalSearch('subnetTable','subTerm')">
+                      <button class="btn" type="submit" ng-disabled="searchSubForm.$invalid"><i class="icon-aw-search"></i></button>
+                      <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchSubTerm" ng-model="globalSearchTerm.subTerm" placeholder='{{"aws.action.search"|translate}}' />
+                    </form>
+                  </div>
+                </div>
+                <div class="table-content">
+                  <empty-tip empty-type="loadSubnetData" tip-id="'sub-tip-msg'"></empty-tip>
+                  <table ng-table="subnetTable" class="table">
+                    <tr ng-repeat="subnet in $data track by $index">
+                      <td data-title="'aws.elasticExpansion.activity'|translate" sortable="'name'">
+                        <div class="edit-name edit-sm">
+                          <span title="{{subnet.name}}">{{subnet.name}}</span>
+                        </div>
+                      </td>
+                      <td data-title="'aws.elasticExpansion.insNumPreExpansion'|translate" sortable="'cidr'">{{subnet.cidr}}<br></td>
+                      <td data-title="'aws.elasticExpansion.insNumAfterExpansion'|translate" sortable="'gatewayIp'" >{{subnet.gatewayIp}}</td>
+                      <td data-title="'aws.elasticExpansion.activityStartTime'|translate" sortable="'allocationPools'">
+                        <span ng-repeat="allocationPool in subnet.allocationPools track by $index ">
+                          {{allocationPool.start}}~{{allocationPool.end}}<br>
+                        </span>
+                      </td>
+                      <td data-title="'aws.elasticExpansion.activityEndTime'|translate" sortable="'networkIpAvailability'">{{subnet.networkIpAvailability}}</td>
+                      
+                      <td data-title="'aws.elasticExpansion.activityResult'|translate" sortable="'ipVersion'">{{subnet._ipVersion}}</td>
+                    </tr>
+                  </table>
+                </div>
+              </uib-tab>
+            </uib-tabset>
+          </div>
+        </div>
+      </div>
+    </pane>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="insListCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="insListCheckbox.checked" class="select-all-insList" value="" />
+      <i class="iconfont"></i>
+    </label>
+  </script>
+<script type="text/ng-template" id="expansion.html">
+  <div class="modal-step modal-common expansion-modal">
+      <div class="modal-header">
+          <button type="button" class="close" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title  clearfix">{{"aws.elasticExpansion.newExpansion" | translate }}</h3>
+          <ul class="steps-sytle-ver clearfix">
+              <li class="clearfix step-start" ng-class="{'active':inStepOneBar}">
+                  <div class="inner">
+                      <span>{{"aws.elasticExpansion.baseConfig" | translate }}</span>
+                      <i>1</i>
+                  </div>
+              </li>
+              <li class="clearfix step-middle"  ng-class="{'active':inStepTwoBar}">
+                  <div class="inner">
+                      <span>{{"aws.elasticExpansion.extensionalStrategy" | translate }}</span>
+                      <i>2</i>
+                  </div>
+              </li>
+              <li class="clearfix step-end"  ng-class="{'active':inStepThreeBar}">
+                  <div class="inner">
+                      <span>{{"aws.elasticExpansion.contractileStrategy" | translate }}</span>
+                      <i>3</i>
+                  </div>
+              </li>
+          </ul>
+      </div>
+      <div class="modal-body">
+          <form name="baseConfigForm" ng-show="inStepOne" novalidate>
+              <div class="control-group">
+                  <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.elasticExpansion.name"|translate}}：</label>
+                  <div class="controls">
+                    <input type="text" class="form-controls" name="name" ng-model="configData.name" placeholder='{{"aws.elasticExpansion.placeholder.name"|translate}}' ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required />
+                    <div class="error" ng-messages='baseConfigForm.name.$error' ng-if="interactedConfig(baseConfigForm.name)">
+                        <form-validate></form-validate>
+                    </div>
+                  </div>
+              </div>
+              <div class="control-group">
+                  <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.elasticExpansion.loadbalancer"|translate}}：</label>
+                  <div class="controls">
+                    <ui-select ng-model="configData.selectedLoadbalancer" name="loadbalancer" ng-disabled="configData.loadbalancer.options.length==0" required>
+                        <ui-select-match placeholder='{{configData.loadbalancer.options.length==0?("aws.elasticExpansion.placeholder.noLoadbalancer"|translate):("aws.elasticExpansion.placeholder.loadbalancer"|translate)}}'>{{$select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="loadbalancer as loadbalancer in configData.loadbalancer.options">
+                        <div>{{loadbalancer}}</div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages='baseConfigForm.loadbalancer.$error' ng-if="interactedConfig(baseConfigForm.loadbalancer)" >
+                        <form-validate></form-validate>
+                    </div>
+                  </div>
+              </div>
+              <div class="control-group">
+                  <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.elasticExpansion.listener"|translate}}：</label>
+                  <div class="controls">
+                    <ui-select ng-model="configData.selectedListener" name="listener" ng-disabled="configData.listener.options.length==0" required>
+                        <ui-select-match placeholder='{{configData.listener.options.length==0?("aws.elasticExpansion.placeholder.noListener"|translate):("aws.elasticExpansion.placeholder.listener"|translate)}}'>{{$select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="listener as listener in configData.listener.options">
+                        <div>{{listener}}</div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages='baseConfigForm.listener.$error' ng-if="interactedConfig(baseConfigForm.listener)" >
+                        <form-validate></form-validate>
+                    </div>
+                  </div>
+              </div>
+              <div class="control-group">
+                  <label class="control-label">{{"aws.elasticExpansion.contactGroup"|translate}}：</label>
+                  <div class="controls">
+                    <ui-select ng-model="configData.selectedContact" name="contact" ng-disabled="configData.contactGroup.options.length==0" required>
+                        <ui-select-match placeholder='{{configData.contactGroup.options.length==0?("aws.elasticExpansion.placeholder.noContactGroup"|translate):("aws.elasticExpansion.placeholder.contactGroup"|translate)}}'>{{$select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="contact as contact in configData.contactGroup.options">
+                        <div>{{contact}}</div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages='baseConfigForm.contact.$error' ng-if="interactedConfig(baseConfigForm.contact)" >
+                        <form-validate></form-validate>
+                    </div>
+                  </div>
+              </div>
+          </form>
+          <form name="extensionalForm" ng-show="inStepTwo" novalidate>
+             <h5 class="block-title">触发条件</h5>
+             <div class="condition-box">
+                <div class="control-group">
+                  <label class="control-label">{{"aws.elasticExpansion.triggerRules"|translate}}：</label>
+                  <div class="controls extensional-controls">
+                      <label class="control-label logic-label">{{"aws.elasticExpansion.triggerLogic"|translate}}：</label>
+                      <div class="controls logic-controls">
+                        <ui-select ng-model="configData.selectedLoadbalancer" name="loadbalancer" ng-disabled="configData.loadbalancer.options.length==0" required>
+                            <ui-select-match placeholder='{{configData.loadbalancer.options.length==0?("aws.elasticExpansion.placeholder.noLoadbalancer"|translate):("aws.elasticExpansion.placeholder.loadbalancer"|translate)}}'>{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="loadbalancer as loadbalancer in configData.loadbalancer.options">
+                            <div>{{loadbalancer}}</div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages='baseConfigForm.loadbalancer.$error' ng-if="interactedConfig(baseConfigForm.loadbalancer)" >
+                            <form-validate></form-validate>
+                        </div>
+                      </div>
+                      <label class="control-label cicle-label">{{"aws.elasticExpansion.monitoringCycle"|translate}}：</label>
+                      <div class="controls cicle-controls">
+                        <ui-select ng-model="configData.selectedLoadbalancer" name="loadbalancer" ng-disabled="configData.loadbalancer.options.length==0" required>
+                            <ui-select-match placeholder='{{configData.loadbalancer.options.length==0?("aws.elasticExpansion.placeholder.noLoadbalancer"|translate):("aws.elasticExpansion.placeholder.loadbalancer"|translate)}}'>{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="loadbalancer as loadbalancer in configData.loadbalancer.options">
+                            <div>{{loadbalancer}}</div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages='baseConfigForm.loadbalancer.$error' ng-if="interactedConfig(baseConfigForm.loadbalancer)" >
+                            <form-validate></form-validate>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">&nbsp;</label>
+                  <div class="controls extensional-controls">
+                      <div class="controls logic-controls">
+                        <ui-select ng-model="configData.selectedLoadbalancer" name="loadbalancer" ng-disabled="configData.loadbalancer.options.length==0" required>
+                            <ui-select-match placeholder='{{configData.loadbalancer.options.length==0?("aws.elasticExpansion.placeholder.noLoadbalancer"|translate):("aws.elasticExpansion.placeholder.loadbalancer"|translate)}}'>{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="loadbalancer as loadbalancer in configData.loadbalancer.options">
+                            <div>{{loadbalancer}}</div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages='baseConfigForm.loadbalancer.$error' ng-if="interactedConfig(baseConfigForm.loadbalancer)" >
+                            <form-validate></form-validate>
+                        </div>
+                      </div>
+                      <div class="controls cicle-controls">
+                        <ui-select ng-model="configData.selectedLoadbalancer" name="loadbalancer" ng-disabled="configData.loadbalancer.options.length==0" required>
+                            <ui-select-match placeholder='{{configData.loadbalancer.options.length==0?("aws.elasticExpansion.placeholder.noLoadbalancer"|translate):("aws.elasticExpansion.placeholder.loadbalancer"|translate)}}'>{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="loadbalancer as loadbalancer in configData.loadbalancer.options">
+                            <div>{{loadbalancer}}</div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages='baseConfigForm.loadbalancer.$error' ng-if="interactedConfig(baseConfigForm.loadbalancer)" >
+                            <form-validate></form-validate>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+             </div>
+          </form>
+          <form name="telescopicForm" ng-show="inStepThree" novalidate>
+          </form>
+      </div>
+
+
+      <div class="modal-footer">
+          <div ng-show = "inStepOne"> 
+              <button class="btn btn-info" type="button"  ng-disabled="beyondQuota_dep.network || beyondQuota_pro.network" ng-click="stepToTwo(createNetworkForm)">
+                  {{'aws.action.nextStep'|translate}}
+              </button>
+              <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                  {{'aws.action.cancel'|translate}}
+              </button>
+          </div>
+          <div ng-show = "inStepTwo"> 
+              <div>
+                  <button class="btn btn-default" type="button" ng-click="stepToOne()">
+                      {{'aws.action.lastStep'|translate}}
+                  </button>
+                  <button class="btn btn-info" type="button" ng-disabled="beyondQuota_dep.subnet || beyondQuota_pro.subnet" ng-click="stepToThree(createSubnetForm)">
+                      {{'aws.action.nextStep'|translate}}
+                  </button>
+                  <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                      {{'aws.action.cancel'|translate}}
+                  </button>
+              </div>
+          </div>
+          <div ng-show = "inStepThree"> 
+              <div>
+                  <button class="btn btn-default" type="button" ng-click="stepToTwo(createNetworkForm)">
+                      {{'aws.action.lastStep'|translate}}
+                  </button>
+                  <button class="btn btn-info" type="button" ng-click="create(subnetDetailForm)">
+                      新建
+                  </button>
+                  <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                      {{'aws.action.cancel'|translate}}
+                  </button>
+              </div>
+          </div>
+      </div>
+  </div>
+  </script>
+
+

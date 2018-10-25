@@ -1,0 +1,212 @@
+<div class="page-inner"> 
+  <div class="page-title">
+    <h2>MySQl-参数模板列表</h2>
+    
+    <!-- <div class="btn-item-group">
+      <button ng-repeat="region in regions.options" ng-click="changeRegion(region.value)" ng-class="{'active':queryLimit.regionId==region.value}" ng-bind="region.name"></button>
+    </div> -->
+  </div>
+  <div class="table-action">
+    <button type="button" data-toggle="modal" ng-click="createParamTmplModal()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新建</button>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='搜索' />
+      </form>
+    </div>
+    <button class="btn btn-refresh" ng-click="refreshParamTmplList()"><i class="icon-aw-refresh"></i>刷新</button>
+  </div>
+  <div class="table-content">
+    <table ng-table="paramTmplTable" class="table" show-filter="false">
+      <colgroup>
+        <col width="25%">
+        <col width="25%">
+        <col width="30%">
+        <col width="20%">
+      </colgroup>
+      <tbody>
+        <tr ng-repeat="item in $data">
+          <td data-title="'模板名称'" sortable="'name'">{{item.name}}</td>
+          <td data-title="'DB版本'" sortable="'engineVersion'">MySQl{{item.engineVersion}}</td>
+          <td data-title="'模板描述'" sortable="'desc'"><span class="ycx">{{item.desc}}</span></td>
+          <td data-title="'操作'" sortable="''" >
+            <a href="#/cdb/paramtmpl?templateId={{item.templateId}}">查看修改&nbsp;&nbsp;</a>
+            <a ng-click="exportParams(item)" >导出参数&nbsp;&nbsp; </a>
+            <a ng-click="deleteParamTmpl(item)" >删除</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="detail-body" animation="animation">
+    <div class= 'animateContent {{animation}} '>
+      <div class='detailInner'>
+        <div class="detail-tab">
+          <div class="dt-title">
+            <a class="an-close" ng-href="#/cdb/paramtmpl">参数模板<i class="icon-aw-angle-left"></i></a>
+            <span>{{paramTmplDetailItem.name}}</span>
+          </div>
+          <div class="dt-box">
+            <div class="tab-content">
+              <div class="tab-pane active">
+                <form name="paramValueForm">
+                  <div class="table-action">
+                    <div class="btn-group" ng-hide="cfmEdit">
+                      <button class="btn btn-info" ng-click="cfmEdit=true;"><i class="icon-aw-modify"></i>修改当前值</button>
+                      <button class="btn btn-info" ng-click="saveAsTmpl(paramTmplDetailItem)"><i class="icon-aw-modify"></i>另存为模板</button>
+                      <!--导入参数功能缺api-->
+                      <!-- <button class="btn btn-info" ng-click="importParams()"><i class="icon-aw-modify"></i>导入参数</button> -->
+                      <button class="btn btn-info" ng-click="exportParams(paramTmplDetailItem)"><i class="icon-aw-modify"></i>导出参数</button>
+                    </div>
+                    <span ng-show="cfmEdit">
+                        <button class="btn btn-info" ng-click="editParamsConfirm('all',paramValueForm)">确认修改</button>
+                        <button class="btn btn-default" ng-click="cfmEdit=false;cancelEdit();">取消</button>
+                    </span>
+                  </div>
+                  <table class="table">
+                      <colgroup>
+                          <col width="30%">
+                          <col width="15%">
+                          <col width="15%">
+                          <col width="20%">
+                          <col width="20%">
+                      </colgroup>
+                      <thead>
+                          <tr>
+                              <th>参数名</th>
+                              <th>是否重启</th>
+                              <th>参数默认值</th>
+                              <th>参数当前值</th>
+                              <th>参数可修改值</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                        <tr ng-repeat="item in paramTmplDetailItem.paramList">
+                          <td>{{item.name}} <i class="icon-aw-prompt"  uib-popover={{item.desc}}  popover-trigger="mouseenter" ></i></td>
+                          <td>{{item.need_reboot}}</td>
+                          <td>{{item.default}}</td>
+                          <td>
+                            <span class="edit-name" ng-if="!item.showEdit && !cfmEdit" >
+                              {{item.curValue}} <i class="icon-aw-modify blue" ng-click="item.showEdit=true;modifyParamValue('one',item)"></i>
+                            </span>
+                            <span ng-if="item.showEdit || cfmEdit">
+                              
+                                <input type="text"  class="form-controls input-sm" name="cur_value_{{$index}}" ng-model="item.cur_value"  ng-if="item.isRange" min="item.min" max="item.max"  limitnumrange required >
+                                <ui-select class="uisel-sm" ng-model="item.cur_value" name="cur_value_{{$index}}" ng-if="item.isEnum" >
+                                  <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                                  <ui-select-choices repeat="val in item.enum_value track by $index">
+                                    <div ng-bind-html="val | highlight: $select.search"></div>
+                                  </ui-select-choices>
+                               </ui-select>
+                                <span class="icon-items" ng-show="!cfmEdit && item.showEdit">
+                                  <i class="icon-aw-yes" ng-click="editParamsConfirm('one',paramValueForm,item,$index)"></i>
+                                  <i class="icon-aw-wrong" ng-click="item.showEdit=false;item.cur_value=item.curValue;"></i>
+                                </span>
+                                <div class="" ng-messages="paramValueForm['cur_value_'+$index].$error" ng-if="interacted(paramValueForm['cur_value_'+$index])" style="color:red;">
+                                  <div ng-message="required">*必填项</div>
+                                  <div ng-message="limitnumrange">*请输入{{item.min}}~{{item.max}}的值</div>
+                                </div>
+                              </span>
+                          </td>
+                          <td>
+                            <span class="ycx" ng-if="item.enum_value.length<=3">{{item.rangeValue}}</span>
+                            <span class="ycx" ng-if="item.enum_value.length>3" uib-popover={{item.rangeValue}}  popover-trigger="mouseenter" >{{item.rangeValue}}</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                  </table>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>  
+<script type="text/ng-template" id="createParamTmplModal.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">创建参数模板</h3>
+    </div>
+    <div class="modal-body">
+      <form name="createParamTmplModalForm" novalidate>
+        <div class="control-group">
+          <label class="control-label">模板名称:</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="tmplName" ng-model="paramTmplForm.name" placeholder="请输入模板名称" ng-maxlength="60" required repeat-name />
+            <div class="error" ng-messages='createParamTmplModalForm.tmplName.$error' ng-if="interacted(createParamTmplModalForm.tmplName)">
+              <div ng-message="required">*必填项</div>
+              <div ng-message="maxlength">请至多输入60个字符</div>
+              <div ng-message="repeatName">模板名称已存在，请重新输入</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">模板描述:</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="tmplDes" ng-model="paramTmplForm.desc" placeholder="请输入模板描述" ng-maxlength="80"  />
+            <div class="error" ng-messages='createParamTmplModalForm.tmplDes.$error' ng-if="interacted(createParamTmplModalForm.tmplDes)">
+              <div ng-message="maxlength">请至多输入80个字符</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">DB版本:</label>
+          <div class="controls">
+            <ui-select ng-model="paramTmplForm.engineVersion" name="dbVersion" required >
+              <ui-select-match>MySQl {{$select.selected}}</ui-select-match>
+              <ui-select-choices repeat="db in dbVersionOptions">
+                <div ng-bind-html=" 'MySQl ' + db | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages='createParamTmplModalForm.dbVersion.$error' ng-if="interacted(createParamTmplModalForm.dbVersion)">
+              <div ng-message="required">*必填项</div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="createParamTmplComfirm(createParamTmplModalForm)">创建并设置参数</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="saveAsTmplModal.html">
+    <div class=" modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">另存为参数模板</h3>
+      </div>
+      <div class="modal-body">
+        <form name="saveAsTmplModalForm" novalidate>
+          <div class="control-group">
+            <label class="control-label">模板名称:</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="tmplName" ng-model="saveAsTmplForm.name" placeholder="请输入模板名称" ng-maxlength="60"  required repeat-name />
+              <div class="error" ng-messages='saveAsTmplModalForm.tmplName.$error' ng-if="interacted(saveAsTmplModalForm.tmplName)">
+                <div ng-message="required">*必填项</div>
+                <div ng-message="maxlength">请至多输入60个字符</div>
+                <div ng-message="repeatName">模板名称已存在，请重新输入</div>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">模板描述:</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="tmplDes" ng-model="saveAsTmplForm.desc" placeholder="请输入模板描述" ng-maxlength="80"  />
+              <div class="error" ng-messages='saveAsTmplModalForm.tmplDes.$error' ng-if="interacted(saveAsTmplModalForm.tmplDes)">
+                <div ng-message="maxlength">请至多输入80个字符</div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="saveAsTmplComfirm(saveAsTmplModalForm,saveAsTmplForm)">创建</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </div>
+</script>

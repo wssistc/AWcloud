@@ -1,0 +1,101 @@
+<div class="page-inner">
+  <div class="table-action">
+    <button class="btn btn-primary" ng-click="updateDepart('','new',list)"><i class="icon-aw-add-to2"></i>{{'aws.org.new_org' | translate}}</button>
+    <div class="search-box">
+      <form name="searchForm" novalidate>
+        <input type="text" class="form-control" name="searchTerm" autocomplete="off" maxlength="128" ng-model="query" ng-change="findNodes()" placeholder="{{'aws.action.search' | translate}}" />
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <div ui-tree="options" data-nodrop-enabled="true" data-drag-enabled="false">
+      <ul class="angular-ui-tree-header clearfix">
+        <li class="tree-header-name">{{'aws.org.table.dep_name' | translate}}</li>
+        <li class="tree-header-handle">{{'aws.org.table.org_handle' | translate}}</li>
+        <li class="tree-header-desc">{{'aws.org.table.org_desc' | translate}}</li>
+      </ul>
+      <ul ui-tree-nodes ng-model="list">
+        <li ng-repeat="item in list" ui-tree-node ng-show="visible(item)||isShow(item)" ng-include="'items_renderer.html'"></li>
+      </ul>
+    </div>
+  </div>
+  <script type="text/ng-template" id="items_renderer.html">
+    <div ui-tree-handle class="clearfix">
+      <div class="tree-name">
+        
+        <a class="btn btn-success" data-nodrag ng-click="toggle(this)">
+        <span>{{item.name}}</span>
+          <span class="glyphicon" ng-class="{'icon-aw-angle-right': collapsed, 'icon-aw-angle-down': !collapsed}"></span>
+        </a>
+      </div>
+      <div class="tree-item">
+        <a class="btn" data-nodrag ng-click="updateDepart(this,'new')"><i class="icon-aw-add-to2"></i></a>
+        <a class="btn" data-nodrag ng-click="updateDepart(this,'edit')"><i class="icon-aw-modify"></i></a>
+        <a class="btn" data-nodrag ng-click="removeDepart(this)"><i class="icon-aw-delete"></i></span></a>
+      </div>
+      <div class="tree-desc">
+        <span>{{item.description}}</span>
+      </div>
+      
+    </div>
+    <ul ui-tree-nodes="options" ng-model="item.children" ng-class="{hidden: collapsed}">
+      <li ng-repeat="item in item.children" ui-tree-node ng-include="'items_renderer.html'" ng-show="visible(item)||item.show||isShow(item)">
+      </li>
+    </ul>
+  </script>
+  <script type="text/ng-template" id="updateOrg.html">
+    <div class="org-modal modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{headTitle}}</h3>
+      </div>
+      <div class="modal-body">
+        <form name="orgForm" novalidate>
+          <div class="control-group" ng-if="directDepart">
+            <label class="control-label">{{'aws.org.upOrg.direct_org' | translate}}：</label>
+            <div class="controls">
+              <span class="directName">{{directDepart}}</label>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">{{'aws.org.upOrg.org_name' | translate}}：</label>
+						<div class="controls">
+							<input type="text" name="name" class="form-controls" ng-model="departName"  placeholder="{{'aws.org.upOrg.name_tip' | translate}}"  ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" maxlength="33" required/>
+              <span class="error" ng-messages="(submitValid ||orgForm.name.$dirty) && orgForm.name.$error">
+                <form-validate max-num="'32'"></form-validate>
+              </span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{'aws.org.upOrg.dep_desc' | translate}}：</label>
+            <div class="controls">
+              <textarea type="text" class="form-controls" name="descName" ng-model="departDes" placeholder="{{'aws.org.upOrg.desc_tip' | translate}}" ng-maxlength="100" maxlength="101"/></textarea>
+              <span class="error" ng-messages="(submitValid ||orgForm.descName.$dirty) && orgForm.descName.$error" >
+                <form-validate max-num="'100'"></form-validate>
+              </span>
+            </div>
+          </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="ok()">{{'aws.action.ok' | translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+</div>
+</script>
+<script type="text/ng-template" id="drop-modal.html">
+  <div class="org-modal modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{'aws.org.upOrg.move_org' | translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <div class="moveDepart">{{'aws.org.upOrg.move_tip' | translate}}<strong>{{fromDepart}}</strong>{{'aws.org.upOrg.move_from' | translate}}<strong>{{toDepart}}</strong>{{'aws.org.upOrg.move_to' | translate}}</div>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="$close(list)">{{'aws.action.ok' | translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+  </div>
+</script>

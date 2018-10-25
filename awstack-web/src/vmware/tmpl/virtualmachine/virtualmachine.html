@@ -1,0 +1,118 @@
+
+<div class="view-content">
+  <div class="table-action">
+    <button type="button" class="btn btn-primary" ng-click="create_vm()"><i class="icon-aw-add-to2"></i>新建虚拟机</button>
+    <button type="button" class="btn btn-info" ng-disabled="!canPowerOn" ng-click="powerVM(editData,'powerOn')"><i class="icon-aw-start-up"></i>开机</button>
+    <button type="button" class="btn btn-info" ng-disabled="!canPowerOff" ng-click="powerVM(editData,'powerOff')"><i class="icon-aw-shut-down"></i>关机</button>
+    <button type="button" class="btn btn-info " ng-disabled="!canOpenConsole"  ng-click="openConsole(editData)"><i  ng-class="{'icon-aw-refresh aw-spin':circleConsole == true, 'icon-aw-pc':pcConsole == true}" ></i>控制台</button>
+    <button type="button" data-toggle="modal" ng-disabled="!canDel" ng-click="deleteVM(checkedItems)" class="btn btn-info"><i class="icon-aw-delete"></i>删除</button>
+    <button class="btn btn-refresh" ng-click="refreshVM()"><i class="icon-aw-refresh"></i>{{'vmware.action.refresh'|translate}}</button>
+    <div class="dropdown">
+      <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" ng-disabled="delisDisabled">更多操作<i class=" icon-aw-angle-down"></i></button>
+      <ul class="dropdown-menu">
+        <li>
+          <!-- <button ng-disabled="" ng-click="editVM(editData)" >编辑</button> -->
+          <button ng-disabled="!canRest" ng-click="powerVM(editData,'reset')" >重启</button>
+          <button ng-disabled="isDisabled" ng-click="migration(editData)" >迁移</button>
+          <button ng-disabled="!canSuspend" ng-click="powerVM(editData,'suspend')" >挂起</button>
+          <button ng-disabled="isDisabled" ng-click="snapshot(editData)" >生成快照</button>
+          <button ng-disabled="!canLookSnap" ng-click="getSnap(editData)" >管理快照</button>
+          <button ng-disabled="!canRestore" ng-click="revertCurrent(editData)" >恢复为最新快照</button>
+        </li>
+      </ul>
+    </div>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="根据虚拟机名称进行搜索" />
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <!-- <empty-tip empty-type="loadData"></empty-tip> -->
+    <table ng-table="tableParams" class="table">
+      <tr ng-repeat="item in $data">
+        <td header="'headerCheckbox.html'" class="check-td">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[item.instanceUuid]" ng-disabled="item.name=='VMware vCenter Server Appliance'" />
+            <i class="iconfont" ng-if="item.name!='VMware vCenter Server Appliance'" ></i>
+            <i class="iconfont" ng-if="item.name=='VMware vCenter Server Appliance'" title="此台虚拟机不能进行任何操作"></i>
+          </label>
+        </td>
+        <td data-title="'名称'" sortable="'name'">
+          <!-- <span><a ng-click="goToVMDetail(item)">{{item.name}}</a></span>  -->
+          {{item.name}} 
+        </td>
+        <td data-title="'状况'" sortable="'powerStatus'">{{"vmware.vm.table.powerStatus."+item.powerStatus | translate}}</td>
+        <td data-title="'状态'" sortable="'overallStatus'">
+          <span ng-class="{'bg-green':item.overallStatus == 'green','bg-orange':item.overallStatus == 'yellow','bg-red':item.overallStatus == 'red'||item.overallStatus == 'gray' }">{{"vmware.vm.table.overallStatus."+item.overallStatus | translate}}</span>
+        </td>
+        <td data-title="'置备的空间（MB）'" sortable="'diskSize'">{{item.diskSize}}</td>
+        <td data-title="'已用空间（MB）'" sortable="'diskSizeUsage'">{{item.diskSizeUsage}}</td>
+        <td data-title="'主机CPU（MHz）'" sortable="'hostCpuMHz'">{{item.hostCpuMHz}}</td>
+        <td data-title="'主机内存（MB）'" sortable="'hostMemoryUsage'">{{item.hostMemoryUsage}}</td>
+        <td data-title="'客户机内存 - %'" sortable="'guestMemoryUsage'">{{item.guestMemoryUsage}}</td>
+      </tr>
+    </table> 
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+
+
+<script type="text/ng-template" id="snapshotModal.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">创建快照</h3>
+    </div>
+    <div class="modal-body" >
+       <form name="createSnapshotForm" novalidate>
+          <div class="control-group">
+            <label class="control-label">名称：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="name" ng-model="snapshotForm.name" placeholder="请输入快照名称" ng-maxlength="32"  required />
+              <div class="error" ng-messages='createSnapshotForm.name.$error' ng-if="interacted(createSnapshotForm.name)">
+                <div ng-message="required">*必填项</div>
+                <div ng-message="maxlength">请至多输入32个字符</div>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">描述：</label>
+            <div class="controls">
+              <textarea type="text" class="form-controls" name="description" ng-model="snapshotForm.description" placeholder="" ng-maxlength="80" ></textarea>
+              <div class="error-messages error" ng-if="interacted(createSnapshotForm.description)" ng-messages="createSnapshotForm.description.$error" >
+                <div ng-message="maxlength">请至多输入80个字符</div>
+              </div>
+            </div>
+          </div>     
+          <div class="control-group" >
+            <label class="control-label" title="生成虚拟机的内存快照">内存快照：</label>
+            <div class="controls">
+              <label class="checkbox">
+                <input type="checkbox" class="form-controls chk" name="memory" ng-model="snapshotForm.memory" />
+                <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>
+          <!-- <div class="control-group">
+            <label class="control-label" title="使客户机文件系统处于静默状态（需要安装有VMware Tools）">使客户机文件系统处于静默状态（需要安装有VMware Tools）</label>
+            <div class="controls">
+              <label class="checkbox" >
+                <input type="checkbox" ng-disabled="true" class="form-controls chk" name="quiesce" ng-model="snapshotForm.quiesce" />
+                <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>  -->      
+        </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirm(createSnapshotForm)">确定</button>
+      <button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+    </div>
+  </div>
+</script>

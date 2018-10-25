@@ -1,0 +1,75 @@
+﻿<div class="transfer-initSetting" ng-controller="initTransferSettingCtrl">
+    <div class="shade-box-initStorage" ng-if="showLoading">
+        <div class="global-loading shows">
+            <i class="loading-icon"></i>
+            <span>{{"aws.initSetting.transferImage.loadingTips"|translate}}</span>
+        </div>
+    </div>
+    <div class="title">
+        <span>{{"aws.initSetting.settingTranslate.transferSetting"|translate}}</span>
+    </div>
+    <div class="transfer-box">
+        <form name="transferForm" novalidate>
+            <div class="control-group">
+                <label class="control-label">{{"aws.initSetting.datacener"|translate}}：</label>
+                <div class="controls">
+                    <ui-select ng-model="setting.region" ng-change="changeRegion(setting.region, 'transferShow')" ng-disabled="true">
+                        <ui-select-match placeholder="{{'aws.initSetting.placeholder.selectDataCenter'|translate }}">{{$select.selected.regionName}}</ui-select-match>
+                        <ui-select-choices repeat="region in regionList | filter: {regionName: $select.search}">
+                            <div ng-bind-html="region.regionName | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{"aws.initSetting.transferImage.storage"|translate}}：</label>
+                <div class="controls">
+                    <ui-select ng-model="transfer.device" name="storageDevice" ng-disabled="transferStatus || transferDisabled" required>
+                        <ui-select-match placeholder="{{'aws.initSetting.transferImage.selectStorage'|translate }}">{{$select.selected.disPlayName}}</ui-select-match>
+                        <ui-select-choices repeat="device in deviceList | filter: {disPlayName: $select.search}">
+                            <div ng-bind-html="device.disPlayName | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages="(submitValid || transferForm.storageDevice.$dirty) && transferForm.storageDevice.$error">
+                        <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">&nbsp;</label>
+                <div class="controls">
+                    <button class="btn btn-info" type="button" ng-click="startTransfer(transferForm)" ng-disabled="transferStatus || transferDisabled">{{"aws.initSetting.transferImage.startTransfer"|translate}}</button>
+                </div>
+            </div>
+            <div class="control-group" ng-if = "showProgress">
+                <label class="control-label">&nbsp;</label>
+                <div class="controls">
+                    <div class="progess-bar">
+                        <div class="pull-left statusText" ng-class="{'failText': !progess.status}">{{progess.tips}}</div>
+                        <div class="pull-right">{{progess.number}}</div>
+                        <div class="progress-step clearfix">
+                            <div class="progress-base" ng-class="{'pregress-100': progess.number=='100%','fail-color': !progess.status}" ng-style="{width: progess.number}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script type="text/ng-template" id="transferAlert.html">
+        <div class="modal-common alert-modal">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <div class="modal-body">
+                <div class="transferTips">
+                    <!-- <span>{{"aws.initSetting.transferImage.transferTips1"|translate}}</span><br>
+                    <span>{{"aws.initSetting.transferImage.transferTips2"|translate}}</span> -->
+                    <span>{{"aws.initSetting.transferImage.transferTips3"|translate}}</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-info" type="button" ng-click="transConfirm()">{{"aws.action.ok"|translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+            </div>
+        </div>
+    </script>
+</div>

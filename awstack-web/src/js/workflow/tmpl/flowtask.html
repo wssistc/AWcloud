@@ -1,0 +1,215 @@
+<div class="page-inner">
+<uib-tabset active="active" justified="true">
+  <uib-tab index="0" heading='{{"aws.workflow.deployed"|translate}}' ng-click="choseTask(index)">
+    <div ng-if="active == '0'">
+      <div class="table-action">
+        <button class="btn btn-refresh" ng-click="refreshFlow('task')"><i class="icon-aw-refresh"></i>{{"aws.action.refresh"|translate}}</button>
+        <button type="button" ng-click="deleteTask(checkedItems)" ng-disabled="delisDisabled" class="btn btn-warning"> <i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+        <div class="search-box">
+          <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="flow.globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+          </form>
+        </div>
+      </div>
+      <div class="table-content">
+        <table ng-table="tableParamsdata" class="table">
+          <tr ng-repeat="item in $data">
+                <td header="'headerCheckbox.html'">
+                  <label class="checkbox">
+                    <input type="checkbox" ng-model="checkboxes.items[item.id]" />
+                    <i class="iconfont"></i>
+                  </label>
+                </td>
+                <td data-title="headers.name" sortable="'name'">
+                  <div class="edit-name">
+                    <span ng-click="getDetail(item)" title="{{item.name}}">{{item.name}}</span>
+                  </div>
+                </td>
+                <td data-title="headers.description" sortable="'description'">
+                    <span class="des">{{item.description}}</span>
+                </td>
+                <td data-title="headers.version" sortable="'version'">{{item.version}}</td>
+            </tr>
+        </table>
+        <loading-data  data="tableParamsDatas"></loading-data>
+      </div>
+    </div>
+  </uib-tab>
+  <uib-tab index="1" heading='{{"aws.workflow.model"|translate}}' ng-click="choseModel(index)">
+    <div ng-if="active == '1'">
+      <div class="table-action">
+        <button type="button" ng-click="createFlow()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}</button>
+        <button type="button" ng-click="editFlow(editData)" ng-disabled="isDisabled" class="btn btn-info"><i class="icon-aw-modify"></i>{{"aws.action.edit"|translate}}</button>
+        <button type="button" ng-click="deployedFlow(editData)" ng-disabled="isDisabled" class="btn btn-info"><i class="icon-aw-least"></i>{{"aws.action.deployed"|translate}}</button>
+        <button class="btn btn-refresh" ng-click="refreshFlow('model')"><i class="icon-aw-refresh"></i>{{"aws.action.refresh"|translate}}</button>
+        <button type="button" ng-click="deleteFlow(checkedItems)" ng-disabled="delisDisabled" class="btn btn-warning"> <i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+        <div class="search-box">
+          <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="flow.globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+          </form>
+        </div>
+      </div>
+      <div class="table-content">
+        <table ng-table="tableParams" class="table">
+        <colgroup>
+          <col width="4%">
+          <col width="20%">
+          <col width="30%">
+          <col>
+          <col>
+          <col>
+        </colgroup>
+          <tr ng-repeat="item in $data track by item.id | searchFilter:{name:SearchTerm,description:SearchTerm,createTime:SearchTerm,lastUpdateTime:SearchTerm,version:SearchTerm}" >
+            <td header="'headerCheckbox.html'">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="checkboxes.items[item.id]" />
+                <i class="iconfont"></i>
+              </label>
+            </td>
+            <td data-title="headers.name" sortable="'name'">
+                <div class="edit-name">
+                  <span title="{{item.name}}">{{item.name}}</span>
+                </div>
+            </td>
+            <td data-title="headers.description" sortable="'metaInfo.description'">
+                <span class="des">{{item.metaInfo.description}}</span>
+            </td>
+            <td data-title="headers.createTime" sortable="'createTime'"><span class="date">{{item.createTime}}</span></td>
+            <td data-title="headers.lastUpdateTime" sortable="'lastUpdateTime'"><span class="date">{{item.lastUpdateTime}}</span></td>
+            <!-- <td data-title="headers.version" sortable="'version'">{{item.version}}</td> -->
+          </tr>
+        </table>
+        <loading-data  data="tableParamsData"></loading-data>
+      </div>
+    </div>
+  </uib-tab>
+</uib-tabset>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="taskDetail.html">
+  <div class=" modal-common modal-img">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title"></h3>
+    </div>
+    <div class="modal-body">
+      <img ng-src="{{imgUrl}}" />
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="deployedFlow.html">
+  <div class=" modal-common">
+    <form name="deployedFlowForm">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{'aws.workflow.workDep'|translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="img-detail">
+          <img ng-src="{{modelImgUrl}}" alt=""/>
+        </div>
+        <div class="control-group deploy-group" ng-repeat="item in nodeList">
+          <label class="control-label"><span ng-if="!item.name">{{'aws.workflow.'+$index | translate}}</span>{{item.name}}：</label>
+          <div class="controls">
+            <div class="cl-box">
+              <ui-select ng-model="item.resourceIdAssign.group" ng-change="groupChange(item.resourceIdAssign.group,$index)">
+                <ui-select-match placeholder="{{'aws.workflow.depart'|translate}}">{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="data in groupList | filter:{name:$select.search}">
+                  <div ng-bind-html="data.levname | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+            <div class="choose-box">
+              <ui-select ng-model="item.resourceIdAssign.user" multiple  name="{{item.selectName}}" required>
+                <ui-select-match placeholder="{{'aws.workflow.user'|translate}}">{{$item.name}}</ui-select-match>
+                <ui-select-choices repeat="data in item.resourceIdAssign.userList | filter:{name:$select.search}">
+                  <div class="choose" ng-bind-html="data.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-messages="(submitValid || deployedFlowForm[item.selectName].$dirty) && deployedFlowForm[item.selectName].$error">
+                <form-validate></form-validate>
+              </div>
+            </div>
+              
+          </div>
+        </div>
+
+        
+
+        <!-- <ul>
+          <li ng-repeat="item in nodeList">
+            <span>{{item.name}}</span>
+            <div>
+              <div>
+                <ui-select ng-model="item.resourceIdAssign.group" ng-change="groupChange(item.resourceIdAssign.group,$index)">
+                  <ui-select-match placeholder="{{'aws.workflow.type'|translate}}">{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="data in groupList | filter:{name:$select.search}">
+                    <div ng-bind-html="data.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+              <div>
+                <ui-select ng-model="item.resourceIdAssign.user" multiple>
+                  <ui-select-match placeholder="{{'aws.workflow.type'|translate}}">{{$item.name}}</ui-select-match>
+                  <ui-select-choices repeat="data in userList | filter:{name:$select.search}">
+                    <div ng-bind-html="data.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+              
+            </div>
+          </li>
+        </ul> -->
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info ng-binding" ng-click="deployedFlowconfirm(nodeList,deployedFlowForm)">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default ng-binding" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+      </div>
+    </form>
+    
+  </div>
+</script>
+<script type="text/ng-template" id="createModel.html">
+  <div class=" modal-common">
+    <form name="createModelForm" novalidate>
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{'aws.workflow.workTitC'|translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">{{'aws.workflow.name'|translate}}：</label>
+          <div class="controls">
+            <input type="text" ng-model="modelName" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" name="name" class="form-controls" required />
+            <div class="error" ng-messages="(submitValid ||createModelForm.name.$dirty) && createModelForm.name.$error">
+              <form-validate max-num="32">
+              </form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.workflow.description'|translate}}：</label>
+          <div class="controls">
+            <textarea type="text" ng-model="decription" ng-maxlength="70" name="decription" class="form-controls"/></textarea>
+            <div class="error" ng-messages="(submitValid ||createModelForm.decription.$dirty) && createModelForm.decription.$error">
+              <form-validate max-num="70">
+              </form-validate>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info ng-binding" ng-click="createModelconfirm(createModelForm)">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default ng-binding" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+      </div>
+    </form>
+  </div>  
+</script>
+
+

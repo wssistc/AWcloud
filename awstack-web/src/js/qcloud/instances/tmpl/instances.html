@@ -1,0 +1,472 @@
+<div class="page-inner">
+  <h3 class="page-title">{{'aws.qcloud.instances.instance'|translate}}</h3>
+  <div class="table-action">
+    <ui-select ng-model="selectedRegion" ng-change="changeRegion(selectedRegion)" title="选择区域" style="width:150px;margin-right:10px;">
+      <ui-select-match placeholder="选择区域">{{$select.selected.name}}</ui-select-match>
+      <ui-select-choices repeat="region.value as region in regions.options">
+        <div ng-bind-html="region.name |highlight:$select.search"></div>
+      </ui-select-choices>
+    </ui-select>
+    <!-- <button type="button" class="btn btn-primary" ng-click="newInstance()" ng-disabled="createEnable"><i class="icon-aw-add-to2"></i>{{'aws.instances.new'|translate}}</button> -->
+    <button class="btn btn-info" ng-click="startServer()" ng-disabled="stopEnable"><i class="icon-aw-start-up"></i>{{'aws.instances.boot'|translate}}</button>
+    <button class="btn btn-info" ng-click="stopServer()" ng-disabled="activeEnable"><i class="icon-aw-shut-down"></i>{{'aws.instances.stop'|translate}}</button>
+    <!--<button class="btn btn-info" ng-disabled="conIsEnable" ng-init="conIsEnable=true" ng-click="openConsole(editData)"><i class="icon-aw-pc"></i>VNC</button> -->
+    <!-- <div class="dropdown">
+        <button type="button" class="btn btn-info dropdown-toggle" ng-disabled="delisDisabled" data-toggle="dropdown">{{'aws.instances.moreOps'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+        <ul class="dropdown-menu">
+            <li><button ng-click="reboot()" ng-disabled="activeIsEnable">{{'aws.instances.restart'|translate}}</button></li>
+            <li><button ng-click="shutdown()" ng-disabled="errorEnable">{{'aws.instances.forceShupdown'|translate}}</button></li>
+            <li><button ng-click="delSever()" ng-disabled="delisDisabled">{{'aws.instances.del_instance'|translate}}</button></li>
+            <li><button ng-click="loadingDisk(editData)" ng-disabled="isDisabled">{{'aws.instances.attachVolume'|translate}}</button></li>
+            <li><button ng-click="editSever(editData)" ng-disabled="isDisabled">{{'aws.instances.edit'|translate}}</button></li>
+            <li><button ng-click="updateNetwork('add',editData)" ng-disabled="stopDisEnable">{{'aws.instances.addNIC'|translate}}</button></li>
+            <li><button ng-click="updateNetwork('remove',editData)" ng-disabled="removefixIpDis">{{'aws.instances.moveNIC'|translate}}</button></li>
+            <li><button ng-click="bindFloatingIp('bind',editData)" ng-disabled="bindfloatingIps">{{'aws.instances.bindingPublicIP'|translate}}</button></li>
+            <li><button ng-click="bindFloatingIp('relieve',editData)" ng-disabled="floatIpDis">{{'aws.instances.releasingPublicIPBindings'|translate}}</button></li>
+            <li><button ng-click="mkImg(editData)">{{'aws.instances.makeImg'|translate}}</button></li>
+        </ul>
+    </div> -->
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.instances.search'|translate}}" />
+            </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="tableParams" class="table instanceTable">
+      <tr ng-repeat="item in $data">
+        <td  header="'headerCheckbox.html'" class="check-td">
+          <label class="checkbox">
+            <input type="checkbox" name="r" ng-model="checkboxes.items[item.unInstanceId]" value="{{item.unInstanceId}}" />
+            <i class="iconfont"></i>
+          </label>
+        </td>
+        <td data-title="'aws.qcloud.instances.cloudInstanceName'|translate"><a ng-href="/view/qcloud?id={{item.unInstanceId}}">{{item.instanceName}}</a></td>
+        <td data-title="'aws.qcloud.instances.status'|translate"> <span class="{{'aws.qcloud.instances.table.c_status.'+item.status| translate}}">{{'aws.qcloud.instances.table.status.'+item.status| translate}}</span>
+          <i ng-class="{'icon-aw-refresh':(item.status=='8' ||item.status=='9')}" class="aw-spin"></i>
+        </td>
+        <td data-title="'aws.qcloud.instances.os'|translate">{{item.os}}</td>
+        <td data-title="'aws.qcloud.instances.imgName'|translate">{{item.unImgId}}</td>
+        <td data-title="'aws.qcloud.instances.privateIP'|translate">{{item.lanIp}}</td>
+        <td data-title="'aws.qcloud.instances.publicIP'|translate">
+          {{item.wanIpSet[0]}}
+        </td>
+        <td data-title="'aws.qcloud.instances.projectName'|translate">{{item.projectId}}</td>
+        <td data-title="'aws.qcloud.instances.create_at'|translate">{{item.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+        <td data-title="'aws.qcloud.instances.cvmPayMode'|translate">{{'aws.qcloud.instances.table.cvmPayMode.'+item.cvmPayMode| translate}}</td>
+      </tr>
+    </table>
+  </div>
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+    <div class="tab-content">
+      <div class="detail-row">
+        <div class="detail-header">
+          <table class="table">
+            <tr>
+              <td><a ng-href="/qcloud/instances">{{qcloudinsConfigData[0].instanceName}}</a></td>
+              <td> {{qcloudinsConfigData[0].projectId}}</td>
+              <td> {{qcloudinsConfigData[0].os}}</td>
+              <td> {{qcloudinsConfigData[0].unImgId}}</td>
+              <td> {{qcloudinsConfigData[0].lanIp}}</td>
+              <td> {{qcloudinsConfigData[0].wanIpSet[0]}}</td>
+              <td> {{qcloudinsConfigData[0].createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+              <td> {{'aws.qcloud.instances.table.status.'+qcloudinsConfigData[0].status| translate}}</td>
+              <td> {{'aws.qcloud.instances.table.cvmPayMode.'+qcloudinsConfigData[0].cvmPayMode| translate}}</td>
+            </tr>
+          </table>
+        </div>
+        <div class="detail-title">
+          <a class="an-close" ng-href="/view/qcloud?"><i class=" icon-aw-mail-reply"></i></a>
+          <span>{{'aws.qcloud.instances.cloudInstanceDetail'|translate}}</span>
+        </div>
+        <div class="detail-info">
+          <table class="table table-info">
+            <tr>
+              <td>{{'aws.qcloud.instances.cloudInstanceName'|translate}}</td>
+              <td>{{qcloudinsConfigData[0].instanceName}}</td>
+              <td>{{'aws.qcloud.instances.image'|translate}}</td>
+              <td>{{qcloudinsConfigData[0].unImgId}}</td>
+            </tr>
+            <tr>
+              <td>{{'aws.qcloud.instances.configration'|translate}}</td>
+              <td>
+                CPU：{{qcloudinsConfigData[0].cpu}}，内存：{{qcloudinsConfigData[0].mem}}GB
+              </td>
+              <td>{{'aws.qcloud.instances.NIC'|translate}}</td>
+              <td>{{qcloudinsConfigData[0].lanIp}}</td>
+            </tr>
+            <tr>
+              <td>{{'aws.qcloud.instances.status'|translate}}</td>
+              <td>{{'aws.qcloud.instances.table.status.'+qcloudinsConfigData[0].status| translate}}</td>
+              <td>{{'aws.qcloud.instances.create_at'|translate}}</td>
+              <td>{{qcloudinsConfigData[0].createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+            </tr>
+            <tr>
+              <td>{{'aws.qcloud.instances.diskInfo'|translate}}</td>
+              <td>类型:{{'aws.qcloud.instances.table.diskInfo.storageType.'+qcloudinsConfigData[0].diskInfo.storageType| translate}},大小:{{qcloudinsConfigData[0].diskInfo.storageSize}}</td>
+              <td>{{'aws.qcloud.instances.deviceClass'|translate}}</td>
+              <td>{{qcloudinsConfigData[0].deviceClass}}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    </pane>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="addinstances.html">
+  <div class="instances-modal modal-common">
+    <div class="modal-header">
+      <!--       <div class="control-group">
+        <div class="controls">
+            <div class="radio-item clearFix">
+                <label class="radio">
+                    <input type="radio" ng-model="options.creatBy" value="isImage"/><i class="iconfont"></i>{{'aws.instances.image'|translate}}
+                </label>
+                <label class="radio">
+                    <input type="radio" ng-model="options.creatBy" value="isSnap"/><i class="iconfont"></i>{{'aws.instances.addinstances.snapshot'|translate}}
+                </label>
+            </div>
+         </div>
+      </div> -->
+      <button type="button" class="close" ng-click="cancel()">×</button>
+      <h3 class="modal-title">{{'aws.instances.addinstances.newInstance'|translate}}</h3>
+    </div>
+    <!-- <code>{{ images2 }}</code> -->
+    <div class="modal-body clearFix">
+      <div class="left">
+        <form action="" name="InstanceForm">
+          <fieldset class="field-base clearFix">
+            <h5 class="title"><span>{{'aws.instances.addinstances.detail'|translate}}</span></h5>
+            <div class="control-items2 clearfix">
+              <div class="control-group">
+                <label class="control-label">{{'aws.instances.addinstances.instanceName'|translate}}:</label>
+                <div class="controls">
+                  <input type="text" class="form-controls" name="instanceName" ng-model="instanceName" placeholder="{{'aws.instances.addinstances.instanceNameInput'|translate}}" required/>
+                  <div ng-messages="InstanceForm.instanceName.$dirty && InstanceForm.instanceName.$error">
+                    <span class="error" ng-message="required">{{'aws.instances.addinstances.required'|translate}}</span>
+                  </div>
+                </div>
+             </div>
+             <div class="control-group">
+                <label class="control-label">{{'aws.instances.addinstances.num'|translate}}:</label>
+                <div class="controls">
+                  <input type="text" class="form-controls" name="hostNum" ng-init="hostNum=1" ng-model="hostNum" required/>
+                  <div ng-messages="InstanceForm.hostNum.$dirty && InstanceForm.hostNum.$error">
+                    <span class="error" ng-message="required">{{'aws.instances.addinstances.required'|translate}}</span>
+                  </div>
+                </div>
+            </div>
+            </div>
+            
+          </fieldset>
+          <fieldset class="field-image clearFix">
+            <h5 class="title"><span>{{'aws.instances.addinstances.imgChoice'|translate}}</span></h5>
+            <div class="control-items2 clearfix">
+              <div class="control-group">
+                <label class="control-label">{{'aws.instances.addinstances.os'|translate}}:</label>
+                <div class="controls">
+                  <ui-select ng-model="image.selected" ng-change="os_changed()" ng-disabled="options.disabled"  title="{{'aws.instances.addinstances.imgChoice'|translate}}">
+                    <ui-select-match placeholder="{{'aws.instances.addinstances.imgChoice'|translate}}">{{$select.selected.type}}</ui-select-match>
+                    <ui-select-choices repeat="image in osType | filter:{type:$select.search}">
+                      <div ng-bind-html="image.type | highlight: $select.search"></div>
+                      <!--<small>
+                        email: {{person.email}}
+                        age: <span ng-bind-html="''+person.age | highlight: $select.search"></span>
+                      </small>-->
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label">{{'aws.instances.imgName'|translate}}:</label>
+                <div class="controls">
+                  <ui-select ng-model="arch.selected" ng-disabled="options.disabled"  title="Choose a person">
+                    <ui-select-match placeholder="{{'aws.instances.addinstances.imgNameChoice'|translate}}">{{$select.selected.imageName}}</ui-select-match>
+                    <ui-select-choices repeat="arch.unImageId as arch  in images2 | filter: {imageName: $select.search}">
+                      <div ng-bind-html="arch.imageName | highlight: $select.search"></div>
+                      <!--<small>
+                        email: {{person.email}}
+                        age: <span ng-bind-html="''+person.age | highlight: $select.search"></span>
+                      </small>-->
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+            </div>
+            
+            <!--             <div class="control-group col">
+              <label class="control-label">{{'aws.instances.addinstances.arch'|translate}}:</label>
+              <div class="controls">
+                <div class="btn-item-group">
+                  <button type="button" class="arch-btn" ng-disabled="options.disabled" ng-class='{"active":item.value === options.arch}'  ng-repeat="item in vm.framework"><span>{{item.text}}</span></button>
+                </div>
+              </div>
+            </div> -->
+            
+            <div class="control-group col">
+              <label class="control-label">{{'aws.instances.addinstances.type'|translate}}:</label>
+              <div class="controls">
+                <div class="btn-item-group">
+                  <button type="button" class="type-btn" ng-class='{"active":item.tag === options.img}' ng-click="choosen(item)" data-value="{{item.tag}}" ng-repeat="item in vm.imgType"><span>{{item.text}}</span></button>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="field-setting">
+            <h5 class="title"><span>{{'aws.instances.addinstances.conf_option'|translate}}</span></h5>
+            <div class="control-group">
+              <label class="control-label">CPU</label>
+              <div class="controls">
+                <div class="btn-item-group">
+                  <button type="button" class="set-btn" ng-click="chooseCpuMem(item)" ng-class='{"active":item.id === options.cpu_mem}' data-value="{{item.id}}" ng-repeat="item in flavorNormalList"><span>{{item.name}}</span></button>
+                </div>
+                <span class="tip">{{item.tip}}</span>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="field-network">
+            <h5 class="title"><span>{{'aws.instances.addinstances.net_setting'|translate}}</span></h5>
+            <div class="control-group">
+              <label class="control-label">{{'aws.instances.addinstances.name'|translate}}:</label>
+              <div class="controls">
+                <ui-select ng-model="network.selected" ng-disabled="disabled" style="width: 100%;"  title="Choose a person">
+                  <ui-select-match placeholder="{{'aws.instances.addinstances.netChoice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="network.id as network in networkList  | filter: {name: $select.search}">
+                    <div ng-bind-html="network.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="field-senior">
+            <h5 class="title"><span>{{'aws.instances.addinstances.advOption'|translate}}<i ng-click="fold =!fold" class="conf-icon" ng-class="{'icon-aw-angle-up':fold,'icon-aw-angle-down':!fold}"></span></i></h5>
+          </fieldset>
+          <fieldset class="field-base" ng-show="fold">
+            <div class="control-group group-senior">
+              <label class="control-label">{{'aws.instances.addinstances.selfConfig'|translate}}:</label>
+              <div class="controls">
+                <ui-select ng-model="conf.selected" ng-change="chooseCpuMem(conf.selected)" ng-disabled="disabled" style="width: 100%;" >
+                  <ui-select-match placeholder="{{'aws.instances.addinstances.choiceConfig'|translate}}">{{$select.selected.text}}</ui-select-match>
+                  <ui-select-choices repeat="conf in flavorHighList  | filter: {id: $select.search}">
+                    <div ng-bind-html="conf.text | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-items2 clearFix">
+              <div class="control-group">
+                <label class="control-label">{{'aws.instances.addinstances.passwd'|translate}}:</label>
+                <div class="controls">
+                  <input type="password" class="form-controls" name="admin_pass" ng-model="admin_pass"  id= "pw2"/>
+                  <div ng-messages="InstanceForm.admin_pass.$dirty && InstanceForm.admin_pass.$error">
+                    <span class="error" ng-message="required">{{'aws.instances.addinstances.required'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group">
+                  <label class="control-label">{{'aws.instances.addinstances.repeatPasswd'|translate}}:</label>
+                  <div class="controls">
+                    <input type="password" class="form-controls" name="admin_comfirmpass" ng-model="admin_comfirmpass" pw-check="pw2"/>
+                    <div ng-messages="InstanceForm.admin_comfirmpass.$dirty && InstanceForm.admin_comfirmpass.$error">
+                      <span class="error" ng-message="required">{{'aws.instances.addinstances.required'|translate}}</span>
+                      <span class="error" ng-message="pwCheck">{{'aws.instances.addinstances.notSamePasswd'|translate}}</span>
+                    </div>
+                  </div>
+              </div>
+            </div>
+            <div class="control-items2 clearFix">
+              <div class="control-group">
+                <label class="control-label">{{'aws.instances.addinstances.keypair'|translate}}:</label>
+                <div class="controls">
+                  <ui-select ng-model="keypairs.selected" ng-disabled="disabled" style="width: 100%;"  title="Choose a person">
+                    <ui-select-match placeholder="{{'aws.instances.addinstances.keypairChoice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="keypairs.name as keypairs  in keypairsList | filter: {name: $select.search}">
+                      <div ng-bind-html="keypairs.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label">{{'aws.instances.firewall'|translate}}:</label>
+                <div class="controls">
+                  <ui-select ng-model="securities.selected" ng-disabled="disabled" style="width: 100%;"  title="Choose a person">
+                    <ui-select-match placeholder="{{'aws.instances.addinstances.firewallChoice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="security.name as security in securityList | filter: {name: $select.search}">
+                      <div ng-bind-html="security.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+            </div>
+            <div class="control-items2 clearFix">
+              <div class="control-group">
+                <label class="control-label">{{'aws.instances.addinstances.launchArea'|translate}}:</label>
+                <div class="controls">
+                  <ui-select ng-model="aa" ng-disabled="disabled" style="width: 100%;"  title="Choose a person">
+                    <ui-select-match placeholder="{{'aws.instances.addinstances.launchAreaChoice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="keypairs.name as keypairs  in keypairsList | filter: {name: $select.search}">
+                      <div ng-bind-html="keypairs.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label">{{'aws.instances.addinstances.launchNode'|translate}}:</label>
+                <div class="controls">
+                  <ui-select ng-model="bb" ng-disabled="disabled" style="width: 100%;"  title="Choose a person">
+                    <ui-select-match placeholder="{{'aws.instances.addinstances.launchNodeChoice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="security.name as security in securityList | filter: {name: $select.search}">
+                      <div ng-bind-html="security.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.instances.addinstances.localStorage'|translate}}:</label>
+              <div class="controls">
+                <label class="checkbox">
+                  <input type="checkbox" name="r" ng-model="use_local" value="" class="" />
+                  <i class="iconfont"></i>
+                </label>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class="right">
+        <h5 class="title">{{'aws.instances.addinstances.conf_detail'|translate}}</h5>
+        <table class="table">
+          <tr>
+            <td>{{'aws.instances.image'|translate}}</td>
+            <td><span>{{image.selected.type}}</span></td>
+          </tr>
+          <tr>
+            <td>{{'aws.instances.addinstances.type'|translate}}</td>
+            <td><span>{{options.img}}</span></td>
+          </tr>
+          <tr>
+            <td>{{'aws.instances.addinstances.arch'|translate}}</td>
+            <td><span>{{options.arch}}</span></td>
+          </tr>
+          <tr>
+            <td>CPU</td>
+            <td><span>{{options.cpu}}{{'aws.instances.addinstances.core'|translate}}</span></td>
+          </tr>
+          <tr>
+            <td>{{'aws.instances.addinstances.memory'|translate}}</td>
+            <td><span>{{options.mem}}</span></td>
+          </tr>
+          <tr>
+            <td>{{'aws.instances.addinstances.instanceName'|translate}}</td>
+            <td><span>{{hostName}}</span></td>
+          </tr>
+          <tr>
+            <td>{{'aws.instances.addinstances.num'|translate}}</td>
+            <td><span>{{hostNum}}</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="InstanceForm.$invalid" ng-click="create()">{{'aws.instances.addinstances.ok'|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="update-os-net.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$close()">×</button>
+      <h3 class="modal-title">{{netTitle}}</h3>
+    </div>
+    <div class="modal-body ">
+      <div class="control-group">
+        <label class="control-label">{{'aws.instances.NIC'|translate}}网卡:</label>
+        <div class="controls">
+          <ui-select ng-model="upNet.selected">
+            <ui-select-match>{{$select.selected.name}}</ui-select-match>
+            <ui-select-choices group-by="groupFind" repeat="value.id as value in netList | filter: {name: $select.search}">
+              <div ng-bind-html="value.name | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="$close(upNet.selected)">{{'aws.instances.addinstances.ok'|translate}}确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="update-os-edit.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$close()">×</button>
+      <h3 class="modal-title">{{'aws.instances.osedit.editInsName'|translate}}编辑主机名</h3>
+    </div>
+    <div class="modal-body ">
+      <form name="oseditForm">
+        <div class="control-group">
+          <label class="control-label">{{'aws.instances.instanceName'|translate}}主机名:</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="name" ng-model="hostName" required/>
+            <div ng-messages="oseditForm.name.$dirty && oseditForm.name.$error">
+              <span class="error" ng-message="required">{{'aws.instances.addinstances.required'|translate}}必填项</span>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="oseditForm.$invalid" ng-click="$close(hostName)">{{'aws.instances.addinstances.ok'|translate}}确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="update-os-FloatingIp.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$close()">×</button>
+      <h3 class="modal-title">{{floatTitle}}</h3>
+    </div>
+    <div class="modal-body ">
+      <div class="control-group" ng-if="!hideips">
+        <label class="control-label">{{'aws.instances.FloatingIp.ipAddr'|translate}}IP地址:</label>
+        <div class="controls">
+          <ui-select ng-model="floatingIp.floatingip_id">
+            <ui-select-match>{{$select.selected.ip}}</ui-select-match>
+            <ui-select-choices group-by="groupFind" repeat="value.id as value in IpsList | filter: {ip : $select.search}">
+              <div ng-bind-html="value.ip | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">{{'aws.instances.NIC'|translate}}网卡:</label>
+        <div class="controls">
+          <ui-select ng-model="floatingIp.port_id">
+            <ui-select-match>{{$select.selected.name}}</ui-select-match>
+            <ui-select-choices group-by="groupFind" repeat="value.id as value in osNetList | filter:{name : $select.search}">
+              <div ng-bind-html="value.name | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="$close(floatingIp)">{{'aws.instances.addinstances.ok'|translate}}确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}取消</button>
+    </div>
+  </div>
+</script>

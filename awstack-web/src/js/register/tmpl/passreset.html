@@ -1,0 +1,45 @@
+<div class="container">
+    <div class="registered-box clearfix">
+        <p class="text-right">{{'aws.register.reg.haveAccount'|translate}}，<a ng-href="#/">{{'aws.register.reg.backlogin'|translate}} </a>>></p>
+        <div class="title">{{'aws.register.reg.resetPassword'|translate}}</div>
+        <form name="resetPassForm" class="form-horizontal" ng-if="linkValid && !resetSuccess">
+            <fieldset>
+                <div class="form-group">
+                    <label class="control-label"><i class="red">*</i> {{'aws.register.reg.newPassword'|translate}}：</label>
+                    <div class="control-item">
+                        <input type="password"  autocomplete="off" name="password" id="new_pass" required ng-minlength="6" ng-maxlength="16" ng-model="passReset.newpass" class="form-control" />
+                        <div ng-if="resetPassForm.password.$invalid && resetPassForm.password.$dirty">
+                            <span class="help-block" ng-if="resetPassForm.password.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                            <span class="help-block" ng-if="resetPassForm.password.$error.minlength">{{'aws.register.reg.passwd6'|translate}}</span>
+                            <span class="help-block" ng-if="resetPassForm.password.$error.maxlength">{{'aws.register.reg.passwd16'|translate}}</span>
+                        </div>
+                        <div ng-if="resetPassForm.password.$valid" class="help-success"><i class="icon-aw_correct"></i></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"><i class="red">*</i> {{'aws.register.reg.confirmPasswd'|translate}}：</label>
+                    <div class="control-item">
+                        <input type="password"  autocomplete="off" name="confirmPassword" required pw-check="new_pass" ng-model="passReset.cfmPassword" class="form-control" />
+                        <div ng-if="resetPassForm.confirmPassword.$invalid  && resetPassForm.confirmPassword.$dirty">
+                            <span class="help-block" ng-if="resetPassForm.confirmPassword.$error.pwCheck">{{'aws.register.reg.passwddiff'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="control-label"></label>
+                    <div class="control-item">
+                        <button type="button" class="btn btn-next" ng-disabled="resetPassForm.$invalid" ng-click="resetPass(resetPassForm)">{{'aws.register.reg.confirm'|translate}}</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+        <div class="text-center">
+            <div ng-if="!linkValid">您用于重置密码的链接已经失效，您可以重新<a  href="#/forgetpass">发送邮件</a>生成一个新的链接。</div>
+            <div ng-if="resetSuccess">密码修改成功！<a href="#/">返回重新登录</a></div>
+            <div ng-if="resetFail">密码修改失败！<a href="#/resetpass">重新修改？</a></div>
+            <div ng-if="severError" class=" red text-center">服务器错误</div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,236 @@
+<div class="inner-page">
+    <div class="bg left">
+        <div class="cont">
+            <legend>硬件监控</legend>
+            <table class="table">
+                <colgroup>
+                    <col width="20%">
+                    <col width="20%">
+                    <col width="20%">
+                    <col width="20%">
+                    <col width="20%">
+                </colgroup>
+                <tr>
+                    <th></th>
+                    <th>电源</th>
+                    <th>温度</th>
+                    <th>磁盘</th>
+                    <th>网络</th>
+                </tr>
+                <tr ng-repeat="item in hardwareTable">
+                    <td>{{item.host}}</td>
+                    <td>
+                        <span>
+                            <i class="icon icon-aw-shut-down" ng-show="item.powerState==0"></i>
+                            <i class="icon icon-aw-start-up" ng-show="item.powerState==1" ></i>
+                        </span>
+                        <span class="red" ng-show="item.powerState!=0 && item.powerState!=1" >--</span>
+                    </td>
+                    <td>
+                        <span ng-class="{'green':item.cpu_temp_state=='green','yellow':item.cpu_temp_state=='yellow','red':item.cpu_temp_state=='red'}" ng-show="item.cpu_temperature != null && item.cpu_temperature!= '' && item.cpu_temperature>=0">{{item.cpu_temperature}} ℃</span>
+                        <sapn class="red" ng-show="(item.cpu_temperature==null || item.cpu_temperature=='') && !item.switch">--</sapn>
+                
+                    </td>
+                    <td>
+                        <span>
+	                        <i class="icon icon-aw-hard-disk" ng-show="item.disk_status == 1 || item.disk_status == 2" ng-class="{'normal':item.disk_status==1 ,'warning':item.disk_status==2}"></i>
+	                        <i class="icon icon-aw-jycp" ng-show="item.disk_status==0" ng-class="{'error':item.disk_status==0}"></i>
+	                    </span>
+	                    <span class="red" ng-show="item.disk_status!=0 && item.disk_status!=1 && item.disk_status!=2 && !item.switch">--</span>
+                    </td>
+                    <td>
+                        <span>
+                            <i class="icon icon-nic" ng-show="item.net_status==1" ng-class="{'normal':item.net_status==1}"></i>
+                            <i class="icon icon-aw-jywk" ng-show="item.net_status==0" ng-class="{'error':item.net_status==0}"></i>
+                        </span>
+                        <span class="red" ng-show="item.net_status!=0 && item.net_status!=1 && !item.switch">--</span>
+                    </td>
+                </tr>
+            </table>
+            <p ng-show="loadingIPMIData && !intervalCount">数据加载中...</p>
+            <p ng-show="!loadingIPMIData && hardwareTable.length ===0 ">数据为空</p>
+        </div>
+    </div>
+    <div class="right">
+        <div class="bg right1">
+            <div class="cont">
+                <legend>云平台资源利用率</legend>
+                <div class="pie-wrap">
+                    <div class="pie-title">CPU</div>
+                    <div class="pie" chart-pie panel='cpuUseChart.panels'></div>
+                </div>
+                <div class="pie-wrap">
+                    <div class="pie-title">内存</div>
+                    <div class="pie" chart-pie panel='memoryUseChart.panels'></div>
+                </div>
+                <div class="pie-wrap">
+                    <div class="pie-title">存储</div>
+                    <div class="pie" chart-pie panel='storageChart.panels'></div>
+                </div>
+            </div>
+        </div>
+        <div class="bg right2">
+            <div class="cont">
+                <legend>云平台告警TOP5</legend>
+                <table class="table">
+                    <colgroup>
+                        <col width="40%">
+                        <col width="40%">
+                        <col width="20%">
+                    </colgroup>
+                    <tr>
+                        <th>主机名</th>
+                        <th>告警类型</th>
+                        <th>严重等级</th>
+                    </tr>
+                    <tr ng-repeat="item in newAlarms_data">
+                        <td>{{item.hostname}}</td>
+                        <td>
+                        	<span class="highlight" ng-class="{'bg-green':item.alarmType == 'healthcheck','bg-orange':item.alarmType == 'threshold','bg-blue':item.alarmType == 'computeha'}" >{{item._alarmType}}</span>
+                        </td>
+                        <td>
+                            <span>{{item.severity}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script type="text/ng-template" id="settingModal.html">
+        <div class="box set-box">
+            <form name="setting_form" novalidate>
+                <div class="form form-title">
+                    设置<a type="button" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()"><i class="icon icon-aw-1shut-down"></i></a>
+                </div>
+                <div class="line"></div>
+                <div class="form form-body">
+                    <div class="clearFix">
+                        <legend>告警配置</legend>
+                        <div class="control-items2">
+                            <div class="control-group clearFix">
+                                <label class="control-label">CPU温度<span class="yellow">黄色</span>告警：</label>
+                                <div class="controls">
+                                    <input class="form-controls" type="text" name="cpuAlarmMin_val" ng-class="{'error':errors.cpuAlarmMin_val}" ng-model="settingForm.cpuAlarmMin" formfield="setting_form" limitnumrange min="30" max="cpuvalidmax" required num-keyboard error="{{errors.cpuAlarmMin_val}}" />
+                                    <div class="error" ng-messages="setting_form.cpuAlarmMin_val.$error" ng-if="interacted(setting_form,'cpuAlarmMin_val')">
+                                        <span ng-message="required">*必填项</span>
+                                        <span ng-message="limitnumrange">请输入30~{{cpuvalidmax}}的整数</span>
+                                    </div>
+                                </div>
+                                <span class="unit">℃</span>
+                            </div>
+                            <div class="control-group clearFix">
+                                <label class="control-label">CPU温度<span class="red">红色</span>告警：</label>
+                                <div class="controls">
+                                    <input class="form-controls" type="text" name="cpuAlarmMax_val" ng-class="{'error':errors.cpuAlarmMax_val}" ng-model="settingForm.cpuAlarmMax" formfield="setting_form" limitnumrange min="cpuvalidmin" max="100" required num-keyboard error="{{errors.cpuAlarmMax_val}}" />
+                                    <div class="error" ng-messages="setting_form.cpuAlarmMax_val.$error" ng-if="interacted(setting_form,'cpuAlarmMax_val')">
+                                        <span ng-message="required">*必填项</span>
+                                        <span ng-message="limitnumrange">请输入{{cpuvalidmin}}~100的整数</span>
+                                    </div>
+                                </div>
+                                <span class="unit">℃</span>
+                            </div>
+                        </div>
+                        <div class="control-items2">
+                            <div class="control-group clearFix">
+                                <label class="control-label">磁盘利用率阀值预警：</label>
+                                <div class="controls">
+                                    <input class="form-controls" type="text" name="diskAlarmMin_val" ng-class="{'error':errors.diskAlarmMin_val}" ng-model="settingForm.diskAlarmMin" formfield="setting_form" limitnumrange min="55" max="95" required num-keyboard error="{{errors.diskAlarmMin_val}}" />
+                                    <div class="error" ng-messages="setting_form.diskAlarmMin_val.$error" ng-if="interacted(setting_form,'diskAlarmMin_val')">
+                                        <span ng-message="required">*必填项</span>
+                                        <span ng-message="limitnumrange">请输入55~95的整数</span>
+                                    </div>
+                                </div>
+                                <span class="unit">%</span>
+                            </div>
+                           <!--  <div class="control-group clearFix">
+                                <label class="control-label">磁盘利用率预警最大值：</label>
+                                <div class="controls">
+                                    <input class="form-controls" type="text" name="diskAlarmMax_val" ng-class="{'error':errors.diskAlarmMax_val}" ng-model="settingForm.diskAlarmMax" formfield="setting_form" limitnumrange min="55" max="100" required num-keyboard error="{{errors.diskAlarmMax_val}}" />
+                                    <div class="error" ng-messages="setting_form.diskAlarmMax_val.$error" ng-if="interacted(setting_form,'diskAlarmMax_val')">
+                                        <span ng-message="required">*必填项</span>
+                                        <span ng-message="limitnumrange">请输入55~100的整数</span>
+                                    </div>
+                                </div>
+                                <span class="unit">%</span>
+                            </div> -->
+                        </div>
+                        <legend>交换机IP配置</legend>
+                        <div class="control-items2 ip-group">
+                            <div class="control-group clearFix">
+                                <label class="control-label">主交换机IP：</label>
+                                <div class="controls">
+                                    <input class="form-controls" type="text" name="mainSwitch_ip" ng-class="{'error':errors.mainSwitch_ip}" ng-model="settingForm.mainSwitchIp" formfield="setting_form" ipaddrpattern required num-keyboard error="{{errors.mainSwitch_ip}}" />
+                                    <div class="error" ng-messages="setting_form.mainSwitch_ip.$error" ng-if="interacted(setting_form,'mainSwitch_ip')">
+                                        <span ng-message="required">*必填项</span>
+                                        <span ng-message="ipaddrpattern">IP地址格式错误</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group clearFix">
+                                <label class="control-label">备交换机IP:</label>
+                                <div class="controls">
+                                    <input class="form-controls" type="text" name="spareSwitch_ip" ng-class="{'error':errors.spareSwitch_ip}" ng-model="settingForm.spareSwitchIp" ipadd="access" formfield="setting_form" ipaddrpattern required num-keyboard error="{{errors.spareSwitch_ip}}" />
+                                    <div class="error" ng-messages="setting_form.spareSwitch_ip.$error" ng-if="interacted(setting_form,'spareSwitch_ip')">
+                                        <span ng-message="required">*必填项</span>
+                                        <span ng-message="ipaddrpattern">IP地址格式错误</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <legend>IPMI配置</legend>
+                        <div class="control-items2 ip-group">
+                            <div class="control-group clearFix">
+                                <label class="control-label">node-1:</label>
+                                <div class="controls">
+                                    <input class="form-controls" type="text" name="node1_ip" ng-class="{'error':errors.node1_ip}" ng-model="settingForm.node1Ip" formfield="setting_form" ipaddrpattern required num-keyboard error="{{errors.node1_ip}}" />
+                                    <div class="error" ng-messages="setting_form.node1_ip.$error" ng-if="interacted(setting_form,'node1_ip')">
+                                        <span ng-message="required">*必填项</span>
+                                        <span ng-message="ipaddrpattern">IP地址格式错误</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group clearFix">
+                                <label class="control-label">node-2:</label>
+                                <div class="controls">
+                                    <input class="form-controls" type="text" name="node2_ip" ng-class="{'error':errors.node2_ip}" ng-model="settingForm.node2Ip" ipadd="access" formfield="setting_form" ipaddrpattern required num-keyboard error="{{errors.node2_ip}}" />
+                                    <div class="error" ng-messages="setting_form.node2_ip.$error" ng-if="interacted(setting_form,'node2_ip')">
+                                        <span ng-message="required">*必填项</span>
+                                        <span ng-message="ipaddrpattern">IP地址格式错误</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2 ip-group">
+                            <div class="control-group clearFix">
+                                <label class="control-label">node-3:</label>
+                                <div class="controls">
+                                    <input class="form-controls" type="text" name="node3_ip" ng-class="{'error':errors.node3_ip}" ng-model="settingForm.node3Ip" formfield="setting_form" ipaddrpattern required num-keyboard error="{{errors.node3_ip}}" />
+                                    <div class="error" ng-messages="setting_form.node3_ip.$error" ng-if="interacted(setting_form,'node3_ip')">
+                                        <span ng-message="required">*必填项</span>
+                                        <span ng-message="ipaddrpattern">IP地址格式错误</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group clearFix">
+                                <label class="control-label">node-4:</label>
+                                <div class="controls">
+                                    <input class="form-controls" type="text" name="node4_ip" ng-class="{'error':errors.node4_ip}" ng-model="settingForm.node4Ip" ipadd="access" formfield="setting_form" ipaddrpattern required num-keyboard error="{{errors.node4_ip}}" />
+                                    <div class="error" ng-messages="setting_form.node4_ip.$error" ng-if="interacted(setting_form,'node4_ip')">
+                                        <span ng-message="required">*必填项</span>
+                                        <span ng-message="ipaddrpattern">IP地址格式错误</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center red" ng-show="!(settingForm.mainSwitchIp && settingForm.spareSwitchIp && settingForm.node1Ip && settingForm.node1Ip && settingForm.node1Ip && settingForm.node1Ip)">请配置IP，以获取电源监控状态</div>
+                <div class="line"></div>
+                <div class="form form-footer btn-item">
+                    <button type="submit" class="btn btn-info" ng-click="confirmSet(setting_form)">确定</button>
+                    <a type="submit" class="reset" ng-click="resetForm()"><i class="icon-aw-repeat"></i></a>
+                </div>
+            </form>
+        </div>
+    </script>
+</div>

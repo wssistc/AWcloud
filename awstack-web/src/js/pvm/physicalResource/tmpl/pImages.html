@@ -1,0 +1,914 @@
+
+<div class="page-inner">
+    <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='2'}">
+      <div class="table-action">
+        <button type="button" class="btn btn-new" disabled="disabled"><i class="icon-aw-add-to2"></i>{{'aws.img.upload_image'|translate}}</button>
+        <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-modify"></i>{{'aws.img.modify'|translate}}</button>
+        <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-delete"></i>{{'aws.img.del'|translate}}</button>
+        <div class="pull-right">
+          <into-information modular="'pvmimages'"></into-information>
+          <button class="btn btn-renovat right-ports" disabled="disabled"><i class="icon-aw-refresh"></i></button>
+          
+          <div class="search-box right-ports">
+            <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+              <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+              <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="table-content">
+        <table class="table">
+          <colgroup>
+            <col width="5%">
+            <col width="12%">
+            <col width="10%">
+            <col width="10%">
+            <col width="8%">
+            <col width="10%">
+            <col width="10%">
+            <col width="10%">
+            <col width="10%">
+            <col width="10%">
+            <col width="5%">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>
+                <label class="checkbox">
+                  <input type="checkbox" name="r" disabled="disabled" />
+                  <i class="iconfont"></i>
+                </label>
+              </th>
+              <th>{{'aws.img.img_name'|translate}}</th>
+              <th>系统类型</th>
+              <th>发行版本</th>
+              <th>{{'aws.img.type'|translate}}</th>
+              <th>{{'aws.img.public'|translate}}</th>
+              <th>{{'aws.img.architecture'|translate}}</th>
+              <th>{{'aws.img.disk_format'|translate}}</th>
+              <th>{{'aws.img.status'|translate}}</th>
+              <th>{{'aws.img.created_at'|translate}}</th>
+            </tr>
+          </thead>
+          <tr>
+            <td colspan="10" class="text-center">
+              如需使用物理资源管理块功能，请打开”系统管理 > 系统设置 >  <a href="/#/system/plugin">功能管理</a> “界面添加”物理机管理”模块
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='1'}">
+      <div class="table-action">
+        <button type="button" class="btn btn-new" ng-click="updateImages('new')"  licence-type = "btn" id="PhyRes-image-upload"><i class="icon-aw-add-to2"></i>{{'aws.img.upload_image'|translate}}</button>
+        <!-- <button type="button" class="btn btn-primary" ng-click="customImages()"><i class="icon-aw-add-to2"></i>{{'aws.img.custom_image'|translate}}</button>  -->
+     
+    
+        <button type="button"  ng-class="{'btn-normal':isDisabled || !canDelete,'btn-info':canDelete,'disabled':isDisabled || !canEdit}" class="btn" 
+        uib-popover="{{isDisabled?('aws.popover.image.tip0'|translate):('aws.popover.image.tip1'|translate)}}" 
+        popover-enable="isDisabled  || !canEdit" popover-trigger="mouseenter" popover-placement = "bottom" 
+        ng-click="updateImages('edit',editData)"  licence-type = "btn" id="PhyRes-image-edit" ><i class="icon-aw-modify"></i>{{'aws.img.modify'|translate}}
+        </button>
+    
+        <button type="button" 
+         ng-class="{'btn-normal':delisDisabled || !canDelete,'btn-normal':canDelete,'disabled':delisDisabled || !canDelete}" class="btn" 
+        uib-popover="{{delisDisabled?('aws.popover.image.tip0'|translate):('aws.popover.image.tip3'|translate)}}" 
+        popover-enable="delisDisabled  || !canDelete" popover-trigger="mouseenter" popover-placement = "bottom" 
+        data-toggle="modal"  ng-click="deleteImages()"  licence-type = "btn" id="PhyRes-image-del"> <i class="icon-aw-delete"></i>{{'aws.img.del'|translate}}</button>
+        <div class="pull-right">
+          <setting title-data="titleData" site-title="titleName" table-data="tableData" search-tearm="pImageSearchTearm(obj)"></setting>
+          <button class="btn btn-renovat right-ports" ng-click="refreshImages()"><i class="icon-aw-refresh"></i></button>
+          <div class="search-box right-ports">
+            <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+              <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+              <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+            </form>
+          </div>
+
+        </div>
+      </div>
+    <div class="table-content">
+      <empty-tip empty-type="loadData"></empty-tip>
+      <table ng-table="tableParams" class="table">
+        <colgroup>
+          <col width="5%">
+          <col width="12%">
+          <col width="10%">
+          <col width="10%">
+          <col width="8%">
+          <col width="10%">
+          <col width="10%">
+          <col width="10%">
+          <col width="10%">
+          <col width="10%">
+          <col width="5%">
+        </colgroup>
+        <tr ng-repeat="item in $data">
+          <td header="'headerCheckbox.html'" class="check-td">
+            <label class="checkbox">
+              <input type="checkbox" name="r" ng-model="checkboxes.items[item.imageUid]" value="{{item.imageUid}}" />
+              <i class="iconfont"></i>
+            </label>
+          </td>
+          <td data-title="'aws.img.img_name'|translate" sortable="'name'" ng-if="titleData[0].value">
+            <div class="edit-name">
+              <a ng-href="/pvm/pvmimages?id={{item.imageUid}}" title="{{item.name}}">{{item.name}}</a>
+            </div>
+          </td>
+          <td data-title="'系统类型'" sortable="'_os_type'" ng-if="titleData[1].value">{{item._os_type}}</td>
+          <td data-title="'发行版本'" sortable="'os'" ng-if="titleData[2].value">{{item.os}}</td>
+          <td data-title="'aws.img.type'|translate" sortable="'image_type'" ng-if="titleData[3].value">{{item.image_type}}</td>
+          <td data-title="'aws.img.public'|translate" sortable="'is_public'" ng-if="titleData[4].value">{{'aws.img.table.is_public.'+item.is_public| translate}}</td>
+          <!-- <td data-title="'aws.img.version'|translate" sortable="'release'">{{item.release}}</td> -->
+          <td data-title="'aws.img.architecture'|translate" sortable="'arch'" ng-if="titleData[5].value">{{item.arch}}</td>
+          <!-- <td data-title="'aws.img.protected'|translate">{{'aws.img.table.is_protected.'+item.is_protected| translate}}</td> -->
+          <td data-title="'aws.img.disk_format'|translate" sortable="'disk_format'" ng-if="titleData[6].value">{{item.disk_format}}</td>
+          <td data-title="'aws.img.status'|translate" sortable="'status'" ng-if="titleData[7].value">
+            <span ng-class="{'bg-green':(item.status=='active'||item.status=='resized'),'bg-blue':(item.status=='saving'||item.status=='queued'||item.status=='pending_delete'||item.status=='deleted'),'bg-orange':(item.status=='unrecognized'||item.status=='killed')}">{{'aws.img.table.status.'+item.status| translate}}</span>
+          </td>
+          <td data-title="'aws.img.created_at'|translate" sortable="'create_at'" ng-if="titleData[8].value"><span class="date">{{item.create_at | date:'yyyy-MM-dd HH:mm:ss'}}</span></td>
+           <td data-title="'aws.img.canUse'|translate" sortable="'canUse'" ng-if="titleData[9].value"><span title="{{item.tip_message}}" >{{'aws.img.table.canUse.'+item.canUse| translate}}</span></td> 
+        </tr>
+      </table>
+    </div>
+    <div ng-controller="detailCtrl">
+      <pane class="detail-body" animation="animation">
+        <div class="tab-content">
+          <div class="detail-row">
+            <div class="detail-header">
+              <table class="table">
+                <tr>
+                  <td><a>{{detailData.name}}</a></td>
+                  <td>{{detailData.owner}}</td>
+                  <td>{{detailData.image_type}}</td>
+                  <td>{{detailData.is_public}}</td>
+                  <td>{{detailData.os}}</td>
+                  <td>{{detailData.release}}</td>
+                  <td>{{detailData.arch}}</td>
+                  <td>{{detailData.is_protected}}</td>
+                  <td>{{detailData.status}}</td>
+                  <td>{{detailData.create_at}}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="detail-title">
+              <a class="an-close" ng-href="/pvm/pvmimages"><i class="icon-aw-mail-reply"></i></a>
+              <span>{{'aws.img.img_detail'|translate}}</span>
+            </div>
+            <div class="detail-info">
+              <div class="tab-content-line"></div>
+              <table class="table table-info column">
+                <tr>
+                  <td>{{'aws.img.img_name'|translate}}</td>
+                  <td>{{detailData.name}}</td>
+                  <td>{{'aws.img.created_at'|translate}}</td>
+                  <td>{{detailData.create_at| date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.img.status'|translate}}</td>
+                  <!-- <td>{{detailData.status}}</td> -->
+                  <td>{{'aws.img.table.status.'+detailData.status| translate}}</td>
+                  <td>{{'aws.img.update_at'|translate}}</td>
+                  <td>{{detailData.update_at| date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.instances.addinstances.os'|translate}}</td>
+                  <td>{{"aws.img.osType."+detailData.os_type | translate}}</td>
+                  <td>{{'aws.img.system_type'|translate}}</td>
+                  <td>{{detailData.os}}</td>
+                </tr>  
+                <tr>
+                  <td>{{'aws.img.public'|translate}}</td>
+                  <td>{{'aws.img.table.is_public.'+detailData.is_public| translate}}</td>
+                  <td>{{'aws.img.architecture'|translate}}</td>
+                  <td>{{detailData.arch}}</td>
+                </tr>
+                <tr>
+                  <!-- <td>{{'aws.img.version'|translate}}</td>
+                  <td>{{detailData.release}}</td>  -->
+                  <td>{{'aws.img.trueSize'|translate}}</td>
+                  <td>{{detailData.true_size}}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </pane>
+    </div>
+    </div>
+  </div>
+  <script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+      <i class="iconfont"></i>
+    </label>
+  </script>
+  <script type="text/ng-template" id="updateimages.html">
+    <div class="images-modal modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="canelUpdataImage()">×</button>
+        <h3 class="modal-title">{{imageTitle}}</h3>
+      </div>
+      <div class="modal-body">
+        <div ng-if="tipCheck" class="alert alert-danger">在上传镜像过程请勿关闭此窗口，否则可能导致镜像上传失败！（再次点击可关闭）</div>
+        <form name="imageForm" enctype="multipart/form-data" action="singleSave" method="post" novalidate>
+          <div class="control-group">
+            <label class="control-label"><span class="red">*</span>{{'aws.img.img_name'|translate}}：</label>
+            <div class="controls">
+              <input type="text" name="name" class="form-controls" ng-model="upImage.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\.)*$/" ng-change="checkNameFun(upImage.name)" ng-maxlength="30" required />
+               <div class="error" ng-if="interacted(imageForm.name)" ng-messages="imageForm.name.$error" >
+                <div ng-message="maxlength">请至多输入30位</div>
+                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="pattern">{{'aws.errors.nameLimit'|translate}}</div>
+              </div>
+              <div class="error" ng-if="nameCheck">{{'aws.errors.imgcheck'|translate}}</div>
+            </div>
+          </div>
+          <div class="control-group" ng-if="!hideSome">
+            <label class="control-label">{{'aws.img.imageSourceType'|translate}}：</label>
+            <div class="controls">
+              <ui-select ng-model="source_type" ng-change="change_source_type(source_type)" >
+                <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="source_type in source_type_list | propsFilter: {name: $select.search}">
+                  <div ng-bind-html="source_type.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div> 
+          <div class="control-group" ng-if="!hideSome && !showFile">
+            <label class="control-label">{{'aws.img.copy_addr'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="copy" ng-model="upImage.copy_from" ng-maxlength="1024"
+               ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required/>
+              <div class="error" ng-messages="(submitInValid ||imageForm.copy.$dirty) && imageForm.copy.$error">
+                <div ng-message="maxlength">{{'aws.errors.maxlength1024'|translate}}</div>
+                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="pattern">请输入正确的url</div>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-show="!hideSome && showFile">
+            <label class="control-label"><span class="red">*</span>{{'aws.img.imageFile'|translate}}：</label>
+            <div class="controls">
+              <div class="file-box clearfix">
+                <input type="text" class="form-controls" name="vaildfile" required ng-model="selected_file" disabled>
+                <div class="file-item">
+                  <a href="javascript:void(0);" class="file-btn"><input  name="file" type="file" id="upload" class="file-input" ng-disabled="cant_select_file"></a>
+                  <button type="button" class="file-choose" >{{'aws.img.chooseFile'|translate}}</button>
+                </div>
+              </div>
+              <div class="error" ng-show="showFile && fileSizeinvalidate">
+                  <div>文件大小不能超过10G</div>
+              </div>
+              <div class="error" ng-messages="submitInValid  && imageForm.vaildfile.$error">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                </div>
+            </div>
+          </div>
+          <div class="control-group" ng-if="!hideSome && showFile && !can_double_click">
+            <label class="control-label">&nbsp;</label>
+            <div class="controls">
+              <div class="clearfix bar-group">
+                <div upload-progress bardata="uploadData"></div>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{'aws.img.architecture'|translate}}：</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" ng-click="chooseArch(item)" name="architecture" ng-class='{"active":item.text === options.arch}' data-value="{{item.text}}" ng-repeat="item in arch"><span>{{item.text}}</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-if="!hideSome">
+            <label class="control-label">{{'aws.img.disk_format'|translate}}：</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button type="button" ng-click="chooseDisk(item)" name="disk_format" ng-class='{"active":item.text === options.disk_format}' data-value="{{item.text}}" ng-repeat="item in disk_format"><span>{{item.text}}</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{'aws.img.OS'|translate}}：</label>
+            <div class="controls">
+              <div class="control-items2 half">
+                            <div class="control-group">
+                  <ui-select ng-model="os_type" ng-change="changeOSType(os_type)" title="{{'aws.img.os_type'|translate}}" name="os_type">
+                    <ui-select-match placeholder="{{'aws.img.chooseOSType'|translate}}" >{{$select.selected.dataName_t}}</ui-select-match>
+                    <ui-select-choices repeat="os_type in osTypeList | propsFilter: {dataName_t: $select.search}">
+                      <div ng-bind-html="os_type.dataName_t | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+                <div class="control-group">
+                  <ui-select ng-model="os_distro" ng-change="changeOS(os_distro)" title="{{'aws.img.OS'|translate}}" name="os_distro">
+                    <ui-select-match placeholder="{{'aws.img.chooseOS'|translate}}">{{_self.os_distro.name}}</ui-select-match>
+                    <ui-select-choices repeat="os_distro in osDistroList | propsFilter: {name: $select.search}">
+                      <div ng-bind-html="os_distro.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <div class="control-group" ng-hide="!ADMIN && hideSome">
+            <label class="control-label">{{'aws.img.public'|translate}}：</label>
+            <div class="controls" class="checkbox">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" class="form-controls" ng-model="upImage.is_public" ng-disabled="!ADMIN" />
+                  <i class="iconfont"></i>
+                </label>
+              </div>
+            </div>
+          </div>
+       
+        </form>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="cant_click()" ng-click="confirmImage(upImage,imageForm)">{{'aws.img.ok'|translate}}</button> 
+        <button class="btn btn-default" type="button" ng-click="canelUpdataImage()">{{'aws.img.cancel'|translate}}</button>
+      </div>
+    </div>
+  </script>
+  <script type="text/ng-template" id="imgaddinstances.html">
+    <div class="instances-modal modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{'aws.img.new_instance'|translate}}</h3>
+      </div>
+      <!-- <code>{{ images2 }}</code> -->
+      <div class="modal-body clearFix">
+        <uib-alert ng-show="insProText || coreProText || ramProText || volumesProText || insDomText || coreDomText || ramDomText || volumesDomText || !canBatch" type="danger" >
+          <div>
+            <span ng-class='{"tip":insDomText}'>{{insDomText}}</span>
+            <span ng-class='{"tip":coreDomText}'>{{coreDomText}}</span>
+            <span ng-class='{"tip":ramDomText}'>{{ramDomText}}</span>
+            <span ng-class='{"tip":ramDomText}'>{{volumesDomText}}</span>
+            <span ng-class='{"tip":insProText}' ng-hide="insDomText">{{insProText}}</span> 
+            <span ng-class='{"tip":coreProText}' ng-hide="coreDomText">{{coreProText}}</span>
+            <span ng-class='{"tip":ramProText}' ng-hide="ramDomText">{{ramProText}}</span>
+            <span ng-class='{"tip":volumesProText}' ng-hide="volumesDomText">{{volumesProText}}</span>
+            <span ng-hide="canBatch">{{'aws.instances.addinstances.batchTip'|translate}}</span>
+          </div>
+        </uib-alert>
+        <div class="left">
+          <form action="" name="osImageForm" novalidate>
+            <fieldset>
+              <h5 class="title"><span>{{'aws.img.detail'|translate}}</span></h5>
+              <div class="control-items2 clearFix">
+                <div class="control-group">
+                  <label class="control-label" title="{{'aws.img.instanceName'|translate}}"><span class="red">*</span>{{'aws.img.instanceName'|translate}}：</label>
+                  <div class="controls">
+                    <input type="text" class="form-controls" name="hostName" ng-model="hostName" ng-pattern="/^([0-9a-zA-Z]|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required/>
+                    <div class="error" ng-messages="(submitInValid ||osImageForm.hostName.$dirty) && osImageForm.hostName.$error">
+                      <form-validate pattern-msg="'aws.errors.vmNamevalidate'|translate"></form-validate>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label"><span class="red">*</span>{{'aws.instances.addinstances.num'|translate}}：</label>
+                  <div class="controls">
+                    <input type="text" class="form-controls" name="hostNum"  ng-model="hostNum" min="1" max="10"  limitnumrange required/>
+                    <div class="error" ng-messages="(submitInValid ||osImageForm.hostNum.$dirty) && osImageForm.hostNum.$error">
+                      <form-validate pattern-msg="'aws.errors.maxinteger'|translate"></form-validate>
+                      <div ng-message="limitnumrange">{{"aws.errors."+['limit_1_10']|translate}}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset>
+              <h5 class="title"><span>{{'aws.img.imgChoice'|translate}}</span></h5>
+              <div class="control-items2 clearFix">
+                <div class="control-group">
+                  <label class="control-label">{{'aws.img.architecture'|translate}}：</label>
+                  <div class="controls">
+                    <div class="btn-item-group">
+                      <button type="button" class="type-btn" ng-disabled="options.disabled" ng-class='{"active":item.value === options.arch}' ng-repeat="item in vm.framework"><span>{{item.text}}</span></button>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">{{'aws.img.type'|translate}}：</label>
+                  <div class="controls">
+                    <div class="btn-item-group">
+                      <button type="button" class="type-btn" ng-disabled="options.disabled" ng-class='{"active":item.value === options.img}' ng-repeat="item in vm.imgType">
+                        <span>{{item.text}}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="control-items2 clearFix">
+                <div class="control-group">
+                  <label class="control-label">{{'aws.img.OS'|translate}}：</label>
+                  <div class="controls">
+                    <input type="text" class="form-controls" ng-disabled="options.disabled" ng-model="options.os" />
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">{{'aws.img.name'|translate}}：</label>
+                  <div class="controls">
+                    <input type="text" class="form-controls" ng-disabled="options.disabled"  title ="{{options.name}}" ng-model="options.name" />
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset>
+              <h5 class="title"><span>{{'aws.img.conf_option'|translate}}</span></h5>
+              <div class="control-group">
+                <label class="control-label"><span class="red">*</span>{{'aws.instances.addinstances.selfConfig'|translate}}：</label>
+                <div class="controls">
+                  <ui-select ng-model="options.flavor" name="flavorName" ng-change="chooseCpuMem(options.flavor)" required>
+                    <ui-select-match placeholder="{{'aws.instances.addinstances.choiceConfig'|translate}}">{{$select.selected.text}}</ui-select-match>
+                    <ui-select-choices repeat="conf in flavorNormalList  | filter: {id: $select.search}">
+                      <div ng-bind-html="conf.text | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                  <div class="error" ng-messages="(submitInValid ||osImageForm.flavorName.$dirty) && osImageForm.flavorName.$error">
+                    <form-validate></form-validate>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset>
+              <h5 class="title"><span>{{'aws.img.net_setting'|translate}}</span></h5>
+              <div class="control-group">
+                <label class="control-label"><span class="red">*</span>{{'aws.img.network'|translate}}：</label>
+                <div class="controls">
+                  <ui-select ng-model="network.selected" class="ui-select-tips" name="netName" ng-change="changeNet(network.selected)" ng-disabled="!networkList.length" required >
+                    <ui-select-match placeholder="{{'aws.instances.addinstances.netChoice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="network in networkList track by $index">
+                      <div ng-mouseover="mouseNet(network,'over')" ng-mouseleave="mouseNet(network,'out')">
+                        <div ng-bind-html="network.name | highlight: $select.search"></div>
+                        <div class="ui-select-tips-detail" ng-show="net_subSegDetail.length">
+                          <div class="arrow-up"></div>
+                          <ul>
+                            <li ng-repeat="sub in net_subSegDetail track by $index" ng-if="sub.showSubSegDetail && sub.id==network.id " >{{sub.sub_name}}</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </ui-select-choices>
+                  </ui-select>
+                  <div class="error" ng-messages="(submitInValid ||osImageForm.netName.$dirty) && osImageForm.netName.$error">
+                    <form-validate></form-validate>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group"  ng-show="network.selected">
+                <label class="control-label">{{'aws.img.config_IP'|translate}}：</label>
+                <div class="controls">
+                  <label class="checkbox">
+                    <input type="checkbox" class="form-controls chk" name="assignIP" ng-model="network.assignIP"  ng-disabled="hostNum != 1"  />
+                    <i class="iconfont"></i>
+                  </label>
+                </div>
+              </div>
+              <div class="control-group" ng-show="network.assignIP && hostNum == 1">
+                <label class="control-label">子网网段：</label>
+                <div class="controls">
+                  <ui-select ng-model="network.subSegment" name="subSegment" ng-change="changeSubSegment(network.subSegment)" ng-disabled="!subSegmentList.length" required >
+                    <ui-select-match placeholder="请选择子网网段">{{$select.selected.sub_name}}</ui-select-match>
+                    <ui-select-choices repeat="seg in subSegmentList track by $index">
+                      <div ng-bind-html="seg.sub_name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                  <div  class="error" ng-messages="(submitInValid ||InstanceForm.subSegment.$dirty) && InstanceForm.subSegment.$error">
+                    <form-validate ></form-validate>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group ip_cidr" ng-show="network.assignIP && hostNum == 1">
+                <label class="control-label"><span class="red">*</span>{{"aws.floatingIps.ipAddr"|translate}}：</label>
+                <div class="controls clearfix">
+                  <div class="flex">
+                    <div class="ip_text">
+                      <input type="text" class="form-controls" name="ip_0" id="ip_0" ng-model="network.init_cidr.ip_0" ng-keyup="checkValue()" />
+                      <div class="error ip_0" ng-if="interacted(osImageForm)">
+                        <div ng-show="required.ip_0">{{'aws.errors.required'|translate}}</div>
+                        <div ng-show="invalid.ip_0">{{'aws.action.pleaseInput'|translate}}{{min_num.ip_0}}~{{max_num.ip_0}}{{'aws.action.int'|translate}}</div>
+                      </div> 
+                    </div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip_text">
+                      <input type="text" class="form-controls" name="ip_1" id="ip_1" ng-model="network.init_cidr.ip_1" ng-keyup="checkValue()" />
+                      <div class="error ip_1" ng-if="interacted(osImageForm)">
+                          <div ng-show="required.ip_1">{{'aws.errors.required'|translate}}</div>
+                          <div ng-show="invalid.ip_1">{{'aws.action.pleaseInput'|translate}}{{min_num.ip_1}}~{{max_num.ip_1}}{{'aws.action.int'|translate}}</div>
+                      </div>
+                    </div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip_text">
+                      <input type="text" class="form-controls" name="ip_2" id="ip_2" ng-model="network.init_cidr.ip_2" ng-keyup="checkValue()" />
+                      <div class="error ip_2"  ng-if="interacted(osImageForm)">
+                        <div ng-show="required.ip_2">{{'aws.errors.required'|translate}}</div>
+                        <div ng-show="invalid.ip_2">{{'aws.action.pleaseInput'|translate}}{{min_num.ip_2}}~{{max_num.ip_2}}{{'aws.action.int'|translate}}</div>
+                      </div>
+                    </div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip_text">
+                      <input type="text" class="form-controls" name="ip_3" id="ip_3" ng-model="network.init_cidr.ip_3" ng-keyup="checkValue()"  ng-focus="repeatIp=false;" />
+                      <div class="error ip_3" ng-if="interacted(osImageForm)">
+                        <div ng-show="required.ip_3">{{'aws.errors.required'|translate}}</div>
+                        <div ng-show="invalid.ip_3">{{'aws.action.pleaseInput'|translate}}{{min_num.ip_3}}~{{max_num.ip_3}}{{'aws.action.int'|translate}}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="error" ng-if="repeatIp">
+                    <span>{{'aws.img.repeatIP'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset>
+              <h5 class="title"><span>{{'aws.instances.addinstances.volume_set'|translate}}</span></h5>
+              <div class="control-items2 clearFix">
+                <div class="control-group">
+                  <label class="control-label"><span class="red">*</span>{{'aws.volumes.cv.storagedevice'|translate}}：</label>
+                  <div class="controls">
+                    <ui-select ng-model="storage.storageDeviceSelected" ng-change="changeDevice(storage.storageDeviceSelected)"name="device" required>
+                      <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="storage in storageDeviceList | filter: {name: $select.search}">
+                        <div ng-bind-html="storage.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages="(submitInValid ||osImageForm.device.$dirty) && osImageForm.device.$error">
+                      <form-validate ></form-validate>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label"><span class="red">*</span>{{'aws.volumes.cv.storagePool'|translate}}：</label>
+                  <div class="controls">
+                    <ui-select ng-model="storage.storagePoolSelected"  ng-change="changePool(storage.storageDeviceSelected,storage.storagePoolSelected)" name="pool" required>
+                      <ui-select-match>{{$select.selected}}</ui-select-match>
+                      <ui-select-choices repeat="storage in storage.storageDeviceSelected.pools">
+                        <div ng-bind-html="storage| highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages="(submitInValid ||osImageForm.pool.$dirty) && osImageForm.pool.$error">
+                      <form-validate ></form-validate>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group" ng-if="roleNumber">
+                  <label class="control-label">{{"aws.volumes.cv.pool_capacity" | translate}}：</label>
+                  <div class="controls">
+                    <span class="val">{{"aws.common.inUsed" | translate}} {{poolsInfo_data.inUsed}}{{poolsInfo_data.title}} / {{poolsInfo_data.total}}{{poolsInfo_data.title}}</span>
+                  </div>
+              </div>
+              <div class="text-center red" ng-show="nomore_voltype">{{'aws.volumes.cv.nomore_volumetype'|translate}}</div>
+            </fieldset>
+            <fieldset>
+              <h5 class="title"><span>{{'aws.img.advOption'|translate}}<i ng-click="fold =!fold" class="conf-icon" ng-class="{'icon-aw-angle-up':fold,'icon-aw-angle-down':!fold}"></span></i></h5>
+            </fieldset>
+            <fieldset ng-show="fold">
+              <div class="control-group">
+                  <label class="control-label">{{'aws.instances.addinstances.hostName2'|translate}}：</label>
+                  <div class="controls">
+                    <input type="text" class="form-control"  name="host_name" ng-model="hostname" placeholder="{{'aws.instances.addinstances.hostNameInput'|translate}}"  ng-maxlength="32" ng-pattern="/^[a-zA-Z][a-zA-Z0-9-]*$/"></input>
+                    <div class="error" ng-messages="(submitInValid ||osImageForm.host_name.$dirty) && osImageForm.host_name.$error">
+                      <form-validate pattern-msg="'aws.errors.hostnameValidate'|translate"></form-validate>
+                    </div>
+                  </div>
+                </div>
+              <div class="control-items2 clearFix">
+                <div class="control-group">
+                  <label class="control-label">{{'aws.instances.addinstances.passwd'|translate}}：</label>
+                  <div class="controls">
+                    <input type="password" class="form-controls" name="admin_pass" ng-model="admin_pass" id="pw2" ng-minlength="8"  ng-maxlength="30" placeholder="{{'aws.instances.addinstances.password'|translate}}" />
+                    <div ng-messages="osImageForm.admin_pass.$dirty && osImageForm.admin_pass.$error">
+                      <span class="error" ng-message="pwCheck">{{'aws.instances.addinstances.notSamePasswd'|translate}}</span>
+                      <span class="error" ng-message="minlength">{{'aws.errors.minlength'|translate}}</span>
+                      <span class="error" ng-message="maxlength">{{'aws.errors.passmaxlength'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">{{'aws.instances.addinstances.repeatPasswd'|translate}}：</label>
+                  <div class="controls">
+                    <input type="password" class="form-controls" name="admin_comfirmpass" ng-model="admin_comfirmpass" ng-minlength="8" ng-maxlength="30" pw-check="pw2" placeholder="{{'aws.instances.addinstances.comfirmpassword'|translate}}" />
+                    <div ng-messages="osImageForm.admin_comfirmpass.$dirty && osImageForm.admin_comfirmpass.$error">
+                      <span class="error" ng-message="pwCheck">{{'aws.instances.addinstances.notSamePasswd'|translate}}</span>
+                      <span class="error" ng-message="minlength">{{'aws.errors.minlength'|translate}}</span>
+                      <span class="error" ng-message="maxlength">{{'aws.errors.passmaxlength'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div ng-class="{'control-items2 clearFix':options.os != 'Windows'}">
+                <div class="control-group" ng-hide="options.os == 'Windows'">
+                  <label class="control-label">{{'aws.instances.addinstances.keypair'|translate}}：</label>
+                  <div class="controls">
+                    <ui-select ng-model="keypairs.selected" ng-disabled="disabled" ng-disabled="!keypairsList.length" >
+                      <ui-select-match placeholder="{{'aws.instances.addinstances.keypairChoice'|translate}}">{{$select.selected.value}}</ui-select-match>
+                      <ui-select-choices repeat="keypairs  in keypairsList | filter: {value: $select.search}">
+                        <div ng-bind-html="keypairs.value | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">{{'aws.instances.addinstances.securityGroup'|translate}}：</label>
+                  <div class="controls">
+                    <ui-select ng-model="securities.selected" ng-disabled="!securityList.length">
+                      <ui-select-match placeholder="{{'aws.instances.addinstances.securityGroupChoice'|translate}}">{{$select.selected.value}}</ui-select-match>
+                      <ui-select-choices repeat="security in securityList | filter: {value: $select.search}">
+                        <div ng-bind-html="security.value | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                  </div>
+                </div>
+              </div>
+              <div class="control-items2 clearFix">
+                <div class="control-group">
+                  <label class="control-label">{{'aws.instances.addinstances.launchArea'|translate}}：</label>
+                  <div class="controls">
+                    <ui-select ng-model="zone.selected" ng-disabled="!zoneList.length" ng-change="changeZone(zone.selected)">
+                      <ui-select-match placeholder="{{'aws.instances.addinstances.launchAreaChoice'|translate}}">{{$select.selected.value}}</ui-select-match>
+                      <ui-select-choices repeat="zone in zoneList | filter: {value: $select.search}">
+                        <div ng-bind-html="zone.value | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">{{'aws.instances.addinstances.launchNode'|translate}}：</label>
+                  <div class="controls">
+                    <ui-select ng-model="node.selected" ng-disabled="!zone.selected.nodeList.length">
+                      <ui-select-match placeholder="{{'aws.instances.addinstances.launchNodeChoice'|translate}}">{{$select.selected.value}}</ui-select-match>
+                      <ui-select-choices repeat="host in zone.selected.nodeList | filter: {value: $select.search}">
+                        <div ng-bind-html="host.value | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                  </div>
+                </div>
+              </div>
+              <!-- <div class="control-group">
+                <label class="control-label">{{'aws.img.localStorage'|translate}}：</label>
+                <div class="controls">
+                  <label class="checkbox">
+                    <input type="checkbox" name="r" ng-model="use_local" value="" class="" />
+                    <i class="iconfont"></i>
+                  </label>
+                </div>
+              </div> -->
+            </fieldset>
+          </form>
+        </div>
+        <div class="right">
+          <h5 class="title">{{'aws.img.conf_detail'|translate}}</h5>
+          <table class="table">
+            <!-- <tr>
+              <td>{{'aws.img.instanceName'|translate}}</td>
+              <td><span>{{hostName}}</span></td>
+            </tr> -->
+            <tr>
+              <td>{{'aws.img.num'|translate}}</td>
+              <td><span>{{hostNum}}</span></td>
+            </tr>
+            <tr>
+              <td>{{'aws.img.architecture'|translate}}</td>
+              <td>{{options.arch}}</td>
+            </tr>
+            <tr>
+              <td>{{'aws.img.OS'|translate}}</td>
+              <td><span title="{{options.os}}">{{options.os}}</span></td>
+            </tr>
+            <tr>
+              <td>{{'aws.img.name'|translate}}</td>
+              <td><span title="{{options.name}}">{{options.name}}</span></td>
+            </tr>
+            <!-- <tr>
+              <td>{{'aws.img.type'|translate}}</td>
+              <td><span>{{options.imgtext}}</span></td>
+            </tr> -->
+            <tr>
+              <td>CPU</td>
+              <td><span>{{options.flavor.vcpus}}{{'aws.img.core'|translate}}</span></td>
+            </tr>
+            <tr>
+              <td>{{'aws.img.memory'|translate}}</td>
+              <td><span>{{options.flavor.ram_gb}} GB</span></td>
+            </tr>
+          </table>
+          <div class="bar-wrap ins-quota">
+            <div ng-show="ADMIN || DOMAIN_ADMIN">
+              <div class="title">{{'aws.instances.quota.domInfo'|translate}}</div>
+              <ul class="clearFix" >
+                <li ng-if="domInsNum">
+                  <div class="wrap-box">
+                    <span class="left">{{'aws.instances.quota.domInfoIns'|translate}}</span>
+                    <span class="right">{{'aws.instances.quota.used'|translate}}{{domInsNum.used}}/{{domInsNum.total}}</span>
+                  </div>
+                  <progress-bar progress-value="domInsNum" bar-type="'width'" ></progress-bar>
+                </li>
+                <li ng-if="domRam">
+                  <div class="wrap-box">
+                    <span class="left">{{'aws.instances.quota.domInfoRam'|translate}}</span>
+                    <span  class="right">{{'aws.instances.quota.used'|translate}}{{domRam.used}}/{{domRam.total}}</span>
+                  </div>
+                  <progress-bar progress-value="domRam" bar-type="'width'" ></progress-bar>
+                </li>
+                <li ng-if="domCores">
+                  <div class="wrap-box">
+                    <span class="left">{{'aws.instances.quota.domInfoCpu'|translate}}</span>
+                      <span class="right">{{'aws.instances.quota.used'|translate}}{{domCores.used}}/{{domCores.total}}</span>
+                  </div>
+                  <progress-bar progress-value="domCores" bar-type="'width'" ></progress-bar>
+                </li>
+                <li ng-if="domVolumes">
+                  <div class="wrap-box">
+                    <span class="left">{{'aws.instances.quota.domInfoVolumes'|translate}}</span>
+                    <span class="right">{{'aws.instances.quota.used'|translate}}{{domVolumes.used}}/{{domVolumes.total}}</span>
+                  </div>
+                  <progress-bar progress-value="domVolumes" bar-type="'width'" ></progress-bar>
+                </li>
+              </ul>
+            </div>
+            <div class="title">{{'aws.instances.quota.proInfo'|translate}}</div>
+            <ul class="clearFix" >
+              <li ng-if="proInsNum">
+                <div class="wrap-box">
+                  <span class="left">{{'aws.instances.quota.proInfoIns'|translate}}</span>
+                  <span class="right">{{'aws.instances.quota.used'|translate}}{{proInsNum.used}}/{{proInsNum.total}}</span>
+                </div>
+                <progress-bar progress-value="proInsNum" bar-type="'width'" ></progress-bar>
+              </li>
+              <li ng-if="proRam">
+                <div class="wrap-box">
+                  <span class="left">{{'aws.instances.quota.proInfoRam'|translate}}</span>
+                  <span class="right">{{'aws.instances.quota.used'|translate}}{{proRam.used}}/{{proRam.total}}</span>
+                </div>
+                <progress-bar progress-value="proRam" bar-type="'width'" ></progress-bar>
+              </li>
+              <li ng-if="proCores">
+                <div class="wrap-box">
+                  <span class="left">{{'aws.instances.quota.proInfoCpu'|translate}}</span>
+                  <span class="right">{{'aws.instances.quota.used'|translate}}{{proCores.used}}/{{proCores.total}}</span>
+                </div>
+                <progress-bar progress-value="proCores" bar-type="'width'" ></progress-bar>
+              </li>
+              <li ng-if="proVolumes">
+                <div class="wrap-box">
+                  <span class="left">{{'aws.instances.quota.proInfoVolumes'|translate}}</span>
+                  <span class="right">{{'aws.instances.quota.used'|translate}}{{proVolumes.used}}/{{proVolumes.total}}</span>
+                </div>
+                <progress-bar progress-value="proVolumes" bar-type="'width'" ></progress-bar>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="insProText || coreProText || ramProText || volumesProText || insDomText || coreDomText || ramDomText || volumesDomText || validForm || !storage.storageSelected || !canBatch" ng-click="create(osImageForm)" >{{'aws.img.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.img.cancel'|translate}}</button>
+      </div>
+    </div>
+  </script>
+  <script type="text/ng-template" id="customImages.html">
+    <div class=" modal-common">
+      <div ng-show="stepOne" >
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">{{'aws.img.custom_image'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <ul class="step-box clearfix">
+            <li class="active"><span class="round"><b>1</b></span></li>
+            <li><span class="round"><b>2</b></span></li>
+            <li><span class="round"><b>3</b></span></li>
+          </ul>
+          <form name="customImgForm">
+            <div class="control-group">
+              <label class="control-label">{{'aws.img.imageType'|translate}}：</label>
+              <div class="controls">
+                <div class="radio-item">
+                  <label class="radio">
+                    <input type="radio" ng-model="img_type" value="iso"></input><i class="iconfont"></i>ISO
+                  </label>
+                  <label class="radio">
+                    <input type="radio" ng-model="img_type" value="qcow2"></input><i class="iconfont"></i>QCOW2
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" ng-show="img_type=='iso'">
+              <label class="control-label">{{'aws.img.chooseISO'|translate}}：</label>
+              <div class = "controls">
+                <div class="radio-item">
+                  <label class="radio">
+                    <input type="radio" ng-model="choose_iso" value="existed"></input><i class="iconfont"></i>{{'aws.img.alearyHave'|translate}}
+                  </label>
+                  <label class="radio">
+                    <input type="radio" ng-model="choose_iso" value="upload"></input><i class="iconfont"></i>{{'aws.img.upload'|translate}}
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" ng-show="choose_iso=='existed'">
+              <label class="control-label"><span class="red">*</span>{{'aws.img.alearyHaveImage'|translate}}：</label>
+              <div class = "controls">
+                <ui-select ng-model="upNet.selected" name="existed" required>
+                  <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices group-by="groupFind" repeat="value in netList | filter: {name: $select.search}">
+                    <div ng-bind-html="value.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <div  class="error" ng-messages="(submitInValid ||customImgForm.existed.$dirty) && customImgForm.existed.$error">
+                  <form-validate ></form-validate>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" ng-show="choose_iso=='upload'">
+              <label class="control-label">{{'aws.img.upload_image'|translate}}：</label>
+              <div class = "controls">
+                <input class="form-controls" ng-model = "uploadAddr" name="uploadAddr" ></input>
+                <div  class="error" ng-messages="(submitInValid ||customImgForm.uploadAddr.$dirty) && customImgForm.uploadAddr.$error">
+                  <form-validate ></form-validate>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" ng-click ="toStepTwo()" type="button">{{'aws.action.nextStep'|translate}}</button>
+        </div>
+      </div>
+      <div ng-show="stepTwo">
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">{{'aws.img.custom_image'|translate}}</h3>
+        </div>
+        <div class= "modal-body">
+          <ul class="step-box clearfix">
+            <li><span class="round"><b>1</b></span></li>
+            <li class="active"><span class="round"><b>2</b></span></li>
+            <li><span class="round"><b>3</b></span></li>
+          </ul>
+          <div class="control-group">
+            <label class="control-label">{{'aws.img.DIYscripts'|translate}}：</label>
+            <div class = "controls">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox"></input><i class="iconfont"></i>shell-1
+                </label>
+                <label>
+                  <input type="checkbox"></input><i class="iconfont"></i>shell-1
+                </label>
+                <label>
+                  <input type="checkbox"></input><i class="iconfont"></i>shell-1
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{'aws.img.make_image'|translate}}：</label>
+            <div class = "controls step-arrow">
+              <div class="arrow">
+                <button type="button" class="btn btn-default">{{'aws.img.make_image'|translate}}</button>
+              </div>
+              <div class="arrow">
+                <button type="button" class="btn btn-default">{{'aws.img.openConsole'|translate}}</button>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" ng-click ="toStepThree()" type="button">{{'aws.action.nextStep'|translate}}</button>
+        </div>
+      </div>
+      <div ng-show="stepThree">
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">{{'aws.img.custom_image'|translate}}</h3>
+        </div>
+        <div class= "modal-body">
+          <ul class="step-box clearfix">
+            <li><span class="round"><b>1</b></span></li>
+            <li><span class="round"><b>2</b></span></li>
+            <li class="active"><span class="round"><b>3</b></span></li>
+          </ul>
+          <div class="control-group">
+            <label class="control-label">cloudInit：</label>
+            <div class = "controls">
+              <button type="button" class="btn btn-default">{{'aws.img.openConsole'|translate}}</button>
+            </div>
+          </div>
+          
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-default" ng-click ="toStepTwo()" type="button">{{'aws.action.lastStep'|translate}}</button>
+        </div>
+      </div>
+    </div>
+  </script>
+  

@@ -1,0 +1,205 @@
+<div class="page-inner permit-overview overview">
+  <!-- 概况 start -->
+  <div class="box permit">
+    <div class="col-3">
+      <div class="user-box">
+        <a ng-href="/permit/department">
+          <div class="cluster-item">
+            <div class="circle-green cluster-left"><i class="icon-aw-bm navy-dark small"></i></div>
+            <div class="cluster-right">
+              <span>{{info.domain}}</span>
+              <div>{{"aws.permit.domain"|translate}}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="col-3">
+      <div class="user-box">
+      <a ng-href="/permit/project">
+        <div class="cluster-item">
+          <div class="circle-waterblue cluster-left"><i class="icon-aw-project navy-dark small"></i></div>
+          <div class="cluster-right">
+            <span>{{info.project}}</span>
+            <div>{{"aws.permit.project"|translate}}</div>
+          </div>
+        </div>
+      </a>
+      </div>
+    </div>
+    <div class="col-3">
+      <div class="user-box">
+        <a ng-href="/permit/user">
+          <div class="cluster-item">
+            <div class="circle-orange cluster-left"><i class="icon-aw-user-group navy-dark small"></i></div>
+            <div class="cluster-right">
+              <span>{{info.user}}</span>
+              <div>{{"aws.permit.user"|translate}}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="col-3">
+      <div class="user-box">
+      <a ng-href="/cvm/instances">
+        <div class="cluster-item">
+          <div class="circle-blue cluster-left"><i class="icon-aw-cloud-server navy-dark small"></i></div>
+          <div class="cluster-right">
+            <span>{{info.instances}}</span>
+            <div>{{"aws.permit.instance"|translate}}</div>
+          </div>
+        </div>
+      </a>
+      </div>
+    </div>
+    
+    <!-- <div class="left-b">
+      <div class="user-box">
+        <ul class="text-list clearfix">
+          <li>
+            <ul class="clearfix">
+              <li class="copy-li"><span><i class="icon-aw-data-center1 navy-dark small"></i></span></li>
+              <li class="copy-text small">
+                {{info.domain}}
+                <em>部门</em>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <ul class="clearfix">
+              <li class="copy-li"><span><i class=" icon-aw-label navy-dark small"></i></span></li>
+              <li class="copy-text small">{{info.project}}<em>项目</em></li>
+            </ul>
+          </li> 
+        </ul>
+      </div>
+    </div>
+    <div class="right-b">
+      <div class="user-box">
+        <ul class="text-list clearfix">
+          <li>
+            <ul class="clearfix">
+              <li class="copy-li"><span><i class=" icon-aw-user-group navy-dark small"></i></span></li>
+              <li class="copy-text small">{{info.user}}<em>用户</em></li>
+            </ul>
+          </li>
+          <li>
+            <ul class="clearfix">
+              <li class="copy-li"><span><i class="icon-aw-cloud-server navy-dark small"></i></span></li>
+              <li class="copy-text small">{{info.instances}}<em>云主机</em></li>
+            </ul>
+          </li> 
+        </ul>
+      </div>
+    </div> -->
+    
+  </div>
+  <div class="box permit">
+    <div class="col-6">
+      <div class="graff-permit">
+        <div class="title">
+          <ul class="vertical clearfix">
+            <li ng-click="getProjectOfDomain()"><i class="blue"></i>{{"aws.permit.domain"|translate}}TOP5</li>
+            <li ng-click="getUserOfDomain()"><i class="green"></i>{{"aws.permit.user"|translate}}TOP5</li>
+          </ul>
+        </div>
+        <div class="panels  vertical clearfix">
+            <progress-vertical chart-data="chartdata"></progress-vertical>
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="graff-permit">
+        <div class="title">
+          <ul class="vertical clearfix">
+            <li ng-click="instancesNum()"><i class="blueDark"></i>{{"aws.permit.instanceNum"|translate}}TOP5</li>
+            <li ng-click="coresNum()"><i class="blue"></i>{{"aws.permit.cpuNum"|translate}}TOP5</li>
+            <li ng-click="ramNum()"><i class="green"></i>{{"aws.permit.mem"|translate}}TOP5（GB）</li>
+          </ul>
+        </div>
+        <div class="panels  vertical clearfix">
+            <progress-vertical chart-data="chartdata1"></progress-vertical>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="box no-border-box">
+    <div class="col-12">
+      <div class="title dept">
+        <span>{{"aws.permit.domainDetail"|translate}}</span>
+        <span class="tip">{{"aws.permit.totalQuota"|translate}}</span>
+      </div>
+      <div class="table-content">
+        <table ng-table="tableParams" class="table">
+          <colgroup>
+            <col width="12%">
+            <col width="22%">
+            <col width="22%">
+            <col width="22%">
+            <col width="22%">
+          </colgroup>
+          <tr ng-repeat="item in $data">
+            <td data-title="'aws.quota.domainUid'|translate" sortable="'_name'"><a  ng-href="#/permit/overview?id={{item.id}}" title="{{item.name}}">{{item._name}}</a></td>
+            <td data-title="'aws.overview.vmHostNumber'|translate">
+                <div quota-bar bardata="item.domainQuotas[2]" id="tableQuota"></div>
+            </td>
+            <td data-title="'aws.permit.cpuCore'|translate">
+                <div quota-bar bardata="item.domainQuotas[0]" id="tableQuota"></div>
+            </td>
+            <td data-title="'aws.permit.memb'|translate">
+                <div quota-bar bardata="item.domainQuotas[3]" id="tableQuota"></div>
+            </td>
+            <td data-title="'aws.permit.externalIp'|translate">
+                <div quota-bar bardata="item.domainQuotas[1]" id="tableQuota"></div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    
+  </div>
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation" >
+        <div class="tab-content">
+            <div class ="detail-row">
+                <div class="detail-title">
+                    <a class = "an-close" ng-href="/permit/overview"><i class="icon-aw-mail-reply"></i></a>
+                    <span class="detail-title-item">{{getDomainDetailName}} {{'aws.permit.projectList'|translate}}</span>
+                </div>
+                <div class="detail-info">
+                    <div class="tab-content-line"></div>    
+                  <empty-tip empty-type="getDomainDetailData"></empty-tip>   
+                  <table ng-table="DomainDetail" class="table">
+                    <colgroup>
+                      <col width="12%">
+                      <col width="22%">
+                      <col width="22%">
+                      <col width="22%">
+                      <col width="22%">
+                    </colgroup>
+                    <tr ng-repeat="item in $data">
+                      <td data-title="'aws.quota.domainUid'|translate">{{item._name}}</td>
+                      <td data-title="'aws.overview.vmHostNumber'|translate">
+                          <div quota-bar bardata="item.projectQuotas[2]" id="tableQuota"></div>
+                      </td>
+                      <td data-title="'aws.permit.cpuCore'|translate">
+                          <!-- <div quota-bar bardata="item.projectQuotas[0]" id="tableQuota"></div> -->
+                          {{item.projectQuotas[0].inUsed}}/{{item.projectQuotas[0].total}}
+                      </td>
+                      <td data-title="'aws.permit.memb'|translate">
+                          <!-- <div quota-bar bardata="item.projectQuotas[3]" id="tableQuota"></div> -->
+                          {{item.projectQuotas[3].inUsed}}/{{item.projectQuotas[3].total}}
+                      </td>
+                      <td data-title="'aws.permit.externalIp'|translate">
+                          <!-- <div quota-bar bardata="item.projectQuotas[1]" id="tableQuota"></div> -->
+                          {{item.projectQuotas[1].inUsed}}/{{item.projectQuotas[1].total}}
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+            </div>
+        </div>
+    </pane>
+  </div>
+</div>

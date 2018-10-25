@@ -1,0 +1,73 @@
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>Ceph管理</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <p>
+	对当前Ceph存储中各服务器的每块硬盘的健康情况进行监控，并将健康状态反馈到页面中，且对错误状态的硬盘进行告警。通过图形化或者列表式页面展示出当前所有服务器上Ceph硬盘（区分固态硬盘SSD和机械硬盘HDD）的状态、硬盘空间使用率和当前健康情况。</p>
+<h3>
+	删除硬盘</h3>
+<p>
+	admin对于错误状态的硬盘，可以进行删除操作。</p>
+<p>
+	<strong>注意</strong>：<br />
+	删除操作，将会把该硬盘从Ceph管理中永久踢出，硬盘中的数据也将无法恢复，请确认该硬盘是否已经无法修复。且删除之前需要设置定时同步数据。</p>
+<ol>
+	<li>
+		在图形展示页面，单击服务器图形框右上角的编辑按钮，进入服务器硬盘配置页面。</li>
+	<li>
+		选择需要删除的硬盘，单击&ldquo;x&rdquo;按钮。</li>
+	<li>
+		设置定时同步数据。</li>
+	<li>
+		单击&ldquo;确定&rdquo;按钮。</li>
+	<li>
+		在弹出的删除确认框里单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+<h3>
+	添加硬盘</h3>
+<ol>
+	<li>
+		在图形展示页面，单击服务器图形框右上角的编辑按钮，进入服务器硬盘配置页面。</li>
+	<li>
+		将可用硬盘区域的硬盘拖拽至需要添加的硬盘区域。</li>
+</ol>
+<p>
+	<strong>说明</strong>：<br />
+	每个服务器只能存在一个日志盘。当日志盘区域已存在硬盘时，不能添加新的硬盘到日志盘区域，只有当把日志盘删掉，才能添加硬盘。</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

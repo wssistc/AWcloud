@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>虚拟网卡</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <p>
+	云管平台支持关闭虚拟网卡的安全策略，允许用户手动在云主机的一个网卡上配置多个IP地址。为了防止手动分配的IP地址被其他用户分配到，设置虚拟网卡占用指定的IP地址。</p>
+<h3>
+	新建虚拟网卡</h3>
+<ol>
+	<li>
+		&nbsp;在云管平台的Web控制台上，选择&ldquo;产品和服务 &gt;虚拟资源管理 &gt;计算&rdquo;，进入计算导航菜单。</li>
+	<li>
+		在左侧导航菜单中单击&ldquo;虚拟网卡&rdquo;，进入虚拟网卡页面。</li>
+	<li>
+		在虚拟网卡页面上方，单击&ldquo;新建&rdquo;按钮，配置网卡信息。</li>
+	<li>
+		单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+<h3>
+	加载虚拟网卡</h3>
+<p>
+	未关联云主机的虚拟网卡可以挂载到云主机上，云主机最多挂载8个网卡。</p>
+<ol>
+	<li>
+		在虚拟网卡列表中，选择待关联云主机的网卡，单击&ldquo;更多操作&rdquo;按钮并在下拉列表中选择&ldquo;加载&rdquo;。</li>
+	<li>
+		在加载页面，选择加载网卡的云主机。</li>
+	<li>
+		单击&ldquo;加载&rdquo;按钮。加载操作后，虚拟网卡&ldquo;关联云主机&rdquo;显示云主机的名称。</li>
+</ol>
+<p>
+	<strong>注意:</strong><br />
+	添加网卡之后，云主机默认会启用新添加的网卡。但是，云主机的操作系统内部，有可能会没有启用该网卡，这时需要手动启动一下新添加的网卡。<br />
+	如果是Linux操作系统，需要在操作系统内部手动添加一下网卡的配置文件，然后执行启动网卡的命令。不同的Linux系统可能启用网卡的命令有差异。<br />
+	云主机添加多个网卡后，需要给云主机添加每个网卡对应的静态路由，否则网卡无法正常通信。</p>
+<h3>
+	卸载虚拟网卡</h3>
+<p>
+	关联该网卡的云主机至少有2块网卡或者以上才可以执行卸载虚拟网卡操作。<br />
+	因为一旦仅有的一块网卡也被移除，就意味着这台云主机无法通过任何方式与外部通信。</p>
+<ol>
+	<li>
+		在虚拟网卡列表中，选择待卸载的网卡，单击&ldquo;更多操作&rdquo;按钮并在下拉列表中选择&ldquo;卸载&rdquo;。</li>
+	<li>
+		在弹出的确认框里单击&ldquo;确定&rdquo;按钮。卸载操作后，虚拟网卡&ldquo;关联云主机&rdquo;为空。</li>
+</ol>
+<p>
+	&nbsp;</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+@charset "utf-8";
+
+/** checkbox && radio **/
+.checkbox, .radio {
+    display: block;
+    margin: 0;
+    position: relative;
+    height: 20px;
+    input[type="checkbox"][disabled], input[type="radio"][disabled] {
+        & + i, & + .iconfont {
+            cursor: not-allowed;
+            &:before {
+                color: @radioCheckboxDisabled;
+            }
+        }
+    }
+    label {
+        display: inline-block;
+        cursor: pointer;
+        font-weight: normal;
+        margin-bottom: 0;
+        min-height: 20px;
+        line-height: 20px;
+        padding-left: 0px;
+        margin-right: 0px;
+        i, .iconfont {
+            font-size: @panelFontSize;
+            font-family: "fontello";
+            width: 20px;
+            height: 20px;
+            font-style: normal;
+        }
+        .text {
+            color: @lightgrey;
+            display: block;
+            padding-left: 24px;
+            font-size: @moreFontSize - 2;
+        }
+        input:not([type="text"]) {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+            filter: alpha(opacity=0);
+            &:checked ~ .text {
+                color: @color;
+            }
+        }
+        input[type="checkbox"] {
+            & + i, & + .iconfont {
+                margin-right: 2px;
+                float: left;
+                &:before {
+                    content: '\e843';
+                    color: @checkbox;
+                }
+            }
+            &:checked  + i:before {
+                content: "\e80f";
+                color: @checkbox-checked;
+            }
+            &:indeterminate + i:before {
+                content: '\E861';
+                color: @blueDark;
+            }
+            &[disabled] + i{
+                cursor: not-allowed;
+                &:before {
+                    color: @radioCheckboxDisabled;
+                }
+            }
+        }
+        input[type="radio"] {
+            & + i, & + .iconfont {
+                margin-right: 2px;
+                display: inline-block;
+                &:before {
+                    content: "\e810";
+                    color: @radio;
+                }
+            }
+            &:checked  + i:before {
+                content: "\e84d";
+                color: @radio-checked;
+            }
+            &[disabled] + i{
+                cursor: not-allowed;
+                &:before {
+                    color: @radioCheckboxDisabled;
+                }
+            }
+        }
+        & + label {
+            margin-left: 10px;
+        }
+        &.disabled {
+            cursor: not-allowed;
+            color: @lightgrey;
+            input[type="checkbox"], input[type="radio"] {
+                & + i, & + .iconfont {
+                    &:before {
+                        color: @radioCheckboxDisabled;
+                    }
+                }
+            }
+        }
+    }
+    &.switch-btn{
+        display: inline-block;
+        height: @btnHeight;
+        padding-top: 3px;
+        label{
+            i, .iconfont{
+                width: 54px;
+                height: 24px;
+                background: #efefef;
+                border: 1px solid @ivory;
+                position: relative;
+                display: inline-block;
+                border-radius: 12px;
+                -webkit-transition: 0.4s;
+                -moz-transition: 0.4s;
+                -ms-transition: 0.4s;
+                transition: 0.4s;
+            }
+            input{
+                & + i, & + .iconfont{
+                    margin-right: 0;
+                    &:before{
+                        content: '';
+                        position: absolute;
+                        width: 18px;
+                        height: 18px;
+                        text-align: center;
+                        border-radius: 100%;
+                        left: 3px;
+                        top: 2px;
+                        z-index: 2;
+                        background: @white;
+                        box-shadow: 0 0 3px rgba(78,128,245,0.25);
+                        -webkit-transition: 0.4s;
+                        -moz-transition: 0.4s;
+                        -ms-transition: 0.4s;
+                        transition: 0.4s;
+                    }
+                    &:hover{
+                        &:before{
+                            box-shadow: 0 0 3px rgba(78,128,245,0.35);
+                        }
+                    }
+                }
+                &:checked + .iconfont {
+                    background: @green;
+                    border: 1px solid @greenDark;
+                    &:before{
+                        content: '';
+                        left: 31px;
+                        background: @white;
+                    }
+                }
+            }
+        }
+    }
+    &.vertical {
+        height: auto;
+        display: inline-block;
+        label {
+            margin-bottom: 10px;
+            display: block;
+            & + label {
+                margin-left: 0;
+            }
+            &:last-child {
+                margin-bottom: 0;
+            }
+            
+        }
+    }
+}

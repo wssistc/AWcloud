@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html ng-app="app">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="renderer" content="webkit" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+  <meta name="format-detection" content="telephone=no, email=no, adress=no" />
+  <!-- <title  ng-bind="pathTitle +' - ' + siteTitle"></title> -->
+  <title  ng-bind="pathTitle"></title>
+    <script src="../js/config.js" id="page-config" data-js="
+    lodash/lodash.min.js
+    jquery/jquery.min.js
+    angular/angular.min.js
+    angular-route/angular-route.min.js
+    angular-messages/angular-messages.min.js
+    angular-translate/dist/angular-translate.min.js
+    angular-ui-bootstrap/dist/ui-bootstrap-tpls.js
+    ui-select/dist/select.min.js
+    ng-table/dist/ng-table.min.js
+    angular-sanitize/angular-sanitize.min.js
+    " data-css="
+    bootstrap/dist/css/bootstrap.min.css
+    ui-select/dist/select.min.css
+    "></script>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/register.css">
+  <link rel="shortcut icon" href="../favicon.ico"/>
+  <link rel="bookmark" href="../favicon.ico"/>
+</head>
+
+<body ng-controller="mainCtrl" class="modal-open" ng-class="{'isLogin':isLogin}" auto-height>
+  <header>
+    <div class="container">
+      <div class="logo">
+        <a>AWSTACK</a>
+      </div>
+    </div>
+  </header>
+  <div class="main">
+    <div class="step-box" ng-class="{'step-show':isInfo}" ng-if="isInfo">
+      <div class="container">
+        <ul class="text-list clearfix">
+<!--           <li class="first" ng-class="{'active': stepOneActive}">
+            <i class="icon-aw-storage"></i>
+            <p>存储配置</p>
+          </li> -->
+          <li class="first" ng-class="{'active': stepOneActive}">
+            <i class="icon-aw-pc"></i>
+            <p>主机配置</p>
+          </li>
+          <li ng-class="{'active': stepTwoActive}">
+            <i class="icon-aw-internet1"></i>
+            <p>{{'aws.register.info.netSetting'|translate}}</p>
+            <div class="state-items">
+              <span class="icon-aw-angle-right"></span>
+              <span class="icon-aw-correct"></span>
+            </div>
+          </li>
+          <li ng-class="{'active': stepThreeActive}">
+            <i class="icon-aw-user"></i>
+            <p>{{'aws.register.info.accSetting'|translate}}</p>
+            <div class="state-items">
+              <span class="icon-aw-angle-right"></span>
+              <span class="icon-aw-correct"></span>
+            </div>
+          </li>
+          <li class="last" ng-class="{'active': stepFourActive}">
+            <i class="icon-aw-information"></i>
+            <p>{{'aws.register.info.infoSummary'|translate}}</p>
+            <div class="state-items">
+              <span class="icon-aw-angle-right"></span>
+              <span class="icon-aw-correct"></span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div ng-view>
+    </div>
+  </div>
+  <footer>
+    <div class="container">
+      <p class="copyright" ng-bind="copyright"></p>
+    </div>
+  </footer>
+  <script type="text/javascript">
+    if(window.location.protocol=="http:"){
+        window.location.href="https:"+window.location.href.split("http:")[1];
+    }
+  </script>
+  <script src="../js/common.js"></script>
+  <script src="../js/register.js"></script>
+  <script src="../js/hyperConfig.js"></script>
+</body>
+
+</html>

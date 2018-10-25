@@ -1,0 +1,157 @@
+<div class="page-inner">
+    <service-tip service = "'ceph'"  menus=['系统管理','运维管理','存储管理']  menu-href="'/system/storageManagement'"></service-tip>
+    <div class="monitor-view" ng-if = "services.ceph">
+      <div class="box">
+        <div class="col-4">
+          <div class="ceph-box clearFix">
+            <div class="title">
+              <div> Health</div>
+              <div> Monitor</div>
+            </div>
+            <div class="wrap health-wrap">
+              <div class="status-box"><span>{{cephstatus}}</span></div>
+              <div class="warning-box footer">
+                <a tabindex="0" popover-trigger="mouseenter" uib-popover-template="dynamicPopover.warnTmplUrl" popover-placement="bottom-left"><i class="circle">{{totalWarnings}}</i>Warning</a>
+              </div>
+            </div>
+            <div class="wrap mon-wrap"> 
+                <div class="status-box">
+                  <span>{{monitorstatusavailable}}/{{monitorstatustotal}}</span>
+                </div>
+                <div class="info-box footer">
+                  <a tabindex="0" popover-trigger="mouseenter" uib-popover-template="dynamicPopover.hostTmplUrl" popover-placement="bottom-left"><i class="circle"></i>{{"aws.monitor.ceph.hostName" | translate}}</a>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="title">PG Status</div>
+          <div class="panels clearfix">
+            <div class="pie-wrap">
+              <div class="pie" chart-pie panel='PGStatusChart.panels' ng-if="pieshow"></div>
+              <div class="pie-center pg-text">
+                <span>{{pgCenterTex}}</span>
+              </div>
+            </div>
+            <div class="pie-legend pie-ceph">
+              <dl class="dl-horizontal" ng-repeat="legend in PGStatusChart.panels.data">
+                <dt title="{{legend.name}}"><i style="background-color:{{PGStatusChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+                <dd ng-style={'color':$index==0?PGStatusChart.panels.colors[$index]:'inherit'}>{{legend.value}}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="title">{{"aws.monitor.ceph.diskStorage" | translate}}</div>
+          <div class="panels clearfix">
+            <div class="pie-wrap">
+              <div class="pie" chart-pie panel='storageChart.panels' ng-if="diskpieshow"></div>
+            </div>
+            <div class="pie-legend">
+              <dl class="dl-horizontal">
+                <dt>{{"aws.overview.totalMemory"|translate}}：</dt>
+                <dd><span class="total">{{storageTotal.b}}{{unit}}</span></dd>
+              </dl>
+              <dl class="dl-horizontal" ng-repeat="legend in storageChart.panels.data">
+                <dt><i style="background-color:{{storageChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+                <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?storageChart.panels.colors[$index]:'inherit'}>{{legend.valueB}}</span></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="col-4" ng-repeat="item in panels.cluster | orderBy:'priority' ">
+            <div class="inner">
+                <div class="panels clearfix">
+                    <div class="area-chart-title">{{item.title}}</div>
+                    <div class="area-chart-wrap" chart-area panel="item"></div>
+                </div>
+            </div>
+        </div>
+      </div>
+      <div class="tab-offset-right">
+        <uib-tabset active="" justified="true">
+          <uib-tab index="0" heading='{{"aws.monitor.ceph.poolsList" | translate}}' ng-click="poolsTab()">
+            <div class="table-content">
+              <empty-tip empty-type="loadData"></empty-tip>
+              <table ng-table="tableParamsPools" class="table">
+                <tr ng-repeat="flavor in $data">
+                  <td data-title="'aws.monitor.ceph.poolName' | translate" sortable="'name'"><a ng-href="/monitor/cephview?id={{flavor.name}}">{{flavor.name}}</a></td>
+                  <td data-title="'aws.monitor.ceph.pgNumber' | translate" sortable="'pg_num'"><span>{{flavor.pg_num}}</span></td>
+                  <td data-title="'aws.monitor.ceph.objNumber' | translate" sortable="'object_num'"><span>{{flavor.object_num}}</span></td>
+                  <td data-title="'aws.monitor.ceph.copyNumber' | translate" sortable="'size'"><span>{{flavor.size}}</span></td>
+                  <td data-title="'aws.monitor.ceph.totalStorage' | translate" sortable="'space_gb'"><span>{{flavor.space_gb}}</span></td>
+                  <td data-title="'aws.monitor.ceph.usage' | translate" sortable="'rate'"><span>{{flavor.rate}}%</span></td>
+                </tr>
+              </table>
+              <div ng-controller="detailCtrl">
+                <pane class="detail-body" animation="animation">
+                  <div class="tab-content">
+                    <div class="detail-row">
+                      <div class="detail-title">
+                        <a class="an-close" ng-href="/monitor/cephview"><i class=" icon-aw-mail-reply"></i></a>
+                        <span>{{poolName}}</span>
+                      </div>
+                      <div class="detail-info">
+                        <div class="tab-content-line"></div>
+                        <div class="box">
+                          <div class="col-4" ng-repeat="item in panels.pool | orderBy:'priority' ">
+                              <div class="inner">
+                                  <div class="panels clearfix">
+                                      <div class="area-chart-title">{{item.title}}</div>
+                                      <div class="area-chart-wrap" chart-area panel="item"></div>
+                                  </div>
+                              </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </pane>
+              </div>
+            </div>
+          </uib-tab>
+          <uib-tab index="1" heading="{{'aws.monitor.ceph.osdList' | translate}}" ng-click="osdTab()">
+            <div class="table-content">
+              <table ng-table="tableParamsOsds" class="table">
+                <tr ng-repeat="flavor in $data">
+                  <td data-title="'ID'" sortable="'id'"><span>{{flavor.id}}</span>
+                  </td>                                    
+                  <td data-title="'aws.monitor.ceph.StatusCeph' | translate" sortable="'status'"><span ng-class="{'bg-green':(flavor.status=='up'),'bg-orange':(flavor.status=='down')}">{{'aws.instances.table.status.'+flavor.status| translate}}</span>
+                  </td>
+                  <td data-title="'aws.monitor.ceph.totalStorage' | translate" sortable="'total_gb'"><span>{{flavor.total_gb}}</span></td>
+                  <td data-title="'aws.monitor.ceph.usage' | translate" sortable="'used_gb'"><span>{{flavor | osdfilter}}%</span></td>
+                  <td data-title="'aws.monitor.ceph.currentServer' | translate" sortable="'node'"><span>{{flavor.node}}</span></td>
+                </tr>
+              </table>
+          </uib-tab>
+        </uib-tabset>
+      </div>
+    </div>
+</div>
+
+<script type="text/ng-template"  id="warningTable.html">
+  <table class="table">
+    <tr ng-repeat="warnInfo in warnInfos">
+      <td><span class="point">●</span></td>
+      <td><span>{{warnInfo.summary}}</span></td>
+    </tr>
+  </table>
+</script>
+<script type="text/ng-template"  id="hostInfoTable.html">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>{{"aws.overview.hostName"|translate}}</th>
+        <th>IP地址</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="monMsg in monMsgs">
+        <td><span>{{monMsg.name}}</span></td>
+        <td><span>{{monMsg.ip}}</span></td>
+      </tr>
+    </tbody>
+  </table>
+</script>

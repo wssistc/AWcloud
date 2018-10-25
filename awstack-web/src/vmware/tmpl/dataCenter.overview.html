@@ -1,0 +1,113 @@
+<div class="page-inner overview">
+  <div class="box">
+      <div class="col-4">
+          <div class="user-box">
+              <ul class="text-list clearfix">
+                <li><span class="font"><i class="icon-aw-pm"></i></span></li>
+                <li class="text-left">
+                  <a><em>主机：</em><span class="orange">暂无数据</span></a>
+                </li>
+              </ul> 
+          </div>
+      </div>
+      <div class="col-4">
+          <div class="user-box">
+              <ul class="text-list clearfix">
+                <li><span class="font"><i class="icon-aw-cluster"></i></span></li>
+                <li class="text-left">
+                  <a><em>集群：</em><span>9</span></a>
+                </li>
+              </ul> 
+          </div>
+      </div>
+      <div class="col-4">
+          <div class="user-box">
+              <ul class="text-list clearfix">
+                <li><span class="font"><i class="icon-aw-cloud-server"></i></span></li>
+                <li class="text-left">
+                  <a><em>虚拟机：</em><span>9</span></a>
+                </li>
+              </ul> 
+          </div>
+      </div>
+  </div>
+  <div class="box">
+      <div class="col-4">
+          <div class="user-box">
+              <ul class="text-list clearfix">
+                <li><span class="font"><i class="icon-aw-internet"></i></span></li>
+                <li class="text-left">
+                  <a><em>网络：</em><span>1</span></a>
+                </li>
+              </ul> 
+          </div>
+      </div>
+      <div class="col-4">
+          <div class="user-box">
+              <ul class="text-list clearfix">
+                <li><span class="font"><i class="icon-aw-storage1"></i></span></li>
+                <li class="text-left">
+                  <a><em>数据存储：</em><span>1</span></a>
+                </li>
+              </ul> 
+          </div>
+      </div>
+      <div class="col-4"></div>
+  </div>
+  <div class="box">
+    <div class="col-4">
+      <div class="title">CPU使用率</div>
+      <div class="panels clearfix">
+        <div class="pie-wrap" >
+        <div class=" pie" chart-pie panel='cpuUseChart.panels'></div>
+        </div>
+        <div class="pie-legend">
+          <dl class="dl-horizontal">
+            <dt>总核数：</dt>
+            <dd><span class="total">{{hostCPUTotal}}</span></dd>
+          </dl>
+          <dl class="dl-horizontal" ng-repeat="legend in cpuUseChart.panels.data">
+            <dt><i style="background-color:{{cpuUseChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+            <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?cpuUseChart.panels.colors[$index]:'inherit'}>{{legend.value>=0?legend.value:0}}</span></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="title">内存使用率</div>
+      <div class="panels clearfix">
+        <div class="pie-wrap">
+          <div class="pie" chart-pie panel='memoryUseChart.panels'></div>
+        </div>
+        <div class="pie-legend">
+          <dl class="dl-horizontal">
+            <dt>总内存：</dt>
+            <dd><span class="total">{{hostMemoryTotal}} GB</span></dd>
+          </dl>
+          <dl class="dl-horizontal" ng-repeat="legend in memoryUseChart.panels.data">
+            <dt><i style="background-color:{{memoryUseChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+            <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?memoryUseChart.panels.colors[$index]:'inherit'}>{{legend.value>=0?legend.value:0}} GB</span></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="title">硬盘使用率</div>
+      <div class="panels clearfix">
+        <div class="pie-wrap">
+        <div class="pie" chart-pie panel='storageChart.panels'></div>
+        </div>
+        <div class="pie-legend">
+          <dl class="dl-horizontal">
+            <dt>总容量：</dt>
+            <dd><span class="total">{{storageTotal.b}}{{unit}}</span></dd>
+          </dl>
+          <dl class="dl-horizontal" ng-repeat="legend in storageChart.panels.data">
+            <dt><i style="background-color:{{storageChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+            <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?storageChart.panels.colors[$index]:'inherit'}>{{legend.valueB}}</span></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

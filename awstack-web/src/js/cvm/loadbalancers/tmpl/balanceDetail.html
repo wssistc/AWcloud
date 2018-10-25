@@ -1,0 +1,390 @@
+<div class="page-inner balance "> 
+  <div class="detail-info">
+    <uib-tabset active=detailActive justified="true">
+      <uib-tab index="0" heading="{{'aws.loadbalancers.lb.overview'| translate}}" disable="!titleFlag">
+        <div class="table-action">
+          <a type="button" class="btn btn-primary" ng-href="#/cvm/loadbalancers">
+            <i class="icon-aw-mail-reply"></i>{{'aws.loadbalancers.pl.back'|translate}} 
+          </a>
+          <span class="title">{{'aws.loadbalancers.ui.lbDetail'|translate}}</span>
+        </div>
+        <table class="table table-info column">
+          <tbody>
+            <tr>
+              <td>{{'aws.loadbalancers.lb.name'| translate}}</td>
+              <td>{{detailData.name}}</td>
+              <td>ID</td>
+              <td>{{detailData.id}}</td>
+            </tr>
+            <tr>
+              <td>{{'aws.loadbalancers.lb.description'| translate}}</td>
+              <td>{{detailData.description}}</td>
+              <td>{{'aws.loadbalancers.ui.provisioning_status'| translate }}</td>   
+              <td>{{'aws.loadbalancers.ui.table.'+detailData.provisioning_status| translate}}</td>
+              
+            </tr>
+            <!-- <tr>
+              <td>{{'aws.loadbalancers.lb.operating_status'| translate}}</td>
+              <td>{{'aws.loadbalancers.lb.table.'+detailData.operating_status| translate}}</td>
+              <td>{{'aws.loadbalancers.lb.provisioning_status'| translate }}</td>   
+              <td>{{'aws.loadbalancers.lb.table.'+detailData.provisioning_status| translate}}</td>
+              <td>{{'aws.loadbalancers.lb.admin_state_up'| translate}}</td>
+              <td>{{'aws.loadbalancers.lb.table.'+detailData.admin_state_up| translate}}</td>
+            </tr> -->
+            <tr>
+              <td>{{'aws.loadbalancers.lb.vip_address'| translate}}</td>
+              <td>{{detailData.vip_address}}</td>
+              <td>{{'aws.loadbalancers.lb.Vlan'| translate}}</td>
+              <td>{{detailData.vip_subnet_id}}</td>
+            </tr> 
+            <tr>
+              <td>{{'aws.loadbalancers.lb.provider'| translate}}</td>
+              <td>{{detailData.provider}}</td>
+              <td>{{'aws.loadbalancers.lb.tenant_id'| translate}}</td>
+              <td>{{detailData.tenant_id}}</td>
+            </tr> 
+            <tr ng-if="L3">
+              <td>{{'aws.instances.publicIP'| translate}}</td>
+              <td>{{detailData.fip}}</td>
+              <td></td>
+              <td></td>
+            </tr> 
+          </tbody>
+        </table>
+      </uib-tab>
+      <uib-tab index="1" heading="{{'aws.loadbalancers.ls.listener'| translate}}" ng-click="getListeners()" disable="!titleFlag">
+        <div class="table-action">
+          <a type="button" class="btn btn-primary" ng-href="#/cvm/loadbalancers"><i class="icon-aw-mail-reply"></i>{{'aws.loadbalancers.ls.back'| translate}}</a>
+          <button type="button" data-toggle="modal" ng-click="createListener('new')" ng-disabled="dataRealdy" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+          <button type="button" data-toggle="modal" ng-click="createListener('edit')" ng-disabled="isDisabled" class="btn btn-info"><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+          <button type="button" data-toggle="modal" ng-click="deleteListener(checkedItems)" ng-disabled="delisDisabled || disabledDelListenerBtn"  class="btn btn-warning" title="{{delListenerTip}}"> <i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+          <button class="btn btn-refresh" ng-click="getListeners()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button>
+          <div class="search-box">
+              <form name="searchForm" novalidate ng-keyup="applyGlobalSearch('tableParamsListeners')">
+                  <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                  <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="search.globalSearchTerm" placeholder={{"aws.action.search"|translate}} />
+              </form>
+          </div>
+        </div>
+        <div class="table-content">
+          <table ng-table="tableParamsListeners" class="table" show-filter="false">
+            <colgroup>
+              <col width="5%">
+              <col width="23.75%">
+              <col width="23.75%">
+              <col width="23.75%">
+              <col width="23.75%">
+            </colgroup>
+            <tbody>
+              <tr ng-repeat="item in $data">
+                <td header="'headerCheckbox.html'">
+                  <label class="checkbox">
+                    <input type="checkbox" ng-model="checkboxes.items[item.id]"/>
+                    <i class="icon-aw-square"></i>
+                  </label>
+                </td>
+                <td data-title="'aws.loadbalancers.ls.name'| translate" sortable="'name'">
+                  <div class="edit-name edit-lg">
+                    <a ng-href="#/cvm/loadbalancers/{{DebalanceId}}?id={{item.id}}" title="{{item.name}}">{{item.name}}</a>
+                  </div>
+                </td>
+                <td data-title="'aws.loadbalancers.ls.description'| translate" sortable="'description'">
+                  <span class="des des-lg">{{item.description}}</span>
+                </td>
+                <td data-title="'aws.loadbalancers.ls.protocol'| translate" sortable="'protocol'">{{item.protocol}}</td>
+                <td data-title="'aws.loadbalancers.ls.protocol_port'| translate" sortable="'protocol_port'">{{item.protocol_port}}</td>
+              </tr>
+            </tbody>
+          </table>
+          <loading-data  data="listenertabledata"></loading-data>
+        </div>
+        <div ng-controller="detailCtrl">
+          <pane class="detail-body" animation="animation" >
+            <div class="tab-content">
+            <div class ="detail-row">
+              <div class="detail-header">
+              </div>
+                <div class="detail-title" >
+                  <a class = "an-close" ng-href="#/cvm/loadbalancers/{{DebalanceId}}"><i class="icon-aw-mail-reply"></i></a>
+                  <span>{{'aws.loadbalancers.ui.listenerDetail'|translate}}</span>
+                </div>
+              <div class="detail-info">
+                <table class="table table-info column">
+                  <tbody>
+                  <tr>
+                    <td>{{'aws.loadbalancers.ls.name'| translate}}</td>
+                    <td>{{detailListeners.name}}</td>
+                    <td>{{'aws.loadbalancers.ls.description'| translate}}</td>
+                    <td>{{detailListeners.description}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{'aws.loadbalancers.ls.protocol'| translate}}</td>
+                    <td>{{detailListeners.protocol}}</td>
+                    <td>{{'aws.loadbalancers.ls.protocol_port'| translate}}</td>
+                    <td>{{detailListeners.protocol_port}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{'aws.loadbalancers.ui.operating_status'| translate}}</td>
+                    <td>{{'aws.loadbalancers.ui.table.'+detailData.operating_status| translate}}</td>
+                    <td>{{'aws.loadbalancers.ui.provisioning_status'| translate }}</td>   
+                    <td>{{'aws.loadbalancers.ui.table.'+detailData.provisioning_status| translate}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{'aws.loadbalancers.ls.connection_limit' | translate}}</td>
+                    <td>{{detailListeners.connection_limit}}</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+                
+            </div>
+          </pane>
+        </div>
+      </uib-tab>
+      <uib-tab index="2" heading="{{'aws.loadbalancers.pl.pool'| translate}}" ng-click="getPools()" disable="!titleFlag">
+        <div class="table-action">
+          <a type="button" class="btn btn-primary" ng-href="#/cvm/loadbalancers">
+            <i class="icon-aw-mail-reply"></i>{{'aws.loadbalancers.pl.back'| translate}}
+          </a>
+          <button type="button" data-toggle="modal" ng-click="creatPools('new')" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+          <button type="button" data-toggle="modal" ng-click="creatPools('edit')" ng-disabled="isDisabled" class="btn btn-info"><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+          <button type="button" data-toggle="modal" ng-click="deletePools(tableParamsPool.checkedItems)" ng-disabled="delisDisabled"  class="btn btn-warning"> <i class=" icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+          <button class="btn btn-refresh" ng-click="getPools()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button>
+          <div class="search-box">
+              <form name="searchForm" novalidate ng-keyup="applyGlobalSearch('tableParamsPool')">
+                  <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                  <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="search.globalSearchTerm" placeholder={{"aws.action.search"|translate}} />
+              </form>
+          </div>
+        </div>
+        <div class="table-content">
+          <table ng-table="tableParamsPool" class="table" show-filter="false">
+            <colgroup>
+              <col width="6%">
+              <col width="47%">
+              <col width="47%">
+            </colgroup>
+            <tbody>
+              <tr ng-repeat="item in $data">
+                <td header="'headerCheckbox.html'">
+                  <label class="checkbox">
+                    <input type="checkbox" ng-model="checkboxes.items[item.id]"/>
+                    <i class="icon-aw-square"></i>
+                  </label>
+                </td>
+                <td data-title="'aws.loadbalancers.pl.name'| translate" sortable="'name'">
+                  <div class="edit-name edit-lg">
+                    <a ng-href="#/cvm/loadbalancers/{{DebalanceId}}/{{item.id}}" title="{{item.name}}">{{item.name}}</a>
+                  </div>
+                </td>
+                <td data-title="'aws.loadbalancers.pl.description'| translate" sortable="'description'">
+                  <span class="des des-lg">{{item.description}}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <loading-data  data="pooltabledata"></loading-data>
+        </div>
+        <div ng-controller="detailCtrl">
+          <pane class="detail-body" animation="animation" >
+            <div class="tab-content">
+            <div class ="detail-row">
+              <div class="detail-header">
+              </div>
+              <div class="detail-title">
+                <a class = "an-close" ng-href="#/cvm/loadbalancers/{{DebalanceId}}"><i class="icon-aw-mail-reply"></i></a>
+                <span>{{'aws.loadbalancers.ui.listenterDetail'|translate}}</span>
+              </div>
+              <div class="detail-info">
+                <table class="table table-info column">
+                  <colgroup>
+                    <col width="50%">
+                    <col width="50%">
+                  </colgroup>
+                  <tbody>
+                  <tr>
+                    <td>{{'aws.loadbalancers.pl.name'| translate}}</td>
+                    <td>{{detailPools.name}}</td>
+                    <td>{{'aws.loadbalancers.pl.description'| translate}}</td>
+                    <td>{{detailPools.id}}</td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+                
+            </div>
+          </pane>
+        </div>
+      </uib-tab>
+    </uib-tabset>
+  </div>
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value=""/>
+    <i class="icon-aw-square"></i>
+  </label>
+</script>
+
+<!-- start Listener -->
+<script type="text/ng-template" id="newListener.html">
+  <div class="modal-common">
+    <form name="listenerForm" autocomplete="off">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">{{'aws.loadbalancers.ui.' + listener.title | translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.ls.name'| translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="name" ng-model="listener.name" placeholder="{{'aws.loadbalancers.ls.name_placeholder'| translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||listenerForm.name.$dirty) && listenerForm.name.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.ls.description'| translate}}：</label>
+          <div class="controls">
+            <textarea type="text" ng-maxlength="255" class="form-controls" name="description" ng-model="listener.description" placeholder="{{'aws.loadbalancers.ls.description_placeholder'| translate}}"/></textarea>
+            <div class="error" ng-messages="(submitInValid ||listenerForm.description.$dirty) && listenerForm.description.$error">
+              <form-validate max-num="255"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.ls.protocol'| translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="listener.selectedId"  ng-disabled="listener.isEdit" required>
+              <ui-select-match placeholder="{{'aws.loadbalancers.ls.protocol_placeholder'| translate}}">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="item in listener.protocol | filter: {name: $select.search}">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.ls.protocol_port'| translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="protocol_port" ng-model="listener.protocol_port" placeholder="{{'aws.loadbalancers.ls.port_placeholder'| translate}}"  min="1" max="65535" limitnumrange checkport ng-disabled="listener.isEdit" required />
+            <div class="error" ng-messages="(submitInValid ||listenerForm.protocol_port.$dirty) && listenerForm.protocol_port.$error">
+              <form-validate></form-validate>
+              <div ng-message="limitnumrange">{{"aws.errors.limit_1_65535"|translate}}</div>
+              <div ng-message="checkport">该端口已被占用</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.ls.connection_limit'| translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="connection_limit" ng-model="listener.connection_limit" placeholder="{{'aws.loadbalancers.ls.connection_limit_ph'| translate}}" ng-pattern="/^([1-9][0-9]*|-1|0)$/" ng-maxlength="32" />
+            <div class="error" ng-messages="(submitInValid ||listenerForm.connection_limit.$dirty) && listenerForm.connection_limit.$error">
+              <form-validate pattern-msg="'aws.errors.integer_negative_one'|translate"></form-validate>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.ls.protocol_port'| translate}}：</label>
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" name="admin_state_up" ng-model="listener.admin_state_up">
+              <i class="icon-aw-square"></i>
+            </label>
+          </div>
+        </div> -->
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirm(listenerForm)">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+      </div>
+    </form>
+  </div>
+</script>
+
+<!-- start Pool-->
+<script type="text/ng-template" id="newPool.html">
+  <div class="modal-common">
+    <form name="poolForm" autocomplete="off">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">{{'aws.loadbalancers.ui.' + pool.title | translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.pl.name'| translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="name" ng-model="pool.name" placeholder="{{'aws.loadbalancers.pl.name_placeholder'| translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||poolForm.name.$dirty) && poolForm.name.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.pl.description'| translate}}：</label>
+          <div class="controls">
+            <textarea type="text" ng-maxlength="255" class="form-controls" name="description" ng-model="pool.description" placeholder="{{'aws.loadbalancers.pl.description_placeholder'| translate}}" /></textarea>
+            <div class="error" ng-messages="(submitInValid ||poolForm.description.$dirty) && poolForm.description.$error">
+              <form-validate max-num="255"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.pl.lbAlgorithm'| translate}}</label>
+          <div class="controls">
+            <ui-select ng-model="lbAlgorithm.selectedId">
+              <ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="item in lbAlgorithm | filter: {name: $select.search}">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.pl.listener'| translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="listenerData.selectedId"  name="listener" ng-disabled="pool.isEdit" required>
+              <ui-select-match placeholder="{{'aws.loadbalancers.pl.listener_placeholder'| translate}}">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="item in listenersData | filter: {name: $select.search}">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="(submitInValid ||poolForm.listener.$dirty) && poolForm.listener.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.pl.protocol'| translate}}：</label>
+          <div class="controls">
+            <!--<ui-select ng-model="protocol.selectedId" ng-disabled="pool.isEdit">
+              <ui-select-match placeholder="{{'aws.loadbalancers.pl.protocol_placeholder'| translate}}" >{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="item in protocol | filter: {name: $select.search}">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>-->
+            <input type="text" ng-model="listenerData.selectedId.protocol" placeholder="{{'aws.loadbalancers.pl.protocol_placeholder'| translate}}" ng-readonly="true"/>
+          </div>
+        </div>
+        <!-- <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.pl.admin_state_up'| translate}}：</label>
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" name="admin_state_up" ng-model="pool.admin_state_up">
+              <i class="icon-aw-square"></i>
+            </label>
+          </div>
+        </div> -->
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmPool(poolForm)">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+      </div>
+    </form>
+  </div>
+</script>

@@ -1,0 +1,115 @@
+<div class="page-inner">
+  <!-- <div class="table-action">
+    <button type="button" class="btn btn-primary"  ng-click="add()"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+    <button type="button" class="btn btn-info" ng-disabled="isDisabled" ng-click="edit(editData)"><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+    <button type="button" data-toggle="modal" ng-disabled="delisDisabled" ng-click="delete()" class="btn btn-info"> <i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+    <button class="btn btn-refresh" ng-click="getStFeatures()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button>
+    <div class="search-box ">
+      <form name="searchForm" novalidate="" ng-keyup="applyGlobalSearch()" class="ng-pristine ng-valid ng-valid-maxlength">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"> <i class="icon-aw-search"></i>
+        </button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder={{"aws.action.search"|translate}} >
+      </form>
+    </div>
+  </div> -->
+  <div class="table-content">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{{'aws.storage.features.ftname'|translate}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>compression</td>
+        </tr>
+        <tr>
+          <td>rsize</td>
+        </tr>
+        <tr>
+          <td>easytier</td>
+        </tr>
+        <tr>
+          <td>hyperswap</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+      <i class="iconfont"></i>
+    </label>
+  </script>
+</div>
+
+<script type="text/ng-template" id="add.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{'aws.storage.features.newTitle'|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="addform" novalidate>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.features.ftname' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="name" class="form-controls"  placeholder="{{'aws.storage.features.ftname_ph' | translate}}" ng-model="feature.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||addform.name.$dirty) && addform.name.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.features.description' | translate}}：</label>
+          <div class="controls">
+            <textarea type="text" name="description" class="form-controls"  placeholder="{{'aws.storage.features.description_ph' | translate}}" ng-model="feature.description" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32"  />
+            <div class="error" ng-messages="(submitInValid ||addform.description.$dirty) && addform.description.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmadd(addform)">{{'aws.action.ok' | translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="edit.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{'aws.storage.device.editTitle'|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="editform" novalidate>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.features.ftname' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="name" class="form-controls"  placeholder="{{'aws.storage.features.ftname_ph' | translate}}" ng-model="feature.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||editform.name.$dirty) && editform.name.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.features.description' | translate}}：</label>
+          <div class="controls">
+            <textarea type="text" name="description" class="form-controls"  placeholder="{{'aws.storage.features.description_ph' | translate}}" ng-model="feature.description" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32"  />
+            <div class="error" ng-messages="(submitInValid ||editform.description.$dirty) && editform.description.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmadd(editform)">{{'aws.action.ok' | translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+  </div>
+</script>

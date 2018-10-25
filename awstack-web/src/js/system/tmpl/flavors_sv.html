@@ -1,0 +1,362 @@
+<div class="page-inner">
+  <div class="table-action">
+    <button type="button" class="btn btn-new" ng-click="createFlavor()">
+      <i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}
+    </button>
+    <!-- <button type="button" class="btn btn-info" ng-click="modifyFlavorAccess(editData)" ng-disabled="isDisabled">
+      <i class="icon-aw-modify"></i>{{"aws.system.flavor.modifyFlavorAccess"|translate}}
+    </button> -->
+    <button type="button" class="btn btn-noraml" ng-disabled="delisDisabled" ng-click="deleteFlavor()">
+      <i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}
+    </button>
+    <button class="btn btn-refresh" ng-click="refreshFlavors()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button>
+    <into-information modular="'flavorsinstance'"></into-information>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+          <i class="icon-aw-search"></i>
+        </button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm"
+               ng-model="globalSearchTerm" placeholder="{{'aws.action.search'|translate}}"/>
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="tableParams" class="table" show-filter="false">
+      <colgroup>
+      <col width="5%">
+      <col width="19%">
+      <col width="19%">
+      <col width="19%">
+      <col width="19%">
+      <col width="19%">
+    </colgroup>
+      <tr ng-repeat="flavor in $data">  
+        <td header="'headerCheckbox.html'">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[flavor.id]"/>
+            <i class="iconfont"></i>
+          </label>
+        </td>
+       <!--  <td data-title="'ID'" sortable="'id'">
+         <a ng-href="/system/flavors?id={{flavor.id}}">{{flavor.id}}</a>
+       </td> -->
+        <td data-title="'aws.system.flavor.name'|translate" sortable="'name'">
+          <div class="edit-name edit-lg">
+            <a ng-href="/system/flavors?id={{flavor.id}}" title="{{flavor.name}}">{{flavor.name}}</a>
+          </div>
+        </td>
+        <td data-title="'CPU'" sortable="'vcpus'">
+          {{flavor.vcpus}}
+        </td>
+        <!-- <td data-title="'CPU(max)'" sortable="'vcpus'"><span>{{flavor.vcpus_max}}</span></td> -->
+        <td data-title="'aws.system.flavor.ram'|translate" sortable="'ram'">
+          {{flavor.ram}}
+        </td>
+        <!-- <td data-title="'aws.system.flavor.rammax'|translate" sortable="'ram'">
+          {{flavor.ram_max}}
+        </td> -->
+        <td data-title="'aws.system.flavor.disk'|translate" sortable="'disk'">
+          {{flavor.disk}}
+        </td>
+        <td data-title="'aws.system.flavor.ephemeral'|translate" sortable="'ephemeral'">
+          {{flavor.ephemeral}}
+        </td>
+        <!-- <td data-title="'aws.system.flavor._public'|translate" sortable="'ispublic'">
+          {{flavor.ispublic}}
+        </td> -->
+      </tr>
+    </table>
+  </div>
+  <div ng-controller="FlavorExtrasCtrl">
+    <flavor-extras class="detail-body" animation="animation">
+      <div class="tab-content">
+        <div class="detail-row">
+          <div class="detail-header">
+            <table class="table">
+              <tr>
+                <td>{{specifiedFlavor.id}}</td>
+                <td>{{specifiedFlavor.name}}</td>
+                <td>{{specifiedFlavor.vcpus}}</td>
+                <td>{{specifiedFlavor.ram}}</td>
+                <td>{{specifiedFlavor.disk}}</td>
+                <td>{{specifiedFlavor._public}}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="detail-title">
+              <a class="an-close" ng-href="/system/flavors"><i class="icon-aw-mail-reply"></i></a>
+              <span>{{"aws.system.flavor.specialSetting"|translate}}</span>
+          </div>
+          <div class="detail-info">
+            <div class="tab-content-line"></div>
+            <div class="table-action">
+              <button type="button" class="btn btn-new" ng-click="flavorExtra('new')">
+                <i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}
+              </button>
+              <button type="button" class="btn btn-normal" ng-click="flavorExtra('edit',editData)" ng-disabled="modifyDisabled">
+                <i class="icon-aw-modify"></i>{{"aws.action.modify"|translate}}
+              </button>
+              <button type="button" class="btn btn-normal"
+                      ng-click="deleteFlavorExtra()" ng-disabled="deleteDisabled">
+                <i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}
+              </button>
+
+                <button class="btn btn-refresh" ng-click="refreshFlavorExtras()">
+                  <i class="icon-aw-refresh"></i>{{"aws.action.refresh"|translate}}
+                </button>
+            </div>
+            <table ng-table="flavorExtrasTable" class="table">
+              <tr ng-repeat="flavor in $data">
+                <td header="'checkbox.html'">
+                  <label class="checkbox">
+                    <input type="checkbox" ng-model="checkboxes.items[flavor.key]"/>
+                    <i class="iconfont"></i>
+                  </label>
+                </td>
+                <td data-title="'名称'" sortable="'name'">
+                  <span>{{flavor.name}}</span>
+                </td>
+                <td data-title="'aws.system.flavor.key'|translate" sortable="'key'">
+                  <span>{{flavor.key}}</span>
+                </td>
+                <td data-title="'aws.system.flavor.value'|translate" sortable="'value'">
+                  <span>{{flavor.value}}</span>
+                </td>
+              </tr>
+            </table>  
+          </div>
+        </div>
+      </div>
+    </flavor-extras>
+  </div>
+</div>
+
+<script type="text/ng-template" id="checkbox.html">
+<label class="checkbox">
+  <input type="checkbox" id="select_all" name="filter-checkbox" value=""
+         ng-model="checkboxes.checked"/>
+   <i class="iconfont"></i>
+</label>     
+</script>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value=""/>
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="newFlavor.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.system.flavor.createInsConfig"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="flavorForm">
+        <div class="control-group">
+          <label class="control-label">{{"aws.system.flavor.name"|translate}}：</label>
+          <div class="controls">
+              <input type="text" name="name" class="form-controls"
+                     placeholder="{{'aws.system.flavor.inputFlavorName'|translate}}" required
+                     ng-model="newFlavorData.name" ng-maxlength="32"/>
+            <div class="error" ng-messages="flavorForm.name.$error" ng-if="interacted(flavorForm,'name')" >
+              <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+              <div ng-message="maxlength">{{"aws.message.textLength"|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.system.flavor.vcpus"|translate}}：</label>
+          <div class="controls">
+              <input type="text" name="vcpus" class="form-controls" ng-model="newFlavorData.vcpus"
+                ng-pattern="/^(1|\d*[2468]|\d+[0])$/"  checknum maxs="'256'" required  id="vcpus" />
+            <div class="error" ng-messages="flavorForm.vcpus.$error"  ng-if="interacted(flavorForm,'vcpus')">
+              <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+              <div ng-message="pattern">{{"aws.errors.evenGt_1" |translate}}</div>
+              <div ng-message="checknum">{{"aws.system.flavor.cupkernel" |translate}}</div>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="control-group">
+          <label class="control-label">{{"aws.system.flavor.vcpus_max"|translate}}：</label>
+          <div class="controls">
+              <input type="text" uib-popover='{{"aws.system.flavor.vcpusmaxtips"|translate}}' popover-placement="top-right" popover-trigger="mouseenter" name="vcpus_max" class="form-controls" ng-model="newFlavorData.vcpus_max"
+                min="vcpus.min_max.min" max=""   required minmax="vcpus" />
+            <div class="error" ng-messages="flavorForm.vcpus_max.$error">
+              <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+              <div ng-message="minmax">{{"aws.errors.vcpus_min"|translate:vcpus.min_max}}</div>
+            </div>
+          </div>
+        </div> -->
+        <div class="control-group">
+          <label class="control-label">{{"aws.system.flavor.ram"|translate}}：</label>
+          <div class="controls">
+              <input type="text" name="ram" class="form-controls" ng-model="newFlavorData.ram"
+                flaram  required checknum maxs="'2097151'"  id="ram"/>
+            <div class="error" ng-messages="flavorForm.ram.$error"  ng-if="interacted(flavorForm,'ram')" >
+              <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+              <div ng-message="flaram">{{"aws.errors.integerGt_1"|translate}}</div>
+              <div ng-message="checknum">{{"aws.system.flavor.ramcheck"|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="control-group">
+          <label class="control-label">{{"aws.system.flavor.rammax"|translate}}：</label>
+          <div class="controls">
+        
+              <input type="text" uib-popover='{{"aws.system.flavor.rammaxtip"|translate}}' popover-placement="top-right" popover-trigger="focus" name="ram_max" class="form-controls" ng-model="newFlavorData.ram_max"
+                min="ram.min_max.min" max=""  required minmax="ram" />
+        
+            <div class="error" ng-messages="flavorForm.ram_max.$error">
+              <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+              <div ng-message="minmax">{{"aws.errors.ram_min"|translate:ram.min_max}}</div>
+            </div>
+          </div>
+        </div> -->
+        <div class="control-group">
+          <label class="control-label">{{"aws.system.flavor.disk"|translate}}：</label>
+          <div class="controls">
+              <input type="text" name="disk" class="form-controls"  ng-model="newFlavorData.disk"
+               min="1"  required limitnumrange placeholder="{{'aws.system.flavor.diskPlaceholder'|translate}}"/>
+            <div class="error" ng-messages="flavorForm.disk.$error" ng-if="interacted(flavorForm,'disk')">
+              <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+              <div ng-message="limitnumrange">{{"aws.errors.atleast"|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.system.flavor.ephemeral"|translate}}：</label>
+          <div class="controls">
+        
+              <input type="text" name="ephemeral" class="form-controls"  ng-model="newFlavorData.ephemeral"
+               min="0" required limitnumrange placeholder="{{'aws.system.flavor.diskPlaceholder'|translate}}"/>
+        
+            <div class="error" ng-messages="flavorForm.ephemeral.$error" ng-if="interacted(flavorForm,'ephemeral')">
+              <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+              <div ng-message="limitnumrange">{{"aws.errors.atleast_0"|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <!--<div class="control-group">
+          <label class="control-label">{{"aws.system.flavor._public"|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="newFlavorData.is_public">
+              <ui-select-match placeholder="{{'aws.system.flavor.chosePublic'|translate}}">{{$select.selected.name}}
+              </ui-select-match>
+              <ui-select-choices repeat="option.value as option in isPublic.options">
+                <div ng-bind-html="option.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>-->
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmNewFlavor(newFlavorData,flavorForm)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="flavorExtras.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{flavorExtrasTitle}}</h3>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-info" ng-if="selecthw">
+        <strong>{{"aws.errors.extra_hw_tip"|translate}}</strong>
+      </div>
+      <div class="alert alert-info" ng-if="mbTob">
+        <strong>1 MB = 1024 * 1024 B</strong>
+      </div>
+      <div class="alert alert-info" ng-if="mbpsTobps">
+        <strong>1 Mbps = 128 kB/s</strong>
+      </div>
+      <form name="FlavorExtraForm">
+        <div class="control-group">
+          <label class="control-label">{{'aws.system.flavor.name'|translate}}：</label>
+          <div class="controls" ng-if="!editExtra">
+            <ui-select ng-model="flavorExtrasData.key" name="key" ng-change="changeKey(flavorExtrasData.key,flavorExtraType)" required>
+              <ui-select-match placeholder="{{'aws.system.flavor.choseKey'|translate}}">{{$select.selected.name}}
+              </ui-select-match>
+              <ui-select-choices repeat="item.key as item in flavorExtraKeysList">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="FlavorExtraForm.key.$error" ng-if="interacted(FlavorExtraForm)">
+              <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+            </div>
+          </div>
+          <div class="controls" ng-if="editExtra">
+            <div class="val">{{flavorExtrasData.name}}</div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.system.flavor.key"|translate}}：</label>
+          <div class="controls">
+              <div class="val"><span ng-if="!editExtra">&nbsp;&nbsp;&nbsp;</span>{{flavorExtrasData.key}}</div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.system.flavor.value"|translate}}：</label>
+          <div class="controls">
+            <input type="text" name="value" class="form-controls" ng-model="flavorExtrasData.value" required  ng-pattern="/^[0-9]*[1-9][0-9]*$/"  min="min_num" max="max_num" key="flavorExtrasData.key" limitflavor/>
+            <div class="error" ng-messages="FlavorExtraForm.value.$error" ng-if="interacted(FlavorExtraForm)">
+              <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+              <div ng-message="pattern">{{"aws.errors.integer"|translate}}</div>
+              <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}16{{"aws.errors.lenghtUnit"|translate}}</div>
+              <div ng-message="limitflavor">
+                <div ng-show="min_num < max_num">{{"aws.errors.toInput"|translate}}{{min_num}}~{{max_num}}{{"aws.errors.toNum"|translate}}
+                </div>
+                <div ng-show="min_num == max_num">{{"aws.system.flavor.currentInputValue"|translate}}{{min_num}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmFlavorExtras(flavorExtrasData,FlavorExtraForm)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="modifyFlavorAccess.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.system.flavor.modifyFlavorAccess"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="flavorForm">
+        <div class="control-group">
+          <label class="control-label">{{"aws.system.flavor.choseProject"|translate}}：</label>
+          <div class="controls">
+
+              <ui-select multiple close-on-select="false"
+                         ng-model="selectedTenants.tenantsIdList" theme="bootstrap">
+                <ui-select-match placeholder="{{'aws.system.flavor.choseAvaiableProjects'|translate}}">{{$item.name}}
+                </ui-select-match>
+                <ui-select-choices repeat="tenant.tenantId as tenant in allTenants.options">
+                  <div ng-bind-html="tenant.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+
+            <div ng-messages="aggregateForm.value.$dirty && aggregateForm.value.$error">
+              <span class="error" ng-message="required">{{"aws.message.required"|translate}}</span>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="flavorForm.$invalid"
+              ng-click="confirmFlavorAccess()">{{"aws.action.ok"|translate}}
+      </button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>

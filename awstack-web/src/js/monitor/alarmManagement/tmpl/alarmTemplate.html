@@ -1,0 +1,247 @@
+<div class="page-inner">
+  <h3 class="page-title">{{'aws.monitor.alarmModule.alarmTemplate'|translate}}</h3>
+  <div class="table-action">
+    <button type="button" class="btn btn-new" ng-click="alarmTmpl('new')" licence-type="btn" id="monitor-alarmTemp-create"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="alarmTmpl('edit',editData)" ng-disabled="isDisabled" licence-type="btn" id="monitor-alarmTemp-edit"><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="settingTmplRule(editData)" ng-disabled="isDisabled" licence-type="btn" id="monitor-alarmTemp-set"><i class="icon-aw-gear"></i>{{'aws.monitor.alarmModule.setRule'|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="deleteAlarmTmpls(checkedItems)" ng-disabled="delisDisabled" licence-type="btn" id="monitor-alarmTemp-del"><i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+    <!-- <button class="btn btn-refresh" ng-click="refreshAlarmTmpl()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button> -->
+    <into-information modular="'alarmtemplate'"></into-information>
+    <div type="button" class="btn btn-renovat right-ports" ng-click="refreshAlarmTmpl()">
+        <i class="icon-aw-refresh"></i>
+    </div>
+    <div class="search-box right-ports">
+        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.instances.search'|translate}}" />
+        </form>
+    </div>
+  </div>
+
+  <script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+      <i class="iconfont"></i>
+    </label>
+  </script>
+
+  <div class="table-content">
+    <empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="tableParams" class="table">
+      <colgroup>
+        <col width="5%">
+        <col width="35%">
+        <col width="30%">
+        <col width="30%">
+      </colgroup>
+      <tr ng-repeat="item in $data">
+        <td header="'headerCheckbox.html'">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[item.id]" />
+            <i class="iconfont"></i>
+          </label>
+        </td>
+        <td data-title="'aws.monitor.alarmModule.templateName'|translate" sortable="'name'">
+          <div class="edit-name edit-lg">
+            <span title="{{item.name}}">{{item.name}}</span>
+          </div>
+        </td>
+        <td data-title="'aws.monitor.alarmModule.resourceType'|translate" sortable="'resource_type'">{{item.resource_type}}</td>
+        <td data-title="'aws.monitor.alarmModule.operate'|translate" >
+        	<a ng-click="alarmTmpl('edit',item)" licence-type="btn" id="monitor-alarmTemp-edit" ><i class="icon-aw-modify" ></i></a></td>
+      </tr>
+    </table>
+  </div>
+
+  <script type="text/ng-template" id="alarmTmpl.html">
+  	<div class="modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{tmplModalTitle}}</h3>
+      </div>
+      <div class="modal-body">
+        <form name="createAlarmTmplForm" novalidate>
+          <div class="control-group">
+            <label class="control-label">{{'aws.monitor.alarmModule.templateName'|translate}}：</label>
+            <div class="controls"> 
+              <input type="text" class="form-controls" name="tmplName" ng-model="addAlarmTmplForm.name" placeholder={{'aws.monitor.alarmModule.placeholder.requiredTmplName'|translate}} ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required />
+              <div class="error" ng-messages='createAlarmTmplForm.tmplName.$error' ng-if="interacted(createAlarmTmplForm)">
+                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+                <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+              </div>
+            </div>
+          </div>
+          <div class="control-group radio-wrap" ng-if="showResType">
+            <label class="control-label">{{'aws.monitor.alarmModule.resourceType'|translate}}：</label>
+            <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.monitor.alarmModule.info.resourceType'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+              <div class="radio-item clearFix">
+                <label class="radio" ng-if="ADMIN">
+                  <input type="radio" ng-model="addAlarmTmplForm.resType" name="physical"  value="physical" /><i class="iconfont"></i>
+                  {{'aws.monitor.alarmModule.physicalHost'|translate}}
+                </label>
+                <label class="radio">
+                  <input type="radio" ng-model="addAlarmTmplForm.resType" name="vmhost" value="virtual" /><i class="iconfont"></i>
+                  {{'aws.monitor.alarmModule.vmHost'|translate}}
+                </label>
+                <label class="radio" ng-if="ADMIN && enableCeph">
+                  <input type="radio" ng-model="addAlarmTmplForm.resType" name="ceph" value="ceph" /><i class="iconfont"></i>
+                  ceph
+                </label>
+                <label class="radio" ng-if="hasCTsdb">
+                  <input type="radio" ng-model="addAlarmTmplForm.resType" name="tsdb" value="tsdb" /><i class="iconfont"></i>
+                  {{'aws.monitor.alarmModule.tsdb'|translate}}
+                </label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="alarmTmplConfirm()">{{"aws.action.ok"|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+      </div>
+  	</div>
+  </script>
+
+  <script type="text/ng-template" id="setAlarmTmplRule.html">
+    <div class="modal-common tmplRule-modal" >
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">{{'aws.monitor.alarmModule.setAlarmTmplRule'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-warning" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="close()"><span aria-hidden="true">×</span></button>
+              <div class="alert-content">
+                  <div class="alert-text">
+                    {{'aws.monitor.alarmModule.alertInfo'|translate}}
+                  </div>
+              </div>
+            </div>
+            <div class="table-content">
+                <empty-tip empty-type="thresholdData" tip-id="'threshold-tip-msg'"></empty-tip>
+                <table ng-table="rulesTableParams" class="table" show-filter="false">
+                    <colgroup>
+                      <col width="22%">
+                      <col width="22%">
+                      <col width="22%">
+                      <col width="22%">
+                      <col width="12%">
+                    </colgroup>                       
+                    <tr ng-repeat="rule in $data">
+                      <!-- <td data-title="">
+                          <label class="radiobox">
+                              <input name="subnet" type="radio" ng-model="editSub.selectedSubnet" ng-change="changeSub(subnet)" value={{subnet.id}} required>
+                              <i class="iconfont"></i>
+                          </label>
+                      </td> -->
+                      <td data-title="'aws.monitor.alarmModule.ruleName'|translate" >
+                        <div class="edit-name edit-sm">
+                          <span title="{{rule.transName}}">{{rule.transName}}</span>
+                        </div>
+                      </td>
+                      <td data-title="'aws.monitor.alarmModule.warnRange'|translate">{{rule.rangeDescreption}}<br></td>
+                      <td data-title="'aws.monitor.alarmModule.cycle'|translate">{{rule.period}}s</td>
+                      <td data-title="'aws.monitor.alarmModule.level'|translate">
+                         {{"aws.monitor.alarmModule."+rule.severity|translate}}
+                      </td>
+                      <td>
+                         <a class="icon-aw-wrong 
+                         deleteRule" ng-click="deleteRule(rule,$index)"></a>
+                      </td>
+                    </tr>
+                </table>
+            </div>
+            <form name="setAlarmTmplRuleForm" novalidate>
+              <!-- <div class="control-group" ng-if="thresholdRules.length>0">
+                <label class="control-label"></label>
+                <div class="controls ruleTh">
+                  <div>{{'aws.monitor.alarmModule.ruleName'|translate}}</div>
+                  <div>{{'aws.monitor.alarmModule.warnRange'|translate}}</div>
+                  <div>{{'aws.monitor.alarmModule.cycle'|translate}}</div>
+                  <div>{{'aws.monitor.alarmModule.level'|translate}}</div>
+                </div>
+              </div> -->
+              <div class="control-group">
+                  <label class="control-label">{{'aws.monitor.alarmModule.threshold'|translate}}：</label>
+                  <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.monitor.alarmModule.info.threshold"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                    <ui-select ng-model="alarmRule.name" class="first">
+                        <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                        <ui-select-choices repeat="ruleName in ruleNames.options | filter: {name: $select.search}">
+                          <div ng-bind-html="ruleName.name | highlight: $select.search" title='{{ruleName.name}}' class="extension-uiselect"></div>
+                        </ui-select-choices>
+                    </ui-select>
+
+                    <ui-select ng-model="alarmRule.statistic" class="second">
+                        <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                        <ui-select-choices repeat="statistic in selectOptions.statistics | filter: {name: $select.search}">
+                          <div ng-bind-html="statistic.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+
+                    <ui-select ng-model="alarmRule.operator">
+                        <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                        <ui-select-choices repeat="operator in selectOptions.operators | filter: {name: $select.search}">
+                          <div ng-bind-html="operator.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                    
+                    <div class="rule threshold clearFix">
+                      <input type="text" class="form-controls" name="threshold" ng-model="alarmRule.threshold" ng-change="checkValue(rule.threshold,rule.unit,$index,rule.name)" threshold-check unit="alarmRule.name.ruleUnit" rule-key="alarmRule.name.ruleKey" rule-name="alarmRule.name" required autocomplete="off" />
+                      <div class="rule unit clearFix">
+                          <span>{{alarmRule.name.ruleUnit}}</sapn>
+                      </div>
+                      <div class="error threshold" ng-messages="(submitted||setAlarmTmplRuleForm.threshold.$dirty)&&setAlarmTmplRuleForm.threshold.$error">
+                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                        <div ng-message="thresholdCheck">
+                            <div ng-if="alarmRule.name.ruleKey=='net.bytes_sent'||alarmRule.name.ruleKey=='net.bytes_recv'">{{'aws.errors.limit_betys'|translate}}</div>
+                            <div ng-if="alarmRule.name.ruleKey!='net.bytes_sent'&&alarmRule.name.ruleKey!='net.bytes_recv'">{{'aws.errors.limit_0_100'|translate}}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              </div>
+              <div class="control-group">
+                  <label class="control-label">{{'aws.monitor.alarmModule.cycle'|translate}}：</label>
+                  <div class="controls">
+                      <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.monitor.alarmModule.info.cycle"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                      <ui-select ng-model="alarmRule.period" class="first">
+                          <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                          <ui-select-choices repeat="period in selectOptions.periods">
+                            <div ng-bind-html="period.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                      </ui-select>
+                  </div>
+              </div>
+              <div class="control-group">
+                  <label class="control-label">{{'aws.monitor.alarmModule.level'|translate}}：</label>
+                  <div class="controls">
+                      <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.monitor.alarmModule.info.level"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                      <ui-select ng-model="alarmRule.severity" class="first">
+                          <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                          <ui-select-choices repeat="severity in selectOptions.severities | filter: {name: $select.search}">
+                            <div ng-bind-html="severity.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                      </ui-select>
+                  </div>
+              </div>
+              <div class="control-group">
+                  <label class="control-label">&nbsp;</label>
+                  <div class="controls">
+                      <a ng-click="addThresholdRule(setAlarmTmplRuleForm)">{{'aws.monitor.alarmModule.addNewRule'|translate}}</a>
+                      <div class="error" ng-if="!isSatisfy">{{addRuleItem.transName}}{{'aws.monitor.alarmModule.alarmConflict'|translate}}</div>
+                  </div>
+              </div>
+              <!-- </div> -->
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="setTmplRuleConfirm()">{{"aws.action.ok"|translate}}</button>
+           <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+    </div>
+  </script>
+</div>

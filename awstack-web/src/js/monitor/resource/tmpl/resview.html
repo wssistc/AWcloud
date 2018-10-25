@@ -1,0 +1,90 @@
+<div class="page-inner monitor-view">
+    <!-- <h3>总览</h3> -->
+    <div class="control-groups clearfix">
+        <div class="control-group pull-left">
+            <div class="control-label">{{'aws.monitor.resview.regoin'|translate}}：</div>
+            <div class="controls">
+                <ui-select ng-model="queryLimit.dataRegion" >
+                    <ui-select-match placeholder="">{{$select.selected.regionName}}</ui-select-match>
+                    <ui-select-choices repeat="region.regionKey as region in options.dataRegionList | propsFilter:{regionName:$select.search}">
+                        <div ng-bind-html="region.regionName | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="control-group pull-left">
+            <div class="control-label">{{'aws.monitor.resview.objType'|translate}}：</div>
+            <div class="controls">
+                <ui-select ng-model="queryLimit.objType">
+                    <ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="obj.value as obj in options.objTypeList | propsFilter:{name:$select.search}">
+                        <div ng-bind-html="obj.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="control-group pull-left">
+            <div class="control-label">{{'aws.monitor.resview.topType'|translate}}：</div>
+            <div class="controls">
+                <ui-select ng-model="queryLimit.topType"  >
+                    <ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="item.value as item in options.topTypeList | propsFilter:{name:$select.search}">
+                        <div ng-bind-html="item.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+                <ui-select ng-model="queryLimit.topLength">
+                    <ui-select-match >{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="item.value as item in options.topLengthList | propsFilter:{name:$select.search}">
+                        <div ng-bind-html="item.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+    	<button class="btn btn-info" type="button" ng-click="query()" ng-disabled="queryDisabled"><i class="icon-aw-search"></i>{{'aws.monitor.resview.search'|translate}}</button>
+    </div>
+    <div class="box">
+        <div class="col-6 bar-chart">
+            <div class='echarts-noData' ng-if='panels.cpu.data.series.length == 0 || panels.cpu.data.xAxis.length == 0'>{{'aws.common.noData'|translate}}</div>
+            <div class="echarts-wrap-line" ng-if='!(panels.cpu.data.series.length == 0 || panels.cpu.data.xAxis.length == 0)' echarts-line chart-title="panels.cpu.title" data="panels.cpu.data"></div>
+        </div>
+        <div class="col-6 bar-chart">
+            <div class='echarts-noData' ng-if='panels.mem.data.series.length == 0 || panels.mem.data.xAxis.length == 0'>{{'aws.common.noData'|translate}}</div>
+            <div class="echarts-wrap-line" ng-if='!(panels.mem.data.series.length == 0 || panels.mem.data.xAxis.length == 0)' echarts-line chart-title="panels.mem.title" data="panels.mem.data"></div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="col-6 bar-chart">
+            <div class='echarts-noData' ng-if='panels.net_receive_rate.data.series.length == 0 || panels.net_receive_rate.data.xAxis.length == 0'>{{'aws.common.noData'|translate}}</div>
+            <div class="echarts-wrap-line"  ng-if='!(panels.net_receive_rate.data.series.length == 0 || panels.net_receive_rate.data.xAxis.length == 0)' echarts-line chart-title="panels.net_receive_rate.title" data="panels.net_receive_rate.data"></div>
+        </div>
+        <div class="col-6 bar-chart">
+             <div class='echarts-noData' ng-if='panels.net_send_rate.data.series.length == 0 || panels.net_send_rate.data.xAxis.length == 0'>{{'aws.common.noData'|translate}}</div>
+            <div class="echarts-wrap-line" ng-if='!(panels.net_send_rate.data.series.length == 0 || panels.net_send_rate.data.xAxis.length == 0)' echarts-line chart-title="panels.net_send_rate.title" data="panels.net_send_rate.data"></div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="col-6 bar-chart">
+            <div class='echarts-noData' ng-if='panels.net_send_rate.data.series.length == 0 || panels.net_send_rate.data.xAxis.length == 0'>{{'aws.common.noData'|translate}}</div>
+            <div class="echarts-wrap-line" ng-if='!(panels.net_send_rate.data.series.length == 0 || panels.net_send_rate.data.xAxis.length == 0)' echarts-line chart-title="panels.diskio_write.title" data="panels.diskio_write.data"></div>
+        </div>
+        <div class="col-6 bar-chart">
+            <div class='echarts-noData' ng-if='panels.diskio_read.data.series.length == 0 || panels.diskio_read.data.xAxis.length == 0'>{{'aws.common.noData'|translate}}</div>
+            <div class="echarts-wrap-line" ng-if='!(panels.diskio_read.data.series.length == 0 || panels.diskio_read.data.xAxis.length == 0)' echarts-line chart-title="panels.diskio_read.title" data="panels.diskio_read.data"></div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="col-6 bar-chart">
+        	<div class="title">{{'aws.monitor.resview.diskUseRate'|translate}}</div>
+        	<div class="panels clearfix">
+                <div class="bar-wrap">
+                    <ul>
+                    	<li ng-repeat="item in panels.disk" class="clearfix">
+                            <div chart-bar bardata="item"></div>
+                        </li>
+                    </ul>
+                    <div class="text-center" ng-show="panels.disk.length == 0 && !loaddisk">{{'aws.common.empty'|translate}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

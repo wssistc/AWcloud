@@ -1,0 +1,347 @@
+<div class="page-inner zr-topo">
+    <button class="btn btn-info" type="button" ng-click="editTopo();editAction=true;" ng-hide="editAction" licence-type = "btn" id="resource-topp-edit">{{'aws.topo.editTopo'|translate}}</button>
+    <button class="btn btn-info btn-scale" type="button" ng-click="scaleCanvas(1)" ng-hide="editAction" ><i class="icon-aw-fd"></i>&nbsp;&nbsp;{{'aws.topo.scaleTopo'|translate}}</button>
+    <button class="btn btn-info btn-reduce" type="button" ng-click="scaleCanvas(-1)" ng-hide="editAction"><i class="icon-aw-sx"></i>&nbsp;&nbsp;{{'aws.topo.reduceTopo'|translate}}</button>
+    <div class="topo-main" id="net-topo-main"></div>
+
+    <div ng-controller="topoDetailCtrl" class="topo-detail">
+        <div class='animateContent {{topoAnimation}}'>
+            <div class='detailInner' ng-if="topoAnimation == 'animateIn' ">
+                <div class="tab-content">
+                    <div class="detail-row">
+                        <div class="detail-title">
+                            <a class="an-close" ng-click="returnOrgPath()"><i class="icon-aw-mail-reply"></i></a>
+                            <strong>
+                            	<span ng-show="detailCont=='exNet'">{{'aws.topo.externalNet'|translate}} </span>
+                            	<span ng-show="detailCont=='firewall'">{{'aws.topo.firewall'|translate}} </span>
+                            	<span ng-show="detailCont=='router'">{{'aws.topo.router'|translate}} </span>
+                            	<span ng-show="detailCont=='net'">{{'aws.topo.network'|translate}} </span>
+                            	<span ng-show="detailCont=='subnet'">{{'aws.topo.subnet'|translate}} </span>
+                            	<span ng-show="detailCont=='vm'">{{'aws.topo.instance'|translate}} </span>
+                            	{{itemData.name}}
+                            </strong>
+                        </div>
+                        <div class="detail-info" ng-show="!editAction">
+                            <dl class="dl-horizontal" ng-show="detailCont=='exNet'">
+                                <dt>{{'aws.topo.exNetName'|translate}}：</dt>
+                                <dd>{{itemData.name}}</dd>
+                                <dt>{{'aws.topo.exNetCidr'|translate}}：</dt>
+                                <dd><span ng-repeat="cidr in itemData.cidr track by $index">{{cidr}}<br/></span></dd>
+                            </dl>
+                            <dl class="dl-horizontal" ng-show="detailCont == 'firewall'">
+                                <dt>{{'aws.topo.firewallName'|translate}}：</dt>
+                                <dd>{{itemData.name}}</dd>
+                                <dt>{{'aws.topo.status'|translate}}：</dt>
+                                <dd>
+                                    <span ng-class="{'bg-green':(detailItem.status=='created'||detailItem.status=='active'),'bg-orange':(detailItem.status=='inactive'||detailItem.status=='down'),'bg-blue':(detailItem.status=='pending_create'||detailItem.status=='pending_update'||detailItem.status=='pending_delete'),'bg-red':(detailItem.status=='error')}">{{detailItem._status}}</span>
+                                </dd>
+                            </dl>
+                            <dl class="dl-horizontal" ng-show="detailCont == 'router'">
+                                <dt>{{'aws.topo.routerName'|translate}}：</dt>
+                                <dd>{{itemData.name}}</dd>
+                                <dt>VPN：</dt>
+                                <dd>{{detailItem.isVPN}}</dd>
+                            </dl>
+                            <dl class="dl-horizontal" ng-show="detailCont == 'net'">
+                                <dt>{{'aws.topo.networkName'|translate}}：</dt>
+                                <dd>{{detailItem.name}}</dd>
+                                <dt>{{'aws.topo.networkType'|translate}}：</dt>
+                                <dd>{{detailItem.provider.network_type}}</dd>
+                                <dt ng-show="detailItem.provider.network_type == 'VLAN'">VLAN ID：</dt>
+                                <dd ng-show="detailItem.provider.network_type == 'VLAN'">{{detailItem.provider.segmentation_id}}</dd>
+                                <dt>{{'aws.topo.networkBandwidth'|translate}}：</dt>
+                                <dd>{{detailItem.rateLimit}}</dd>
+                                <dt>{{'aws.topo.shared'|translate}}：</dt>
+                                <dd>{{detailItem.shared}}</dd>
+                                <dt>{{'aws.topo.status'|translate}}：</dt>
+                                <dd>
+                                    <sapn ng-class="{'bg-green':detailItem.status=='active','bg-orange':detailItem.status!='active'}" ng-show="detailItem.state">{{detailItem.state}}</sapn>
+                                </dd>
+                            </dl>
+                            <dl class="dl-horizontal" ng-show="detailCont == 'subnet'">
+                                <dt>{{'aws.topo.subnetName'|translate}}：</dt>
+                                <dd>{{itemData.name}}</dd>
+                                <dt>{{'aws.topo.subnet'|translate}}CIDR：</dt>
+                                <dd>{{detailItem.cidr}}</dd>
+                                <dt>{{'aws.topo.gatewayIp'|translate}}：</dt>
+                                <dd>{{detailItem.gatewayIp}}</dd>
+                                <dt>{{'aws.topo.allocationPool'|translate}}：</dt>
+                                <dd><span ng-repeat="pool in detailItem.allocationPools track by $index">{{pool.start}} ~ {{pool.end}}<br/></span></dd>
+                                <dt>{{'aws.topo.enableDhcp'|translate}}：</dt>
+                                <dd>{{detailItem.enableDhcp}}</dd>
+                                <dt>{{'aws.topo.dnsNameserver'|translate}}：</dt>
+                                <dd><span ng-repeat="dns in detailItem.dnsNameserver track by $index">{{dns}}<br/></span></dd>
+                                <dt>{{'aws.topo.hostRoutes'|translate}}：</dt>
+                                <dd> <span ng-repeat="hostRouter in detailItem.hostRoutes track by $index">{{hostRouter}}<br/></span></dd>
+                            </dl>
+                            <dl class="dl-horizontal" ng-show="detailCont == 'vm'">
+                                <dt>{{'aws.topo.instanceName'|translate}}：</dt>
+                                <dd>{{itemData.name}}</dd>
+                                <dt>{{'aws.topo.image'|translate}}：</dt>
+                                <dd>{{detailItem.imageName}}</dd>
+                                <dt>{{'aws.topo.specification'|translate}}：</dt>
+                                <dd>CPU：{{detailItem.cpuConfigData}}{{'aws.instances.info.core'|translate}}，{{'aws.instances.info.memory'|translate}}：{{detailItem.ramConfigData}}GB</dd>
+                                <dt>{{'aws.topo.security_group'|translate}}：</dt>
+                                <dd><span ng-repeat="secGroup in detailItem.secGroups track by $index">{{secGroup}}<br/></span></dd>
+                                <dt>{{'aws.topo.volume'|translate}}：</dt>
+                                <dd><span ng-repeat="disk in detailItem.diskInfo track by $index">{{disk.name}}({{disk.type}})<br/></span></dd>
+                                <dt>{{'aws.topo.startZoon'|translate}}：</dt>
+                                <dd>{{detailItem.availabilityZone}}</dd>
+                                <dt>{{'aws.topo.keypairs'|translate}}：</dt>
+                                <dd>{{detailItem.keyName}}</dd>
+                                <dt>{{'aws.topo.status'|translate}}：</dt>
+                                <dd>
+                                    <span class="bg" ng-style="{'background-color':detailItem.color}">
+                                    	{{detailItem._status}}
+                                    </span>
+                                </dd>
+                                <dt>{{'aws.topo.subnet'|translate}}：</dt>
+                                <dd>
+                                    <table class="table">
+                                        <colgroup>
+                                            <col width="60%">
+                                            <col width="40%">
+                                        </colgroup>
+                                        <thead>
+                                            <tr>
+                                                <th>{{'aws.topo.linkedSubnetName'|translate}}</th>
+                                                <th>{{'aws.topo.portIp'|translate}}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="sub in detailItem.portInfo">
+                                                <td>
+                                                    <div class="lg">{{sub.subNetName}}</div>
+                                                </td>
+                                                <td>{{sub.ip_address}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </dd>
+                                <dt>{{'aws.topo.netCard'|translate}}：</dt>
+                                <dd><span ng-repeat="fixIp in detailItem.fixedIps track by $index">{{fixIp}}<br/></span></dd>
+                            </dl>
+                        </div>
+                        <div class="detail-info" ng-show="editAction">
+                            <form name="editNetworkForm" novalidate ng-if="detailCont=='exNet' || detailCont=='net'">
+                                <div class="control-group" ng-if="detailCont=='net' && !editData.external">
+                                    <label class="control-label">{{"aws.networks.networkName"|translate}}：</label>
+                                    <div class="controls">
+                                        <input type="text" class="form-controls" name="name" ng-model="networkForm.name" placeholder='{{"aws.networks.networkName"|translate}}' ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required />
+                                        <div class="error" ng-messages='editNetworkForm.name.$error' ng-if="interacted(editNetworkForm.name)">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                                            <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+                                            <!-- <div ng-message="exceptName">{{'aws.networks.except_external_net' | translate}}</div> -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="control-group" ng-if="(detailCont=='net' && editData.external) || detailCont=='exNet'">
+                                    <label class="control-label">{{"aws.networks.networkName"|translate}}：</label>
+                                    <div class="controls">
+                                        <input type="text" class="form-controls" name="name" ng-model="networkForm.name" placeholder='{{"aws.networks.networkName"|translate}}' ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required />
+                                        <div class="error" ng-messages='editNetworkForm.name.$error' ng-if="interacted(editNetworkForm.name)">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                                            <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="footer">
+                                    <button class="btn btn-primary" type="button" ng-click="editNetConfirm(editNetworkForm)" ng-disabled="formSubmitted">{{"aws.action.ok"|translate}}</button>
+                                    <button class="btn btn-default" type="button" ng-click="returnOrgPath()">{{"aws.action.cancel"|translate}}</button>
+                                </div>
+                            </form>
+                            <form name="editRouterForm" novalidate ng-if="detailCont=='router'">
+                                <div class="control-group">
+                                    <label class="control-label">{{"aws.routers.routerName"|translate}}：</label>
+                                    <div class="controls">
+                                        <input type="text" class="form-controls" name="name" ng-model="routerForm.name" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.routers.routerName"|translate}}' required>
+                                        <div class="error" ng-messages='editRouterForm.name.$error' ng-if="submitted || editRouterForm.name.$dirty">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                                            <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="footer">
+                                    <button class="btn btn-primary" type="button" ng-click="editConfirm(editRouterForm)" ng-disabled="formSubmitted">{{"aws.action.ok"|translate}}</button>
+                                    <button class="btn btn-default" type="button" ng-click="returnOrgPath()">{{"aws.action.cancel"|translate}}</button>
+                                </div>
+                            </form>
+                            <form name="editFirewallForm" novalidate ng-if="detailCont=='firewall' ">
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.topo.firewallName'|translate}}：</label>
+                                    <div class="controls">
+                                        <input type="text" class="form-controls" name="name" ng-model="netFirewall.name" placeholder={{ 'aws.networks.inputFirewallName'|translate}} ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required />
+                                        <div class="error" ng-messages="(submitInValid ||editFirewallForm.name.$dirty) && editFirewallForm.name.$error">
+                                            <form-validate></form-validate>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="footer">
+                                    <button class="btn btn-primary" type="button" ng-click="editConfirm(editFirewallForm)" ng-disabled="formSubmitted">{{"aws.action.ok"|translate}}</button>
+                                    <button class="btn btn-default" type="button" ng-click="returnOrgPath()">{{"aws.action.cancel"|translate}}</button>
+                                </div>
+                            </form>
+                            <form name="editSubnetForm" novalidate ng-if="detailCont == 'subnet'">
+                                <div class="control-group">
+                                    <label class="control-label">{{"aws.networks.subnetName"|translate}}：</label>
+                                    <div class="controls subnet-controls">
+                                        <input type="text" class="form-controls" name="name" ng-model="subnetForm.name" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.networks.inputSubnetName"|translate}}' ng-disabled="v6subnet" required/>
+                                        <div class="error" ng-messages='editSubnetForm.name.$error' ng-show="interacted(editSubnetForm.name)">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                                            <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+                                            <!-- <div ng-message="exceptName">{{'aws.networks.except_external_subnet' | translate}}</div> -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">{{"aws.networks.subnetCidr"|translate}}：</label>
+                                    <div class="controls subnet-controls">
+                                        <span class="val">{{subnetForm.cidr}}</span>
+                                    </div>
+                                </div>
+                                <div class="ip_pool clearfix">
+                                    <div class="control-label">{{"aws.networks.availableAddressRange"|translate}}：</div>
+                                    <div ng-repeat="pool in subnetForm.allocationPools track by $index" class="group clearfix" ng-class="{'repeat':$index>=1}">
+                                        <div class="control-group ">
+                                            <label class="control-label">{{"aws.networks.start"|translate}}:</label>
+                                            <div class="controls subnet-controls">
+                                                <input type="text" class="form-controls" name="start_ip{{$index}}" id="startIp_{{$index}}" ng-model="pool.start" ipformat-validate ng-focus="setIpIsOverlap()" incidr cidr-val="subnetForm.cidr" ng-disabled="v6subnet" required />
+                                                <div class="error" ng-messages="editSubnetForm['start_ip'+$index].$error" ng-if="interacted(editSubnetForm['start_ip'+$index])">
+                                                    <div ng-message="ipformat">{{"aws.networks.ipPatternError"|translate}}</div>
+                                                    <div ng-message="incidr">
+                                                        <div ng-if="pool.start==networkAddress">{{"aws.networks.ipIsNetworkAdress"|translate}}</div>
+                                                        <div ng-if="pool.start==broadcastAddress">{{"aws.networks.ipIsBroadcastAdress"|translate}}</div>
+                                                        <div ng-if="pool.start!=networkAddress&&pool.start!=broadcastAddress">{{"aws.networks.ipNotInSubCidr"|translate}}</div>
+                                                    </div>
+                                                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="control-group ">
+                                            <label class="control-label">{{"aws.networks.end"|translate}}:</label>
+                                            <div class="controls">
+                                                <input type="text" class="form-controls" name="end_ip{{$index}}" id="endIp_{{$index}}" ng-model="pool.end" ng-disabled="v6subnet" ng-focus="setIpIsOverlap()" ipformat-validate gtip="startIp_{{$index}}" incidr cidr-val="subnetForm.cidr" required />
+                                                <div class="error" ng-messages="editSubnetForm['end_ip'+$index].$error" ng-if="interacted(editSubnetForm['end_ip'+$index])">
+                                                    <div ng-message="ipformat">{{"aws.networks.ipPatternError"|translate}}</div>
+                                                    <div ng-message="gtip">{{'aws.errors.gtIpError'|translate}}</div>
+                                                    <div ng-message="incidr">
+                                                        <div ng-if="pool.end==networkAddress">{{"aws.networks.ipIsNetworkAdress"|translate}}</div>
+                                                        <div ng-if="pool.end==broadcastAddress">{{"aws.networks.ipIsBroadcastAdress"|translate}}</div>
+                                                        <div ng-if="pool.end!=networkAddress&&pool.end!=broadcastAddress">{{"aws.networks.ipNotInSubCidr"|translate}}</div>
+                                                    </div>
+                                                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="del" ng-if="subnetForm.allocationPools.length>1">
+                                            <a ng-click="delAllocationPools($index,subnetForm.allocationPools)"><i class="icon-aw-wrong"></i></a>
+                                        </div>
+                                    </div>
+                                    <div class="add-subpool" ng-show="subnetForm.allocationPools.length&&!v6subnet">
+                                        <a ng-click="addAllocationPools()"><i class="icon-aw-add-to2"></i>&nbsp;{{'aws.topo.newAdd'|translate}}</a>
+                                    </div>
+                                </div>
+                                <div class="red text-center" ng-if="ipIsOverlap"> {{"aws.networks.ipPoolIsOverlap"|translate}}</div>
+                                <div class="red text-center" ng-if="ipEqToGateway">{{"aws.networks.ipInPoolEqToGateway"|translate}}({{editData.gatewayIp}})</div>
+                                <div class="red text-center" ng-if="poolNarrow">
+                                    <span ng-if="subnetForm.external">{{"aws.networks.poolNarrow"|translate}}</span>
+                                    <span ng-if="!subnetForm.external">{{"aws.networks.assignedIpNotInPool"|translate}}</span>
+                                </div>
+                                <div class="footer" ng-if="!v6subnet">
+                                    <button class="btn btn-primary" type="button" ng-click="editSubnetCfm(editSubnetForm)" ng-disabled="formSubmitted">{{"aws.action.ok"|translate}}</button>
+                                    <button class="btn btn-default" type="button" ng-click="returnOrgPath()">{{"aws.action.cancel"|translate}}</button>
+                                </div>
+                            </form>
+                            <form name="editVmForm" novalidate ng-if="detailCont == 'vm' ">
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.instances.editinstanceName'|translate}}：</label>
+                                    <div class="controls">
+                                        <input type="text" class="form-controls" name="name" ng-model="vmForm.hostName" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required/>
+                                        <div ng-messages="editVmForm.name.$dirty && editVmForm.name.$error">
+                                            <form-validate class="error"></form-validate>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="footer">
+                                    <button class="btn btn-primary" type="button" ng-click="editVmCfm(editVmForm)" ng-disabled="formSubmitted">{{"aws.action.ok"|translate}}</button>
+                                    <button class="btn btn-default" type="button" ng-click="returnOrgPath()">{{"aws.action.cancel"|translate}}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="animate-backup"></div>
+    </div>
+
+    <!-- 编辑中的新建云主机 -->
+    <div class="detailIns-box">
+      <div class= 'animateContent  {{insAnimation}} '>
+        <div class='detailInner'>
+            <div class="tab-content">
+                <div class="detail-title">
+                  <a class="an-close" ng-click="closeNewIns()"><i class=" icon-aw-mail-reply"></i></a>
+                  <span>{{'aws.instances.addinstances.newInstance'|translate}}</span>
+                </div>
+                <div class="detail-info"  ng-if="insAnimation == 'animateIn'">
+                  <div ng-controller ="createInsCtrl" ng-include = "'js/shortcuts/instances/tmpl/createIns.html'"></div>
+                </div>
+              </div>
+        </div>
+      </div>
+      <div class='animate-backup'></div>
+    </div>
+    <script type="text/ng-template" id="createFirewallModal.html">
+        <div class="network-modal modal-common">
+            <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancelCreateFirewall()">×</button>
+            <h3 class="modal-title">{{'aws.topo.createFirewall'|translate}}</h3>
+            </div>
+            <div class="modal-body">
+                <form name="createNetfirewallForm" novalidate>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.networks.name'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="name" ng-model="netFirewall.name" placeholder={{'aws.networks.inputFirewallName'|translate}} ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required />
+                            <div class="error" ng-messages="(submitInValid ||createNetfirewallForm.name.$dirty) && createNetfirewallForm.name.$error">
+                                <form-validate></form-validate>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.topo.linkedRouter'|translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="netFirewall.router" name="router" required >
+                                <ui-select-match placeholder="{{'aws.topo.pleaseSelectLinkRouter'|translate}}" >{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item in routerList">
+                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-messages="(submitInValid ||createNetfirewallForm.router.$dirty) && createNetfirewallForm.router.$error">
+                                <form-validate></form-validate>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.networks.description'|translate}}：</label>
+                        <div class="controls">
+                            <textarea type="text" class="form-controls" name="description" ng-model="netFirewall.description" placeholder={{'aws.networks.inputFirewallDes'|translate}} ng-maxlength="80" ></textarea>
+                            <div class="error" ng-messages="(submitInValid ||createNetfirewallForm.description.$dirty) && createNetfirewallForm.description.$error">
+                                <form-validate pattern-msg="'aws.errors.description'|translate" max-num="80"></form-validate>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+        <button class="btn btn-info" type="button" ng-click="createFirewallCfm(createNetfirewallForm,netFirewall)" ng-disabled= "formSubmitted" >{{"aws.action.ok"|translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="cancelCreateFirewall()">{{"aws.action.cancel"|translate}}</button>
+            </div>
+        </div>
+    </script>
+</div>

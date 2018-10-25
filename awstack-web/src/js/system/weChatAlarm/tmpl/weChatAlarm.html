@@ -1,0 +1,134 @@
+<div class="box operating-box">
+    <div class="cloud-box">
+        <div class="page-inner">
+            <form name="weChatAlarmForm" novalidate>
+                <div class="weChatAlarm-box">
+                    <div class="alert alert-warning" role="alert">
+                        <div class="alert-content">
+                            <div class="alert-text">
+                                {{'aws.system.weChatAlarm.tips'|translate}}
+                            </div>
+                        </div>
+                    </div>
+                    <fieldset class="weChat-srv">
+                        <div class="weChatDesc">
+                            <p>{{'aws.system.weChatAlarm.desc1'|translate}}</p>
+                            <p>{{'aws.system.weChatAlarm.desc2'|translate}}</p>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">
+                                <span class="weChat-tips icon-aw-bz" uib-popover="{{'aws.system.weChatAlarm.appIdTips'|translate}}" popover-enable="true" popover-trigger="mouseenter" popover-placement = "top"></span>
+                                {{"aws.system.weChatAlarm.appId"|translate}}：
+                                <p class="notes">(App ID)</p>
+                            </label>
+                            <div class="controls">
+                                <input type="text" name="app_id" ng-model="weChat.app_id" class="form-controls" ng-maxlength="255" placeholder={{"aws.system.weChatAlarm.inputAppId"|translate}} required />
+                                <div class="error" ng-messages="(submitValid || weChatAlarmForm.app_id.$dirty) && weChatAlarmForm.app_id.$error">
+                                    <span ng-message="maxlength">{{'aws.errors.maxlength255'|translate}}</span>
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">{{"aws.system.weChatAlarm.appSecret"|translate}}：
+                                <p class="notes">(AppSecret)</p>
+                            </label>
+                            <div class="controls">
+                                <input type="password" name="app_secret" ng-model="weChat.app_secret" class="form-controls" ng-maxlength="255" autocomplete="new-password" placeholder={{"aws.system.weChatAlarm.inputAppSecret"|translate}} required />
+                                <div class="error" ng-messages="(submitValid || weChatAlarmForm.app_secret.$dirty) && weChatAlarmForm.app_secret.$error">
+                                    <span ng-message="maxlength">{{'aws.errors.maxlength255'|translate}}</span>
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <div class="control-group">
+                            <label class="control-label">{{"aws.system.weChatAlarm.url"|translate}}：</label>
+                            <div class="controls">
+                                <input type="url" name="url" ng-model="weChat.url" class="form-controls" ng-maxlength="255" placeholder={{"aws.system.weChatAlarm.inputUrl"|translate}} required />
+                                <div class="error" ng-messages="(submitValid || weChatAlarmForm.url.$dirty) && weChatAlarmForm.url.$error">
+                                    <span ng-message="maxlength">{{'aws.errors.maxlength255'|translate}}</span>
+                                    <span ng-message="url">{{'aws.errors.urlCheck'|translate}}</span>
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                </div>
+                            </div>
+                        </div>			
+                        <div class="control-group">
+                            <label class="control-label">{{"aws.system.weChatAlarm.token"|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" name="token" ng-model="weChat.token" class="form-controls" ng-maxlength="255" placeholder={{"aws.system.weChatAlarm.inputToken"|translate}} required />
+                                <div class="error" ng-messages="(submitValid ||weChatAlarmForm.token.$dirty) && weChatAlarmForm.token.$error">
+                                    <span ng-message="maxlength">{{'aws.errors.maxlength255'|translate}}</span>
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                    </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">{{"aws.system.weChatAlarm.key"|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" name="encoding_aes_key" ng-model="weChat.encoding_aes_key" class="form-controls" ng-maxlength="255" placeholder={{"aws.system.weChatAlarm.inputKey"|translate}} required />
+                                <div class="error" ng-messages="(submitValid || weChatAlarmForm.encoding_aes_key.$dirty) && weChatAlarmForm.encoding_aes_key.$error">
+                                    <span ng-message="maxlength">{{'aws.errors.maxlength255'|translate}}</span>
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                    </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">{{"aws.system.weChatAlarm.way"|translate}}：</label>
+                            <div class="controls">
+                                <div class="radio-item clearFix">
+                                    <label>
+                                        <input type="radio" name="radio" value="raw" ng-model="weChat.encryption" />
+                                        <i class="iconfont"></i>{{'aws.system.weChatAlarm.plain'|translate}}
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="radio" value="aes" ng-model="weChat.encryption" />
+                                        <i class="iconfont"></i>{{'aws.system.weChatAlarm.safe'|translate}}
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="radio" value="and" ng-model="weChat.encryption" />
+                                        <i class="iconfont"></i>{{'aws.system.weChatAlarm.compatible'|translate}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div> -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <span class="weChat-tips icon-aw-bz" uib-popover="{{'aws.system.weChatAlarm.activeTips'|translate}}" popover-enable="true" popover-trigger="mouseenter" popover-placement = "top"></span>
+                                {{"aws.system.weChatAlarm.active"|translate}}：
+                            </label>
+                            <div class="controls">
+                                <div class="checkbox switch-btn">
+                                    <label>
+                                        <input type="checkbox" class="form-controls" ng-model="weChat.isUse">
+                                        <i class="iconfont"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if = "showQRCodeText">
+                            <label class="control-label">&nbsp;</label>
+                            <div class="controls">
+                                <span class="QRCodeText" ng-click="openQRCodeModel()">{{"aws.system.weChatAlarm.getQRCode"|translate}}</span>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="save-btn">
+                    <button class="btn btn-info" ng-click="saveWeChat(weChat,weChatAlarmForm)" ng-bind="'aws.action.save'|translate"></button>
+                </div>
+            </form>
+        </div>
+    </div>    
+</div>
+
+
+<script type="text/ng-template" id="QRCode.html">
+    <div class="modal-common QRCode-box">
+    	<div class="modal-header">
+    		<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+    	</div>
+        <div class="QRCodeImg">
+        	<img ng-src="{{QRCodeImg}}">
+        </div>
+    </div>
+</script>

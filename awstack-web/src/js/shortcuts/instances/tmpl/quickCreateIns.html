@@ -1,0 +1,858 @@
+<div class="quick-ins">
+    <div class="quick-ins-wrap clearfix">
+        <uib-alert ng-show="insProText || coreProText || ramProText || volumesProText || insDomText || coreDomText || ramDomText || volumesDomText ||
+        (!canBatchNoCeph && storage.isUseLocal ==2) || (!canBatch && storage.isUseLocal==2) || (!canVolum && storage.isUseLocal==2)" type="danger">
+            <div>
+                <span ng-class='{"tip":insDomText}'>{{insDomText}}</span>
+                <span ng-class='{"tip":coreDomText}'>{{coreDomText}}</span>
+                <span ng-class='{"tip":ramDomText}'>{{ramDomText}}</span>
+                <span ng-class='{"tip":ramDomText}'>{{volumesDomText}}</span>
+                <span ng-class='{"tip":insProText}' ng-hide="insDomText">{{insProText}}</span>
+                <span ng-class='{"tip":coreProText}' ng-hide="coreDomText">{{coreProText}}</span>
+                <span ng-class='{"tip":ramProText}' ng-hide="ramDomText">{{ramProText}}</span>
+                <span ng-class='{"tip":volumesProText}' ng-hide="volumesDomText">{{volumesProText}}</span>
+                <span ng-if="!canBatch && storage.isUseLocal ==2">{{'aws.instances.addinstances.batchTip'|translate}}</span>
+                <span ng-if="!canBatchNoCeph && storage.isUseLocal==2">{{'aws.instances.addinstances.batchNoCephTip'|translate}}</span>
+                <span ng-show="!canVolum && storage.isUseLocal==2">{{'aws.instances.addinstances.volumsTip'|translate}}</span>
+            </div>
+        </uib-alert>
+        <div class="content clearFix">
+            <div class="left-field">
+                <form action="" name="InstanceForm" novalidate>
+                    <fieldset>
+                        <h5 class="title"><span>{{'aws.instances.addinstances.detail'|translate}}</span></h5>
+                        <div ng-if="source.isQuickEnter">
+                            <div class="control-items2 clearFix">
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.general.dataCenter' | translate}}：</label>
+                                    <div class="controls">
+                                        <!-- <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tipx' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i> -->
+                                        <ui-select ng-model="options.regionSelected" ng-change="changeRegion(options.regionSelected)">
+                                            <ui-select-match placeholder="{{'aws.general.selectDataCenter' | translate}}" title="{{$select.selected.regionName}}">{{$select.selected.regionName}}</ui-select-match>
+                                            <ui-select-choices repeat=" item in options.regionList | filter:{regionName:$select.search}">
+                                                <div ng-bind-html="item.regionName | highlight: $select.search" title="{{item.regionName}}" class="ui-select-item-ellips"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-items2 clearFix">
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.users.cu.department' | translate}}：</label>
+                                    <div class="controls">
+                                        <!-- <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tipx' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i> -->
+                                        <ui-select ng-model="createInsForm.domain" name="domain" ng-change="changeDomain(createInsForm.domain)" ng-disabled="!ADMIN || !source.new" required>
+                                            <ui-select-match placeholder="{{'aws.users.placeholder.department' | translate}}" title="{{$select.selected.disDomainName}}">{{$select.selected.disDomainName}}</ui-select-match>
+                                            <ui-select-choices repeat="domain as domain in options.domainList">
+                                                <div ng-bind-html="domain.disDomainName | highlight: $select.search" title="{{domain.disDomainName}}"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                        <div class="error" ng-messages="(submitInValid ||InstanceForm.domain.$dirty) && InstanceForm.domain.$error">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-items2 clearFix">
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.users.cu.project' | translate}}：</label>
+                                    <div class="controls">
+                                        <!-- <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tipx' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i> -->
+                                        <ui-select ng-model="createInsForm.project" name="project" ng-change="changeProject(createInsForm.domain,createInsForm.project)" ng-disabled="!source.new" required>
+                                            <ui-select-match placeholder="{{'aws.users.placeholder.project' | translate}}" title="{{$select.selected.disProjectName}}">{{$select.selected.disProjectName}}</ui-select-match>
+                                            <ui-select-choices repeat="project as project in createInsForm.domain.projects">
+                                                <div ng-bind-html="project.disProjectName | highlight: $select.search" title="{{project.disProjectName}}"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                        <div class="error" ng-messages="(submitInValid ||InstanceForm.project.$dirty) && InstanceForm.project.$error">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2 clearFix">
+                            <div class="control-group">
+                                <label class="control-label" title="{{'aws.instances.addinstances.instanceName'|translate}}"><span class="red">*</span>{{'aws.instances.addinstances.instanceName'|translate}}：</label>
+                                <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip18' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <input type="text" class="form-controls" name="hostName" ng-model="createInsForm.name" placeholder="{{'aws.instances.addinstances.instanceNameInput'|translate}}" ng-pattern="/^([0-9a-zA-Z]|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required/>
+                                    <div class="error" ng-messages="(submitInValid ||InstanceForm.hostName.$dirty) && InstanceForm.hostName.$error">
+                                        <form-validate pattern-msg="'aws.errors.vmNamevalidate'|translate"></form-validate>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2 clearFix">
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.passwd'|translate}}：</label>
+                                <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip19' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <input type="password" class="form-controls" name="admin_pass" ng-model="insForm.admin_pass" id="quick-pw2" ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,\/\-\^\%])[0-9a-zA-Z!@._:,\/\-\^\%]{8,16}$/" placeholder="{{'aws.instances.addinstances.password'|translate}}" />
+                                    <div ng-messages="InstanceForm.admin_pass.$error">
+                                        <span class="error" ng-message="pwCheck">{{'aws.instances.addinstances.notSamePasswd'|translate}}</span>
+                                        <span class="error" ng-message="pattern">{{'aws.register.info.special_8_16'|translate}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2 clearFix">
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.comfirmpassword'|translate}}：</label>
+                                <div class="controls">
+                                    <input type="password" class="form-controls" name="admin_comfirmpass" ng-model="insForm.admin_comfirmpass" ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,\/\-\^\%])[0-9a-zA-Z!@._:,\/\-\^\%]{8,16}$/" pw-check="quick-pw2" placeholder="{{'aws.instances.addinstances.comfirmpassword'|translate}}" />
+                                    <div ng-messages="InstanceForm.admin_comfirmpass.$error">
+                                        <span class="error" ng-message="pwCheck">{{'aws.instances.addinstances.notSamePasswd'|translate}}</span>
+                                        <span class="error" ng-message="pattern">{{'aws.register.info.special_8_16'|translate}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2 clearFix">
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.num'|translate}}：</label>
+                                <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip20' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <div class="count-box">
+                                        <span class="minus" ng-class="{'disabled':insForm.hostNum<=1}" ng-click="setInsNum('minus')">-</span>
+                                        <input type="text" class="button-num" name="hostNum" min="1" max="10" ng-model="insForm.hostNum"  required limitnumrange
+                                        popover-placement="bottom" popover-trigger="mouseenter" popover-enable="options.imgSrc=='volume' || options.imgSrc=='backup'" uib-popover="将不支持从云硬盘、备份批量创建云主机"/>
+                                        <div class="error" ng-messages="(submitInValid ||InstanceForm.hostNum.$dirty) && InstanceForm.hostNum.$error">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            <div ng-message="limitnumrange">{{"aws.errors."+['limit_1_10']|translate}}</div>
+                                        </div>
+                                        <!--默认为1,最大为10-->
+                                        <span class="add" ng-class="{'disabled':insForm.hostNum>=10}" ng-click="setInsNum('add')">+</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2 clearFix">
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.vmgroup'|translate}}：</label>
+                                    <div class="controls">
+                                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip1' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                        <ui-select ng-model="createInsForm.vmGroupSelected" name="vmGroup" 
+                                        ng-change="changeAffinityGroup(createInsForm.vmGroupSelected)" >
+                                            <ui-select-match  placeholder="{{'aws.instances.addinstances.vmgroupPlaceholder'|translate}}" title="{{$select.selected.name}}">{{$select.selected.name}}</ui-select-match>
+                                            <ui-select-choices repeat="group in createInsForm.vmGroups | filter: {name: $select.search}">
+                                                <div ng-bind-html="group.showInfo | highlight: $select.search" title="{{group.showInfo}}"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                        <div class="error" ng-messages="(submitInValid ||InstanceForm.vmGroup.$dirty) && InstanceForm.vmGroup.$error">
+                                            <form-validate></form-validate>
+                                        </div>
+                                        <div class="error" ng-if="options.canJoinNode">
+                                            <div>{{'aws.instances.addinstances.memberEnough'|translate}}</div>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset ng-if="source.fromVolume">
+                        <h5 class="title"><span>{{'aws.volumes.curVolume' | translate}}</span></h5>
+                        <div class="clearfix" >
+                            <div class="table-label">&nbsp</div>
+                            <div class="table-content table-small">
+                                <table class="table table-info">
+                                    <tbody>
+                                        <tr>
+                                            <td>{{'aws.common.name' | translate}}</td>
+                                            <td>{{createInsForm.selectedVolume.name}}</td>
+                                            <td>{{'aws.common.size' | translate}}（GB）</td>
+                                            <td>{{createInsForm.selectedVolume.size}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset ng-if="source.fromSnapshot">
+                        <h5 class="title"><span>{{'aws.snapshots.curSnapshot' | translate}}</span></h5>
+                        <div class="clearfix" >
+                            <div class="table-label">&nbsp</div>
+                            <div class="table-content table-small">
+                                <table class="table table-info">
+                                    <tbody>
+                                        <tr>
+                                            <td>{{'aws.snapshots.snapshotName' | translate}}</td>
+                                            <td>{{createInsForm.selectedSnap.name}}</td>
+                                            <td>{{'aws.volumes.volumeName' | translate}}</td>
+                                            <td>{{createInsForm.selectedSnap.volumeName}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{'aws.snapshots.size' | translate}}</td>
+                                            <td>{{createInsForm.selectedSnap.size}}</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset ng-if="source.fromBackup">
+                        <h5 class="title"><span>>{{'aws.backups.curBackup' | translate}}</span></h5>
+                        <div  class="clearfix" >
+                            <div class="table-label">&nbsp</div>
+                            <div class="table-content table-small">
+                                <table class="table table-info">
+                                    <tbody>
+                                        <tr>
+                                            <td>{{'aws.backups.backupName' | translate}}</td>
+                                            <td>{{createInsForm.selectedBackup.name}}</td>
+                                            <td>{{'aws.backups.table.vm' | translate}}</td>
+                                            <td>
+                                                <span ng-repeat="item in createInsForm.selectedBackup.serverNames track by $index">{{item}}</span>
+                                            </td>
+                                            <!-- <td>大小（GB）</td>
+                                            <td>{{createInsForm.selectedBackup.size}}</td> -->
+                                        </tr>
+                                        <tr>
+                                            <td>{{'aws.backups.backupTime' | translate}}</td>
+                                            <td>{{createInsForm.selectedBackup.createdAt  | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset ng-if = "source.new">
+                        <h5 class="title"><span>{{'aws.instances.addinstances.imgChoice'|translate}}</span></h5>
+                        <div class="control-items2 clearFix">
+                            <!-- 系统架构 -->
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.arch'|translate}}： </label>
+                                <div class="controls btn-item2">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip35' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <div class="btn-item-group">
+                                        <button type="button" class="type-btn" ng-disabled="options.disabled" ng-class='{"active":item.value === options.arch}' ng-click="framework(item)" ng-repeat="item in vm.framework"><span>{{item.text}}</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 镜像类型是否公有 -->
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.type'|translate}}：</label>
+                                <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip36' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <div class="btn-item-group">
+                                        <button type="button" class="type-btn" ng-class='{"active":item.value === options.img}' ng-click="choosen(item)" data-value="{{item.value}}" ng-repeat="item in vm.imgType">
+                                            <span>{{item.text}}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2 clearFix">
+                            <!-- 系统类型 -->
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.os'|translate}}：</label>
+                                <div class="controls col-1">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip37' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <ui-select ng-model="image.selected" ng-change="os_changed()" name="imageName" ng-disabled="!osType.length" required>
+                                        <ui-select-match placeholder="{{'aws.instances.addinstances.oxChoice'|translate}}">{{$select.selected.type}}</ui-select-match>
+                                        <ui-select-choices repeat="image in osType | filter:{type:$select.search}">
+                                            <div ng-bind-html="image.type | highlight: $select.search" title="{{image.type}}"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                    <div class="error" ng-messages="(submitInValid ||InstanceForm.imageName.$dirty) && InstanceForm.imageName.$error">
+                                        <form-validate></form-validate>
+                                    </div>
+                                </div>
+                                <div class="controls col-2">
+                                    <ui-select ng-model="arch.selected" name="archName" ng-change="changeArchName(arch.selected)" required ng-disabled="!images2.length">
+                                        <ui-select-match placeholder="{{'aws.instances.addinstances.imgNameChoice'|translate}}" title="{{image.selected.name}}">{{$select.selected.name}}</ui-select-match>
+                                        <ui-select-choices repeat="arch  in images2 | filter: {name: $select.search}">
+                                            <div ng-bind-html="arch.name | highlight: $select.search" title="{{arch.name}}"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                    <div class="error" ng-messages="(submitInValid ||InstanceForm.archName.$dirty) && InstanceForm.archName.$error">
+                                        <form-validate></form-validate>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset ng-if = "source.fromImage">
+                        <h5 class="title"><span>{{'aws.instances.addinstances.imgChoice'|translate}}</span></h5>
+                        <div class="control-items2 clearFix">
+                            <!-- 系统架构 -->
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.arch'|translate}}</label>
+                                <div class="controls btn-item2">
+                                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip35' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <div class="btn-item-group">
+                                        <button type="button" class="type-btn"  ng-class='{"active":item.value === arch.selected.arch}' ng-repeat="item in vm.framework"><span>{{item.text}}</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 镜像类型是否公有 -->
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.type'|translate}}</label>
+                                <div class="controls">
+                                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip36' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <div class="btn-item-group">
+                                        <button type="button" class="type-btn" ng-class='{"active":item.value === arch.selected.imgType}' data-value="{{item.value}}" ng-repeat="item in vm.imgType">
+                                            <span>{{item.text}}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2 clearFix">
+                            <!-- 系统类型 -->
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.os'|translate}}</label>
+                                <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip37' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <input type="text" class="form-control" ng-model="arch.selected.os_type"  name="imageName" ng-disabled="true">
+                                    <div class="error" ng-messages="(submitInValid ||InstanceForm.imageName.$dirty) && InstanceForm.imageName.$error">
+                                        <form-validate></form-validate>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 镜像名称-->
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.imgName'|translate}}</label>
+                                <div class="controls">
+                                    <input type="text" class="form-control" ng-model="arch.selected.name"  name="archName" ng-disabled="true">
+                                    <div class="error" ng-messages="(submitInValid ||InstanceForm.archName.$dirty) && InstanceForm.archName.$error">
+                                        <form-validate></form-validate>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <h5 class="title"><span>{{'aws.instances.addinstances.conf_type'|translate}}</span></h5>
+                        <div class="control-items clearFix" ng-show="!showMoreFlavor">
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.common.recommendFlavor' | translate}}：</label>
+                                <div class="controls">
+                                    <div class="btn-item-group">
+                                        <button type="button" class="type-btn type-btn-large" ng-click="changeBaseFlavor(item,$index)" ng-class='{"active":$index === baseFlavorIndex}' ng-repeat="item in flavorNormalList3">
+                                            <strong>{{item.text}}</strong>
+                                            <span class="description">{{item.description}}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items clearFix" ng-show="!showMoreFlavor">
+                            <div class="control-group">
+                                <label class="control-label">&nbsp</label>
+                                <div class="controls">
+                                    <a href="" ng-click="showMoreFlavorFunc()" >{{'aws.common.moreFlavor' | translate}}</a>
+                                    <em ng-show="unmatchedFalvor" class= "red"> &nbsp &nbsp {{'aws.instances.addinstances.unmatchedFalvorTip'|translate}}</em>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items clearFix" ng-show="showMoreFlavor">
+                            <div class="table-label">{{'aws.common.chooseFlavor' | translate}}：</div>
+                            <div class="table-content table-small">
+                                <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip22' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                <div class="table-wrap">
+                                    <empty-tip empty-type="loadFlavorData" tip-id="'flavor-tip-msg'"></empty-tip>
+                                    <table ng-table="options.insFlavorTable" class="table" show-filter="false">
+                                        <tr ng-repeat="item in $data track by $index ">
+                                            <td data-title="">
+                                                <label class="radiobox">
+                                                    <input name="flavor" type="radio" ng-model="createInsForm.flavor" ng-change="changeFlavor(item)" value={{item.id}}>
+                                                    <i class="iconfont"></i>
+                                                </label>
+                                            </td>
+                                            <td data-title="'aws.common.name' | translate" sortable="'name'">
+                                                <div class="edit-name">
+                                                    <span>{{item.name}}</span>
+                                                </div>
+                                            </td>
+                                            <td data-title="'CPU'" sortable="'vcpus'">
+                                                <span>{{item.vcpus}} {{'aws.instances.addinstances.core'|translate}}</span>
+                                            </td>
+                                            <td data-title="'aws.instances.addinstances.memory'|translate" sortable="'ram'">
+                                                <span>{{item.ram_gb}} G</span>
+                                            </td>
+                                            <!-- <td data-title="'aws.instances.addinstances.local_sysytem'|translate" sortable="'disk'" ng-if="storage.isUseLocal">
+                                                <span>{{item.disk}} G</span>
+                                            </td>
+                                            <td data-title="'aws.instances.addinstances.local_data'|translate" sortable="'ephemeral'" ng-if="storage.isUseLocal">
+                                                <span>{{item.ephemeral}} G</span>
+                                            </td> -->
+                                            <td data-title="'aws.instances.addinstances.cputopu'|translate">
+                                                <div ng-if="!item.sockets&&!item.cores&&!item.threads">{{'aws.instances.addinstances.unset'|translate}}</div>
+                                                <div ng-if="item.sockets||item.cores||item.threads">
+                                                    <span ng-repeat="topo in item.cpuTopoArr">
+                                                    {{topo.name+":"+topo.value+($index<(item.cpuTopoArr.length-1)?",":"")}}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items clearFix" ng-show="showMoreFlavor">
+                            <div class="control-group">
+                                <label class="control-label">&nbsp</label>
+                                <div class="controls">
+                                    <a class="val" ng-click="recommendFlavorFunc()">{{'aws.common.recommendFlavor' | translate}}</a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <div class="control-items2 clearFix">
+                            <div class="control-group">
+                                <label class="control-label"><span class="red">*</span>更多规格</label>
+                                <div class="controls">
+                                    <ui-select ng-model="createInsForm.selectedFlavor" name="flavorName" ng-change="chooseCpuMem(createInsForm.selectedFlavor)" required ng-disabled="!flavorNormalList.length">
+                                        <ui-select-match placeholder="{{baseFlavorIndex == -1?('没有找到可匹配的规格'):('aws.instances.addinstances.choiceConfig'|translate)}}" title="{{$select.selected.text}}">{{$select.selected.text}}</ui-select-match>
+                                        <ui-select-choices repeat="conf in flavorNormalList  | filter: {id: $select.search}">
+                                            <div ng-bind-html="conf.text | highlight: $select.search" title="{{conf.text}}"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                    <div class="error" ng-messages="(submitInValid ||InstanceForm.flavorName.$dirty) && InstanceForm.flavorName.$error">
+                                        <form-validate></form-validate>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+                    </fieldset>
+                    <fieldset>
+                        <h5 class="title"><span>{{'aws.instances.addinstances.net_setting'|translate}}</span></h5>
+                        <div class="control-items2 clearFix">
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.net'|translate}}：</label>
+                                <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip25' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <ui-select ng-model="network.selectedNet" ng-change="changeExtNet(network.selectedNet)" name="net" title="选择网络" required>
+                                        <ui-select-match placeholder="{{'aws.instances.addinstances.netChoice'|translate}}" title="{{$select.selected.name}}">{{$select.selected.name}}</ui-select-match>
+                                        <ui-select-choices repeat="net in network.networkList | propsFilter:{name:$select.search}">
+                                            <div ng-bind-html="net.name | highlight: $select.search" title="{{net.name}}"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                    <div class="error" ng-messages="InstanceForm.net.$error" ng-if="interacted(InstanceForm)">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.securityGroup'|translate}}：</label>
+                                <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip32' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <ui-select ng-model="securities.selected" ng-disabled="!securityList.length">
+                                        <ui-select-match placeholder="{{'aws.instances.addinstances.securityGroupChoice'|translate}}" title="{{$select.selected.value}}">{{$select.selected.value}}</ui-select-match>
+                                        <ui-select-choices repeat="security in securityList | filter: {value: $select.search}">
+                                            <div ng-bind-html="security.value | highlight: $select.search" title="{{security.value}}"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2 clearFix" ng-show="network.selectedNet">
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.ports.specifySubnet' | translate}}： </label>
+                                <div class="controls">
+                                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip26' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <label class="checkbox">
+                                        <input type="checkbox" class="form-controls chk" name="assignSub" ng-model="network.assignSub" />
+                                        <i class="iconfont"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2 clearFix" ng-show="network.assignSub">
+                            <div class="clearFix">
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.ports.selectSubnet' | translate}}</label>
+                                    <div class="controls">
+                                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip27' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                        <ui-select ng-model="network.selectedSubnet" class="ui-select-tips" ng-change="changeSubnet(network.selectedSubnet)" title='{{"aws.floatingIps.placeholder.choseSubnet"|translate}}'>
+                                            <ui-select-match placeholder='{{"aws.floatingIps.placeholder.choseSubnet"|translate}}' title="{{$select.selected.name}}">{{$select.selected.name}}</ui-select-match>
+                                            <ui-select-choices repeat="subnet in subnets track by $index">
+                                                <div ng-mouseover="mouseSub(subnet,'over')" ng-mouseleave="mouseSub(subnet,'out')">
+                                                    <div ng-bind-html="subnet.name | highlight: $select.search" title="{{subnet.name}}"></div>
+                                                    <div class="ui-select-tips-detail" ng-show="selectedSubPoolList.length">
+                                                        <div class="arrow-up"></div>
+                                                        <ul>
+                                                            <li ng-repeat="sub in subPool_detail track by $index" ng-if="sub.showSubSegDetail">{{sub.sub_pool}}</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clearFix" ng-show="insForm.hostNum == 1">
+                                <div class="control-group clearFix">
+                                    <label class="control-label">{{'aws.ports.specifyIPAdress' | translate}}：</label>
+                                    <div class="controls">
+                                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip28' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                        <label class="checkbox">
+                                            <input type="checkbox" class="form-controls chk" name="assignIP" ng-model="network.assignIP" ng-disabled="insForm.hostNum!= 1" />
+                                            <i class="iconfont"></i>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clearFix" ng-show="network.assignIP && insForm.hostNum == 1">
+                                <div class="control-group ">
+                                    <label class="control-label">{{'aws.ports.subnetSegment' | translate}}：</label>
+                                    <div class="controls">
+                                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip29' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                        <ui-select ng-model="network.selectedSubPool" ng-change="changeSubPool(network.selectedSubPool)" title='{{"aws.routers.choseSubSegment"|translate}}'>
+                                            <ui-select-match placeholder="{{'aws.routers.choseSubSegment'|translate}}" title="{{$select.selected.sub_pool}}">{{$select.selected.sub_pool}}</ui-select-match>
+                                            <ui-select-choices repeat="subnet in selectedSubPoolList track by $index">
+                                                <div ng-bind-html="subnet.sub_pool | highlight: $select.search" title="{{subnet.sub_pool}}"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clearFix" ng-show="network.assignIP && insForm.hostNum == 1">
+                                <div class="control-group ip_cidr">
+                                    <label class="control-label">{{'aws.ports.ipAdress' | translate}}：</label>
+                                    <div class="controls clearfix">
+                                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip30' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                        <div class="flex">
+                                            <div class="ip_text">
+                                                <input type="text" class="form-controls" name="ip_0" id="ip_0" ng-model="network.init_cidr.ip_0" ng-keyup="setCheckValueFunc();setCheckValueFunc1()" placeholder={{network.placeholder.ip_0}} ng-readonly="network.readonly.ip_0" ng-focus="network.repeatIp=false;" />
+                                                <div class="error ip_0" ng-show="interacted(InstanceForm)">
+                                                    <div ng-show="required.ip_0">{{'aws.errors.required'|translate}}</div>
+                                                    <div ng-show="invalid.ip_0">{{'aws.instances.addinstances.enter'|translate}}{{network.min_num.ip_0}}~{{network.max_num.ip_0}}{{'aws.instances.addinstances.integer'|translate}}</div>
+                                                </div>
+                                            </div>
+                                            <div class="ip-spilt">.</div>
+                                            <div class="ip_text">
+                                                <input type="text" class="form-controls" name="ip_1" id="ip_1" ng-model="network.init_cidr.ip_1" ng-keyup="setCheckValueFunc();setCheckValueFunc1()" placeholder={{network.placeholder.ip_1}} ng-readonly="network.readonly.ip_1" ng-focus="network.repeatIp=false;" />
+                                                <div class="error ip_1" ng-show="interacted(InstanceForm)">
+                                                    <div ng-show="required.ip_1">{{'aws.errors.required'|translate}}</div>
+                                                    <div ng-show="invalid.ip_1">{{'aws.instances.addinstances.enter'|translate}}{{network.min_num.ip_1}}~{{network.max_num.ip_1}}{{'aws.instances.addinstances.integer'|translate}}</div>
+                                                </div>
+                                            </div>
+                                            <div class="ip-spilt">.</div>
+                                            <div class="ip_text">
+                                                <input type="text" class="form-controls" name="ip_2" id="ip_2" ng-model="network.init_cidr.ip_2" ng-keyup="setCheckValueFunc();setCheckValueFunc1()" placeholder={{network.placeholder.ip_2}} ng-readonly="network.readonly.ip_2" ng-focus="network.repeatIp=false;" />
+                                                <div class="error ip_2" ng-show="interacted(InstanceForm)">
+                                                    <div ng-show="required.ip_2">{{'aws.errors.required'|translate}}</div>
+                                                    <div ng-show="invalid.ip_2">{{'aws.instances.addinstances.enter'|translate}}{{network.min_num.ip_2}}~{{network.max_num.ip_2}}{{'aws.instances.addinstances.integer'|translate}}</div>
+                                                </div>
+                                            </div>
+                                            <div class="ip-spilt">.</div>
+                                            <div class="ip_text">
+                                                <input type="text" class="form-controls" name="ip_3" id="ip_3" ng-model="network.init_cidr.ip_3" ng-keyup="setCheckValueFunc();setCheckValueFunc1()" placeholder={{network.placeholder.ip_3}} ng-readonly="network.readonly.ip_3" ng-focus="network.repeatIp=false;" />
+                                                <div class="error ip_3" ng-show="interacted(InstanceForm)">
+                                                    <div ng-show="required.ip_3">{{'aws.errors.required'|translate}}</div>
+                                                    <div ng-show="invalid.ip_3">{{'aws.instances.addinstances.enter'|translate}}{{network.min_num.ip_3}}~{{network.max_num.ip_3}}{{'aws.instances.addinstances.integer'|translate}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="error" ng-if="network.repeatIp">
+                                            <span>{{'aws.img.repeatIP'|translate}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <h5 class="title"><span>{{'aws.instances.addinstances.volume_set'|translate}}</span></h5>
+                        <div class="control-items clearfix">
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.chooseBoot'|translate}}：</label>
+                                <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip23' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <div class="btn-item-group imgSrc">
+                                        <button type="button" class="type-btn" ng-class='{"active":storage.isUseLocal==1,"disabled":source.fromVolume||source.fromSnapshot||source.fromBackup}' 
+                                        ng-show = "!isCustom && bootLocal" ng-click="chooseBoot(1)">
+                                            <span>{{'aws.instances.addinstances.isUseLocal.1'|translate}}</span>
+                                        </button>
+                                        <button type="button" class="type-btn" ng-class='{"active":storage.isUseLocal==2}' ng-click="chooseBoot(2)" service-permit service-name="['cinder']">
+                                            <span>{{'aws.instances.addinstances.isUseLocal.2'|translate}}</span>
+                                        </button>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items  clearFix" ng-if="storage.isUseLocal==2">
+                            <div class="control-group no-margin">
+                                <label class="control-label">{{'aws.volumes.cv.storagedevice'|translate}}：</label>
+                                <div class="controls step second-cont">
+                                    <div class="control-items3 clearFix">
+                                        <div class="control-group all">
+                                            <div class="controls">
+                                                <ui-select ng-model="storage.storageDeviceSelected" ng-disabled="options.imgSrc=='volume' || options.imgSrc == 'snap' " ng-change="changeStorage(storage.storageDeviceSelected)" name="device" ng-required="storage.isUseLocal==2">
+                                                    <ui-select-match>{{$select.selected.disPlayName}}</ui-select-match>
+                                                    <ui-select-choices repeat="storage in storageDeviceList | filter: {disPlayName: $select.search}">
+                                                        <div ng-bind-html="storage.disPlayName | highlight: $select.search"></div>
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                                <div class="error" ng-messages="(submitInValid ||InstanceForm.device.$dirty) && InstanceForm.device.$error">
+                                                    <form-validate></form-validate>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="control-group small-group" ng-if="(options.imgSrc=='img' || source.fromImage) &&  arch.selected.imageUid">
+                                            <div class="controls">
+                                                <input type="text" class="" name="sysVolume" ng-model="createInsForm.sysVolumeSize" ng-change="changesysVolumeSize(createInsForm.sysVolumeSize)"  min="createInsForm.sysVolumeMinSize" max="1000" required limitnumrange 
+                                                ng-readonly="(options.imgSrc=='img' && insImgTable.data.length===0) || (options.imgSrc=='snap' && insSysSnapTable.data.length==0 ) || storage.isUseLocal==1"> 
+                                                <div class="error" ng-messages="(submitInValid || InstanceForm.sysVolume.$dirty) && InstanceForm.sysVolume.$error">
+                                                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                                    <div ng-message="limitnumrange">{{'aws.action.pleaseInput' | translate}}{{createInsForm.sysVolumeMinSize}}~1000{{'aws.action.int' | translate}}</div>
+                                                </div>
+                                            </div>
+                                            <label class="control-label">&nbspGB</label>
+                                        </div>
+                                        <div class="control-group small-group" ng-if="(options.imgSrc=='backup')">
+                                            <div class="controls">
+                                                <input type="text" class="form-control"  ng-model="createInsForm.selectedBackup.size" ng-disabled="true"/> 
+                                            </div>
+                                            <label class="control-label">&nbspGB</label>
+                                        </div>
+                                        <div class="control-group small-group" ng-if="(options.imgSrc=='volume')">
+                                            <div class="controls">
+                                                <input type="text" class="form-control"  ng-model="createInsForm.selectedVolume.size" ng-disabled="true" /> 
+                                            </div>
+                                            <label class="control-label">&nbspGB</label>
+                                        </div>
+                                        <div class="control-group small-group" ng-if="(options.imgSrc=='snap')">
+                                            <div class="controls">
+                                                <input type="text" class="form-control"  ng-model="createInsForm.selectedSnap.size" ng-disabled="true" /> 
+                                            </div>
+                                            <label class="control-label">&nbspGB</label>
+                                        </div>
+                                        <div class="control-group all" ng-if="(options.imgSrc=='img' || source.fromImage) &&  arch.selected.imageUid">
+                                            <div class="controls">
+                                                <p>{{'aws.helpTip.instances.tip12' | translate}}<span>{{createInsForm.sysVolumeMinSize}}</span>GB</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items clearFix" ng-if="storage.isUseLocal==2">
+                            <div class="control-group">
+                                <label class="control-label">&nbsp</label>
+                                <div class="controls">
+                                    <div class="control-group" ng-show="storage.storageDeviceSelected.volumeTypeId" ng-if="roleNumber">
+                                        <label class="control-label left">{{"aws.volumes.cv.pool_capacity" | translate}}(TB)：</label>
+                                        <div class="controls">
+                                            <span class="val">{{"aws.common.inUsed" | translate}} {{poolsInfo_data.inUsed}} / {{poolsInfo_data.total}}</span>
+                                            <span class="val">{{"aws.common.allocate" | translate}} {{poolsInfo_data.allocate}} / {{poolsInfo_data.total}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-center red" ng-show="nomore_voltype">{{'aws.volumes.cv.nomore_volumetype'|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-if="storage.isUseLocal==1" class=" step second-cont quick-cont">
+                            <div class = "control-items">
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.common.systemDisk' | translate}}：</label>
+                                    <div class="control-group">
+                                        <div class="control-items3 ">
+                                            <div class="control-group all">
+                                                <div class="controls">
+                                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tipx' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                                    <input type="text" class="" name="sysVolume" ng-model="createInsForm.sysVolumeSize" ng-change="changesysVolumeSize()"  min="createInsForm.sysVolumeMinSize" max="1000" ng-disabled="true" required limitnumrange > 
+                                                    <div class="error" ng-messages="(submitInValid || InstanceForm.sysVolume.$dirty) && InstanceForm.sysVolume.$error">
+                                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                                        <div ng-message="limitnumrange">{{'aws.action.pleaseInput' | translate}}{{createInsForm.sysVolumeMinSize}}~1000{{'aws.action.int' | translate}}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="control-group all">
+                                                <div class="controls">
+                                                    <p>{{'aws.helpTip.instances.tip12' | translate}}<span>{{createInsForm.sysVolumeMinSize}}</span>GB</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="control-items-group no-border">
+                                <div class="control-group">
+                                    <label for="" class="control-label ">&nbsp</label>
+                                    <div class="controls text-color-gray" >
+                                        系统盘容量(TB)：  已使用 0.007 / 5.438  已分配 0.142 / 5.438
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class = "control-items">
+                                <div class="control-group">
+                                    <label class="control-label">{{'aws.common.dataDisk' | translate}}：</label>
+                                    <div class="control-group">
+                                        <div class="control-items3 ">
+                                            <div class="control-group all">
+                                                <div class="controls">
+                                                    <input type="text" class="" name="ephemeral" ng-model="createInsForm.ephemeral" ng-change="changeephemeralSize()"  min="1"  max="1000"  limitnumrange > 
+                                                    <div class="error" ng-messages="(submitInValid || InstanceForm.ephemeral.$dirty) && InstanceForm.ephemeral.$error">
+                                                        <div ng-message="limitnumrange">{{'aws.action.pleaseInput' | translate}}1~1000{{'aws.action.int' | translate}}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- <div class="control-group all">
+                                                <div class="controls">
+                                                    <p>{{'aws.helpTip.instances.tip12' | translate}}<span>{{createInsForm.sysVolumeMinSize}}</span>GB</p>
+                                                </div>
+                                            </div> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- <div class="control-items-group no-border">
+                                <div class="control-group">
+                                    <label for="" class="control-label ">&nbsp</label>
+                                    <div class="controls text-color-gray" >
+                                        系统盘容量(TB)：  已使用 0.007 / 5.438  已分配 0.142 / 5.438
+                                    </div>
+                                </div>
+                            </div> -->
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <h5 class="title"><span>{{'aws.instances.addinstances.advOption'|translate}}<i ng-click="fold =!fold" class="conf-icon" ng-class="{'icon-aw-angle-up':fold,'icon-aw-angle-down':!fold}"></span></i></h5>
+                    </fieldset>
+                    <fieldset ng-show="fold">
+                        <div class="control-items2 clearFix">
+                            <div class="control-group">
+                                <label class="control-label">{{'aws.instances.addinstances.hostName'|translate}}</label>
+                                <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip2' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <input type="text" class="form-control" name="host_name" ng-model="insForm.hostname" placeholder="请输入虚拟机操作系统名称指定的主机名" ng-maxlength="32" ng-pattern="/^[a-zA-Z][a-zA-Z0-9-]*$/"></input>
+                                    <div class="error" ng-messages="(submitInValid ||InstanceForm.host_name.$dirty) && InstanceForm.host_name.$error">
+                                        <form-validate pattern-msg="'aws.errors.hostnameValidate'|translate"></form-validate>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group"
+                            ng-hide="(options.imgSrc=='img'&& arch.selected.os_type == 'windows')
+                            || (options.imgSrc=='volume'&&createInsForm.selectedVolume.imageMetadata.os_type == 'windows')
+                            || (options.imgSrc=='snap'&&createInsForm.selectedSnap.osType == 'windows')
+                            || (options.imgSrc=='backup'&&createInsForm.selectedBackup.osType == 'windows')">
+                                <label class="control-label">{{'aws.instances.addinstances.keypair'|translate}}</label>
+                                <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip31' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <ui-select ng-model="keypairs.selected" ng-disabled="disabled" ng-disabled="!keypairsList.length">
+                                        <ui-select-match placeholder="{{'aws.instances.addinstances.keypairChoice'|translate}}" title="{{$select.selected.value}}">{{$select.selected.value}}</ui-select-match>
+                                        <ui-select-choices repeat="keypairs  in keypairsList | filter: {value: $select.search}">
+                                            <div ng-bind-html="keypairs.value | highlight: $select.search" title="{{keypairs.value}}"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2 clearFix" ng-if="ADMIN">
+                            <div class="control-group">
+                                <label class="control-label">
+                                    {{'aws.instances.addinstances.launchArea'|translate}}
+                                </label>
+                                <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip33' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <ui-select ng-model="zone.selected" ng-change="changeZoneForDetail();changeZone(zone.selected)">
+                                        <ui-select-match placeholder="{{'aws.instances.addinstances.launchAreaChoice'|translate}}" title="{{$select.selected.value}}">{{$select.selected.value}}</ui-select-match>
+                                        <ui-select-choices repeat="zone in zoneList | filter: {value: $select.search}">
+                                            <div ng-bind-html="zone.value | highlight: $select.search" title="{{zone.value}}"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div> 
+                            <div class="control-group">
+                                <label class="control-label">
+                                    {{'aws.instances.addinstances.launchNode'|translate}}
+                                </label>
+                                <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip34' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                    <ui-select ng-model="node.selected" ng-disabled="list_disabled" ng-change="changeNodeForDetail(); changeNode(node.selected)">
+                                        <ui-select-match placeholder="{{'aws.instances.addinstances.launchNodeChoice'|translate}}" title="{{$select.selected.value}}">{{$select.selected.value}}</ui-select-match>
+                                        <ui-select-choices repeat="host in node.list | filter: {value: $select.search}">
+                                            <div ng-bind-html="host.value | highlight: $select.search" title="{{host.value}}"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2" ng-show="ADMIN">
+                            <div  class="control-items" ng-show="supportCloudSecurity">
+                                <div class="control-group no-margin">
+                                    <label class="control-label">安全加固： </label>
+                                    <div class="controls">
+                                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip69' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                        <label class="checkbox">
+                                            <input type="checkbox" class="form-controls chk" name="cloudSecurity" ng-model="cloud_security" />
+                                            <i class="iconfont"></i>免费开通
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items">
+                            <div class="control-group" ng-show="cloud_security && ((options.imgSrc=='img'&& arch.selected.os_type == 'windows')
+                            || (options.imgSrc=='volume'&&createInsForm.selectedVolume.imageMetadata.os_type == 'windows')
+                            || (options.imgSrc=='snap'&&createInsForm.selectedSnap.osType == 'windows')
+                            || (options.imgSrc=='backup'&&createInsForm.selectedBackup.osType == 'windows'))">
+                                <label class="control-label">&nbsp;</label>
+                                <div class="controls">
+                                    <span class="val">您需要<a class="blue" href="{{supportPass.CloudSecurity.agentUrl +'/ydeyes_win32.zip'}}" target="_blank">获取Windows的安装方式</a>手动安装云镜客户端，云镜主机防护才会生效。</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items2 clearFix" ng-show="ADMIN">
+                            <div  class="control-items" ng-show="supportCOC">
+                                <div class="control-group no-margin">
+                                        <label class="control-label" ng-show="((options.imgSrc=='img'&& arch.selected.os_type == 'windows')
+                                        || (options.imgSrc=='volume'&&createInsForm.selectedVolume.imageMetadata.os_type == 'windows')
+                                        || (options.imgSrc=='snap'&&createInsForm.selectedSnap.osType == 'windows')
+                                        || (options.imgSrc=='backup'&&createInsForm.selectedBackup.osType == 'windows'))">云监控： </label>
+                                        <label class="control-label" ng-show="!((options.imgSrc=='img'&& image.selected.type == 'Windows')
+                                        || (options.imgSrc=='volume'&&createInsForm.selectedVolume.imageMetadata.os_type == 'windows')
+                                        || (options.imgSrc=='snap'&&createInsForm.selectedSnap.osType == 'windows')
+                                        || (options.imgSrc=='backup'&&createInsForm.selectedBackup.osType == 'windows'))">自动化运维： </label>
+                                    <div class="controls">
+                                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip70' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                        <label class="checkbox">
+                                            <input type="checkbox" class="form-controls chk" name="COC" ng-model="COC" />
+                                            <i class="iconfont"></i>免费开通
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-items">
+                            <div class="control-group" ng-show="COC && ((options.imgSrc=='img'&& arch.selected.os_type == 'windows')
+                            || (options.imgSrc=='volume'&&createInsForm.selectedVolume.imageMetadata.os_type == 'windows')
+                            || (options.imgSrc=='snap'&&createInsForm.selectedSnap.osType == 'windows')
+                            || (options.imgSrc=='backup'&&createInsForm.selectedBackup.osType == 'windows'))">
+                                <label class="control-label">&nbsp;</label>
+                                <div class="controls">
+                                    <span class="val">请在云主机“更多操作"中的“光盘管理”中挂载cloud-tools光盘镜像到云主机，并下载其中windows_agent.7z包到云主机中安装agent。</span>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="right-field">
+                <h5> <strong>{{'aws.instances.addinstances.conf_detail' | translate}}</strong></h5>
+                <div ins-config-detail-table></div>
+            </div>
+        </div>
+        
+    </div>
+    <div class="ins-footer"  isdetail="source.isQuickEnter">
+        <div class='price-box'  ng-if="showPrice">
+            {{'aws.networks.price.totalPrice' | translate}}：<span>¥{{price}}</span> {{'aws.networks.price.perHour' | translate}} × {{insForm.hostNum}} =  <span>¥{{priceFix}}</span> {{'aws.networks.price.perHour' | translate}} ({{'aws.networks.price.count' | translate}} ¥{{totalPrice}} {{'aws.networks.price.perMonth' | translate}})
+        </div>
+        <div class="footer">
+             <button class="btn btn-info" type="button" ng-disabled="insProText || coreProText || ramProText || volumesProText || insDomText || coreDomText || ramDomText || volumesDomText || validForm  || !canBatchNoCeph || !canBatch|| !canVolum 
+             || !createInsForm.selectedFlavor || !storage.isUseLocal
+             || (options.imgSrc=='volume' && insForm.hostNum>1)
+             || (options.imgSrc=='backup' && insForm.hostNum>1)" ng-click="createInstance(InstanceForm);">{{'aws.instances.addinstances.ok'|translate}}</button>
+        </div>
+    </div>
+</div>

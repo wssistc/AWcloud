@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans" ng-app="app" ng-cloak>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <meta name="format-detection" content="telephone=no, email=no, adress=no" />
+    <!--  <title  ng-bind="pathTitle +' - ' + siteTitle"></title> -->
+    <title  ng-bind="pathTitle"></title>
+    <script src="js/config.js" id="page-config" charset="UTF-8" data-js="
+    lodash/lodash.min.js
+    jquery/jquery.min.js
+    zrender/zrender.min.js
+    moment/min/moment.min.js
+    d3/d3.min.js
+    bootstrap/dist/js/bootstrap.min.js
+    bootstrap-datetime-picker/js/bootstrap-datetimepicker.js
+    bootstrap-datetime-picker/js/bootstrap-datetimepicker.zh-CN.js
+    angular/angular.min.js
+    angular-animate/angular-animate.min.js
+    angular-route/angular-route.min.js
+    angular-resource/angular-resource.min.js
+    angular-sanitize/angular-sanitize.min.js
+    angular-messages/angular-messages.min.js
+    angular-translate/dist/angular-translate.min.js
+    angular-ivh-treeview/dist/ivh-treeview.min.js
+    angular-file-saver/dist/angular-file-saver.bundle.min.js
+    angular-ui-bootstrap/dist/ui-bootstrap-tpls.js
+    angular-ui-tree/dist/angular-ui-tree.min.js
+    angularjs-dropdown-multiselect/src/angularjs-dropdown-multiselect.js
+    ng-table/dist/ng-table.min.js
+    ui-select/dist/select.min.js
+    ng-csv/ng-csv.min.js
+    bootstrap-daterangepicker/moment.js
+    bootstrap-daterangepicker/daterangepicker.js
+    angularjs-slider/dist/rzslider.min.js
+    range-slider/dist/ion.rangeSlider.min.js
+    angular-file-upload/angular-file-upload.min.js
+    echarts/echarts.min.js
+    ng-echarts/ng-echarts.min.js
+    " data-css="
+    bootstrap/dist/css/bootstrap.min.css
+    bootstrap-datetime-picker/css/bootstrap-datetimepicker.min.css
+    angular/angular-csp.css
+    angular-ivh-treeview/dist/ivh-treeview.min.css
+    angular-ivh-treeview/dist/ivh-treeview-theme-basic.css
+    ui-select/dist/select.min.css
+    bootstrap-daterangepicker/daterangepicker.css
+    angularjs-slider/dist/rzslider.min.css
+    range-slider/dist/ion.rangeSlider.css
+    range-slider/dist/ion.rangeSlider.skinFlat.css
+    "></script>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" id="setStyle" href="css/white.css">
+    <link rel="shortcut icon" href="/favicon.ico"/>
+    <link rel="bookmark" href="/favicon.ico"/>
+</head>
+<body ng-controller="MainCtrl" ng-class="{'auth':isAuth||isfirstLogin,'logined':isLogined,'create-easy-vm':isEasyCreateVm,'no-side-menu':isView}">
+<div id="ie-tips" class="ie-tips hide">
+  <h2>您的浏览器暂不支持云平台，请使用以下浏览器</h2>
+  <ul class="img-list">
+    <li>
+        <figure>
+          <a target="_blank" href="https://support.microsoft.com/zh-cn/help/17621/internet-explorer-downloads"></a>
+          <figcaption>internet explorer</figcaption>
+          <p><b>v10.0</b> 及以上版本</p>
+        </figure>
+    </li>
+    <li>
+        <figure>
+          <a target="_blank" href="https://www.google.com/chrome"></a>
+          <figcaption>Google Chrome</figcaption>
+          <p><b>v43.0</b> 以上版本</p>
+        </figure>
+    </li>
+    <li>
+      <figure>
+          <a target="_blank" href="https://www.firefox.com/"></a>
+          <figcaption>火狐浏览器</figcaption>
+          <p><b>v30.0</b> 以上版本</p>
+        </figure>
+    </li>
+    <li>
+      <figure>
+          <a target="_blank" href="https://www.apple.com/safari/"></a>
+          <figcaption>Safari</figcaption>
+          <p><b>v9.0</b> 以上版本</p>
+        </figure>
+    </li>
+    <li>
+      <figure>
+          <a target="_blank" href="http://se.360.cn/"></a>
+          <figcaption>360SE</figcaption>
+          <p><b>v8.0</b> 以上版本</p>
+        </figure>
+    </li>
+  </ul>
+</div>
+<header>
+    <div ng-include="'tmpl/header.html'"></div>
+</header>
+
+<div class="main clearfix open">
+  <div class="page-alert-list" ng-class="{'show-dash-alert':dashAlerts.list.length>0}">
+    <div ng-repeat='alert in dashAlerts.list' ng-class="{'alert-building': alert.severity=='building','alert-success': alert.severity=='success','alert-warning': alert.severity=='warning','alert-error': alert.severity=='error'}" class="alert">
+        <button type="button" class="alert-close" ng-click="dashAlerts.clear(alert)"><i class="icon-aw-wrong"></i></button>
+        <div class="alert-content">
+            <div class="alert-text">
+                <span ng-bind="alert.text" id="alert-text"></span><i ng-show="alert.severity=='building'" class="icon-aw-refresh aw-spin"></i>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="delete-wrap" ng-show="showAlert">
+    <div class="delete-alert" ng-class="{'delete-show':showAlert}">
+      <uib-alert type="{{ContType}}" close="close()">
+        <div class="del-cont" ng-bind-html="delCont |trust_html"></div>
+      	<div class="btn-item">
+         	<button type='button' class='btn {{btnType}}' ng-click='confirm()'  ng-disabled="notDel">{{btnText}}</button><button type='button' class='btn btn-default' ng-hide="showDel" ng-click="close({$event: $event})">{{delBtnText}}</button>
+        </div>
+     </uib-alert>
+    </div>
+  </div>
+  <div class="delete-wrap" ng-show="show_delete_error">
+    <div class="delete-alert" ng-class="{'delete-show':show_delete_error}">
+      <uib-alert type="{{ContType}}" close="close_error()">
+        <div class="del-cont" ng-bind-html="del_errpr_cont |trust_html"></div>
+        <div class="btn-item">
+          <button type='button' class='btn {{btnType}}' ng-click='confirm_error()' >{{'aws.tmpl.index.ok'|translate}}</button><button type='button' class='btn btn-default' ng-click="close_error({$event: $event})">{{'aws.tmpl.index.cancel'|translate}}</button>
+        </div>
+     </uib-alert>
+    </div>
+  </div>
+  <!--总资源超限 -->
+ <!--  <div class="delete-wrap" ng-show="totalResAlert">
+    <div class="delete-alert alert-lg" ng-class="{'delete-show':totalResAlert}">
+      <uib-alert close="closeTotal()">
+        <div class="del-cont" ng-bind-html="TotalCont |trust_html"></div>
+        <div class="btn-item">
+          <button type='button' class='btn btn-primary' ng-click='closeTotal()' >{{'aws.tmpl.index.ok'|translate}}</button>
+        </div>
+     </uib-alert>
+    </div>
+  </div> -->
+  <div class="alert-p" ng-class="{'alarm-show':totalResShow}">
+    <div class="alert-error alert alertres">
+        <button type="button" class="alert-closeres" ng-click="closeTotalTips()"><i class="icon-aw-wrong"></i></button>
+        <div class="alert-content">
+            <div class="alert-text">
+                <div>{{'aws.indextran.platform'|translate}}{{ListName}}{{'aws.indextran.resource_70'|translate}}</div>
+            </div>
+        </div>
+    </div>
+  </div>
+  
+  <div class="delete-wrap" ng-show="TBDSAlert">
+    <div class="delete-alert alert-TBDS" ng-class="{'delete-show':TBDSAlert}">
+        <i class="loading-icon"></i>
+        <span style="">大数据平台登录跳转中......</span>
+    </div>
+  </div>
+
+
+
+  <!-- 主导航 start -->
+  <aside toggle-nav ng-if="isLogined && !isfirstLogin && !isView">
+    <!-- <span class="space-item"></span> -->
+    <h5 class="menu-title clearfix" ng-if="!MEM_ADMIN">
+      <i class="{{sideMenu.titleIcon[sideMenu.sideMentTitle]}}"></i>
+      <span class="title-name">{{'aws.menu.'+sideMenu.sideMentTitle | translate}}</span>
+    </h5>
+    <ul class="menu-level-1"  ng-class="{'menu-level-p':MEM_ADMIN}">
+      <li ng-repeat="item in sideMenu.sideMenuList" ng-class="{'level2-active':(sideMenu.activeSubMenu==item.keywords&&sideMenu.openFlag[item.keywords]),'active':checkActive(item)}"
+      ng-hide="item.keywords.indexOf('TBDS')>-1&&(item.keywords=='TBDS_entrance')"
+      >
+        <a ng-href="{{item.href}}" ng-class="{'active':checkActive(item),'activebg':(checkActive(item)&&item.child.length==0)}" ng-click="changeMenuFlag(item)" ng-if="(item.href&&item.href.indexOf('tstack/login')==-1)||!item.href">
+          <span ng-click="sideMenu.activeSubMenu=item.keywords"><i class="{{sideMenu.icons[item.keywords]}}"></i><b>{{'aws.menu.'+item.keywords | translate}}</b></span>
+          <i class="icon-arrow" ng-if="item.child.length>0" ng-click="sideMenu.activeSubMenu=item.keywords"></i>
+        </a>
+        <!-- 天眼云镜，另开窗口-->
+        <a ng-class="{'active':checkActive(item),'activebg':(checkActive(item)&&item.child.length==0)}" ng-click="changeMenuFlag(item)" ng-if="(item.href&&item.href.indexOf('tstack/login')>-1)">
+          <span ng-click="sideMenu.activeSubMenu=item.keywords"><i class="{{sideMenu.icons[item.keywords]}}"></i><b>{{'aws.menu.'+item.keywords | translate}}</b></span>
+          <i class="icon-arrow" ng-if="item.child.length>0" ng-click="sideMenu.activeSubMenu=item.keywords"></i>
+        </a>
+        <a ng-href="{{item.href}}" class="close-show-title" ng-if="item.child.length<1">{{'aws.menu.'+item.keywords | translate}}</a>
+        <ul class="menu-level-2" ng-if="item.child.length>0">
+          <li ng-repeat="subItem in item.child">
+            <a ng-href="{{'#'+subItem.href}}" ng-class="{'sub-active':sideMenu.menuKeyword==subItem.active}" ng-if="subItem.href.indexOf('maxscreen')==-1&&subItem.href.indexOf('TBase/TStudio')==-1&&((subItem.href&&subItem.href.indexOf('tstack/login')==-1)||!subItem.href)">
+              <span>{{'aws.menu.'+subItem.keywords | translate}}</span>
+            </a>
+            <a ng-click="jumpScreen()" ng-class="{'sub-active':sideMenu.menuKeyword==subItem.active}"  ng-if="subItem.href.indexOf('maxscreen')>-1">
+              <span>{{'aws.menu.'+subItem.keywords | translate}}</span>
+            </a>
+            <a ng-click="jumpTStudio()" ng-class="{'sub-active':sideMenu.menuKeyword==subItem.active}"  ng-if="subItem.href.indexOf('TBase/TStudio')>-1">
+              <span>{{'aws.menu.'+subItem.keywords | translate}}</span>
+            </a>
+            <a ng-click="jumpSkyCloudSecurity(subItem)" ng-class="{'sub-active':sideMenu.menuKeyword==subItem.active}"  ng-if="subItem.href.indexOf('tstack/login')>-1">
+              <span>{{'aws.menu.'+subItem.keywords | translate}}</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <span class="toggle-icon">
+      <i class="icon-aw-right-up"></i>
+    </span>
+  </aside>
+  <!-- <div class="main-content" ng-class="{'setting-show':showInitSettingAlert||isShowPasswordExpired,'setting-password':showInitSettingAlert&&isShowPasswordExpired}"> -->
+  <div class="main-content">
+
+  <!--帮助信息-->
+  <div ng-controller="helpDetailCtrl">
+      <panes class="detail-body systemHelp-box" animation="animation">
+        <div class="tab-content">
+          <help-information modular="systemHelp" ng-if="systemHelp"></help-information>
+        </div>
+      </panes>
+  </div>
+    <!-- <div class="menu-manage">
+      <nav class="nav" ng-if="isView" ng-class={'is-view':isView}>
+        <ul class="clearfix" ng-if="isShowCloud">
+            <li ng-class="{active:isActive}" ><a ng-href="#/view">{{'aws.menu.privatecloud' | translate}}</a></li>
+            <li ng-class="{active:isActive2}" ng-if="supportOtherClouds('QCLOUD_API_KEY')"><a ng-href="#/view/qcloud">{{'aws.menu.tencentcloud' | translate}}</a></li>
+            <li ng-if="supportOtherClouds('QCLOUD_API_KEY')">
+              <a ng-if="!qcloudUrl" ng-bind="'aws.menu.tencentcloud' | translate"></a>
+              <a ng-if="qcloudUrl" href="{{qcloudUrl}}" target="_blank" ng-bind="'aws.menu.tencentcloud' | translate"></a>
+            </li>
+            <li ng-if="supportOtherClouds('ALIYUN_API_KEY')"><a ng-href="#/view">{{'aws.menu.alicloud' | translate}}</a></li>
+            <li ng-if="supportOtherClouds('AWS_API_KEY')"><a ng-href="#/view">AWS</a></li>
+            <li ng-if="supportOtherClouds('VMWARE_API_KEY')">
+              <a href="{{vmwareUrl}}"  target="_blank">VMware</a>
+            </li>
+        </ul>
+      </nav>
+      <nav class="nav" ng-if="allMenu" nav-drop ng-class={'top-menu':allMenu}>
+        <ul class="clearfix">
+          <li ng-repeat="item in allMenu" class="menu-li" ng-class="{'active':checkActive(item)}" hover-action>
+            <a ng-href="{{item.href}}"><span>{{'aws.menu.'+item.keywords | translate}}</span><i class="icon-aw-angle-down" ng-if="item.child.length"></i></a>
+            <ul class="dropdown-ul" ng-if="item.child.length">
+              <li ng-repeat="child in item.child">
+                <a ng-href="{{child.href}}" ng-class="{'active': checkActive(child)}">{{'aws.menu.'+child.keywords | translate}}</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div> -->
+    <!--<div class="initSettingEnter">
+      <div class="initSettingDiv" ng-class="{'initSettingShow':showInitSettingAlert}">
+        <uib-alert type="danger" class="initSettingAlert long-tips" close="hideInitAlert()">
+          <div>
+            <span class="tips" ng-click="openInitSettingModal()">{{'aws.indextran.warning'|translate}}
+              <span class="setting">{{'aws.indextran.set'|translate}}</span>
+              {{'aws.indextran.detail'|translate}}
+            </span>
+          </div>
+        </uib-alert>
+      </div>-->
+      <!-- <uib-alert type="danger" close="hideConMsg()" ng-if="showConAlert" class="long-tips">
+        <div>
+            <span>容器管理功能安装完成，若需查看容器管理功能模块导航菜单，请重新登录 。</span>
+        </div>
+      </uib-alert>
+      <uib-alert type="danger" close="hidePhyMsg()" ng-if="showPhyAlert" class="long-tips">
+        <div>
+            <span>物理机管理功能安装完成，若需查看物理资源管理功能模块导航菜单，请重新登录。 </span>
+        </div>
+      </uib-alert> -->
+    <!--</div>  -->
+    <div class="main-top-box clearFix" ng-if="isLogined && !isfirstLogin && !isView" 
+      ng-class="{'hide-top':(sideMenu.menuKeyword == 'cephViewInfo'||sideMenu.activeSubMenu.indexOf('Alauda')>-1||sideMenu.activeSubMenu.indexOf('TBase')>-1||sideMenu.activeSubMenu.indexOf('CTSDB')>-1||sideMenu.activeSubMenu.indexOf('TDsql')>-1||sideMenu.activeSubMenu.indexOf('TBDS')>-1||sideMenu.activeSubMenu.indexOf('COC')>-1),'hide-bottom':
+      hideBottom.indexOf(sideMenu.menuKeyword)>-1}">
+      <h3 class="page-top-title">{{'aws.siteTitle.'+sideMenu.menuKeyword | translate}}</h3>
+      <domain-projects></domain-projects>
+    </div>
+    
+    <div ng-view></div>
+    <div ng-include="'tmpl/userConsumeDetail.html'"></div>
+    <loading></loading>
+</div>
+<div class="delete-wrap vmware-loading" ng-show="vmwareLoadding">
+  <div class="delete-alert" ng-class="{'delete-show':true}">
+    <i class="loading-icon"></i>
+  </div>
+</div>
+<div ng-include="'tmpl/footer.html'" ng-show='isAuth || isfirstLogin'></div> 
+<div class="login-timeout" ng-class="{'show':effeToken}">
+  <div class="backup-bg"></div>
+  <div class="text">
+    <span>操作超时，请重新 <a ng-click="relogin()">登录</a></span>
+  </div>
+</div>
+<div class="login-timeout" ng-class="{'show':showPwdModify}">
+  <div class="backup-bg"></div>
+  <div class="text">
+    <span>该用户密码已被修改，请重新 <a ng-click="relogin()">登录</a></span>
+  </div>
+</div>
+<div class="login-timeout" ng-class="{'show':showNatureStart}">
+    <div class="backup-bg"></div>
+    <div class="text">
+        <span>云管重启成功，请重新 <a ng-click="relogin()">登录</a></span>
+    </div>
+</div>
+<div class="login-timeout" ng-class="{'show':cloudGrading}">
+  <div class="backup-bg"></div>
+  <div class="text">
+    <span>平台正在升级，请稍后登陆使用 <a ng-click="relogin()"> 退出</a></span>
+  </div>
+</div>
+
+<script type="text/ng-template" id="relogin.html">
+  <div class="modal-common modal-login">
+    <div class="modal-body" style="margin:0;">
+      <span>操作超时，请重新 <a ng-href="#/">登录</a></span>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" >
+  <div class="modal-common modal-login">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">登录</h3>
+    </div>
+    <div class="modal-body">
+      <div class="control-group">
+        <label class="control-label">企业名称：</label>
+        <div class="controls"><input type="text" class="form-controls"></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">用户名：</label>
+        <div class="controls"><input type="text" class="form-controls"></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">密码：</label>
+        <div class="controls"><input type="text" class="form-controls"></div>
+      </div>
+    </div>
+     
+  </div>
+</script>
+<!--去掉Microsoft Edge浏览器-->
+<script type="text/javascript">
+  $(document).ready(function(){
+    var browser = navigator.userAgent.toLowerCase();
+    if(browser.indexOf("edge")>-1){
+        $('#ie-tips').removeClass('hide');
+    }
+  })
+
+  // if(window.location.protocol=="http:"){
+  //     window.location.href="https:"+window.location.href.split("http:")[1];
+  // }
+</script>
+<script src="js/common.js"></script>
+<script src="js/index.js"></script>
+<script src="js/auth.js"></script>
+<!--[if lte IE 9]>
+<script>
+    $(document).ready(function(){
+        $('#ie-tips').removeClass('hide');
+        $('#ie-tips .close').on('click',function(){
+            $(this).parents('#ie-tips').addClass('hide');
+        })
+    })
+</script>
+<![endif]-->
+
+</div>
+</body>
+</html>

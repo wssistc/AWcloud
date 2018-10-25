@@ -1,0 +1,234 @@
+﻿<div class="alarm-initSetting" ng-controller="initAlarmSettingCtrl">
+    <div class="title">
+        <span>{{"aws.initSetting.settingTranslate.alarmSetting"|translate }}</span>
+    </div>
+    <div class="step-title">
+        <ul class="steps-sytle-ver clearfix">
+            <li class="clearfix step-start alarmStep" ng-class="{'active':inStepOneBar}">
+                <div class="inner">
+                    <span>{{"aws.initSetting.settingTranslate.alarmWay"|translate }}</span>
+                    <i>1</i>
+                </div>
+            </li>
+            <li class="clearfix step-end alarmStep"  ng-class="{'active':inStepTwoBar}">
+                <div class="inner">
+                    <span>{{"aws.initSetting.settingTranslate.alarmContacts"|translate }}</span>
+                    <i>2</i>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div ng-show="inStepOne">
+        <div class="setting-box">
+            <div class="setting-title">
+                <span>{{"aws.initSetting.settingTranslate.email"|translate }}</span>
+            </div>
+            <p class="setting-tips">{{'aws.system.mailServer.tips'|translate}}</p>
+            <form name="mailSrvForm" novalidate>
+                <div class="mailServer-box">
+                    <div class="mail-group clearfix">
+                        <div class="control-group pull-left host">
+                            <label class="control-label">{{"aws.initSetting.settingTranslate.emailServer"|translate }}：</label>
+                            <div class="controls">
+                                <input type="text" name="host" ng-model="mail.host" class="form-controls" ng-disabled="emailStatus || weChatStatus" placeholder={{"aws.system.mailServer.inputServer"|translate}} ng-pattern="/^([a-zA-Z0-9-_@]{1,63}\.){1,8}[a-zA-Z0-9]{1,63}$/" required />
+                                <div class="error" ng-messages="!weChatStatus && ((submitValid || mailSrvForm.host.$dirty) && mailSrvForm.host.$error)">
+                                    <span ng-message="pattern">{{"aws.errors.emailServer"|translate}}</span>
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group pull-right port">
+                            <label class="control-label">{{'aws.system.mailServer.port'|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" name="port" ng-model="mail.smtp.port" min="1" max="65535" limitnumrange ng-disabled="emailStatus || weChatStatus" class="form-controls" required />
+                                <div class="error" ng-messages="!weChatStatus && ((submitValid || mailSrvForm.port.$dirty) && mailSrvForm.port.$error)">
+                                    <span ng-message="limitnumrange">{{'aws.errors.limit_1_65535'|translate}}</span>
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.mailServer.account'|translate}}：</label>
+                        <div class="controls">
+                            <input type="email" name="username" ng-model="mail.username" class="form-controls" ng-disabled="emailStatus || weChatStatus" autocomplete="off" placeholder={{"aws.system.mailServer.inputAccount"|translate}} ng-pattern="/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/"  required />
+                            <div class="error" ng-messages="!weChatStatus && ((submitValid ||mailSrvForm.username.$dirty) && mailSrvForm.username.$error)">
+                                <span ng-message="pattern" >{{'aws.errors.email'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.mailServer.password'|translate}}：</label>
+                        <div class="controls">
+                            <input type="password" name="password" ng-model="mail.password" class="form-controls" ng-disabled="emailStatus || weChatStatus" placeholder={{"aws.system.mailServer.inputPassword"|translate}} autocomplete="new-password" ng-minlength="8" ng-maxlength="30" required />
+                            <div class="error" ng-messages="!weChatStatus && ((submitValid || mailSrvForm.password.$dirty) && mailSrvForm.password.$error)">
+                                <span ng-message="minlength">{{'aws.errors.minlength'|translate}}</span>
+                                <span ng-message="maxlength">{{'aws.errors.passmaxlength'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.system.mailServer.safeConnection'|translate}}：</label>
+                        <div class="controls">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="form-controls chk" name="saveConnection" ng-model="mail.smtp.auth" ng-disabled="weChatStatus" ng-click="isSaveConnection(mail.smtp.auth)"/>
+                                    <i class="iconfont"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group active-group">
+                        <label class="control-label">{{"aws.system.weChatAlarm.active"|translate}}：</label>
+                        <div class="controls">
+                            <div class="checkbox switch-btn">
+                                <label>
+                                    <input type="checkbox" class="form-controls" ng-model="mail.isUse" ng-click="saveMailServer(mail,mailSrvForm)" ng-disabled="weChatStatus">
+                                    <i class="iconfont"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="setting-save-btn" ng-if = "false">
+                <button class="btn btn-info" ng-click="saveMailServer(mail,mailSrvForm)">{{'aws.action.save'|translate}}</button>
+            </div>
+        </div>
+        <div class="setting-box">
+            <div class="setting-title">
+                <span>{{"aws.initSetting.settingTranslate.weChat"|translate }}</span>
+            </div>
+            <p class="setting-tips">{{'aws.system.weChatAlarm.tips'|translate}}</p>
+            <form name="weChatAlarmForm" novalidate>
+                <div class="weChatAlarm-box">
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.system.weChatAlarm.appId"|translate}}：
+                            <p class="notes">(App ID)</p>
+                        </label>
+                        <div class="controls">
+                            <input type="text" name="app_id" ng-model="weChat.app_id" class="form-controls" ng-disabled="emailStatus || weChatStatus" ng-maxlength="255" placeholder={{"aws.system.weChatAlarm.inputAppId"|translate}} required />
+                            <div class="error" ng-messages="!emailStatus && ((submitValidWeChat || weChatAlarmForm.app_id.$dirty) && weChatAlarmForm.app_id.$error)">
+                                <span ng-message="maxlength">{{'aws.errors.maxlength255'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.system.weChatAlarm.appSecret"|translate}}：
+                            <p class="notes">(AppSecret)</p>
+                        </label>
+                        <div class="controls">
+                            <input type="password" name="app_secret" ng-model="weChat.app_secret" class="form-controls" ng-disabled="emailStatus || weChatStatus" ng-maxlength="255" autocomplete="new-password" placeholder={{"aws.system.weChatAlarm.inputAppSecret"|translate}} required />
+                            <div class="error" ng-messages="!emailStatus && ((submitValidWeChat || weChatAlarmForm.app_secret.$dirty) && weChatAlarmForm.app_secret.$error)">
+                                <span ng-message="maxlength">{{'aws.errors.maxlength255'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group active-group">
+                        <label class="control-label">{{"aws.system.weChatAlarm.active"|translate}}：</label>
+                        <div class="controls">
+                            <div class="checkbox switch-btn">
+                                <label>
+                                    <input type="checkbox" class="form-controls" ng-model="weChat.isUse" ng-click="saveWeChat(weChat,weChatAlarmForm)" ng-disabled="emailStatus">
+                                    <i class="iconfont"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="setting-save-btn" ng-if = "false">
+                <button class="btn btn-info" ng-click="saveWeChat(weChat,weChatAlarmForm)">{{'aws.action.save'|translate}}</button>
+            </div>
+        </div>
+    </div>
+    <div ng-show="inStepTwo">
+        <div class="setting-box">
+            <form name="createContactGroupForm" class="contract-box" novalidate>
+                <div class="control-group name">
+                    <label class="control-label">{{'aws.monitor.alarmModule.contactGroup'|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="name" ng-model="contactGroupForm.name" placeholder={{'aws.monitor.alarmModule.placeholder.requiredContactGroup'|translate}} ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required repeat-name ng-disabled="alarmStatus" />
+                        <div class="error" ng-messages='createContactGroupForm.name.$error' ng-if="createContactGroupForm.name.$dirty || submitted.name">
+                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+                            <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+                            <div ng-message="repeatName">{{'aws.errors.repeatContractGroupName' | translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-repeat="contact in contactGroupForm.email" class="clearfix">
+                    <div class="control-group name">
+                        <label class="control-label">{{'aws.monitor.alarmModule.email'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="email_{{$index}}" ng-model="contact.value" placeholder='example@xx.com' ng-pattern="/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/" required ng-maxlength="50" ng-disabled="alarmStatus" />
+                            <div class="error" ng-messages="createContactGroupForm['email_'+$index].$error" ng-if="createContactGroupForm['email_'+$index].$dirty || submitted['email_'+$index]">
+                                <div ng-message="pattern">{{'aws.errors.emailPatternError'|translate}}</div>
+                                <div ng-message="maxlength">{{'aws.errors.emailmaxlength'|translate}}</div>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contact del" ng-if="$index!=0 && !alarmStatus">
+                        <a ng-click="delContactOfGroup($index,contact,'email')" ><i class="icon-aw-wrong"></i></a>
+                    </div>
+                    <div class="contact add" ng-if="$index==(contactGroupForm.email.length-1) && contactGroupForm.email.length < 10 && !alarmStatus">
+                        <a ng-click="addContactToGroup('email')" ><i class="icon-aw-add-to2"></i></a>
+                    </div>
+                </div>
+                <div ng-repeat="contact in contactGroupForm.phone" class="clearfix">
+                    <div class="control-group name">
+                        <label class="control-label">{{'aws.monitor.alarmModule.phone'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="phone_{{$index}}" ng-model="contact.value" placeholder={{'aws.monitor.alarmModule.placeholder.phoneLength_11'|translate}} ng-pattern="/^1[0-9]{10}$/" required ng-disabled="alarmStatus" />
+                            <div class="error" ng-messages= "createContactGroupForm['phone_'+$index].$error" ng-if="createContactGroupForm['phone_'+$index].$dirty || submitted['phone_'+$index]">
+                                <div ng-message="pattern">{{'aws.errors.phonePatternError'|translate}}</div>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contact del" ng-if="$index!=0  && !alarmStatus">
+                        <a ng-click="delContactOfGroup($index,contact,'phone')" ><i class="icon-aw-wrong"></i></a>
+                    </div>
+                    <div class="contact add" ng-if="$index==(contactGroupForm.phone.length-1) && contactGroupForm.phone.length < 10 && !alarmStatus">
+                        <a ng-click="addContactToGroup('phone')" ><i class="icon-aw-add-to2"></i></a>
+                    </div>
+                </div>
+                <div ng-repeat="contact in contactGroupForm.wechat" class="clearfix">
+                    <div class="control-group name">
+                        <label class="control-label">{{'aws.monitor.alarmModule.wechatName'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls nickname-input" name="wechat_{{$index}}" ng-model="contact.value" placeholder={{'aws.monitor.alarmModule.placeholder.wechatName'|translate}} ng-maxlength="100" ng-disabled="contact.disable || alarmStatus"/>
+                            <div class="error" ng-messages="createContactGroupForm['wechat_'+$index].$error" ng-if="createContactGroupForm['wechat_'+$index].$dirty || submitted['wechat_'+$index]">
+                                <span ng-message="maxlength">{{'aws.errors.maxlength100'|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nickname" ng-class="{'disableName': contact.disable}" ng-if = "!alarmStatus">
+                        <a ng-click="checkNickname($index,contact,'wechat')">{{contact.check}}</a>
+                    </div>
+                    <div class="contact del" ng-if="$index!=0 && !alarmStatus">
+                        <a ng-click="delContactOfGroup($index,contact,'wechat')" ><i class="icon-aw-wrong"></i></a>
+                    </div>
+                    <div class="contact add" ng-if="$index==(contactGroupForm.wechat.length-1) && contactGroupForm.wechat.length < 10 && !alarmStatus">
+                        <a ng-click="addWechatToGroup('wechat')" ><i class="icon-aw-add-to2"></i></a>
+                    </div>
+                </div>
+                <div class="clearfix">
+                    <div class="control-group name">
+                        <label class="control-label">&nbsp;</label>
+                        <div class="controls">
+                            <button class="btn btn-info" type="button" ng-click="weChatBind()" ng-disabled="alarmStatus">{{'aws.monitor.alarmModule.weChatBind'|translate}}</button>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if="contractGroupError===1&&repeatEmailOrPhone" class="contactGroup-error">{{'aws.monitor.alarmModule.inputSameEmail'|translate}}</div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,102 @@
+<div class="page-inner">
+<div class="tab-offset-right">
+  <uib-tabset active="" justified="true">
+  <uib-tab index="0" heading='{{"aws.workflow.handling"|translate}}' ng-click="choseHandling()">
+    <div ng-if="flow.handling">
+      <div class="table-action">
+        <div class="search-box">
+          <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="flow.globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+          </form>
+        </div>
+      </div>
+      <div class="table-content">
+        <table ng-table="tableParams" class="table">
+          <tr ng-repeat="item in $data | searchFilter:{name:SearchTerm,description:SearchTerm,version:SearchTerm}" >
+              <td data-title="headers.name" sortable="'name'">
+                  <div class="edit-name edit-lg">
+                    <span ng-click="getDetail(item)" title="{{item.name}}">{{item.name}}</span>
+                  </div>
+              </td>
+              <td data-title="headers.description" sortable="'description'">
+                  <span class="des des-lg">{{item.description}}</span>
+              </td>
+              <td data-title="headers.version" sortable="'version'">{{item.version}}</td>
+              <td data-title="headers.action" sortable="'version'">
+                  <button ng-click="handle(item)" class="btn btn-info">处理</button>
+              </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </uib-tab>
+  <uib-tab index="1" heading='{{"aws.workflow.handled"|translate}}' ng-click="choseHandled()">
+    <div ng-if="flow.handled">
+      <div class="table-action">
+        <div class="search-box">
+          <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="flow.globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+          </form>
+        </div>
+      </div>
+      <div class="table-content">
+        <table ng-table="tableParams" class="table">
+          <tr ng-repeat="item in $data | searchFilter:{name:SearchTerm,description:SearchTerm,version:SearchTerm}" >
+              <td data-title="headers.name" sortable="'name'">
+                <div class="edit-name edit-lg">
+                  <span ng-click="getDetail(item)" title="{{item.name}}">{{item.name}}</span>
+                </div>
+              </td>
+              <td data-title="headers.description" sortable="'description'">
+                  <span class="des des-lg">{{item.description}}</span>
+              </td>
+              <td data-title="headers.version" sortable="'version'">{{item.version}}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </uib-tab>
+</uib-tabset>
+</div>
+
+  
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="handleTask.html">
+  <div class=" modal-common">
+    <form name="handleTaskForm">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title"></h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">是否批准：</label>
+          <div class="controls">
+            <select class="form-controls" ng-model="pro.signed" ng-options="item.approve as item.name for item in chosData">
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">描述：</label>
+          <div class="controls">
+            <textarea class="form-controls" ng-model="pro.decription"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info ng-binding" ng-click="handleTaskConfim(pro,handleTaskForm)">确定</button>
+        <button class="btn btn-default ng-binding" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+
+
+

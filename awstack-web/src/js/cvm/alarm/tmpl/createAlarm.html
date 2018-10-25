@@ -1,0 +1,100 @@
+<div class="modal-common">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+		<h3 class="modal-title">创建告警触发任务</h3>
+	</div>
+	<div class="modal-body" >
+		<form name="alarmForm" novalidate>
+			<div class="control-group">
+				<label class="control-label">任务名称：</label>
+				<div class="controls">
+					<input type="text" class="form-controls" name="name" ng-model="newObj.name" placeholder="请输入任务名称" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\_)*$/" ng-maxlength="32" required />
+					<div class="error" ng-if="interacted(alarmForm.name)" ng-messages="alarmForm.name.$error" >
+							<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+							<div ng-message="pattern">只能输入中文、字母、数字、横线以及下划线</div>
+							<div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+						</div>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">监控项：</label>
+				<div class="controls">
+					<ui-select ng-model="newObj.watchitem" ng-change="change_watchitem(newObj.watchitem)"  >
+						<ui-select-match placeholder="请选择监控项">{{$select.selected.name}}</ui-select-match>
+						<ui-select-choices repeat="watchitem in newObj.watchitem_list | propsFilter: {name: $select.search}">
+							<div ng-bind-html="watchitem.name | highlight: $select.search"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" title="统计周期（分钟）">统计周期（分钟）：</label>
+				<div class="controls">
+					<ui-select ng-model="newObj.period" ng-change="change_period(newObj.period)">
+						<ui-select-match placeholder="请选择统计周期">{{$select.selected.name}}</ui-select-match>
+						<ui-select-choices repeat="period in newObj.period_list | propsFilter: {name: $select.search}">
+							<div ng-bind-html="period.name | highlight: $select.search"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</div>
+            <div class="control-group">
+				<label class="control-label">统计办法：</label>
+				<div class="controls">
+					<ui-select ng-model="newObj.method" ng-change="change_method(newObj.method)">
+						<ui-select-match placeholder="请选择统计办法">{{$select.selected.name}}</ui-select-match>
+						<ui-select-choices repeat="method in newObj.method_list | propsFilter: {name: $select.search}">
+							<div ng-bind-html="method.name | highlight: $select.search"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</div>
+            <div class="control-group">
+				<label class="control-label">&nbsp</label>
+				<div class="controls">
+					<ui-select ng-model="newObj.symbol" ng-change="change_method(newObj.symbol)">
+						<ui-select-match >{{$select.selected.name}}</ui-select-match>
+						<ui-select-choices repeat="symbol in newObj.symbol_list | propsFilter: {name: $select.search}">
+							<div ng-bind-html="symbol.name | highlight: $select.search"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</div>
+            <div class="control-group">
+				<label class="control-label">&nbsp</label>
+				<div class="controls">
+					<ui-select ng-model="newObj.percent" ng-change="change_method(newObj.percent)">
+						<ui-select-match >{{$select.selected.name}}</ui-select-match>
+						<ui-select-choices repeat="percent in newObj.percent_list | propsFilter: {name: $select.search}">
+							<div ng-bind-html="percent.name | highlight: $select.search"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</div>
+            <div class="control-group">
+				<label class="control-label">重复几次后报警：</label>
+				<div class="controls">
+					<ui-select ng-model="newObj.times" ng-change="change_times(newObj.times)">
+						<ui-select-match >{{$select.selected.name}}</ui-select-match>
+						<ui-select-choices repeat="times in newObj.times_list | propsFilter: {name: $select.search}">
+							<div ng-bind-html="times.name | highlight: $select.search"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</div>
+            <div class="control-group">
+				<label class="control-label">备注：</label>
+				<div class="controls">
+					<input type="text" class="form-controls" name="note" ng-model="newObj.note" />
+				</div>
+			</div>
+			
+		</form>
+	</div>
+	
+	<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-disabled="!canCreate()" ng-click="cretealarm()">{{'aws.action.ok' | translate}}</button>
+		<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+	</div>
+	
+</div>

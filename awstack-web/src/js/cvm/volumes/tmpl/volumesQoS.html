@@ -1,0 +1,203 @@
+<div class="page-inner volumes-QoS"> 
+    <div class="table-action">
+    <button type="button" class="btn btn-new" ng-click="createVolumesQoS()" ng-disabled="!services.cinder" licence-type="btn" id="resource-volQoS-create"><i class="icon-aw-add-to2"></i> {{'aws.action.create'|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="relativeVolumesQoS(checkedItems[0])" ng-disabled="!canRelation" licence-type="btn" id="resource-volQoS-relation"><i class="icon-aw-gl"></i> {{'aws.volumesQoS.associatedStorage'|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="relieveVolumeQoS(checkedItems[0])" ng-disabled="!canRelieve" licence-type="btn" id="resource-volQoS-relieve"><i class="icon-aw-jcgl"></i> {{'aws.volumesQoS.rescissionAssociation'|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="delVolumeQoS(checkedItems)" ng-disabled="!canDel" licence-type="btn" id="resource-volQoS-del"><i class="icon-aw-delete"></i> {{'aws.action.del'|translate}}</button>
+    <into-information modular="'volumesQoS'"></into-information>
+    <div type="button" class="btn btn-renovat right-ports" ng-click="refreshVolumesQoS()">
+        <i class="icon-aw-refresh"></i>
+    </div>
+    <div class="search-box right-ports">
+        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(volumesQoS_search.globalSearchTerm)">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="volumesQoS_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+        </form>
+    </div> 
+    </div>
+    <div class="table-content">
+    <empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="volumesQoSTable" class="table"> 
+    <colgroup>
+        <col width="10%">
+        <col width="45%">
+        <col width="45%">
+    </colgroup>
+    <tr ng-repeat="item in $data">
+        <td header="'headerCheckbox.html'" class="check-td">
+            <label class="checkbox">
+                <input type="checkbox" name="r" ng-model="checkFirst.items[item.id]" value="{{item.id}}" />
+                <i class="iconfont"></i>
+            </label>
+        </td>
+        <td data-title="'aws.volumesQoS.QoSName'|translate" sortable="'name'">
+            {{item.name}}
+        </td>
+        <td data-title="'aws.volumesQoS.QoSNum'|translate">
+            <span ng-if="item.specs.write_bytes_sec">{{'aws.volumesQoS.write_bytes_sec'|translate}}：{{item.specs.write_bytes_sec}} </span>
+            <span ng-if="item.specs.read_bytes_sec">{{'aws.volumesQoS.read_bytes_sec'|translate}}：{{item.specs.read_bytes_sec}} </span>
+            <span ng-if="item.specs.read_iops_sec">{{'aws.volumesQoS.read_iops_sec'|translate}}：{{item.specs.read_iops_sec}} </span>
+            <span ng-if="item.specs.write_iops_sec">{{'aws.volumesQoS.write_iops_sec'|translate}}：{{item.specs.write_iops_sec}} </span>
+        </td>
+    </tr>
+    </table>
+    <service-tip service = "'cinder'"  menus=['系统管理','运维管理','存储管理']  menu-href="'/system/storageManagement'"></service-tip>  
+    </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+    <input type="checkbox" ng-model="checkFirst.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+    </label>
+</script>
+<!-- 新建 -->
+<script type="text/ng-template" id="createVolumesQoS.html">
+    <div class="modal-common create-volumes-QoS">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{"aws.action.create"|translate}}</h3>
+        </div>
+        <div class="modal-body">
+            <form name="createVomulesQoSForm" novalidate>
+                <!-- 名称 -->
+                <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>{{'aws.volumesQoS.name'|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="name"  ng-model="volumesQoSMsg.name" placeholder="{{'aws.volumesQoS.placeholder.input_volumesQoSName'|translate}}" ng-maxlength="32" required/>
+                        <div class="error" ng-messages='(submitInValid||createVomulesQoSForm.name.$dirty)&&createVomulesQoSForm.name.$error'>
+                            <form-validate></form-validate>
+                        </div>
+                    </div>
+                </div>
+                <!-- 对接设备 -->
+                <div class="control-group" >
+                    <label class="control-label">{{"aws.volumesQoS.hasAssociatedStorage"|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip9' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                        <ui-select ng-model="volumesQoSMsg.hasDockingDevice" name="hasDockingDevice">
+                        <ui-select-match placeholder="{{hasAssociatedStorageList.length?('aws.volumesQoS.placeholder.choiceStorageDevice' | translate):('aws.volumesQoS.placeholder.noStorageDevice' | translate)}}">{{$select.selected.disPlayName}}</ui-select-match>
+                            <ui-select-choices repeat="hasDockingDevice in hasAssociatedStorageList | filter: {disPlayName : $select.search}">
+                                <div ng-bind-html="hasDockingDevice.disPlayName | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <!-- 读吞吐量 -->
+                <div class="control-group">
+                    <label class="control-label">{{'aws.volumesQoS.read_bytes_sec'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip53' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                        <input type="text" class="form-controls" name="read_bytes_sec"  ng-model="volumesQoSMsg.read_bytes_sec" placeholder="{{'aws.volumesQoS.placeholder.input_read_bytes_sec'|translate}}" ng-pattern="/^([1-9]\d{1,2}|1000|0)$/"/>
+                        <div class="error" ng-messages='(submitInValid||createVomulesQoSForm.read_bytes_sec.$dirty)&&createVomulesQoSForm.read_bytes_sec.$error'>
+                            <form-validate  pattern-msg= "'aws.errors.limit_10_1000'|translate"></form-validate>
+                        </div>
+                    </div>
+                </div>
+                <!-- 写吞吐量 -->
+                <div class="control-group">
+                    <label class="control-label">{{'aws.volumesQoS.write_bytes_sec'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip54' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                        <input type="text" class="form-controls" name="write_bytes_sec"  ng-model="volumesQoSMsg.write_bytes_sec" placeholder="{{'aws.volumesQoS.placeholder.input_write_bytes_sec'|translate}}" ng-pattern="/^([1-9]\d{1,2}|1000|0)$/"/>
+                        <div class="error" ng-messages='(submitInValid||createVomulesQoSForm.write_bytes_sec.$dirty)&&createVomulesQoSForm.write_bytes_sec.$error'>
+                            <form-validate  pattern-msg= "'aws.errors.limit_10_1000'|translate"></form-validate>
+                        </div>
+                    </div>
+                </div> 
+                <!-- 读iops -->
+                <div class="control-group" >
+                    <label class="control-label">{{'aws.volumesQoS.read_iops_sec'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip55' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                        <input type="text" class="form-controls" name="read_iops_sec"  ng-model="volumesQoSMsg.read_iops_sec" placeholder="{{'aws.volumesQoS.placeholder.input_read_iops_sec'|translate}}" ng-pattern="/^([1-9]\d{1,3}|10000|0)$/"/>
+                        <div class="error" ng-messages='(submitInValid||createVomulesQoSForm.read_iops_sec.$dirty)&&createVomulesQoSForm.read_iops_sec.$error'>
+                            <form-validate  pattern-msg= "'aws.errors.limit_10_10000'|translate"></form-validate>
+                        </div>
+                    </div>
+                </div>
+                <!-- 写iops -->
+                <div class="control-group" >
+                    <label class="control-label">{{'aws.volumesQoS.write_iops_sec'|translate}}：</label>          
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip56' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                        <input type="text" class="form-controls" name="write_iops_sec"  ng-model="volumesQoSMsg.write_iops_sec" placeholder="{{'aws.volumesQoS.placeholder.input_write_iops_sec'|translate}}" ng-pattern="/^([1-9]\d{1,3}|10000|0)$/"/>
+                        <div class="error" ng-messages='(submitInValid||createVomulesQoSForm.write_iops_sec.$dirty)&&createVomulesQoSForm.write_iops_sec.$error'>
+                            <form-validate pattern-msg= "'aws.errors.limit_10_10000'|translate"></form-validate>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <p class="mustOne" ng-if = mustOne>{{'aws.volumesQoS.placeholder.mustOne'|translate}}</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="createVolumesQoSConfirm(createVomulesQoSForm,data)">{{"aws.action.ok"|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+    </div>
+</script>
+<!-- 关联 -->
+<script type="text/ng-template" id="relativeVolumesQoS.html">
+    <div class="modal-common modal-smallest relative-volumes-QoS">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{"aws.volumesQoS.associatedStorage"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+        <form name="relativeVolumesQoSFrom" >
+            <div class="control-group">
+                <label class="control-label">{{"aws.volumesQoS.hasAssociatedStorage"|translate}}：</label>
+                <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip9' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                    <ui-select ng-model="volumesQoS.relativeVolumes"  name="relativeVolumes" >
+                    <ui-select-match placeholder="{{!relativeVolumesList.length?('aws.volumesQoS.placeholder.no_relative_volumes' | translate):('aws.volumesQoS.placeholder.choice_relative_volumes' | translate)}}" >{{$select.selected.disPlayName}}</ui-select-match>
+                        <ui-select-choices repeat="relativeVolumes in relativeVolumesList | propsFilter:{disPlayName:$select.search}">
+                            <div ng-bind-html="relativeVolumes.disPlayName | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages='(submitted||relativeVolumesQoSFrom.relativeVolumes.$dirty)&&relativeVolumesQoSFrom.relativeVolumes.$error'>
+                        <form-validate></form-validate>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="relativeVolumesQoSConfirm(relativeVolumesQoSFrom)">{{"aws.action.ok"|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+    </div>
+</script>
+<!-- 解除关联 -->
+<script type="text/ng-template" id="relieveVolumeQoS.html">
+    <div class="modal-common modal-smallest relieve-volume-QoS">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{"aws.volumesQoS.rescissionAssociation"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+        <form name="relieveVolumeQoSFrom">
+            <div class="control-group" >
+                <label class="control-label">{{"aws.volumesQoS.hasAssociatedStorage"|translate}}：</label>
+                <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip10' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                    <ui-select ng-model="volumesQoS.relieveVolumes" name="relieveVolumeQoS">
+                    <ui-select-match placeholder="{{!relieveVolumesQoSList.length?('aws.volumesQoS.placeholder.no_relieve_volumes' | translate):('aws.volumesQoS.placeholder.choice_relieve_volumes' | translate)}}" >{{$select.selected.name}}</ui-select-match>
+                        <ui-select-choices repeat="relieveVolumes in relieveVolumesQoSList | propsFilter:{name:$select.search}">
+                            <div ng-bind-html="relieveVolumes.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages='(submitted||relieveVolumeQoSFrom.relieveVolumeQoS.$dirty)&&relieveVolumeQoSFrom.relieveVolumeQoS.$error'>
+                        <form-validate></form-validate>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="relieveVolumesQoSConfirm(relieveVolumeQoSFrom)">{{"aws.action.ok"|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+    </div>
+</script>
+
+

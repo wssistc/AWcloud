@@ -1,0 +1,48 @@
+<div class="modal-common modal-largest delsub-modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.networks.delSubnet"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <div class="table-content delsub-content">
+          <table ng-table="delSubnetTable" class="table" show-filter="false">
+              <colgroup>
+                <col width="4%">
+              </colgroup>                       
+              <tr ng-repeat="subnet in $data">
+                <td header="'delSubnetheaderCheckbox.html'">
+                  <label class="checkbox" >
+                    <input type="checkbox" ng-model="delSubnetCheckbox.items[subnet.id]" />
+                    <i class="iconfont"></i>
+                  </label>
+                </td>
+                <td data-title="'aws.networks.subnetName'|translate" sortable="'name'">
+                  <div class="edit-name edit-sm">
+                    <span title="{{subnet.name}}">{{subnet.name}}</span>
+                  </div>
+                </td>
+                <td data-title="'aws.networks.subnetCidr'|translate" sortable="'cidr'">{{subnet.cidr}}<br></td>
+                <td data-title="'aws.networks.gatewayIp'|translate" sortable="'gatewayIp'">{{subnet.gatewayIp}}</td>
+                <td data-title="'aws.networks.availableAddressRange'|translate">
+                  <span ng-repeat="allocationPool in subnet.allocationPools track by $index ">
+                    {{allocationPool.start}}~{{allocationPool.end}}<br>
+                  </span>
+                </td>
+                <td data-title="'aws.networks.availableIP'|translate" sortable="'networkIpAvailability'">{{subnet.networkIpAvailability}}</td>
+                <td data-title="'aws.networks.subnetType'|translate" sortable="'ipVersion'">{{subnet._ipVersion}}</td>
+              </tr>
+          </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-info" type="button" ng-click="confirmDelsubnet(delSubnetCheckedItems)" ng-disabled ="delSubnetCheckedItems.length<1" >{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+</div>
+
+<script type="text/ng-template" id="delSubnetheaderCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="delSubnetCheckbox.checked" class="select-all-delSubnetTable" value="" />
+      <i class="iconfont"></i>
+    </label>
+</script>

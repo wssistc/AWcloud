@@ -1,0 +1,164 @@
+<div class="modal-common">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancelRouterModal()">×</button>
+        <h3 class="modal-title">{{routerModal_title}}</h3>
+    </div>
+    <div class="modal-body">
+        <uib-alert ng-if="beyondQuota_pro.router" type="danger">{{"aws.routers.beyondQuota_pro" | translate }}</uib-alert>
+        <uib-alert ng-if="beyondQuota_dep.router" type="danger">{{"aws.routers.beyondQuota_dep" | translate }}</uib-alert>
+        <form name="createrouterForm">
+            <div class="control-group">
+                <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.routerName"|translate}}：</label>
+                <div class="controls">
+                    <input type="text" class="form-controls" name="name" ng-model="routerForm.name" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.routers.routerName"|translate}}' required>
+                    <div class="error" ng-messages='createrouterForm.name.$error' ng-if="interacted(createrouterForm)">
+                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                        <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                        <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.routerExtNet"|translate}}：</label>
+                <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.routerExtNet'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                    <ui-select ng-model="routerForm.selectedNet" ng-change="changeExtNet(routerForm.selectedNet)" name="extnet" ng-disabled="!extNets.options.length" title='{{"aws.routers.placeholder.routerExtNet"|translate}}' required>
+                        <ui-select-match placeholder={{extNetsPlaceholder}}>{{$select.selected.name}}</ui-select-match>
+                        <ui-select-choices repeat="extNet in extNets.options | propsFilter:{name:$select.search}">
+                            <div ng-bind-html="extNet.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages="createrouterForm.extnet.$error" ng-if="interacted(createrouterForm)">
+                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group" ng-show="ADMIN">
+                <label class="control-label">{{"aws.routers.assignExternalSubnet"|translate}}：</label>
+                <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.assignExternalSubnet'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                    <label class="checkbox">
+                        <input type="checkbox" class="form-controls chk" name="assignSub" ng-model="routerForm.assignSub" />
+                        <i class="iconfont"></i>
+                    </label>
+                </div>
+            </div>
+            <div ng-show="routerForm.assignSub && ADMIN">
+                <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.floatingIps.placeholder.choseSubnet"|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.choseSubnet'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <ui-select ng-model="routerForm.selectedSubnet" class="ui-select-tips" name="subnet" ng-change="changeSubnet(routerForm.selectedSubnet)" title='{{"aws.floatingIps.placeholder.choseSubnet"|translate}}' required>
+                            <ui-select-match placeholder='{{"aws.floatingIps.placeholder.choseSubnet"|translate}}'>{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="subnet in subnets track by $index">
+                                <div ng-mouseover="mouseSub(subnet,'over')" ng-mouseleave="mouseSub(subnet,'out')">
+                                    <div ng-bind-html="subnet.name | highlight: $select.search"></div>
+                                    <div class="ui-select-tips-detail" ng-show="selectedSubPoolList.length">
+                                        <div class="arrow-up"></div>
+                                        <ul>
+                                            <li ng-repeat="sub in subPool_detail track by $index" ng-if="sub.showSubSegDetail">{{sub.sub_pool}}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages="createrouterForm.subnet.$error" ng-if="interacted(createrouterForm)">
+                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.routers.assignExternalGatewayIp"|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.assignExternalGatewayIp'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <label class="checkbox">
+                            <input type="checkbox" class="form-controls chk" name="assignIP" ng-model="routerForm.assignIP" />
+                            <i class="iconfont"></i>
+                        </label>
+                    </div>
+                </div>
+                <div class="control-group" ng-show="routerForm.assignIP">
+                    <label class="control-label">{{"aws.routers.subSegment"|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.subSegment'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <ui-select ng-model="routerForm.selectedSubPool" ng-change="changeSubPool(routerForm.selectedSubPool)" title='{{"aws.routers.choseSubSegment"|translate}}'>
+                            <ui-select-match placeholder={{ "aws.routers.choseSubSegment"|translate}}>{{$select.selected.sub_pool}}</ui-select-match>
+                            <ui-select-choices repeat="subnet in selectedSubPoolList track by $index">
+                                <div ng-bind-html="subnet.sub_pool | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="control-group ip_cidr" ng-show="routerForm.assignIP">
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.routerGatewayIp"|translate}}：</label>
+                    <div class="controls clearfix">
+                        <div class="flex">
+                            <div class="ip_text">
+                                <input type="text" class="form-controls" name="ip_0" id="ip_0" ng-model="routerForm.init_cidr.ip_0" ng-keyup="setCheckValueFunc()" placeholder="{{routerForm.placeholder.ip_0}}" ng-readonly="routerForm.readonly.ip_0" />
+                                <div class="error ip_0" ng-if="interacted(createrouterForm)">
+                                    <div ng-show="required.ip_0">{{'aws.errors.required'|translate}}</div>
+                                    <div ng-show="invalid.ip_0">{{"aws.routers.enter"|translate}}{{routerForm.min_num.ip_0}}~{{routerForm.max_num.ip_0}} {{"aws.routers.integer"|translate}}</div>
+                                </div>
+                            </div>
+                            <div class="ip-spilt">.</div>
+                            <div class="ip_text">
+                                <input type="text" class="form-controls" name="ip_1" id="ip_1" ng-model="routerForm.init_cidr.ip_1" ng-keyup="setCheckValueFunc()" placeholder="{{routerForm.placeholder.ip_1}}" ng-readonly="routerForm.readonly.ip_1" />
+                                <div class="error ip_1" ng-if="interacted(createrouterForm)">
+                                    <div ng-show="required.ip_1">{{'aws.errors.required'|translate}}</div>
+                                    <div ng-show="invalid.ip_1">{{"aws.routers.enter"|translate}}{{routerForm.min_num.ip_1}}~{{routerForm.max_num.ip_1}} {{"aws.routers.integer"|translate}}</div>
+                                </div>
+                            </div>
+                            <div class="ip-spilt">.</div>
+                            <div class="ip_text">
+                                <input type="text" class="form-controls" name="ip_2" id="ip_2" ng-model="routerForm.init_cidr.ip_2" ng-keyup="setCheckValueFunc()" placeholder="{{routerForm.placeholder.ip_2}}" ng-readonly="routerForm.readonly.ip_2" />
+                                <div class="error ip_2" ng-if="interacted(createrouterForm)">
+                                    <div ng-show="required.ip_2">{{'aws.errors.required'|translate}}</div>
+                                    <div ng-show="invalid.ip_2">{{"aws.routers.enter"|translate}}{{routerForm.min_num.ip_2}}~{{routerForm.max_num.ip_2}} {{"aws.routers.integer"|translate}}</div>
+                                </div>
+                            </div>
+                            <div class="ip-spilt">.</div>
+                            <div class="ip_text">
+                                <input type="text" class="form-controls" name="ip_3" id="ip_3" ng-model="routerForm.init_cidr.ip_3" ng-keyup="setCheckValueFunc()" placeholder="{{routerForm.placeholder.ip_3}}" ng-readonly="routerForm.readonly.ip_3" />
+                                <div class="error ip_3" ng-if="interacted(createrouterForm)">
+                                    <div ng-show="required.ip_3">{{'aws.errors.required'|translate}}</div>
+                                    <div ng-show="invalid.ip_3">{{"aws.routers.enter"|translate}}{{routerForm.min_num.ip_3}}~{{routerForm.max_num.ip_3}} {{"aws.routers.integer"|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.linkSubnet"|translate}}：</label>
+                <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.linkSubnet'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                    <ui-select ng-model="routerForm.selectedTenantSub" name="tenantsub" ng-disabled="!tenantSubs.options.length" title='{{"aws.routers.choseSubnet"|translate}}' required>
+                        <ui-select-match placeholder={{subPlaceholder}}>{{$select.selected.name}}</ui-select-match>
+                        <ui-select-choices repeat="tenantSub in tenantSubs.options | propsFilter:{name:$select.search} ">
+                            <div ng-bind-html="tenantSub.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages="createrouterForm.tenantsub.$error" ng-if="interacted(createrouterForm)">
+                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{"aws.routers.routeQuota" | translate }}：</label>
+                <div class="controls">
+                    <div class="clearfix bar-group">
+                        <div quota-bar bardata="project_data.router"></div>
+                        <div quota-bar bardata="domain_data.router" ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class='price-box' ng-if="showPrice">
+            {{'aws.networks.price.totalPrice'|translate}}：<span>¥{{price}}</span> {{'aws.networks.price.perHour'|translate}} × 1 = <span>¥{{priceFix}}</span> {{'aws.networks.price.perHour'|translate}} ({{'aws.networks.price.count'|translate}} ¥{{totalPrice}} {{'aws.networks.price.perMonth'|translate}})
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-info" type="button" ng-click="routerConfirm(createrouterForm)" ng-disabled="beyondQuota_dep.router || beyondQuota_pro.router || formSubmitted">{{"aws.action.ok"|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="cancelRouterModal()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+</div>

@@ -1,0 +1,136 @@
+<div class="modal-common">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+		<h3 class="modal-title">{{cluster_title}}</h3>
+	</div>
+	<div class="modal-body" >
+		<form name="eeForm" novalidate>
+			<div class="control-group">
+				<label class="control-label">集群名称：</label>
+				<div class="controls">
+					<input type="text" class="form-controls" name="name" ng-model="newObj.name" placeholder="请输入弹性伸缩集群名称" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\_)*$/" ng-maxlength="32" required />
+					<div class="error" ng-if="interacted(eeForm.name)" ng-messages="eeForm.name.$error" >
+							<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+							<div ng-message="pattern">只能输入中文、字母、数字、横线以及下划线</div>
+							<div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+						</div>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">最小云主机数：</label>
+				<div class="controls">
+					<input type="text" class="form-controls" name="minSize" ng-model="newObj.minSize" placeholder="请输入最小云主机数" min="1" max="newObj.maxSize" vaild-size="maxSize" ng-pattern="/^[1-9][0-9]*$/" required id="minSize"/>
+					<div class="error" ng-if="interacted(eeForm.minSize)" ng-messages="eeForm.minSize.$error" >
+						<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+						<div ng-message="pattern">{{'aws.errors.integer'|translate}}</div>
+						<div ng-message="vaildSize">最小云主机数大于1，且小于最大云主机数</div>
+					</div>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">最大云主机数：</label>
+				<div class="controls">
+					<input type="text" class="form-controls" name="maxSize" ng-model="newObj.maxSize" placeholder="请输入最大云主机数" ng-pattern="/^[1-9][0-9]*$/" min="newObj.minSize" max="100" vaild-size="minSize" id="maxSize" required />
+					<div class="error" ng-if="interacted(eeForm.maxSize)" ng-messages="eeForm.maxSize.$error" >
+						<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+						<div ng-message="vaildSize">最大云主机数大于最小云主机数，且小于项目配额（100）</div>
+					</div>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" title="默认冷却时间（秒）">默认冷却时间（秒）：</label>
+				<div class="controls">
+					<input type="text" class="form-controls" name="defaultCooldown" ng-model="newObj.defaultCooldown" placeholder="请输入默认冷却时间" ng-pattern="/^[0-9]*$/" min="0" max="86400" limitnumrange required />
+					<div class="error" ng-if="interacted(eeForm.defaultCooldown)" ng-messages="eeForm.defaultCooldown.$error" >
+						<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+						<div ng-message="pattern">{{'aws.errors.integer'|translate}}</div>
+						<div ng-message="limitnumrange">请输入0~86400之间的整数</div>
+					</div>  
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">移除策略：</label>
+				<div class="controls">
+					<ui-select ng-model="newObj.remove_strategy" ng-change="change_strategy(newObj.remove_strategy)"  >
+						<ui-select-match >{{$select.selected.name}}</ui-select-match>
+						<ui-select-choices repeat="remove_strategy in newObj.remove_strategy_list | propsFilter: {name: $select.search}">
+							<div ng-bind-html="remove_strategy.name | highlight: $select.search"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</div>
+			<div class="control-items2">
+
+				<div class="control-group half" ng-if="showNew">
+					<label class="control-label">负载均衡器：</label>
+					<div class="controls">
+						<ui-select ng-model="newObj.load_balancer" ng-change="change_load_balance(newObj.load_balancer)">
+							<ui-select-match placeholder="请选择负载均衡器">{{$select.selected.name}}</ui-select-match>
+							<ui-select-choices repeat="load_balancer in newObj.load_balancer_list | propsFilter: {name: $select.search}">
+								<div ng-bind-html="load_balancer.name | highlight: $select.search"></div>
+							</ui-select-choices>
+						</ui-select>
+					</div>
+				</div>
+				<div class="control-group half" ng-if="!showNew">
+					<label class="control-label">负载均衡器：</label>
+					<div class="controls">
+						<span class="val"><a ng-href="/cvm/loadbalancers/{{loadbalancerId}}">弹性伸缩集群负载均衡器</a></span>
+					</div>
+				</div>
+				<div class="control-group half" ng-if="showNew">
+					<label class="control-label">资源池：</label>
+					<div class="controls">
+						<ui-select ng-model="newObj.resource_pool" ng-change="change_pool(newObj.resource_pool)">
+							<ui-select-match placeholder="请选择资源池">{{$select.selected.name}}</ui-select-match>
+							<ui-select-choices repeat="resource_pool in newObj.resource_pool_list | propsFilter: {name: $select.search}">
+								<div ng-bind-html="resource_pool.name | highlight: $select.search"></div>
+							</ui-select-choices>
+						</ui-select>
+					</div>
+				</div>
+			</div>
+     
+      		<div class="control-group"  ng-if="noLB && showNew">
+				<label class="control-label">&nbsp</label>
+				<div class="controls">
+					<span class="val">您还没有负载均衡器，去<a ng-href="/cvm/loadbalancers" class="orange"> 创建负载均衡器</a></span>
+				</div>
+			</div>
+			<div class="control-group"  ng-if="noPool &&  showNew">
+				<label class="control-label">&nbsp</label>
+				<div class="controls">
+					<span class="val">你的负载均衡器下还没有资源池，去<a ng-href="#/cvm/loadbalancers/{{newObj.load_balancer.id}}?active=2" class="orange"> 创建资源池</a></span>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-disabled="!canCreate()" ng-click="creteEE()">{{'aws.action.ok' | translate}}</button>
+		<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+	</div>
+	
+</div>
+<script type="text/ng-template" id="tip_create.html">
+  <div class=" modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">弹性伸缩集群创建成功</h3>
+      </div>
+      <div class="modal-body">
+		<div class="control-group">
+				<label class="control-label"><i class=" icon-aw-correct"></i></label>
+				<div class="controls">
+					<span><!-- <i class="icon-aw_correct"></i> -->弹性伸缩集群必须有生效的伸缩配置才能实现弹性伸缩，</br>立即创建伸缩集群需要的规格。</span>
+				</div>
+		</div>
+	 </div>
+        
+   
+      <div class="modal-footer" >
+		<button class="btn btn-primary" type="button"  ng-click="creteEEConfig()">创建伸缩配置</button>
+		<button class="btn btn-default" type="button" ng-click="$dismiss()">稍后创建</button>
+	 </div>
+  </div>
+</script>

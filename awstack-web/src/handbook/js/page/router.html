@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>路由器</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <h3>
+	新建路由器</h3>
+<p>
+	<strong>前提条件</strong></p>
+<ul>
+	<li>
+		私有网络已创建完成。</li>
+	<li>
+		项目和部门剩余配额满足需求。</li>
+</ul>
+<p>
+	<strong>操作步骤</strong></p>
+<ol>
+	<li>
+		在云管平台的Web控制台上，选择&ldquo;产品和服务 &gt;虚拟资源管理 &gt;网络&rdquo;，进入网络导航菜单。</li>
+	<li>
+		在左侧导航菜单中单击&ldquo;路由器&rdquo;，进入路由器页面。</li>
+	<li>
+		在路由器页面的右上方，单击&ldquo;新建&rdquo;按钮。</li>
+	<li>
+		配置路由器信息。</li>
+	<li>
+		单击&ldquo;确定&rdquo;按钮。操作成功后，可以在列表区查看。</li>
+</ol>
+<h3>
+	设置/删除网关</h3>
+<p>
+	网关（Gateway）就是一个网络连接到另一个网络的&ldquo;关口&rdquo;，实质上是一个网络通向其他网络的IP地址。这里的网关就是与路由器相连的外部网络的IP地址。</p>
+<p>
+	<strong>注意：</strong><br />
+	只有安装部署阶段创建了Neutron的外部网络，才可以执行这里的设置网关操作。<br />
+	路由器关联的子网下的云主机没有绑定公网IP时，才可以执行删除网关操作。删除网关后，云主机将无法访问外网。</p>
+<ol>
+	<li>
+		在路由器列表页，勾选待操作的路由器，单击&ldquo;设置网关&rdquo;按钮，从下拉列表中选择安装部署阶段创建的外部网络，云管平台会自动设置此网络的IP地址为路由器的网关，然后单击&ldquo;确定&rdquo;按钮。</li>
+	<li>
+		在路由器列表页，勾选待操作的路由器，单击&ldquo;删除网关&rdquo;按钮，在弹出的页面中单击&ldquo;确定&rdquo;按钮即可。</li>
+</ol>
+<h3>
+	新建端口转发</h3>
+<p>
+	当用公网IP地址有限的时候，可通过虚拟路由器的端口转发功能，通过路由器的网关接口地址和端口号访问某个云主机开放的端口号。</p>
+<p>
+	<strong>注意</strong>：<br />
+	当云主机已绑定公网IP时，端口转发功能会失效。</p>
+<ol>
+	<li>
+		在路由器列表勾选待添加静态路由的路由器，单击&ldquo;端口转发&rdquo;按钮并在下拉列表中选择&ldquo;新建&rdquo;。</li>
+	<li>
+		配置端口转发信息，将云主机私网IP地址的一个端口映射到公网IP的一个端口上。</li>
+	<li>
+		单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+<h3>
+	删除端口转发规则</h3>
+<ol>
+	<li>
+		在路由器列表勾选待添加静态路由的路由器，单击&ldquo;端口转发&rdquo;按钮并在下拉列表中选择&ldquo;删除&rdquo;。</li>
+	<li>
+		在弹出的提示框里单击&ldquo;确认&rdquo;按钮。</li>
+</ol>
+<p>
+	<strong>注意：</strong><br />
+	删除云主机时，针对该云主机设置的端口转发规则将会同步删除。</p>
+<h3>
+	删除路由器</h3>
+<p>
+	<strong>注意：</strong><br />
+	删除路由器之前，需要先解除路由器绑定的端口，可以通过前面的&ldquo;解除关联子网&rdquo;来操作。加载了防火墙的路由器不允许被删除。</p>
+<p>
+	在路由器列表页，勾选要删除的路由器，单击&ldquo;删除&rdquo;按钮，在弹出的确认框中单击&ldquo;确定&rdquo;按钮。</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

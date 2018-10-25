@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>负载均衡</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <p>
+	负载均衡是由多台服务器以对称的方式组成的一个集群，每台服务器都具有一定的地位（等价或加权），每台服务器都可以单独对外提供服务而无须其他服务器的辅助。通过某种负载分发技术，将外部发送来的请求动态地分配到对称结构中的某一台服务器上，而接收到请求的服务器独立地回应客户的请求。</p>
+<p>
+	创建负载均衡的完整流程：</p>
+<ol>
+	<li>
+		新建负载均衡</li>
+	<li>
+		新建监听器</li>
+	<li>
+		绑定云主机</li>
+	<li>
+		（可选）绑定公网IP<br />
+		如果需要从外网访问负载均衡器，需要绑定公网IP。</li>
+</ol>
+<p>
+	<strong>前提条件</strong></p>
+<p>
+	需要提前新建2个或以上云主机。</p>
+<h3>
+	绑定公网IP</h3>
+<p>
+	给负载均衡器绑定公网IP，这样可以通过外网访问此负载均衡器。</p>
+<p>
+	<strong>前提条件</strong></p>
+<p>
+	有可用的公网IP。</p>
+<p>
+	<strong>操作步骤</strong></p>
+<ol>
+	<li>
+		在&ldquo;负载均衡&rdquo;列表，勾选负载均衡器，然后单击&ldquo;更多操作&rdquo;按钮并在下拉列表中选择&ldquo;绑定公网IP&rdquo;。</li>
+	<li>
+		在对话框的下拉列表中选择要绑定的公网IP，如无可用公网IP，可以单击&ldquo;申请公网IP&rdquo;按钮申请IP，然后单击&ldquo;确定&rdquo;按钮。操作成功后，可以在负载均衡详情中查看。</li>
+</ol>
+<h3>
+	删除负载均衡</h3>
+<p>
+	删除负载均衡之前，请确保对应的监听器已经删除。</p>
+<ol>
+	<li>
+		在负载均衡列表页，勾选待删除的负载均衡，单击&ldquo;删除&rdquo;按钮。</li>
+	<li>
+		在弹出的确认对话框单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

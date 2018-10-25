@@ -1,0 +1,1120 @@
+<div class="page-inner">
+    <div class="table-action">
+        <button type="button" class="btn btn-new" ng-disabled="createDisabled" ng-click="openBalanceModel('new')" licence-type="btn" id="resource-cbd-create"><i class="icon-aw-add-to2"></i> {{'aws.action.create'|translate}}</button>
+        <button type="button" class="btn btn-normal" ng-disabled="editDisabled" ng-click="openBalanceModel('edit')" licence-type="btn" id="resource-cbd-edit"><i class="icon-aw-modify"></i> {{'aws.action.edit'|translate}}</button>
+        <div class="dropdown" licence-type="btn-group">
+            <button type="button" class="btn btn-normal dropdown-toggle" ng-disabled="deleteDisabled" data-toggle="dropdown">{{'aws.instances.moreOps'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+            <ul class="dropdown-menu">
+                <!-- <li ng-if = "false">
+                    <button ng-click="startUp(editData)" ng-disabled="UpDisabled">{{'aws.action.enabled'|translate}}</button>
+                </li>
+                <li ng-if = "false">
+                    <button ng-click="forbidden(editData)" ng-disabled="forbiddenDisabled" >{{'aws.action.forbidden'|translate}}</button>
+                </li> -->
+                <li licence-type="btn" id="resource-cbd-bindPublicIp">
+                    <button ng-click="bindPublicIp(editData)" ng-disabled="bindIpDisabled" >{{'aws.loadbalance.bindPublicIP'|translate}}</button>
+                </li>
+                <li licence-type="btn" id="resource-cbd-unbindPublicIp">
+                    <button ng-click="unbindPublicIp(editData)" ng-disabled="unbindIpDisabled" >{{'aws.loadbalance.unbindPublicIP'|translate}}</button>
+                </li>
+                <li licence-type="btn" id="resource-cbd-del">
+                    <button ng-click="deleteBalance(checkedItemsbalanceTable)" ng-disabled="deleteDisabled" >{{'aws.action.del'|translate}}</button>
+                </li>
+            </ul>
+        </div>
+        <div class="dropdown show-title" ng-if = "false">
+           <button type="button" class="btn btn-renovat dropdown-toggle" data-toggle="dropdown">
+              <i class="icon-aw-gear"></i>
+           </button>
+           <ul class="dropdown-menu">
+              <li ng-repeat="title in titleData track by $index">
+                <div class="check-left">
+                    <label class="checkbox">
+                        <input type="checkbox" class="form-controls chk" name="assignVlan" ng-model="title.value" />
+                        <i class="iconfont"></i>
+                    </label>
+                </div>
+                <span>{{'aws.loadbalance.' + title.name|translate}}</span>
+              </li>
+           </ul>
+        </div>
+        <into-information modular="'loadbalancing'"></into-information>
+        <div type="button" class="btn btn-renovat right-ports" ng-click="refreshStorageTable()">
+            <i class="icon-aw-refresh"></i>
+        </div>
+        <div class="search-box right-ports">
+            <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+            </form>
+        </div>
+        <div class="select-box right-ports" ng-if = "false">
+            <ui-select ng-model="select.status" ng-change="changeLbstatus(select.status)">
+                <ui-select-match placeholder="{{'aws.loadbalance.selectStatus'|translate}}">{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="status in statusList | filter: {name: $select.search}">
+                    <div ng-bind-html="status.name | highlight: $select.search"></div>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </div>
+    <script type="text/ng-template" id="headerCheckbox.html">
+      <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxesbalanceTable.checked" class="select-all-balanceTable" value="" />
+        <i class="iconfont"></i>
+      </label>
+    </script>
+    <div class="table-content">
+        <table ng-table="balanceTable" class="table" show-filter="false">
+            <colgroup>
+                <col width="10%">
+                <col width="20%">
+                <col width="20%">
+                <col width="20%">
+                <col width="30%">
+            </colgroup>
+            <tr ng-repeat="balance in $data">
+                <td header="'headerCheckbox.html'">
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="checkboxesbalanceTable.items[balance.id]" />
+                        <i class="iconfont"></i>
+                    </label>
+                </td>
+                <td data-title="'aws.loadbalance.name'|translate" sortable="'name'">
+                    <div class="edit-name">
+                        <a ng-href="#/cvm/loadbalancing?id={{balance.id}}" title="{{balance.name}}">{{balance.name}}</a>
+                    </div>
+                </td>
+                <td data-title="'aws.loadbalance.privateIP'|translate" sortable="'vip_address'">
+                    {{balance.vip_address}}
+                </td>
+                <td data-title="'aws.loadbalance.publicIP'|translate" sortable="'fip'">
+                    {{balance.fip}}
+                </td>
+                <!-- <td data-title="'aws.loadbalance.status'|translate" sortable="'admin_state_up'" ng-if="titleData[3].value">
+                    <span ng-class="{'bg-green':(balance.admin_state_up == true), 'bg-orange':(balance.admin_state_up == false)}">
+                        {{"aws.loadbalance.table.admin_state_up."+ balance.admin_state_up | translate}}
+                    </span>
+                </td> -->
+                <!-- <td data-title="'aws.loadbalance.maxConnections'|translate" sortable="'maxConnections'" ng-if="titleData[4].value">
+                    {{balance.maxConnections}}
+                </td> -->
+                <td data-title="'aws.loadbalance.description'|translate" sortable="'description'">
+                    <span class="des des-sm des-break">{{balance.description}}</span>
+                </td>
+            </tr>
+        </table>
+        <loading-data data="blance_data"></loading-data>
+    </div>
+    <div ng-controller="detailCtrl">
+        <pane class="detail-body vm-view monitor-view" animation="animation">
+            <div class="tab-content">
+                <div class="detail-row lbDetail-row">
+                    <div class="detail-info tab-offset-right">
+                        <div class="lbDetail">
+                            <div class="detail-title">
+                                <a class="an-close" ng-href="#/cvm/loadbalancing"><i class=" icon-aw-mail-reply"></i></a>
+                                <span>{{detailData.name}} {{'aws.loadbalance.detail'|translate}}</span>
+                            </div>
+                            <ul class="nav nav-tabs nav-justified">
+                                <li ng-class="{active:lbBasicInfoShow}" class="uib-tab nav-item" ng-disabled="!canClick" ng-click="lbBasicTabShow()">
+                                    <a href="">{{'aws.loadbalance.basicInfo'|translate}}</a>
+                                </li>
+                                <li ng-class="{active:lbListerInfoShow}" class="uib-tab nav-item" ng-disabled="!canClick" ng-click="lbListerTabShow()">
+                                    <a href="">{{'aws.loadbalance.listenerManage'|translate}}</a>
+                                </li>
+                                <li ng-class="{active:lbMonitorInfoShow}" class="uib-tab nav-item" ng-disabled="!canClick" ng-click="lbMonitorTabShow()" ng-if = "false">
+                                    <a href="">{{'aws.loadbalance.monitor'|translate}}</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class ="table-content table-small"  ng-if = "lbBasicInfoShow">
+                                    <table class="table table-info column">
+                                        <tr>
+                                            <td>{{'aws.loadbalance.name'|translate}}</td>
+                                            <td>{{detailData.name}}</td>
+                                            <td>{{'aws.loadbalance.lbId'|translate}}</td>
+                                            <td>{{detailData.id}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{'aws.loadbalance.description'|translate}}</td>
+                                            <td>{{detailData.description}}</td>
+                                            <td>{{'aws.loadbalance.configStatus'|translate}}</td>
+                                            <td>{{'aws.loadbalance.table.provisioning_status.'+ detailData.provisioning_status| translate}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{'aws.loadbalance.privateIP'|translate}}</td>
+                                            <td>{{detailData.vip_address}}</td>
+                                            <td>{{'aws.loadbalance.publicIP'|translate}}</td>
+                                            <td>{{detailData.fip}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{'aws.loadbalance.provider'|translate}}</td>
+                                            <td>{{detailData.provider}}</td>
+                                            <td>{{'aws.loadbalance.tenantId'|translate}}</td>
+                                            <td>{{detailData.tenant_id}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{'aws.loadbalance.subnet'|translate}}</td>
+                                            <td>{{detailData.vip_subnet_id}}</td>
+                                            <td>{{'aws.loadbalance.createTime'|translate}}</td>
+                                            <td>{{detailData.created_at|date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div ng-if = "lbListerInfoShow">
+                                    <div>
+                                        <div class="basicInfo-title">
+                                            <span>{{'aws.loadbalance.listener'|translate}}</span>
+                                        </div>
+                                        <div class="table-action">
+                                            <button type="button" data-toggle="modal" class="btn btn-new" ng-click="openListenerModel('new')" licence-type="btn" id="resource-cbd-createMonitor"><i class="icon-aw-add-to2"></i> {{'aws.loadbalance.createListener'|translate}}</button>
+                                            <button type="button" data-toggle="modal" class="btn btn-normal" ng-click="openListenerModel('edit')" ng-disabled="lisEditDisabled" licence-type="btn" id="resource-cbd-editMonitor"><i class="icon-aw-modify"></i> {{'aws.action.edit'|translate}}</button>
+                                            <button type="button" data-toggle="modal" class="btn btn-normal" ng-disabled="lisUpDisabled" ng-click="lisStartUp(editDatalisTable)" licence-type="btn" id="resource-cbd-enableMonitor"><i class="icon-aw-start-up"></i> {{'aws.action.enabled'|translate}}</button>
+                                            <button type="button" class="btn btn-normal" ng-disabled="lisForbiddenDisabled" ng-click="lisForbidden(editDatalisTable)" licence-type="btn" id="resource-cbd-disenableMonitor"><i class="icon-aw-jy"></i> {{'aws.action.forbidden'|translate}}</button>
+                                            <button type="button" class="btn btn-normal" ng-disabled="lisDeleteDisabled" ng-click="deleteListener([editDatalisTable])" licence-type="btn" id="resource-cbd-delMonitor"><i class="icon-aw-delete"></i> {{'aws.action.del'|translate}}</button>
+                                            <setting title-data="lisTitleData" site-title="titleName" table-data="listener_data" search-tearm="lisSearchTerm(obj)"></setting>
+                                            <div type="button" class="btn btn-renovat right-ports" ng-click="refreshLisTable();globalSearchLisTerm=''">
+                                                <i class="icon-aw-refresh"></i>
+                                            </div>
+                                            <div class="search-box right-ports">
+                                                <form name="searchLisForm" novalidate ng-keyup="applyGlobalSearchLis(globalSearchLisTerm)">
+                                                    <button class="btn" type="submit" ng-disabled="searchLisForm.$invalid"><i class="icon-aw-search"></i></button>
+                                                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchLisTerm" ng-model="globalSearchLisTerm" placeholder="{{'aws.action.search'|translate}}" />
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <script type="text/ng-template" id="listenerHeaderCheckbox.html">
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="checkboxeslisTable.checked" class="select-all-lisTable" value="" />
+                                                <i class="iconfont"></i>
+                                            </label>
+                                        </script>
+                                        <div class="table-content lisTable">
+                                            <table ng-table="lisTable" class="table">
+                                                <tr ng-repeat="listener in $data track by $index">
+                                                    <td>
+                                                        <div class="control-group radio-group">
+                                                            <div class="controls">
+                                                                <div class="radio-item">
+                                                                    <label>
+                                                                        <input type="radio" name="radio_listener" value="{{listener.id}}" ng-model="radiolisTab.checked" />
+                                                                        <i class="iconfont"></i>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td data-title="'aws.loadbalance.name'|translate" sortable="'name'" ng-if="lisTitleData[0].value">
+                                                        {{listener.name}}
+                                                    </td>
+                                                    <td data-title="'aws.loadbalance.listenerProtocol'|translate" sortable="'protocol'" ng-if="lisTitleData[1].value">
+                                                        {{listener.protocol}}
+                                                    </td>
+                                                    <td data-title="'aws.loadbalance.port'|translate" sortable="'protocol_port'" ng-if="lisTitleData[2].value">
+                                                        {{listener.protocol_port}}
+                                                    </td>
+                                                    <td data-title="'aws.loadbalance.balanceAlgorithm'|translate" sortable="'lb_algorithm'" ng-if="lisTitleData[3].value">
+                                                        {{"aws.loadbalance.lisTab.lb_algorithm."+ listener.lb_algorithm | translate}}
+                                                    </td>
+                                                    <td data-title="'aws.loadbalance.maxConnections'|translate" sortable="'connection_limit'" ng-if="lisTitleData[4].value">
+                                                        {{listener.connection_limit == "-1" ? ('aws.loadbalance.noLimit'|translate) : listener.connection_limit}}
+                                                    </td>
+                                                    <!-- <td data-title="'aws.loadbalance.healthcheck'|translate" sortable="'provisioning_status'" ng-if="lisTitleData[5].value">
+                                                        <span ng-class="{'bg-green':(listener.provisioning_status == 'ACTIVE'),
+                                                        'bg-blue':(listener.provisioning_status == 'PENDING_CREATE'|| listener.provisioning_status == 'PENDING_UPDATE'|| listener.provisioning_status == 'PENDING_DELETE'),
+                                                        'bg-orange':(listener.provisioning_status == 'DELETED'),
+                                                        'bg-red':(listener.provisioning_status == 'ERROR')}">
+                                                            {{"aws.loadbalance.lisTab.provisioning_status."+ listener.provisioning_status | translate}}
+                                                            <i ng-class="{'icon-aw-refresh':(listener.provisioning_status == 'PENDING_CREATE' || listener.provisioning_status == 'PENDING_UPDATE' || listener.provisioning_status == 'PENDING_DELETE')}" class="aw-spin"></i>
+                                                        </span>
+                                                    </td> -->
+                                                    <td data-title="'aws.loadbalance.status'|translate" sortable="'admin_state_up'" ng-if="lisTitleData[5].value">
+                                                        <span ng-class="{'bg-green':(listener.admin_state_up == true), 'bg-orange':(listener.admin_state_up == false)}">
+                                                            {{"aws.loadbalance.table.admin_state_up."+ listener.admin_state_up | translate}}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <loading-data data="listener_data"></loading-data>
+                                        </div>
+                                    </div>
+                                    <div class="bindIns">
+                                        <div class="basicInfo-title">
+                                            <span>{{'aws.loadbalance.bindIns'|translate}}</span>
+                                        </div>
+                                        <div ng-if = "lisChecked">
+                                            <div class="table-action">
+                                                <button type="button" class="btn btn-new" ng-click="openServerModel('new')" ng-disabled="memCreateDisabled" licence-type="btn" id="resource-cbd-monitor-createEnd"><i class="icon-aw-gl"></i> {{'aws.loadbalance.bindIns'|translate}}</button>
+                                                <button type="button" class="btn btn-normal" ng-click="openServerModel('edit')" ng-disabled="memEditDisabled" licence-type="btn" id="resource-cbd-monitor-edit"><i class="icon-aw-modify"></i> {{'aws.loadbalance.modifyWeight'|translate}}</button>
+                                                <button type="button" class="btn btn-normal" ng-click="memStartUp(editDatamemberTable)" ng-disabled="memUpDisabled" licence-type="btn" id="resource-cbd-monitor-enable"><i class="icon-aw-start-up"></i> {{'aws.action.enabled'|translate}}</button>
+                                                <button type="button" class="btn btn-normal" ng-click="memForbidden(editDatamemberTable)" ng-disabled="memForbiddenDisabled" licence-type="btn" id="resource-cbd-monitor-disabled"><i class="icon-aw-jy"></i> {{'aws.action.forbidden'|translate}}</button>
+                                                <button type="button" class="btn btn-normal" ng-disabled="memDeleteDisabled" ng-click="deleteMember(checkedItemsmemberTable)" licence-type="btn" id="resource-cbd-monitor-del"><i class="icon-aw-jcgl"></i> {{'aws.action.unbind'|translate}}</button>
+                                                <setting title-data="insTitleData" site-title="titleName" table-data="member_data" search-tearm="memSearchTerm(obj)"></setting>
+                                                <div type="button" class="btn btn-renovat right-ports" ng-click="refreshMemTable();globalSearchMemTerm=''">
+                                                    <i class="icon-aw-refresh"></i>
+                                                </div>
+                                                <div class="search-box right-ports">
+                                                    <form name="searchMemForm" novalidate ng-keyup="applyGlobalSearchMem(globalSearchMemTerm)">
+                                                        <button class="btn" type="submit" ng-disabled="searchMemForm.$invalid"><i class="icon-aw-search"></i></button>
+                                                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchMemTerm" ng-model="globalSearchMemTerm" placeholder="{{'aws.action.search'|translate}}" />
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <script type="text/ng-template" id="memberHeaderCheckbox.html">
+                                                <label class="checkbox">
+                                                    <input type="checkbox" ng-model="checkboxesmemberTable.checked" class="select-all-memberTable" value="" />
+                                                    <i class="iconfont"></i>
+                                                </label>
+                                            </script>
+                                            <div class="table-content memTable">
+                                                <table ng-table="memberTable" class="table">
+                                                    <tr ng-repeat="member in $data track by $index">
+                                                        <td header="'memberHeaderCheckbox.html'">
+                                                            <label class="checkbox">
+                                                                <input type="checkbox" ng-model="checkboxesmemberTable.items[member.id]" />
+                                                                <i class="iconfont"></i>
+                                                            </label>
+                                                        </td>
+                                                        <td data-title="'aws.loadbalance.memberName'|translate" sortable="'name'" ng-if="insTitleData[0].value">
+                                                            <div class="edit-name">
+                                                                <span title="{{member.name}}">{{member.name}}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td data-title="'aws.loadbalance.status'|translate" sortable="'admin_state_up'" ng-if="insTitleData[1].value">
+                                                            <span ng-class="{'bg-green':(member.admin_state_up == true), 'bg-orange':(member.admin_state_up == false)}">
+                                                                {{"aws.loadbalance.table.admin_state_up."+ member.admin_state_up | translate}}
+                                                            </span>
+                                                        </td>
+                                                        <td data-title="'aws.loadbalance.healthcheck'|translate" sortable="'operating_status'" ng-if="insTitleData[2].value">
+                                                            <span ng-class="{'bg-green':(member.operating_status == 'ONLINE'),
+                                                            'bg-orange':(member.operating_status == 'OFFLINE' || member.operating_status == 'DEGRADED' || member.operating_status == 'NO_MONITOR'),
+                                                            'bg-red':(member.operating_status == 'DISABLED')}">
+                                                                {{"aws.loadbalance.insTab.operating_status."+ member.operating_status | translate}}
+                                                            </span>
+                                                        </td>
+                                                        <td data-title="'aws.loadbalance.ipAddr'|translate" sortable="'address'" ng-if="insTitleData[3].value">
+                                                            {{member.address}}
+                                                        </td>
+                                                        <td data-title="'aws.loadbalance.port'|translate" sortable="'protocol_port'" ng-if="insTitleData[4].value">
+                                                            {{member.protocol_port}}
+                                                        </td>
+                                                        <td data-title="'aws.loadbalance.weight'|translate" sortable="'weight'" ng-if="insTitleData[5].value">
+                                                            {{member.weight}}
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <loading-data data="member_data"></loading-data>
+                                            </div>
+                                        </div>
+                                        <div ng-if = "!lisChecked">
+                                            <span class="notChooseLisTips">{{'aws.loadbalance.notChooseLisTips'|translate}}</span>
+                                        </div>   
+                                    </div>
+                                </div>
+                                <div ng-if = "lbMonitorInfoShow">
+                                    
+                                </div>
+                            </div>
+                            <!-- <uib-tabset active="0" justified="true">
+                                <uib-tab index="0" heading="{{'aws.loadbalance.basicInfo'|translate}}" class="lbDetailTab" disable="!canClick">
+                                    <div>
+                                        <table class="table table-info column">
+                                            <tr>
+                                                <td>{{'aws.loadbalance.name'|translate}}</td>
+                                                <td>{{detailData.name}}</td>
+                                                <td>{{'aws.loadbalance.lbId'|translate}}</td>
+                                                <td>{{detailData.id}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{'aws.loadbalance.description'|translate}}</td>
+                                                <td>{{detailData.description}}</td>
+                                                <td>{{'aws.loadbalance.configStatus'|translate}}</td>
+                                                <td>{{'aws.loadbalance.table.provisioning_status.'+ detailData.provisioning_status| translate}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{'aws.loadbalance.privateIP'|translate}}</td>
+                                                <td>{{detailData.vip_address}}</td>
+                                                <td>{{'aws.loadbalance.publicIP'|translate}}</td>
+                                                <td>{{detailData.fip}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{'aws.loadbalance.provider'|translate}}</td>
+                                                <td>{{detailData.provider}}</td>
+                                                <td>{{'aws.loadbalance.tenantId'|translate}}</td>
+                                                <td>{{detailData.tenant_id}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{'aws.loadbalance.subnet'|translate}}</td>
+                                                <td>{{detailData.vip_subnet_id}}</td>
+                                                <td>{{'aws.loadbalance.createTime'|translate}}</td>
+                                                <td>{{detailData.created_at|date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </uib-tab>
+                                <uib-tab index="1" heading="{{'aws.loadbalance.listener'|translate}}" ng-click="listenerTabFresh()" disable="!canClick">
+                                    <div class="table-action">
+                                        <button type="button" data-toggle="modal" class="btn btn-primary" ng-click="openListenerModel('new')"><i class="icon-aw-add-to2"></i>{{'aws.loadbalance.createListener'|translate}}</button>
+                                        <button type="button" data-toggle="modal" class="btn btn-info" ng-click="openListenerModel('edit')" ng-disabled="lisEditDisabled"><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+                                        <button type="button" data-toggle="modal" class="btn btn-info" ng-disabled="lisUpDisabled" ng-click="lisStartUp(editDatalisTable)"><i class="icon-aw-start-up"></i>{{'aws.action.enabled'|translate}}</button>
+                                        <button type="button" class="btn btn-warning" ng-disabled="lisForbiddenDisabled" ng-click="lisForbidden(editDatalisTable)"><i class="icon-aw-1shut-down"></i>{{'aws.action.forbidden'|translate}}</button>
+                                        <button type="button" class="btn btn-warning" ng-disabled="lisDeleteDisabled" ng-click="deleteListener(checkedItemslisTable)"><i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+                                    </div>
+                                    <script type="text/ng-template" id="listenerHeaderCheckbox.html">
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-model="checkboxeslisTable.checked" class="select-all-lisTable" value="" />
+                                            <i class="iconfont"></i>
+                                        </label>
+                                    </script>
+                                    <div class="table-content">
+                                        <table ng-table="lisTable" class="table">
+                                            <tr ng-repeat="listener in $data track by $index">
+                                                <td header="'listenerHeaderCheckbox.html'">
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" ng-model="checkboxeslisTable.items[listener.id]" />
+                                                        <i class="iconfont"></i>
+                                                    </label>
+                                                </td>
+                                                <td data-title="'aws.loadbalance.name'|translate" sortable="'name'">
+                                                    <div class="edit-name">
+                                                        <a title="{{listener.name}}" ng-click="showLisDetail(listener)">{{listener.name}}</a>
+                                                    </div>
+                                                </td>
+                                                <td data-title="'aws.loadbalance.listenerProtocol'|translate" sortable="'protocol'">
+                                                    {{listener.protocol}}
+                                                </td>
+                                                <td data-title="'aws.loadbalance.port'|translate" sortable="'protocol_port'">
+                                                    {{listener.protocol_port}}
+                                                </td>
+                                                <td data-title="'aws.loadbalance.balanceAlgorithm'|translate" sortable="'lb_algorithm'">
+                                                    {{"aws.loadbalance.lisTab.lb_algorithm."+ listener.lb_algorithm | translate}}
+                                                </td>
+                                                <td data-title="'aws.loadbalance.maxConnections'|translate" sortable="'connection_limit'">
+                                                    {{listener.connection_limit == "-1"?"无限制":listener.connection_limit}}
+                                                </td>
+                                                <td data-title="'aws.loadbalance.healthcheck'|translate" sortable="'provisioning_status'">
+                                                    {{"aws.loadbalance.lisTab.provisioning_status."+ listener.provisioning_status | translate}}
+                                                </td>
+                                                <td data-title="'aws.loadbalance.status'|translate" sortable="'admin_state_up'">
+                                                    {{"aws.loadbalance.table.admin_state_up."+ listener.admin_state_up | translate}}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <loading-data data="listener_data"></loading-data>
+                                    </div>
+                                </uib-tab>
+                                <uib-tab index="2" heading="{{'aws.loadbalance.monitor'|translate}}" disable="!canClick">
+                                    
+                                </uib-tab>
+                            </uib-tabset> -->
+                        </div>
+                        <!-- <div class="listenerDetail">
+                            <div class="detail-title">
+                                <span ng-click="showLbDetail()">{{detailData.name}} {{'aws.loadbalance.detail'|translate}}</span>
+                                <span>&gt;</span>
+                                <span>{{lisDetailData.name}} {{'aws.loadbalance.detail'|translate}}</span>
+                            </div>
+                            <div class="ldRow">
+                                <span>{{'aws.loadbalance.listenerProtocol'|translate}}：</span>
+                                <span>{{lisDetailData.protocol}}</span>
+                                <span class="titleTxt">{{'aws.loadbalance.port'|translate}}：</span>
+                                <span>{{lisDetailData.port}}</span>
+                                <span class="showAll" ng-click="fold =!fold">{{!fold?"展示全部属性":"隐藏"}}</span>
+                            </div>
+                            <div ng-show = "fold">
+                                <div class="ldRow">
+                                    <span>{{'aws.loadbalance.balanceAlgorithm'|translate}}：</span>
+                                    <span>{{lisDetailData.algorithm}}</span>
+                                </div>
+                                <div class="ldRow">
+                                    <span>{{'aws.loadbalance.healthcheckWay'|translate}}：</span>
+                                    <span>{{lisDetailData.healthcheckWay}}</span>
+                                </div>
+                                <div class="ldRow">
+                                    <span>{{'aws.loadbalance.checkItem'|translate}}：</span>
+                                    <span>延迟{{lisDetailData.delay}}秒</span>
+                                    <span>超时{{lisDetailData.timeout}}秒</span>
+                                    <span>最大重试次数{{lisDetailData.maxRetries}}次</span>
+                                </div>
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </pane>
+    </div>
+</div>
+
+<script type="text/ng-template" id="balanceModel.html">
+    <div class="modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{modalTitle}}</h3>
+        </div>
+        <div class="modal-body">
+            <form name="BalanceForm" novalidate>
+                <div class="control-group">
+                    <label class="control-label">
+                        <span class="notNull">*</span>{{'aws.loadbalance.name'|translate}}：
+                    </label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="name" ng-model="balance.name" ng-change="checkedName(balance.name)" placeholder="{{'aws.loadbalance.inputName'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\.)*$/" ng-maxlength="32" required />
+                        <div class="error" ng-messages="(submitValid || BalanceForm.name.$dirty) && BalanceForm.name.$error">
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            <span ng-message="pattern">{{'aws.errors.nameLimit'|translate}}</span>
+                            <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                            <span ng-if="nameCheck">{{'aws.errors.balanceName_check'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{'aws.loadbalance.description'|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="description" ng-model="balance.description" placeholder="{{'aws.loadbalance.inputDescription'|translate}}"  ng-maxlength="255" />
+                        <div class="error" ng-messages="(submitValid || BalanceForm.description.$dirty) && BalanceForm.description.$error">
+                            <span ng-message="maxlength">{{'aws.errors.maxlength_255'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.loadbalance.subnet'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.loadbalance.info.subnet'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <ui-select ng-model="balance.subnet" name="subnet" ng-disabled="isEdit" required>
+                            <ui-select-match placeholder="{{'aws.loadbalance.selectSubnet'|translate}}">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="subnet in subnetList | filter: {name: $select.search}">
+                                <div ng-bind-html="subnet.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages="(submitValid || BalanceForm.subnet.$dirty) && BalanceForm.subnet.$error">
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="control-group">
+                    <label class="control-label">{{'aws.loadbalance.maxConnections'|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="maxConnections" ng-model="blance.maxConnections" placeholder="{{'aws.loadbalance.inputNumber'|translate}}"  min="1" max="255" limitnumrange required />
+                        <div class="error" ng-messages="(submitValid || BalanceForm.maxConnections.$dirty) && BalanceForm.maxConnections.$error">
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            <span ng-message="limitnumrange">{{'aws.errors.limit_1_255'|translate}}</span>
+                        </div>
+                    </div>
+                </div> -->
+            </form>
+            <div class="des-info" ng-if = "showPriceTip">
+                <span>{{'aws.networks.price.totalPrice' | translate}}：</span>
+                <strong>¥{{priceHour}}</strong>
+                <span>{{'aws.networks.price.perHour' | translate}} × 1 =</span>
+                <strong>¥{{priceHourAbout}}</strong>
+                <span>{{'aws.networks.price.perHour' | translate}} ({{'aws.networks.price.count' | translate}} ¥{{priceMonth}} {{'aws.networks.price.perMonth' | translate}})</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="balanceConfirm(BalanceForm)">{{'aws.action.ok'|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="bindPublicIp.html">
+    <div class="modal-common modal-smallest">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$close()">×</button>
+            <h3 class="modal-title">{{'aws.instances.FloatingIp.bindIP'| translate}}</h3>
+        </div>
+        <div class="modal-body">
+            <form name="bindIpForm">
+                <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.instances.FloatingIp.ipAddr'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.loadbalance.info.bindIP"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <ui-select ng-model="bindIp.ip" name="floatingName" required ng-disabled="!IpsList.length">
+                            <ui-select-match placeholder="{{!IpsList.length?('aws.instances.FloatingIp.noFloatingIp'|translate):('aws.instances.FloatingIp.ipSelect'|translate)}}">{{$select.selected.ip}}</ui-select-match>
+                            <ui-select-choices group-by="groupFind" repeat="value in IpsList | filter: {ip: $select.search}">
+                                <div ng-bind-html="value.ip | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages="(submitValid || bindIpForm.floatingName.$dirty) && bindIpForm.floatingName.$error">
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group" licence-type="btn" id="resource-publicNet-apply">
+                    <label class="control-label">&nbsp;</label>
+                    <div class="controls">
+                        <span class="applyIpText" ng-click="applyPublicIp()">{{'aws.loadbalance.applyIp'| translate}}</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="bindIpConfirm(bindIpForm)">{{'aws.action.ok'|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="applyIp.html">
+    <div class="modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{'aws.loadbalance.applyIp'| translate}}</h3>
+        </div>
+        <div class="modal-body">
+            <uib-alert ng-if="beyondQuota_pro.floatingip" type="danger">{{"aws.floatingIps.beyondQuota_pro"|translate}}</uib-alert>
+            <uib-alert ng-if="beyondQuota_dep.floatingip" type="danger">{{"aws.floatingIps.beyondQuota_dep"|translate}}</uib-alert>
+            <form name="createfloatipForm" novalidate>
+                <div class="control-group">
+                    <label class="control-label">{{'aws.loadbalance.publicIpPool'|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="floatipForm.selectedNet" ng-change="changeExtNet(floatipForm.selectedNet)">
+                            <ui-select-match placeholder="{{'aws.loadbalance.selectIpPool'|translate}}">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="pool in extNets.options | propsFilter:{name:$select.search}">
+                                <div ng-bind-html="pool.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.floatingIps.assignSub"|translate}}：</label>
+                    <div class="controls">
+                        <label class="checkbox">
+                            <input type="checkbox" class="form-controls chk" name="assignSub" ng-model="floatipForm.assignSub" />
+                            <i class="iconfont"></i>
+                        </label>
+                    </div>
+                </div>
+
+                <div ng-show="floatipForm.assignSub">
+                    <div class="control-group" >
+                        <label class="control-label">{{"aws.floatingIps.placeholder.choseSubnet"|translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="floatipForm.selectedSubnet" class="ui-select-tips" ng-change="changeSubnet(floatipForm.selectedSubnet)"  title='{{"aws.floatingIps.placeholder.choseSubnet"|translate}}'>
+                                <ui-select-match placeholder='{{"aws.floatingIps.placeholder.choseSubnet"|translate}}' >{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="subnet in subnets track by $index">
+                                    <div ng-mouseover="mouseSub(subnet,'over')" ng-mouseleave="mouseSub(subnet,'out')">
+                                        <div ng-bind-html="subnet.name | highlight: $select.search"></div>
+                                        <div class="ui-select-tips-detail" ng-show="selectedSubPoolList.length">
+                                            <div class="arrow-up"></div>
+                                            <ul>
+                                                <li ng-repeat="sub in subPool_detail track by $index" ng-if="sub.showSubSegDetail">{{sub.sub_pool}}</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.loadbalance.specifiedIp'|translate}}：</label>
+                        <div class="controls">
+                            <label class="checkbox">
+                                <input type="checkbox" class="form-controls chk" name="assignIP" ng-model="floatipForm.assignIP" />
+                                <i class="iconfont"></i>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-show="floatipForm.assignIP">
+                        <label class="control-label">{{'aws.loadbalance.subSegment'|translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="floatipForm.selectedSubnet" name="subSegment" class="ui-select-tips" ng-change="changeSubnet(floatipForm.selectedSubnet)" ng-disabled="!selectedSubPoolList.length">
+                                <ui-select-match placeholder="{{!selectedSubPoolList.length?('aws.loadbalance.noSubSegment'|translate):('aws.loadbalance.selectSubSegment'|translate)}}">{{$select.selected.sub_pool}}</ui-select-match>
+                                <ui-select-choices repeat="subnet in selectedSubPoolList track by $index">
+                                    <div ng-bind-html="subnet.sub_pool | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group ip_cidr" ng-show="floatipForm.assignIP">
+                        <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.loadbalance.ipAddr'|translate}}：</label>
+                        <div class="controls clearfix">
+                            <div class="flex">
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_0" id="ip_0" ng-model="floatipForm.init_cidr.ip_0" ng-keyup="setCheckValueFunc()"  placeholder="{{floatipForm.placeholder.ip_0}}" ng-readonly="floatipForm.readonly.ip_0" />
+                                    <div class="error ip_0" ng-if="interacted(createfloatipForm)">
+                                        <div ng-show="required.ip_0">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-show="invalid.ip_0">{{'aws.action.pleaseInput'|translate}}{{floatipForm.min_num.ip_0}}~{{floatipForm.max_num.ip_0}}{{'aws.action.int'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_1" id="ip_1" ng-model="floatipForm.init_cidr.ip_1" ng-keyup="setCheckValueFunc()"  placeholder="{{floatipForm.placeholder.ip_1}}" ng-readonly="floatipForm.readonly.ip_1" />
+                                    <div class="error ip_1" ng-if="interacted(createfloatipForm)">
+                                        <div ng-show="required.ip_1">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-show="invalid.ip_1">{{'aws.action.pleaseInput'|translate}}{{floatipForm.min_num.ip_1}}~{{floatipForm.max_num.ip_1}}{{'aws.action.int'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_2" id="ip_2" ng-model="floatipForm.init_cidr.ip_2" ng-keyup="setCheckValueFunc()"  placeholder="{{floatipForm.placeholder.ip_2}}" ng-readonly="floatipForm.readonly.ip_2" />
+                                    <div class="error ip_2"  ng-if="interacted(createfloatipForm)">
+                                        <div ng-show="required.ip_2">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-show="invalid.ip_2">{{'aws.action.pleaseInput'|translate}}{{floatipForm.min_num.ip_2}}~{{floatipForm.max_num.ip_2}}{{'aws.action.int'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip_text">
+                                    <input type="text" class="form-controls" name="ip_3" id="ip_3" ng-model="floatipForm.init_cidr.ip_3" ng-keyup="setCheckValueFunc()"  placeholder="{{floatipForm.placeholder.ip_3}}" ng-readonly="floatipForm.readonly.ip_3" />
+                                    <div class="error ip_3" ng-if="interacted(createfloatipForm)">
+                                        <div ng-show="required.ip_3">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-show="invalid.ip_3">{{'aws.action.pleaseInput'|translate}}{{floatipForm.min_num.ip_3}}~{{floatipForm.max_num.ip_3}}{{'aws.action.int'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">{{"aws.loadbalance.publicIpQuota" | translate }}：</label>
+                    <div class="controls">
+                        <div class="clearfix bar-group">
+                            <div quota-bar bardata="project_data.floatingip"></div>
+                            <div quota-bar bardata="domain_data.floatingip"></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="des-info" ng-if = "showPriceTip">
+                <span>{{'aws.networks.price.totalPrice' | translate}}：</span>
+                <strong>¥{{priceHour}}</strong>
+                <span>{{'aws.networks.price.perHour' | translate}} × 1 =</span>
+                <strong>¥{{priceHourAbout}}</strong>
+                <span>{{'aws.networks.price.perHour' | translate}} ({{'aws.networks.price.count' | translate}} ¥{{priceMonth}} {{'aws.networks.price.perMonth' | translate}})</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="applyIpConfirm()" ng-disabled="beyondQuota_dep.floatingip || beyondQuota_pro.floatingip || formSubmitted">{{'aws.action.ok'|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="listenerModel.html">
+    <div class="modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{modalTitle}}</h3>
+        </div>
+        <div class="modal-body">
+            <form name="listenerForm" novalidate>
+                <div class="control-group">
+                    <label class="control-label">
+                        <span class="notNull">*</span>{{'aws.loadbalance.name'|translate}}：
+                    </label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="name" ng-model="listener.name" placeholder="{{'aws.loadbalance.inputName'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\.)*$/" ng-maxlength="32" required />
+                        <div class="error" ng-messages="(submitValid || listenerForm.name.$dirty) && listenerForm.name.$error">
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            <span ng-message="pattern">{{'aws.errors.nameLimit'|translate}}</span>
+                            <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="listener-group clearfix">
+                    <div class="control-group pull-left protocol">
+                        <label class="control-label">
+                            <span class="notNull">*</span>{{'aws.loadbalance.protocolPort'|translate}}：
+                        </label>
+                        <div class="controls">
+                             <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.loadbalance.info.protocolPort'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <ui-select ng-model="listener.protocol" name="protocol" ng-change="changeProtocol(listener.protocol)" ng-disabled="lisEdit" required>
+                                <ui-select-match placeholder="{{'aws.loadbalance.selectProtocol'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="protocol in protocolList track by $index">
+                                    <div ng-bind-html="protocol.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group pull-left port">
+                        <label class="control-label">：</label>
+                        <div class="controls">
+                            <input type="text" name="port" ng-model="listener.port" placeholder="{{'aws.loadbalance.inputPort'|translate}}" min="1" max="65535" limitnumrange class="form-controls" ng-disabled="lisEdit" required />
+                            <div class="error" ng-messages="(submitValid || listenerForm.port.$dirty) && listenerForm.port.$error">
+                                <span ng-message="limitnumrange">{{'aws.errors.limit_1_65535'|translate}}</span>
+                                <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            </div>
+                        </div>
+                        <label class="control-label port-label">{{'aws.loadbalance.portRange'|translate}}</label>
+                    </div>
+                </div>
+                <div class="control-group keepSession" ng-if = "keepSessionShow">
+                    <label class="control-label">&nbsp;</label>
+                    <label class="control-label sessionLabel">{{'aws.loadbalance.keepSession'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.loadbalance.info.keepSession'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <ui-select ng-model="listener.keepSession" ng-change="changeSession(listener.keepSession)">
+                            <ui-select-match placeholder="{{'aws.loadbalance.selectKeepSession'|translate}}">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="session in keepSessionList | filter: {name: $select.search}">
+                                <div ng-bind-html="session.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="control-group keepSession" ng-if = "keepSessionShow && cookieNameShow">
+                    <label class="control-label">&nbsp;</label>
+                    <label class="control-label sessionLabel"><span class="red">*</span>&nbsp;{{'aws.loadbalance.cookieName'|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="cookieName" ng-model="listener.cookieName" placeholder="{{'aws.loadbalance.inputName'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\.)*$/" ng-maxlength="32" required />
+                        <div class="error" ng-messages="(submitValid || listenerForm.cookieName.$dirty) && listenerForm.cookieName.$error">
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            <span ng-message="pattern">{{'aws.errors.nameLimit'|translate}}</span>
+                            <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                        <span class="notNull">*</span>{{'aws.loadbalance.balanceAlgorithm'|translate}}：
+                    </label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-tooltip-template="'balanceAlgorithm.html'"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <ui-select ng-model="listener.algorithm">
+                            <ui-select-match placeholder="{{'aws.loadbalance.selectAlgorithm'|translate}}">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="algorithm in algorithmList | filter: {name: $select.search}">
+                                <div ng-bind-html="algorithm.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{'aws.loadbalance.maxConnections'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.loadbalance.info.maxConnections'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <input type="text" class="form-controls" name="connectionLimit" ng-model="listener.connectionLimit" placeholder="{{'aws.loadbalance.inputMaxConnections'|translate}}"  min="1" max="65535" limitnumrange />
+                        <div class="error" ng-messages="(submitValid || listenerForm.connectionLimit.$dirty) && listenerForm.connectionLimit.$error">
+                            <span ng-message="limitnumrange">{{'aws.errors.limit_1_65535'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group healthcheck">
+                    <label class="control-label">
+                        <span class="question-tip icon-aw-bz" uib-popover="{{'aws.loadbalance.healthcheckTips'|translate}}" popover-enable="true" popover-trigger="mouseenter" popover-placement = "top"></span>
+                        <span class="notNull">*</span>{{'aws.loadbalance.healthcheck'|translate}}：
+                    </label>
+                    <label class="control-label"><i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.loadbalance.info.healthcheck'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>{{'aws.loadbalance.healthcheckWay'|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="listener.healthcheckWay" ng-change="changeHealthcheckWay(listener.healthcheckWay)" ng-disabled="lisEdit">
+                            <ui-select-match placeholder="{{'aws.loadbalance.selectHealthcheckWay'|translate}}">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="healthcheckWay in healthcheckWayList | filter: {name: $select.search}">
+                                <div ng-bind-html="healthcheckWay.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="control-group healthcheck">
+                    <label class="control-label">&nbsp;</label>
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.loadbalance.delay'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.loadbalance.info.delay'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <input type="text" class="form-controls" name="delay" ng-model="listener.delay" placeholder="{{'aws.loadbalance.inputNumber'|translate}}"  min="1" max="65535" limitnumrange required />
+                        <div class="error" ng-messages="(submitValid || listenerForm.delay.$dirty) && listenerForm.delay.$error">
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            <span ng-message="limitnumrange">{{'aws.errors.limit_1_65535'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group healthcheck">
+                    <label class="control-label">&nbsp;</label>
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.loadbalance.overtime'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.loadbalance.info.overtime'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <input type="text" class="form-controls" name="overtime" ng-model="listener.overtime" placeholder="{{'aws.loadbalance.inputNumber'|translate}}"  min="1" max="65535" limitnumrange required />
+                        <div class="error" ng-messages="(submitValid || listenerForm.overtime.$dirty) && listenerForm.overtime.$error">
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            <span ng-message="limitnumrange">{{'aws.errors.limit_1_65535'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group healthcheck">
+                    <label class="control-label">&nbsp;</label>
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.loadbalance.maxRetries'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.loadbalance.info.maxRetries'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <input type="text" class="form-controls" name="maxRetries" ng-model="listener.maxRetries" placeholder="{{'aws.loadbalance.inputNumber'|translate}}"  ng-pattern="/^([1-9]|10)$/" required />
+                        <div class="error" ng-messages="(submitValid || listenerForm.maxRetries.$dirty) && listenerForm.maxRetries.$error">
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            <span ng-message="pattern">{{'aws.errors.zerototen'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group healthcheck" ng-if = "urlShow">
+                    <label class="control-label">&nbsp;</label>
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.loadbalance.url'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.loadbalance.info.url'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <input type="text" class="form-controls" name="url" ng-model="listener.url" placeholder="{{'aws.loadbalance.inputUrl'|translate}}"  ng-maxlength="128" ng-pattern="/^\//" required />
+                        <div class="error" ng-messages="(submitValid || listenerForm.url.$dirty) && listenerForm.url.$error">
+                            <span ng-message="maxlength">{{'aws.errors.maxlength128'|translate}}</span>
+                            <span ng-message="pattern">{{'aws.errors.httpCheck'|translate}}</span>
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group healthcheck" ng-if = "urlShow">
+                    <label class="control-label">&nbsp;</label>
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.loadbalance.httpStatus'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.loadbalance.info.httpStatus'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <input type="text" class="form-controls" name="httpStatus" ng-model="listener.httpStatus" placeholder="{{'aws.loadbalance.inputHttpStatus'|translate}}"  min="200" max="204" limitnumrange required />
+                        <div class="error" ng-messages="(submitValid || listenerForm.httpStatus.$dirty) && listenerForm.httpStatus.$error">
+                            <span ng-message="limitnumrange">{{'aws.errors.limit_200_204'|translate}}</span>
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="listenerConfirm(listenerForm)">{{'aws.action.ok'|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+    </div>
+</script>
+
+
+<script type="text/ng-template" id="createServerModel.html">
+    <div class="modal-step modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title clearfix">{{modalTitle}}</h3>
+            <ul class="steps-sytle-ver steps-sytle-ver-two clearfix">
+                <li class="clearfix step-start lbStep" ng-class="{'active':inStepOneBar}">
+                    <div class="inner">
+                        <span>{{"aws.loadbalance.chooseIns"|translate }}</span>
+                        <i>1</i>
+                    </div>
+                </li>
+                <li class="clearfix step-end lbStep"  ng-class="{'active':inStepTwoBar}">
+                    <div class="inner">
+                        <span>{{"aws.loadbalance.setPortWeight"|translate }}</span>
+                        <i>2</i>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="modal-body">
+            <div class="createIns" ng-show="inStepOne">
+                <div class="table-action">
+                    <!-- <div class="table-label">
+                        <span class="notNull">*</span><span>{{"aws.loadbalance.chooseIns"|translate }}：</span>
+                        <div class="notes">(可多选)</div>
+                    </div> -->
+                    <div type="button" class="btn btn-renovat right-ports" ng-click="refreshInsTable()">
+                        <i class="icon-aw-refresh"></i>
+                    </div>
+                    <div class="search-box right-ports">
+                        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+                        </form>
+                    </div>
+                    <div class="select-box right-ports" ng-if = "false">
+                        <ui-select ng-model="select.status" ng-change="changeType(select.status)">
+                            <ui-select-match placeholder="{{'aws.loadbalance.selectStatus'|translate}}">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="status in statusList | filter: {name: $select.search}">
+                                <div ng-bind-html="status.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="table-content">
+                    <empty-tip empty-type="loadData"></empty-tip>
+                    <table ng-table="tableParams" class="table">
+                        <colgroup>
+                            <col width="5%">
+                            <col width="35%">
+                            <col width="35%">
+                            <col width="25%">
+                        </colgroup>
+                        <tr ng-repeat="ins in $data">
+                            <td header="'headerInsCheckbox.html'">
+                                <label class="checkbox">
+                                    <input type="checkbox" ng-model="checkboxes.items[ins.uid]" />
+                                    <i class="iconfont"></i>
+                                </label>
+                            </td>
+                            <td data-title="'aws.instances.cloudInstanceName'|translate" sortable="'name'">
+                                <div class="edit-name">
+                                    <span title="{{ins.name}}">{{ins.name}}</span>
+                                </div>
+                            </td>
+                            <td data-title="'aws.loadbalance.ipAddr'|translate" sortable="'ipAddrs_long'">
+                                <div class="control-group radio-group">
+                                    <div class="controls">
+                                        <div class="radio-item radioIns">
+                                            <label ng-repeat = "ipAddr in ins.ipAddrs track by $index">
+                                                <input type="radio" name="radio_{{ins.uid}}" value="{{ipAddr}}" ng-model="ins.ipAddr" />
+                                                <i class="iconfont"></i>{{ipAddr}}
+                                          </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-title="'aws.loadbalance.status'|translate" sortable="'status'">
+                                <span ng-class="{
+                                'bg-green':(ins.status=='active'||ins.status=='up'),
+                                'bg-blue':(ins.status=='building'||ins.status=='build'||ins.status=='powering-off'||ins.status=='powering-on'||ins.status=='deleting'||ins.status=='deleted'||ins.status=='soft-deleting'||ins.status=='soft-delete'||ins.status=='reboot_pending'||ins.status=='reboot'||ins.status=='pausing'||ins.status=='unpausing'||ins.status=='suspending'||ins.status=='resuming'||ins.status=='resize'||ins.status=='resize_prep'||ins.status=='resize_finish'||ins.status=='resize_migrating'||ins.status=='image_backup'||ins.status=='image_snapshot'||ins.status=='spawning'||ins.status=='migrating'||ins.status=='rebuilding'||ins.status=='rebuild'||ins.status=='retyping'),
+                                'bg-orange':(ins.status=='stopped'||ins.status=='shutoff'||ins.status=='paused'||ins.status=='suspended'||ins.status=='resized'||ins.status=='verify_resize'||ins.status=='revert_resize'||ins.status=='down'||ins.status=='unknow'||ins.status=='unrecognized'),'bg-red':(ins.status=='error')
+                                }">
+                                    {{'aws.instances.table.status.'+ ins.status | translate}}
+                                    <i ng-class="{'icon-aw-refresh':(ins.status=='build'||ins.status=='building' || ins.status=='soft-deleting'|| ins.status=='powering-off' ||ins.status=='powering-on' ||ins.status=='deleting' ||ins.status=='reboot'||ins.status=='reboot_pending' || ins.status=='resuming' || ins.status=='suspending' || ins.status=='unpausing' || ins.status=='pausing'  || ins.status =='resize_migrating' || ins.status =='resized' || ins.status =='resize_prep' || ins.status =='resize_finish'  || ins.status =='image_backup' || ins.status =='image_snapshot' || ins.status =='spawning' || ins.status == 'verify_resize' || ins.status =='resize' || ins.status =='rebuilding' || ins.status =='rebuild' || ins.status =='migrating')}" class="aw-spin"></i>
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <form name="portWeightForm" class="portWeight clearFix" ng-show="inStepTwo" novalidate>
+                <!-- <div class="table-label"><span class="notNull">*</span>{{"aws.loadbalance.writePortWeight"|translate }}：</div> -->
+                <div class="table-content">
+                    <table class="table">
+                        <colgroup>
+                            <col width="40%">
+                            <col width="30%">
+                            <col width="30%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>{{"aws.instances.cloudInstanceName"|translate }}</th>
+                                <th>{{"aws.loadbalance.port"|translate }}</th>
+                                <th>{{"aws.loadbalance.weight"|translate }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="serverIns in checkedInsList track by $index">
+                                <td>
+                                    <div class="edit-name">
+                                        <span title="{{serverIns.name}}">{{serverIns.name}}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-controls" name="port_{{$index}}" ng-model="serverIns.port" placeholder="{{'aws.loadbalance.port_1_65535'|translate}}"  min="1" max="65535" limitnumrange required />
+                                    <div class="errors" ng-messages="(submitValid || portWeightForm['port_'+$index].$dirty) && portWeightForm['port_'+$index].$error">
+                                        <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                        <span ng-message="limitnumrange">{{'aws.errors.limit_65535'|translate}}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-controls" name="weight_{{$index}}" ng-model="serverIns.weight" placeholder="{{'aws.loadbalance.weight_1_100'|translate}}"  min="1" max="100" limitnumrange required />
+                                    <div class="errors" ng-messages="(submitValid || portWeightForm['weight_'+$index].$dirty) && portWeightForm['weight_'+$index].$error">
+                                        <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                        <span ng-message="limitnumrange">{{'aws.errors.limit_1_100'|translate}}</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <div ng-show = "inStepOne"> 
+                <button class="btn btn-info" type="button" ng-disabled="checkedItems.length < 1"  ng-click="stepToTwo(checkedItems)">
+                    {{'aws.action.nextStep'|translate}}
+                </button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                    {{'aws.action.cancel'|translate}}
+                </button>
+            </div>
+            <div ng-show = "inStepTwo">
+                <div>
+                    <button class="btn btn-default" type="button" ng-click="stepToOne()">
+                        {{'aws.action.lastStep'|translate}}
+                    </button>
+                    <button class="btn btn-info" type="button" ng-click="createServer(portWeightForm)">
+                        {{'aws.action.add'|translate}}
+                    </button>
+                    <!-- <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                        {{'aws.action.cancel'|translate}}
+                    </button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="headerInsCheckbox.html">
+    <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+        <i class="iconfont"></i>
+    </label>
+</script>
+
+
+<script type="text/ng-template" id="editServerModel.html">
+    <div class="modal-common modal-smallest">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{modalTitle}}</h3>
+        </div>
+        <div class="modal-body">
+            <form name="editServerForm" novalidate>
+                <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.loadbalance.name'|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="name" ng-model="server.name" placeholder="{{'aws.loadbalance.inputName'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\.)*$/" ng-maxlength="32" required />
+                        <div class="error" ng-messages="(submitValid || editServerForm.name.$dirty) && editServerForm.name.$error">
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            <span ng-message="pattern">{{'aws.errors.nameLimit'|translate}}</span>
+                            <span ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.loadbalance.weight'|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.loadbalance.info.weight'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <input type="text" class="form-controls" name="weight" ng-model="server.weight" placeholder="{{'aws.loadbalance.input_1_100'|translate}}" min="1" max="100" limitnumrange required />
+                        <div class="error" ng-messages="(submitValid || editServerForm.weight.$dirty) && editServerForm.weight.$error">
+                            <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                            <span ng-message="limitnumrange">{{'aws.errors.limit_1_100'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="editServerConfirm(editServerForm)">{{'aws.action.ok'|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="balanceSuccess.html">
+    <div class="modal-common lbSuccess-modal">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="addConfigLater()">×</button>
+            <h3 class="modal-title">{{"aws.loadbalance.createBalanceSuccess"|translate }}</h3>
+        </div>
+        <div class="modal-body">
+            <div class="successTips">
+                <i class="icon-aw-correct"></i>
+                <span>{{"aws.loadbalance.createBalanceSucTips"|translate }}</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-info" type="button" ng-click="addConfigNow()">{{"aws.loadbalance.createConf"|translate }}</button>
+            <button class="btn btn-default" type="button" ng-click="addConfigLater()">{{"aws.loadbalance.ceeateLater"|translate }}</button>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="balanceAlgorithm.html">
+    <div style="text-align:left">轮询算法：按顺序把每个新的连接请求分配给下一个服务器，最终把所有请求平分给所有的服务器。</div>
+    <div style="text-align:left">最少连接：系统把新的连接请求分配给当前连接数目最少的服务器。</div>
+    <div style="text-align:left">源IP算法：将请求的源IP地址作为散列键（HashKey），从静态分配的散列表找出对应的服务器。</div>
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

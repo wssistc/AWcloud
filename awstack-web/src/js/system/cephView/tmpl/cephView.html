@@ -1,0 +1,27 @@
+
+<div ng-if="view.isView">
+    <div class = "page-inner" ng-controller="cephViewCtrl">
+        <div class="tab-offset-right">
+            <ul class="ceph-tabs nav nav-tabs  nav-ctrl nav-justified">
+                <li ng-class="{active:!view.istable}" class="uib-tab nav-item " ng-click="view.getCephViewChart()">
+                    <a class="view"><i class="icon-aw-xtgl"></i></a>
+                </li>
+                <li ng-class="{active:view.istable}" class="uib-tab nav-item"  ng-click="view.getCephViewTable()">
+                    <a class="view" ><i class="icon-aw-sort"></i></a>
+                </li>
+            </ul>
+        </div>
+        <div ng-include="view.cephViewTemp"></div>
+    </div>
+</div>
+<div ng-if="view.isViewInfo">
+    <div ng-include="'js/system/cephView/tmpl/cephViewInfo.html'"></div>
+</div>
+
+
+
+
+
+
+
+

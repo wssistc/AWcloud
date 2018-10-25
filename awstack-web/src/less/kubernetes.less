@@ -1,0 +1,1206 @@
+.k8s-modal {
+    .add-label{
+        a{  
+            float: left;
+            line-height: 32px;
+            color: #666666;
+            i{
+                color: #51a3ff;
+            }
+        }
+    }
+    .modal-header{
+        padding: 0px !important;
+        margin-bottom: 0px !important;
+        height: 70px !important;
+    }
+  .lg-modal{
+      width: 730px !important;
+      padding: 0px;
+      .steps-item{
+        li{
+            &.step-start{
+                &:after{
+                    width:100px !important;
+                }
+            }
+            &.step-end{
+                &:after{
+                    width:100px !important;
+                }
+            }
+        }
+        .active{
+            i{
+                background: #51a3ff !important;
+            }
+        }
+      } 
+  }
+  .cluster-first {
+    height: 310px;
+    overflow-y: auto;
+  }
+  .cluster-next {
+        margin-top: 20px;
+        height: 600px;
+        overflow-y: auto;
+    .controls{
+        a{
+            color: #666666;
+            i{
+                color: #51a3ff;
+            }
+        }
+    }
+    .deleteNotOne{
+        margin-left: 10px
+    }
+  }
+  .labels-group {
+    position: relative;
+    margin-bottom: 0;
+    .label-name {
+      margin-left: 9%;
+      
+      float: left;
+    }
+    .add {
+        
+     
+      &:hover {
+       
+        cursor: pointer;
+      }
+    }
+    .hiden {
+    
+      &:hover {
+      
+        cursor: pointer;
+      }
+    }
+    .hide-labels {
+      width: 30%;
+      float: right;
+    }
+    .left {
+      margin-left: 7%;
+      width: 43%;
+      float: left;
+    }
+    .right {
+      width: 43%;
+      float: left;
+    }
+    .delete {
+      position: absolute;
+      right: 0px;
+      font-size: 20px;
+      i{
+        color: red;
+        font-size: 14px;
+       
+    }
+    .icon-aw-add-to2{
+        color:#51a3ff
+    }
+      &:hover {
+       
+        cursor: pointer;
+      }
+    }
+  }
+ 
+  .node-selectors-group {
+    position: relative;
+    margin-bottom: 0;
+    .label-name {
+      margin-left: 9%;
+      width: 20%;
+      float: left;
+      margin-bottom: 10px;
+    }
+    .error-msg {
+      margin-left: 9%;
+      float: left;
+      margin-bottom: 10px;
+    }
+    .select-key {
+      width: 26%;
+      float: left;
+      margin-left: -7%;
+      margin-bottom: 10px;
+      .error{
+        float: left;
+        color: red;
+        font-size: 12px;
+      }
+      .controls {
+        width: 65%;
+        &.two {
+          .form-controls {
+            width: 49%;
+            float: left;
+            &:first-child {
+              margin-right: 2%;
+            }
+          }
+        }
+        &.two-select {
+          .select {
+            width: 16%;
+            float: left;
+            margin-right: 2%;
+          }
+          > .form-controls {
+            width: 82%;
+            float: left;
+          }
+        }
+        .form-controls {
+          width: 100%;
+        }
+        .btn-tips {
+          position: absolute;
+          right: -30px;
+          top: 0;
+          cursor: pointer;
+          font-size: 20px;
+         
+        }
+      }
+    }
+    .select-type {
+      width: 16%;
+      float: left;
+      margin-left: 2%;
+      margin-bottom: 10px;
+      .controls {
+        width: 65%;
+        &.two {
+          .form-controls {
+            width: 49%;
+            float: left;
+            &:first-child {
+              margin-right: 2%;
+            }
+          }
+        }
+        &.two-select {
+          .select {
+            width: 16%;
+            float: left;
+            margin-right: 2%;
+          }
+          > .form-controls {
+            width: 82%;
+            float: left;
+          }
+        }
+        .form-controls {
+          width: 100%;
+        }
+        .btn-tips {
+          position: absolute;
+          right: -30px;
+          top: 0;
+          cursor: pointer;
+          font-size: 20px;
+         
+        }
+      }
+    }
+    .select-value {
+      width: 26%;
+      float: left;
+      margin-left: 2%;
+      margin-bottom: 10px;
+        .error{
+            float: left;
+            color: red;
+            font-size: 12px;
+        }
+      .controls {
+        width: 65%;
+        &.two {
+          .form-controls {
+            width: 49%;
+            float: left;
+            &:first-child {
+              margin-right: 2%;
+            }
+          }
+        }
+        &.two-select {
+          .select {
+            width: 16%;
+            float: left;
+            margin-right: 2%;
+          }
+          > .form-controls {
+            width: 82%;
+            float: left;
+          }
+        }
+        .form-controls {
+          width: 100%;
+        }
+        .btn-tips {
+          position: absolute;
+          right: -30px;
+          top: 0;
+          cursor: pointer;
+          font-size: 20px;
+         
+        }
+      }
+    }
+    .delete {
+      position: absolute;
+      right: 0px;
+      font-size: 20px;
+        i{
+            color: red;
+            font-size: 14px;
+        
+        }
+        .icon-aw-add-to2{
+            color:#51a3ff
+        }
+      &:hover {
+       
+        cursor: pointer;
+      }
+    }
+  }
+  .container-group {
+    position: relative;
+    margin-top: 2px;
+    margin-bottom: 10px;
+    margin-left: 6%;
+    margin-right: 6%;
+    text-align: left;
+    .container-label {
+      margin-left: 3%;
+      float: left;
+    }
+    .delete {
+      margin-right: 3%;
+      i{
+        color: red;
+        }
+        .icon-aw-add-to2{
+            color:#51a3ff
+        }
+      &:hover {
+       
+        cursor: pointer;
+      }
+    }
+    .container-detail {
+      position: relative;
+      margin-left: 4%;
+      margin-right: 4%;
+      width: auto;
+      overflow: hidden;
+      .controls{
+          line-height: 32px;
+      }
+      .container-image {
+        margin-right: -2.5%;
+        margin-bottom: -15px;
+        .image-labels {
+          margin-bottom: 0;
+        }
+        .image-control {
+          position: relative;
+          .left {
+            width: 43%;
+            float: left;
+            margin-left: 18%;
+            margin-bottom: 10px;
+            .image-label {
+              float: left;
+              text-align: right;
+              font-size: 14px;
+              font-weight: normal;
+              line-height: 32px
+            }
+            .controls {
+              width: 65%;
+              &.two {
+                .form-controls {
+                  width: 49%;
+                  float: left;
+                  &:first-child {
+                    margin-right: 2%;
+                  }
+                }
+              }
+              &.two-select {
+                .select {
+                  width: 16%;
+                  float: left;
+                  margin-right: 2%;
+                }
+                > .form-controls {
+                  width: 82%;
+                  float: left;
+                }
+              }
+              .form-controls {
+                width: 100%;
+              }
+              .btn-tips {
+                position: absolute;
+                right: -30px;
+                top: 0;
+                cursor: pointer;
+                font-size: 20px;
+              }
+            }
+          }
+          .right {
+            width: 39%;
+            float: left;
+            margin-bottom: 10px;
+            .image-label {
+              float: left;
+              text-align: right;
+              font-size: 14px;
+              font-weight: normal;
+                line-height: 32px;
+            }
+            .controls {
+              width: 65%;
+              &.two {
+                .form-controls {
+                  width: 49%;
+                  float: left;
+                  &:first-child {
+                    margin-right: 2%;
+                  }
+                }
+              }
+              &.two-select {
+                .select {
+                  width: 16%;
+                  float: left;
+                  margin-right: 2%;
+                }
+                > .form-controls {
+                  width: 82%;
+                  float: left;
+                }
+              }
+              .form-controls {
+                width: 100%;
+              }
+              .btn-tips {
+                position: absolute;
+                right: -30px;
+                top: 0;
+                cursor: pointer;
+                font-size: 20px;
+               
+              }
+            }
+          }
+        }
+      }
+      .container-cmds {
+        margin-bottom: 10px;
+        .controls{
+            text-align: left;
+        }
+        .cmd-name {
+          margin-left: 6%;
+          float: left;
+        }
+        .add-cmds {
+          width: 25%;
+          float: left;
+        }
+        .add {
+         
+        
+          &:hover {
+         
+            cursor: pointer;
+          }
+        }
+        .hiden {
+         
+        
+          &:hover {
+           
+            cursor: pointer;
+          }
+        }
+        .hide-cmds {
+          width: 35%;
+          float: right;
+        }
+        .cmd-control {
+            margin-left: 13%;
+            line-height: 32px;
+            position: relative;
+            margin-bottom: 10px;
+          .env-label {
+            float: left;
+            width: 21.1%;
+            margin-bottom: 0;
+            text-align: right;
+            color: @color;
+            font-size: 14px;
+            font-weight: normal;
+            padding-right: 5px;
+          }
+          .env-name {
+            width: 70%;
+            border-radius: @borderRadius;
+            outline: none;
+          }
+          .delete {
+              margin-left: 2%;
+            margin-right: 5%;
+            i{
+                font-size: 14px;
+                color: red;
+            }
+            .icon-aw-add-to2{
+                color:#51a3ff
+            }
+            &:hover {
+             
+              cursor: pointer;
+            }
+          }
+        }
+        .error {
+          margin-left: 31%;
+          color: #e74c3c;
+          font-size: 12px;
+        }
+      }
+      .container-envs {
+        margin-bottom: 10px;
+        .controls{
+            text-align: left;
+        }
+        .env-name {
+          margin-left: 6%;
+          float: left;
+        }
+        .add-envs {
+
+          float: left;
+        }
+        .add {
+         
+          
+          &:hover {
+           
+            cursor: pointer;
+          }
+        }
+        .hiden {
+         
+         
+          &:hover {
+           
+            cursor: pointer;
+          }
+        }
+        .hide-envs {
+          width: 35%;
+          float: right;
+        }
+        .env-control {
+          position: relative;
+          .left {
+            width: 37%;
+            float: left;
+            margin-left: 19%;
+            .env-name-label {
+              float: left;
+              text-align: right;
+              color: @color;
+              font-size: 14px;
+              font-weight: normal;
+              line-height:32px;
+              //padding-right: 5px;
+            }
+            .env-name {
+              width: 80%;
+              margin-left: 5px;
+              border-radius: @borderRadius;
+              outline: none;
+            }
+          }
+          .right {
+            width: 37%;
+            float: left;
+            margin-left: 2%;
+            .env-value-label {
+              float: left;
+              text-align: right;
+              color: @color;
+              font-size: 14px;
+              font-weight: normal;
+              padding-right: 5px;
+              line-height: 32px;
+            }
+            .env-value {
+              width: 75%;
+              border-radius: @borderRadius;
+              outline: none;
+            }
+          }
+          .delete {
+            width: 5%;
+            margin-right: 5px;
+            line-height: 32px;
+            i{
+                font-size: 14px;
+                color: red;
+            }
+            .icon-aw-add-to2{
+                color:#51a3ff
+            }
+            &:hover {
+             
+              cursor: pointer;
+            }
+          }
+        }
+        .error {
+            margin-left: 31%;
+            color: #e74c3c;
+            font-size: 12px;
+          width: 100%;
+          float: left;
+          margin-left: 25.5%;
+        //   margin-bottom: 10px;
+        //   line-height: 15px;
+        }
+      }
+      .container-ports {
+          text-align: left;
+        margin-bottom: 10px;
+        .controls{
+            text-align: left;
+        }
+        .port-labels {
+          margin-left: 6%;
+          float: left;
+        }
+        .add-ports {
+          width: 25%;
+          float: left;
+        }
+        .add {
+         
+          &:hover { 
+            cursor: pointer;
+          }
+        }
+        .hiden {
+         
+         
+          &:hover {
+            
+            cursor: pointer;
+          }
+        }
+        .hide-ports {
+          width: 35%;
+          float: right;
+        }
+        .ports-label {
+          margin-left: 19%;
+          margin-bottom: 10px;
+          font-weight: normal;
+        }
+        .delete {
+          margin-right: 3%;
+          i{
+            font-size: 14px;
+            color: @red;
+        }
+        .icon-aw-add-to2{
+            color:#51a3ff
+        }
+         
+          &:hover {
+           
+            cursor: pointer;
+          }
+        }
+        .ports-control {
+          position: relative;
+          .left {
+            width: 41%;
+            float: left;
+            margin-left: 19%;
+            .ports-label-name {
+                width: 30%;
+              float: left;
+              text-align: right;
+              color: @color;
+              font-size: 14px;
+              font-weight: normal;
+              line-height: 32px;
+            }
+            .ports-label-value {
+              width: 65%;
+              border-radius: @borderRadius;
+              outline: none;
+            }
+          }
+          .right {
+            width: 40%;
+            float: left;
+            .ports-label-name {
+                width: 30%;
+                float: left;
+                text-align: right;
+                color: @color;
+                font-size: 14px;
+                font-weight: normal;
+                line-height: 32px;
+            }
+            .ports-label-value {
+              width: 70%;
+              border-radius: @borderRadius;
+              outline: none;
+            }
+            .controls {
+                padding-left: 0px;
+              width: 70%;
+              &.two {
+                .form-controls {
+                  width: 49%;
+                  float: left;
+                  &:first-child {
+                    margin-right: 2%;
+                  }
+                }
+              }
+              &.two-select {
+                .select {
+                  width: 16%;
+                  float: left;
+                  margin-right: 2%;
+                }
+                > .form-controls {
+                  width: 82%;
+                  float: left;
+                }
+              }
+              .form-controls {
+                width: 100%;
+              }
+              .btn-tips {
+                position: absolute;
+                right: -30px;
+                top: 0;
+                cursor: pointer;
+                font-size: 20px;
+               
+              }
+            }
+          }
+        }
+        .left-error {
+          margin-left: 31%;
+          color: #e74c3c;
+          font-size: 12px;
+        }
+        .left-ports-error{
+            margin-left: 30%;
+            color: #e74c3c;
+            font-size: 12px;
+        }
+        .right-ports-error{
+            margin-left: 30%;
+            color: #e74c3c;
+            font-size: 12px;
+        }
+        .right-error {
+          margin-left: 60%;
+          color: #e74c3c;
+          font-size: 13px;
+        }
+      }
+      .container-volumeMounts {
+        margin-bottom: 10px;
+        text-align: left;
+        .controls{
+            text-align: left;
+        }
+        .volumeMounts-label {
+          margin-left: 6%;
+          float: left;
+        }
+        .add-volumeMounts {
+          width: 25%;
+          float: left;
+        }
+        .hide-volumeMounts {
+          width: 35%;
+          float: right;
+        }
+        .add {
+         
+         
+          &:hover {
+            
+            cursor: pointer;
+          }
+        }
+        .hiden {
+         
+        
+          &:hover {
+            
+            cursor: pointer;
+          }
+        }
+        .volumeMounts-index {
+          margin-left: 19%;
+          margin-bottom: 10px;
+          font-weight: normal;
+        }
+        .delete {
+          margin-right: 3%;
+          i{
+            font-size: 14px;
+            color: red;
+        }
+        .icon-aw-add-to2{
+            color:#51a3ff
+        }
+          &:hover {
+           
+            cursor: pointer;
+          }
+        }
+        .volumeMount-control {
+          position: relative;
+          margin-bottom: 10px;
+          .left {
+            width: 51%;
+            float: left;
+            margin-left: 19%;
+            .volumeMount-name-label {
+              float: left;
+              text-align: right;
+              font-size: 14px;
+              font-weight: normal;
+              line-height: 32px;
+            }
+            .controls {
+              width: 68%;
+              padding-left: 0px;
+              &.two {
+                .form-controls {
+                  width: 49%;
+                  float: left;
+                  &:first-child {
+                    margin-right: 2%;
+                  }
+
+                }
+              }
+              &.two-select {
+                .select {
+                  width: 16%;
+                  float: left;
+                  margin-right: 2%;
+                }
+                > .form-controls {
+                  width: 82%;
+                  float: left;
+                }
+              }
+              .form-controls {
+                width: 100%;
+              }
+              .btn-tips {
+                position: absolute;
+                right: -30px;
+                top: 0;
+                cursor: pointer;
+                font-size: 20px;
+              }
+            }
+          }
+          .right {
+            width: 30%;
+            float: left;
+            .volumeMount-readOnly-label {
+              float: left;
+              text-align: right;
+              font-size: 14px;
+              font-weight: normal;
+              line-height: 32px;
+            }
+            .controls {
+              width: 55%;
+              &.two {
+                .form-controls {
+                  width: 43%;
+                  float: left;
+                  &:first-child {
+                    margin-right: 2%;
+                  }
+                }
+              }
+              &.two-select {
+                .select {
+                  width: 16%;
+                  float: left;
+                  margin-right: 2%;
+                }
+                > .form-controls {
+                  width: 75%;
+                  float: left;
+                }
+              }
+              .form-controls {
+                width: 90%;
+              }
+              .btn-tips {
+                position: absolute;
+                right: -30px;
+                top: 0;
+                cursor: pointer;
+                font-size: 20px;
+              }
+            }
+          }
+          .middle {
+            float: left;
+            margin-left: 19%;
+            width: 86%;
+            .volumeMount-label-name {
+              float: left;
+              text-align: right;
+              font-size: 14px;
+              font-weight: normal;
+              line-height: 32px;
+            }
+            .volumeMount-label-value {
+              width: 76%;
+              border-radius: @borderRadius;
+              outline: none;
+            }
+          }
+        }
+        .left-error {
+          margin-left: 15%;
+        //   color: red;
+          font-size: 12px;
+          color:#e74c3c;
+        }
+      }
+      .container-resources {
+        // margin-bottom: -15px;
+        width: 100%;
+        height: 32px;
+        .resources-labels {
+          margin-left: 6%;
+          margin-bottom: 0;
+          float: left;
+        }
+        .hiden {
+         
+         
+          &:hover {
+           
+            cursor: pointer;
+          }
+        }
+        .hide-resources {
+          width: 35%;
+          float: right;
+        }
+        .resource-control {
+          position: relative;
+          .left {
+            width: 40%;
+            float: left;
+            margin-left: 19%;
+            margin-bottom: 10px;
+            .resource-label {
+                width: 37%;
+              float: left;
+              text-align: right;
+              font-size: 14px;
+              font-weight: normal;
+              line-height: 32px;
+            }
+            .resource-value {
+              width: 60%;
+              border-radius: @borderRadius;
+              outline: none;
+            }
+          }
+          .right {
+            width: 38%;
+            float: left;
+            margin-bottom: 10px;
+            .resource-label {
+                width: 40%;
+              float: left;
+              text-align: right;
+              font-size: 14px;
+              font-weight: normal;
+              line-height: 32px;
+            }
+            .resource-value {
+              width: 60%;
+              border-radius: @borderRadius;
+              outline: none;
+            }
+          }
+          .left-error {
+            width: 61%;
+            float: left;
+            margin-left: 37%;
+            color: #e74c3c;
+            font-size: 12px;
+          }
+          .right-error {
+            width: 68%;
+            float: left;
+            margin-left: 40%;
+            color: #e74c3c;
+            font-size: 12px;
+          }
+        }
+      }
+    }
+  }
+  .service-group {
+    position: relative;
+    margin-left: 5%;
+    //margin-right: 5%;
+    .service-ports {
+      margin-bottom: 10px;
+      .port-index-label {
+        position: relative;
+        margin-bottom: 10px;
+      }
+      .ports-control {
+        .left {
+          width: 45%;
+          float: left;
+          margin-left: 5%;
+          .ports-label-name {
+            float: left;
+            text-align: right;
+            font-size: 14px;
+            font-weight: normal;
+            border-radius: @borderRadius;
+          }
+          .ports-label-value {
+            width: 72%;
+            border-radius: @borderRadius;
+            outline: none;
+          }
+        }
+        .right {
+          width: 45%;
+          float: left;
+          .ports-label-name {
+            float: left;
+            text-align: right;
+            font-size: 14px;
+            font-weight: normal;
+            border-radius: @borderRadius;
+          }
+          .ports-label-value {
+            width: 72%;
+            border-radius: @borderRadius;
+            outline: none;
+          }
+        }
+        .full {
+          width: 90%;
+          float: left;
+          margin-left: 5%;
+          .ports-label-name {
+            float: left;
+            text-align: right;
+            font-size: 14px;
+            font-weight: normal;
+          }
+        }
+      }
+      .error {
+        position: relative;
+        margin-left: 16%;
+        margin-bottom: 5px;
+        color: red;
+        font-size: 13px;
+        line-height: 20px;
+      }
+    }
+  }
+  .node-label-group {
+    position: relative;
+    .left {
+      margin-left: 7%;
+      width: 43%;
+      float: left;
+    }
+    .right {
+      width: 43%;
+      float: left;
+    }
+    .add{
+      position: absolute;
+      right: 20px;
+      font-size: 20px;
+      i{
+        font-size: 14px;
+        color: @blue;
+      }
+      &:hover {
+        cursor: pointer;
+      }
+    }
+    .delete {
+      position: absolute;
+      right: 0px;
+      font-size: 20px;
+      i{
+        font-size: 14px;
+        color: red;
+      }
+      .icon-aw-add-to2{
+        color:#51a3ff
+    }
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+  .rolling-update-group {
+    position: relative;
+    width: auto;
+    .container-image {
+      margin-right: 0;
+      margin-bottom: -15px;
+      .image-labels {
+        margin-bottom: 0;
+      }
+      .image-control {
+        position: relative;
+        .left {
+          width: 45%;
+          float: left;
+          margin-left: 9%;
+          margin-bottom: 10px;
+          .image-label {
+            float: left;
+            text-align: right;
+            font-size: 14px;
+            font-weight: normal;
+          }
+          .controls {
+            width: 68%;
+            margin-left: 2%;
+            &.two {
+              .form-controls {
+                width: 49%;
+                float: left;
+                &:first-child {
+                  margin-right: 2%;
+                }
+              }
+            }
+            &.two-select {
+              .select {
+                width: 16%;
+                float: left;
+                margin-right: 2%;
+              }
+              > .form-controls {
+                width: 82%;
+                float: left;
+              }
+            }
+            .form-controls {
+              width: 100%;
+            }
+            .btn-tips {
+              position: absolute;
+              right: -30px;
+              top: 0;
+              cursor: pointer;
+              font-size: 20px;
+            }
+          }
+        }
+        .right {
+          width: 45%;
+          float: left;
+          margin-bottom: 10px;
+          .image-label {
+            float: left;
+            text-align: right;
+            font-size: 14px;
+            font-weight: normal;
+          }
+          .controls {
+            width: 68%;
+            margin-left: 2%;
+            &.two {
+              .form-controls {
+                width: 49%;
+                float: left;
+                &:first-child {
+                  margin-right: 2%;
+                }
+              }
+            }
+            &.two-select {
+              .select {
+                width: 16%;
+                float: left;
+                margin-right: 2%;
+              }
+              > .form-controls {
+                width: 82%;
+                float: left;
+              }
+            }
+            .form-controls {
+              width: 100%;
+            }
+            .btn-tips {
+              position: absolute;
+              right: -30px;
+              top: 0;
+              cursor: pointer;
+              font-size: 20px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.container-monitor {
+  .echarts {
+    height: 220px;
+    width: 100%;
+    min-height: 220px;
+    float: left;
+  }
+}

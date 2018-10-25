@@ -1,0 +1,85 @@
+<div class="page-inner deploy-box" ng-controller="steponeCtrl">
+  <div class="step-box">
+    <ul class="text-list clearfix">
+      <li class="first active">
+        <i class="icon-aw-pc"></i>
+        <p>{{'aws.register.info.hostChoice'|translate}}</p>
+      </li>
+      <li>
+        <i class="icon-aw-internet"></i>
+        <p>{{'aws.register.info.netSetting'|translate}}</p>
+        <div class="state-items">
+          <span class="icon-aw-angle-right"></span>
+          <span class="icon-aw-correct"></span>
+        </div>
+      </li>
+      <!-- <li>
+        <i class="icon-aw-user"></i>
+        <p>{{'aws.register.info.accSetting'|translate}}</p>
+        <div class="state-items">
+          <span class="icon-aw-angle-right"></span>
+          <span class="icon-aw-correct"></span>
+        </div>
+      </li> -->
+      <li class="last">
+        <i class="icon-aw-information"></i>
+        <p>{{'aws.register.info.infoSummary'|translate}}</p>
+        <div class="state-items">
+          <span class="icon-aw-angle-right"></span>
+          <span class="icon-aw-correct"></span>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="host-box">
+    <!-- 表格 start -->
+    <table class="table border">
+      <thead>
+      <tr>
+        <th class="check-all">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.checked" class="select-all">
+            <i class="icon-aw-square"></i>
+          </label>
+        </th>
+        <th>{{'aws.register.info.hostName'|translate}}</th>
+        <th>{{'aws.register.info.area'|translate}}</th>
+        <th>{{'aws.register.info.ManagementNetwork'|translate}}</th>
+        <th>{{'aws.register.info.cpu'|translate}}</th>
+        <th>{{'aws.register.info.mem'|translate}}</th>
+        <th>SSD <span ng-if="stepOneData[0].hostInfoMap.ssdUnit">({{stepOneData[0].hostInfoMap.ssdUnit}})</span></th>
+        <th>SATA <span ng-if="stepOneData[0].hostInfoMap.sataUnit">({{stepOneData[0].hostInfoMap.sataUnit}})</span></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="item in stepOneData">
+        <td class="check-td">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[item.id]">
+            <i class="icon-aw-square"></i>
+          </label>
+        </td>
+        <td class="col-2">
+          <span ng-dblclick="oneModule.edit(item)" ng-if="oneModule.editActive!==item.id">{{item.hostName}}</span>
+          <div class="edit-input" ng-if="oneModule.editActive===item.id">
+            <input type="text" ng-model="item.hostName" ng-blur="oneModule.save(item)" class="form-control" />
+            <i class="icon-aw-storage" ng-click="oneModule.save(item)"></i>
+          </div>
+        </td>
+        <td>{{item.regionName}}</td>
+        <td>{{item.hostInfoMap.ip}}</td>
+        <td>{{item.hostInfoMap.cpu.ht}}</td>
+        <td>{{item.hostInfoMap.mem | unitFilter | number:1}}</td>
+        <td>{{item.hostInfoMap.ssdAll}}</td>
+        <td>{{item.hostInfoMap.sataAll}}</td>
+      </tr>
+      </tbody>
+    </table>
+    <br>
+    <span ng-if="isChecked">节点信息不统一,请重新注册节点</span>
+    <div class="text-center">
+      <button class="btn btn-default" ng-click="oneModule.completeOne()" ng-disabled="oneModule.isDisabled || isChecked" type="button">{{'aws.register.info.next'|translate}}</button>
+    </div>
+  </div>
+</div>
+

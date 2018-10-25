@@ -1,0 +1,81 @@
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>备份</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <h3>
+	新建备份</h3>
+<p>
+	单击&ldquo;新建备份&rdquo;按钮，选择备份名称和备份类型，单击&ldquo;确定&rdquo;，对当前的云硬盘增加备份。</p>
+<p>
+	<strong>注意</strong>：<br />
+	当备份链中的某个备份状态为非可用（例如错误）时，将不能在此非正常备份的基础上继续进行增量备份。可以继续正常的创建全量备份，并在该全量备份的基础上进行创建增量备份。若备份为A（全量）&mdash;B（增量，状态为错误），若要在A的基础上继续进行增量备份的创建，可以将B删除，创建增量备份C，则变为A（全量）&mdash;&mdash;C（增量）。</p>
+<h3>
+	还原</h3>
+<p>
+	备份还原支持全量还原和增量还原。对于备份还原的源云硬盘，需要先确定云硬盘上是否有快照。如有快照依赖，则执行还原操作后，快照将不可使用。需请先删除相应快照再进行还原。</p>
+<p>
+	<strong>前提条件</strong></p>
+<ul>
+	<li>
+		待还原的云硬盘处于&ldquo;可用&rdquo;状态。</li>
+	<li>
+		如云硬盘处于&ldquo;使用中&rdquo;，则云主机需为&ldquo;关机&rdquo;状态。</li>
+</ul>
+<p>
+	<strong>操作步骤</strong></p>
+<ol>
+	<li>
+		在备份列表中勾选备份，单击&ldquo;还原&rdquo;按钮，将备份恢复到源云硬盘。即A的备份，将A进行还原。</li>
+	<li>
+		在弹出的确认框里单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+<h3>
+	删除备份</h3>
+<p>
+	<strong>注意</strong>：<br />
+	如果待删除的文件处于备份链中，则需要按照备份拓扑由下往上删除该文件所依赖的备份文件。</p>
+<p>
+	在备份文件列表中，勾选待删除的备份，单击&ldquo;删除&rdquo;按钮，在弹出的确认框中，自下而上删除备份文件，单击&ldquo;确定&rdquo;按钮。</p>
+<h3>
+	删除备份链</h3>
+<p>
+	在备份界面删除选定的备份链，将会删除该备份链下的所有备份。</p>
+<p>
+	当对备份链进行删除时，定时任务将会重启一个新的定时备份任务链，即从全量&mdash;增量&mdash;增量&mdash;...全量为止。</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

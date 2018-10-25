@@ -1,0 +1,66 @@
+<div ng-controller="dockerServiceDetailsCtrl">
+    <table class="table table-info">
+        <colgroup>
+            <col width="20%">
+            <col width="30%">
+            <col width="20%">
+            <col width="30%">
+        </colgroup>
+        <tr>
+            <td>{{"aws.k8s.dockerServices.name"|translate}}</td>
+            <td>{{serviceData.name}}</td>
+            <td>{{"aws.k8s.dockerServices.creationTimestamp"|translate}}</td>
+            <td>{{serviceData.metadata.creationTimestamp | localDate}}</td>
+        </tr>
+        <tr>
+            <td>{{"aws.k8s.dockerServices.clusterIP"|translate}}</td>
+            <td>{{serviceData.spec.clusterIP}}</td>
+            <td>{{"aws.k8s.dockerServices.type"|translate}}</td>
+            <td>{{serviceData.spec.type}}</td>
+        </tr>
+        <tr>
+            <td>{{"aws.k8s.dockerServices.labels"|translate}}</td>
+            <td>{{getLabels(serviceData.metadata.labels)}}</td>
+            <td>{{"aws.k8s.dockerServices.selectors"|translate}}</td>
+            <td>{{getLabels(serviceData.spec.selector)}}</td>
+        </tr>
+        <tr>
+            <td>{{"aws.k8s.dockerServices.portName"|translate}}</td>
+            <td>
+                {{serviceData.spec.ports.length > 0 ?
+                (serviceData.spec.ports[0].name || "None") : "None"}}
+            </td>
+            <td>{{"aws.k8s.dockerServices.port"|translate}}</td>
+            <td>
+                {{serviceData.spec.ports.length > 0 ? showPorts(serviceData.spec.ports, "port") : "None"}}
+            </td>
+        </tr>
+        <tr>
+            <td>{{"aws.k8s.dockerServices.nodePort"|translate}}</td>
+            <td>
+                {{serviceData.spec.ports.length > 0 ? (serviceData.spec.ports[0].nodePort ?
+                showPorts(serviceData.spec.ports, "nodePort") :
+                "None") : "None"}}
+            </td>
+            <td>{{"aws.k8s.dockerServices.targetPort"|translate}}</td>
+            <td>
+                {{serviceData.spec.ports.length > 0 ? showPorts(serviceData.spec.ports, "targetPort") : "None"}}
+            </td>
+        </tr>
+        <tr>
+            <td>{{"aws.k8s.dockerServices.useServiceWithinCluster"|translate}}</td>
+            <td colspan="3">
+                {{serviceData.spec.clusterIP + ":" + getAllPorts(serviceData.spec.ports, "port")}}{{"；"}}
+                {{serviceData.name + ":" + getAllPorts(serviceData.spec.ports, "port")}}
+                （推荐：在其它容器内部的应用程序直接使用【服务的名字】加【端口】的形式访问）
+            </td>
+            </tr>
+            <tr ng-show="serviceData.spec.ports.length > 0 && serviceData.spec.type === 'NodePort'">
+            <td>{{"aws.k8s.dockerServices.useServiceOutOfCluster"|translate}}</td>
+            <td colspan="3">
+                {{k8sNodes + ":" + getAllPorts(serviceData.spec.ports, "nodePort")}}
+                {{serviceData.spec.ports.length > 5 ? "（k8s集群的node节点过多，随机选择5个显示）" : ""}}
+            </td>
+        </tr>
+    </table>
+</div>

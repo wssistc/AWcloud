@@ -1,0 +1,72 @@
+<div class="view-content">
+  <div class="table-action">
+  <button class="btn btn-refresh" ng-click="getClusterList()"><i class="icon-aw-refresh"></i>{{'vmware.action.refresh'|translate}}</button>
+    <!-- <button type="button" data-toggle="modal" ng-click="addCluster()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新建集群</button> -->
+    <!-- <button type="button" data-toggle="modal" ng-click=""  class="btn btn-primary"><i class=""></i>添加主机</button>
+    <button type="button" data-toggle="modal" ng-click="" class="btn btn-default"><i class=""></i>将主机移入群集</button>
+    <button type="button" data-toggle="modal" ng-click=""  class="btn btn-primary"><i class=""></i>创建新虚拟机</button>
+    <button type="button" data-toggle="modal" ng-click="add()" class="btn btn-primary"><i class=""></i>创建新vAPP</button>
+    <button type="button" data-toggle="modal" ng-click=""  class="btn btn-primary"><i class=""></i>创建新资源池</button>
+    <div class="dropdown">
+      <button type="button" class="btn btn-info dropdown-toggle" ng-disabled="delisDisabled" data-toggle="dropdown">更多操作<i class=" icon-aw-angle-down"></i></button>
+      <ul class="dropdown-menu">
+        <li><button ng-click="" ></button></li>
+        <li><button ng-click="" ></button></li>
+        <li><button ng-click="" ></button></li>
+        <li><button ng-click="" ></button></li>
+      </ul>
+    </div> -->
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='搜索' />
+      </form>
+    </div>
+  </div>
+  <script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+      <i class="iconfont"></i>
+    </label>
+  </script>
+  <div class="table-content">
+    <!-- <empty-tip empty-type="loadData"></empty-tip> -->
+    <table ng-table="clusterTable" class="table " show-filter="false">
+      <colgroup>
+        <col width="5%">
+        <col width="15%">
+        <col width="15%">
+        <col width="15%">
+        <col width="15%">
+        <col width="15%">
+        <col width="20%">
+      </colgroup>
+      <tr ng-repeat="item in $data">
+        <td header="'headerCheckbox.html'">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[item.name]" />
+            <i class="iconfont"></i>
+          </label>
+        </td>
+        <td data-title="'名称'" sortable="'name'">
+          <span><a ng-click="goToClusterDetail(item.name)">{{item.name}}</a></span>
+        </td>
+        <td data-title="'可用CPU(GHz)'" sortable="'cpuAvailable'">
+          <span>{{item.cpuAvailable}} GHz</span>
+        </td>
+        <td data-title="'可用内存(GB)'" sortable="'memAvailable'">
+          <span>{{item.memAvailable}} GB</span>
+        </td>
+        <td data-title="'可用存储(GB)'" sortable="'diskAvailable'">
+          <span>{{item.diskAvailable}} GB</span>
+        </td>
+        <td data-title="'vSphere DRS'" sortable="'vSphereDRS'">
+          <span ng-class="{'green':item.vSphereDRS,'red':!item.vSphereDRS}">{{item._vSphereDRS}}</span>
+        </td>
+        <td data-title="'vSphere HA'" sortable="'vSphereHA'">
+          <span ng-class="{'green':item.vSphereHA,'red':!item.vSphereHA}">{{item._vSphereHA}}</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>

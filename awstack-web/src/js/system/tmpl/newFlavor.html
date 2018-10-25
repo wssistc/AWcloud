@@ -1,0 +1,90 @@
+    <div class="modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">新建云主机规格</h3>
+        </div>
+        <div class="modal-body">
+            <form name="flavorForm">
+                <!-- <div class="control-group">
+                    <label class="control-label">云主机启动源：</label>
+                    <div class="controls">
+                        <div class="btn-item-group middle">
+                            <button type="button" class="type-btn" ng-class='{"active":src=="local","disabled":disableLocal}'ng-disabled="disableLocal" ng-click="choseSrc('local')">
+                                <span>本地盘</span>
+                            </button>
+                            <button type="button" class="type-btn" ng-class='{"active":src=="volume","disabled":fromIns}' ng-disabled="fromIns" ng-click="choseSrc('volume')" licence-type="btn" id="system-spec-vm-volumeCreate">
+                                <span>云硬盘</span>
+                            </button>
+                        </div>
+                    </div>
+                </div> -->
+                <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>{{"aws.system.flavor.name"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" name="name" class="form-controls" placeholder="{{'aws.system.flavor.inputFlavorName'|translate}}" required ng-model="newFlavorData.name" ng-maxlength="32" />
+                        <div class="error" ng-messages="flavorForm.name.$error" ng-if="interacted(flavorForm,'name')">
+                            <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+                            <div ng-message="maxlength">{{"aws.message.textLength"|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>{{"aws.system.flavor.vcpus"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" name="vcpus" class="form-controls" ng-model="newFlavorData.vcpus" ng-pattern="/^(1|\d*[2468]|\d+[0])$/" checknum maxs="'240'" required id="vcpus" />
+                        <div class="error" ng-messages="flavorForm.vcpus.$error" ng-if="interacted(flavorForm,'vcpus')">
+                            <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+                            <div ng-message="pattern">{{"aws.errors.evenGt_1" |translate}}</div>
+                            <div ng-message="checknum">{{"aws.system.flavor.cupkernel" |translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class=" control-label"><span class="red">*</span>{{"aws.system.flavor.ram "|translate}}：</label>
+                    <div class="controls ">
+                        <input type="text " name="ram " class="form-controls " ng-model="ram_gb " required limitnumrange min="1 " max="4000 " />
+                        <div class="error " ng-messages="flavorForm.ram.$error " ng-if="interacted(flavorForm, 'ram') ">
+                            <div ng-message="required ">{{"aws.errors.required "|translate}}</div>
+                            <div ng-message="limitnumrange ">{{"aws.errors.limit_1_4000 "|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="control-group" ng-if="src=='local'">
+                    <label class=" control-label"><span class="red">*</span>系统盘（GB）：</label>
+                    <div class="controls ">
+                        <input type="text " name="disk " class="form-controls " ng-model="newFlavorData.disk "  limitnumrange min="1 " max="4000 "
+                        placeholder="此系统盘容量为云主机使用本地盘的空间" required/>
+                        <div class="error " ng-messages="flavorForm.disk.$error " ng-if="interacted(flavorForm, 'disk') ">
+                            <div ng-message="required ">{{"aws.errors.required "|translate}}</div>
+                            <div ng-message="limitnumrange ">{{"aws.errors.limit_1_4000 "|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group" ng-if="src=='local'">
+                    <label class=" control-label"><span class="red">*</span>数据盘（GB）：</label>
+                    <div class="controls ">
+                        <input type="text " name="ephemeral " class="form-controls " ng-model="newFlavorData.ephemeral "  limitnumrange min="1 " max="4000 " 
+                        placeholder="此数据盘容量为云主机使用本地盘的空间" required/>
+                        <div class="error " ng-messages="flavorForm.ephemeral.$error " ng-if="interacted(flavorForm, 'ephemeral') ">
+                            <div ng-message="required ">{{"aws.errors.required "|translate}}</div>
+                            <div ng-message="limitnumrange ">{{"aws.errors.limit_1_4000 "|translate}}</div>
+                        </div>
+                    </div>
+                </div> -->
+                <!-- <div class="red text-center" ng-if="ramGtMax ">{{"aws.errors.ramGtMax " | translate}}</div> -->
+                <div class="control-group ">
+                    <label class="control-label">{{"aws.system.flavor._public "|translate}}：</label>
+                    <div class="controls ">
+                        <label class="checkbox">
+                            <input type="checkbox" class="form-controls chk" name="public" ng-model="newFlavorData.is_public" />
+                            <i class="iconfont"></i>
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-info" type="button " ng-click="confirmNewFlavor(newFlavorData,flavorForm) ">{{"aws.action.ok "|translate}}</button>
+            <button class="btn btn-default " type="button " ng-click="$dismiss() ">{{"aws.action.cancel "|translate}}</button>
+        </div>
+    </div>

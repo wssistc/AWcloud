@@ -1,0 +1,10 @@
+<li class="admin-center-info header-padding" ng-show="isRegionShow">
+  <a><i class="icon-aw-position header-icon"></i><span class="region-name">{{regionModel.selected.regionName}}</span></a>
+  <div class="dropdown-layer admin-center region-change">
+    <ul class="admin-center-menu">
+      <li ng-repeat="item in regionList" ng-click="changeRegion(item)">
+        <a class="cursor-pointer" ng-class="{'active':(item.regionName==regionModel.selected.regionName)}">{{item.regionName}}</a>
+      </li>
+    </ul>
+  </div>
+</li>

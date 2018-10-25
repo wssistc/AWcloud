@@ -1,0 +1,314 @@
+<div class="detail-body page-inner">
+  <div class="animateIn">
+    <div class="detail-tab">
+      <div class="dt-title">
+        <a ng-href="#/cvm/securitygroup">返回<i class="icon-aw-angle-left"></i></a><span>{{detailInfo.sgId}}</span>
+      </div>
+      <div class="dt-box">
+        <ul class="nav nav-tabs clearfix">
+          <li ng-class="{'active':onestep}" ng-click ="basicConf()"><a>基本配置</a></li>
+          <li ng-class="{'active':twostep}" ng-click ="inbound()"><a>入站规则</a></li>
+          <li ng-class="{'active':threestep}" ng-click="outbound()"><a>出站规则</a></li>
+        </ul>
+        <div class="dt-content">
+          <div class="tab-pane" ng-show="onestep">
+            <strong>基本信息</strong>
+            <dl class="dl-horizontal">
+              <dt>名称</dt>
+              <dd>{{detailInfo.sgName}}</dd>
+              <dt>ID</dt>
+              <dd>{{detailInfo.sgId}}</dd> 
+              <dt>备注</dt>
+              <dd>{{detailInfo.sgRemark}}</dd>
+              <dt>创建时间</dt>
+              <dd>{{detailInfo.createTime | date: 'yyyy-MM-dd:HH:mm:ss'}}</span></dd>
+            </dl>
+            <strong>安全组内云主机</strong>
+            <div class="table-action">
+              <button  class="btn btn-primary" ng-click="joinvm(detailInfo)"><i class="icon-aw-add-to2"></i>加入云主机</button>
+              <button  ng-class="{'btn-default':prorm_btn,'btn-info':!delisDisabled && !prorm_btn}" class="btn" uib-popover="{{delisDisabled?'请选择云主机':'每个实例至少需要加入一个安全组'}}" popover-enable="prorm_btn" popover-trigger="mouseenter" popover-placement = "bottom"  ng-click="rmvm(checkedItems)">批量移除</button>
+            </div>
+            <table ng-table="tableParams" class="table table-check">
+              <tbody>
+                <tr ng-repeat="item in $data">
+                  <td  header="'headerCheckbox.html'" class="check-td">
+                    <label class="checkbox">
+                      <input type="checkbox" name="r" ng-model="checkboxes.items[item.unInstanceId]" value="{{item.unInstanceId}}" />
+                      <i class="iconfont"></i>
+                    </label>
+                  </td>
+                  <td data-title="'云主机ID'"><a ng-href="#cvm/instances?id={{item.unInstanceId}}">{{item.unInstanceId}}</a></td>
+                  <td data-title="'云主机名称'">{{item.instanceName}}</td>
+                  <td data-title="'配置安全组个数'">{{item.sgInfo.length}}</td>
+                  <td data-title="'内网IP'">{{item.lanIp}}</td>
+                  <td data-title="'外网IP'"><span ng-repeat = "wanIp in item.wanIpSet">{{wanIp}}</span></td>
+                  <td data-title="'操作'">
+                    <a ng-click="rmvm([item])" ng-class="{'disabled':item.sgInfo.length==1}" uib-popover="每个实例至少需要加入一个安全组" popover-enable="{{item.sgInfo.length==1}}" popover-trigger="mouseenter" popover-placement="bottom">移除安全组</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane" ng-show="twostep">
+            <span class="tab-subtitle">
+              <strong><i class="icon-aw-modify blue" ng-show="detailInfo.sys == '0'" ng-click="editingress = true"></i></strong>
+            </span>
+            <table class="table" >
+              <thead>
+                <tr>
+                  <th class="sortable">规则协议</th>
+                  <th class="sortable">端口</th>
+                  <th class="sortable">来源</th>
+                  <th class="sortable">策略</th>
+                  <th class="sortable">备注</th>
+                  <th class="sortable" ng-show="editingress">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-show = "!ingress.length && editingress && !addingressArray.length">
+                  <td colspan="6" class="add-td">
+                    没有自定义规则 <a href="" ng-click="addIngress(addingressArray)">+新增</a>
+                  </td>
+                </tr>
+                <tr ng-repeat = "ingress in addingressArray">
+                  <td>
+                    <ui-select class="uisel-sm" ng-model="ingress.ipProtocolselect" >
+                      <ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="ipProtocol in ipProtocols | propsFilter: {name: $select.search}">
+                        <div ng-bind-html="ipProtocol.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                  </td>
+                  <td>
+                    <input type="text" class="form-controls" ng-disabled="(ingress.ipProtocolselect.name !='TCP' &&  ingress.ipProtocolselect.name !='UDP') || ingress.ipProtocolselect.name =='ICMP'"  ng-model="ingress.ipProtocolselect.portRange">
+                  </td>
+                  <td>
+                    <ui-select class="uisel-sm" ng-model="ingress.sourceselect" >
+                      <ui-select-match class="uisel-sm" placeholder="">{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="source in sources | propsFilter: {name: $select.search}">
+                        <div ng-bind-html="source.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                    <input type="text" class="form-controls" ng-if="ingress.sourceselect.value == 'cidr'" placeholder="例如：10.0.0.1或10.0.0.0" ng-model="ingress.cidrselect"></input>
+                    <ui-select class="uisel-sm" ng-model="ingress.securityselect" ng-if="ingress.sourceselect.value == 'sgId'">
+                      <ui-select-match placeholder="">{{$select.selected.sgName}}</ui-select-match>
+                      <ui-select-choices repeat="security in allSecurityGroup | propsFilter: {sgName: $select.search}">
+                        <div ng-bind-html="security.sgName | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                  </td>
+                  <td>
+                    <ui-select class="uisel-sm" ng-model="ingress.actionselect" >
+                      <ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="action in actions | propsFilter: {name: $select.search}">
+                        <div ng-bind-html="action.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                  </td>
+                  <td>
+                    <input type="text" class="form-controls" ng-model="ingress.desc"></input>
+                  </td>
+                  <td ng-if="editingress && !item.isdel" ><a ng-click ="deladdingress(ingress)" >删除</a></td>
+                  <td ng-if="editingress && item.isdel"><a ng-click ="recoveryingress(ingress)" >恢复</a></td>
+                </tr>
+                <tr ng-repeat="item in ingress">
+                  <td>{{item.ipProtocol}}</td>
+                  <td>{{item.portRange?item.portRange:"ALL"}}</td>
+                  <td ng-if="item.cidrIp">{{item.cidrIp}}</td>
+                  <td ng-if="item.sgId">{{item.sgId}}</td>
+                  <td>{{'CN.securitygroup.table.action.' + item.action | translate}}</td>
+                  <td>{{item.desc}}</td>
+                  <td ng-if="editingress && !item.isdel"><a ng-click="delingress(item)">删除</a></td>
+                  <td ng-if="editingress && item.isdel"><a ng-click ="recoveryingress(item)" >恢复</a></td>
+                </tr>
+                <!-- <tr>
+                  <td>All traffic</td>
+                  <td></td>
+                  <td>0.0.0.0/0</td>
+                  <td>拒绝</td>
+                  <td></td>
+                  <td ng-show="editingress"></td>
+                </tr> -->
+              </tbody>
+            </table>
+            <a href="" class ="add" ng-click="addIngress(addingressArray)" ng-show="editingress"> + 新增一行</a>
+            <div class="" ng-show="editingress">
+                <button class="btn btn-primary" type="button" ng-click="confirmaddIngress('ingress')">确认</button>
+                <button class="btn btn-default" type="button" ng-click="cancelIngress(addingressArray)">取消</button>
+            </div>
+          </div>
+          <div class="tab-pane" ng-show="threestep">
+            <strong>规则列表<i class="icon-aw-modify blue" ng-show="detailInfo.sys == '0'" ng-click="editingress = true"></i></strong>
+            <table class="table" >
+              <thead>
+                <tr>
+                  <th class="sortable">规则协议</th>
+                  <th class="sortable">端口</th>
+                  <th class="sortable">目标</th>
+                  <th class="sortable">策略</th>
+                  <th class="sortable">备注</th>
+                  <th class="sortable" ng-show="editingress">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-show = "!egress.length && editingress && !addingressArray.length">
+                  <td colspan="6" class="add-td">
+                    没有自定义规则 <a href="" ng-click="addIngress(addingressArray)">+新增</a>
+                  </td>
+                </tr>
+                <tr ng-repeat = "ingress in addingressArray">
+                  <td>
+                    <ui-select ng-model="ingress.ipProtocolselect" >
+                      <ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="ipProtocol in ipProtocols | propsFilter: {name: $select.search}">
+                        <div ng-bind-html="ipProtocol.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                  </td>
+                  <td>
+                    <input ng-model="ingress.ipProtocolselect.portRange" ng-disabled="(ingress.ipProtocolselect.name !='TCP' &&  ingress.ipProtocolselect.name !='UDP') || ingress.ipProtocolselect.name =='ICMP'"></input>
+                  </td>
+                  <td>
+                    <ui-select ng-model="ingress.sourceselect" >
+                      <ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="source in sources | propsFilter: {name: $select.search}">
+                        <div ng-bind-html="source.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                    <input ng-if="ingress.sourceselect.value == 'cidr'" placeholder="例如：10.0.0.1或10.0.0.0" ng-model="ingress.cidrselect"></input>
+                    <ui-select ng-model="ingress.securityselect" ng-if="ingress.sourceselect.value == 'sgId'">
+                      <ui-select-match placeholder="">{{$select.selected.sgName}}</ui-select-match>
+                      <ui-select-choices repeat="security in allSecurityGroup | propsFilter: {sgName: $select.search}">
+                        <div ng-bind-html="security.sgName | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                  </td>
+                  <td>
+                    <ui-select ng-model="ingress.actionselect" >
+                      <ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="action in actions | propsFilter: {name: $select.search}">
+                        <div ng-bind-html="action.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                  </td>
+                  <td>
+                    <input ng-model = "ingress.desc"></input>
+                  </td>
+                  <td ng-if="editingress && !item.isdel" ><a ng-click ="deladdingress(ingress)" >删除</a></td>
+                  <td ng-if="editingress && item.isdel"><a ng-click ="recoveryingress(ingress)" >恢复</a></td>
+                </tr>
+                <tr ng-repeat="item in egress">
+                  <td>{{item.ipProtocol}}</td>
+                  <td>{{item.portRange?item.portRange:"ALL"}}</td>
+                  <td ng-if="item.cidrIp">{{item.cidrIp}}</td>
+                  <td ng-if="item.sgId">{{item.sgId}}</td>
+                  <td>{{'CN.securitygroup.table.action.' + item.action | translate}}</td>
+                  <td>{{item.desc}}</td>
+                  <td ng-if="editingress && !item.isdel"><a ng-click="delingress(item)">删除</a></td>
+                  <td ng-if="editingress && item.isdel"><a ng-click ="recoveryingress(item)" >恢复</a></td>
+                </tr>
+                <tr>
+                  <td>All traffic</td>
+                  <td>ALL</td>
+                  <td>0.0.0.0/0</td>
+                  <td>拒绝</td>
+                  <td></td>
+                  <td ng-show="editingress"></td>
+
+                </tr>
+              </tbody>
+            </table>
+            <a href="" class ="add" ng-click="addIngress(addingressArray)" ng-show="editingress"> + 新增一行</a>
+            <div class="" ng-show="editingress">
+                <button class="btn btn-primary" type="button" ng-click="confirmaddIngress('egress')">确认</button>
+                <button class="btn btn-default" type="button" ng-click="cancelIngress(addingressArray)">取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="joinvm.html">
+    <div class="privilegeTo-modal modal-common">
+      <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">加入云主机</h3>
+      </div>
+      <uib-alert type="warning" class="alert-tip">
+        当主机绑定多个安全组时，新绑定的安全组将自动设为最高优先级。
+      </uib-alert>
+      <div class="modal-body">
+          <div class="left-select-table">
+              <h5>选择云服务器</h5>
+              <div class="table-responsive">
+                  <table class="table table-bordered">
+                      <tr ng-repeat="vm in vm.allVm ">
+                          <td>
+                              <label class="checkbox">
+                                  <input type="checkbox" ng-model="checkboxes.vms[vm.unInstanceId]"  ng-disabled="getState(vm)"  class=""/>
+                                  <i class="iconfont" ng-class="{disabled:checkboxes.chk[vm.unInstanceId]}"></i>
+                              </label>
+                          </td>
+                          <td>
+                              <span class="name">{{vm.instanceName}}</span>
+                              <span ng-if="vm.vpcId">{{vm.vpcId}} | {{vm.lanIp}}</span>
+                              <span ng-if="!vm.vpcId">基础网络 | {{vm.lanIp}}</span>
+                          </td>
+                          <td>
+                              <span ng-if="getState(vm)">已绑定该安全组</span>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+          </div>
+          <div class="btnGroup">
+            <button class="btn btn-primary">&gt;</button>
+            <button class="btn btn-primary">&lt;</button>
+          </div>
+          <div class="right-select-table">
+              <h5>已选择</h5>
+              <div class="table-responsive">
+                  <table align="center" border="0" cellpadding="0" cellspacing="0" class="table table-bordered">
+                      <tr ng-repeat="chkvm in vm.checkVms">
+                          <td>
+                            <span>{{chkvm.instanceName}}</span>
+                            <span ng-if="item.vpcId">{{vm.vpcId}} | {{vm.lanIp}}</span>
+                            <span ng-if="!item.vpcId">基础网络 | {{vm.lanIp}}</span>
+                          </td>
+                          <td><i class="icon-aw-wrong" ng-click="rmVm(chkvm)"></i></td>
+                      </tr>
+                  </table>
+              </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-primary" type="button" ng-click="confirmJoinvm()">确认</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </div>
+</script>
+<script type="text/ng-template" id="rmvm.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">移除云主机</h3>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warning">
+          确认要移出所选云主机?
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirmrm()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+

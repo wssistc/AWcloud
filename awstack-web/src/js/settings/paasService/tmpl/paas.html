@@ -1,0 +1,72 @@
+<div class="box operating-box">
+	<div class="cloud-box">
+		<div class="page-inner" >
+			<form name="paasForm" novalidate>
+                <div class="settings-box">
+                    <div class="control-group control-choose">
+                        <label class="control-label ">Paas服务类型：</label>
+                        <div class="controls">
+                            <div class="choose-item">
+                                <ui-select ng-model="paas.selectedPassService" name="service" ng-change="changePaasService()" required>
+                                    <ui-select-match placeholder="{{'aws.cloud.selectCloudType' | translate}}">{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="paas.paramName as paas in paasServiceTypes | propsFilter: {name: $select.search}">
+                                        <div ng-bind-html="paas.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <div class="error" ng-messages="(submitInValid ||paasForm.service.$dirty) && paasForm.service.$error">
+                                    <form-validate></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">URL：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="url" ng-model="paas[paas.selectedPassService].paramValue.url" required />
+                            <div class="error" ng-messages="(submitInValid ||paasForm.url.$dirty) && paasForm.url.$error">
+                                <form-validate></form-validate>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">用户名：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="username" ng-model="paas[paas.selectedPassService].paramValue.username" required />
+                            <div class="error" ng-messages="(submitInValid ||paasForm.username.$dirty) && paasForm.username.$error">
+                                <form-validate></form-validate>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">密码：</label>
+                        <div class="controls">
+                            <input type="password" class="form-controls"  name="password" ng-model="paas[paas.selectedPassService].paramValue.password" required/>
+                            <div class="error" ng-messages="(submitInValid ||paasForm.password.$dirty) && paasForm.password.$error">
+                                <form-validate></form-validate>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group" >
+                        <label class="control-label">激活：</label>
+                        <div class="controls ">
+                            <div class="checkbox switch-btn">
+                                <label>
+                                    <input type="checkbox" class="form-controls"  ng-model="paas[paas.selectedPassService].paramValue.active">
+                                    <i class="iconfont"></i>
+                                </label>
+                            </div>
+                            <div class="chk-tip" >
+                                <span ng-show="validVCenterUrl['valid_'+vmCloudCon.radio]=='success'" ng-class="{'succ':validVCenterUrl['valid_'+vmCloudCon.radio]=='success'}">验证成功！</span>
+                                <span ng-show="validVCenterUrl['valid_'+vmCloudCon.radio]=='fail'" ng-class="{'fail':validVCenterUrl['valid_'+vmCloudCon.radio]=='fail'}" >验证失败！</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-info"  ng-click="confirmPaas(paasForm)" >{{paas[paas.selectedPassService].canEdit?('aws.action.save'|translate):('aws.action.ok'|translate)}}</button>
+                    <button class="btn btn-default" ng-click="resetPaas()">{{'aws.action.reset'|translate}}</button>
+                </div>
+			</form>
+		</div>
+	</div>
+</div>

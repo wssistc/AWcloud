@@ -1,0 +1,305 @@
+
+<div class="nodeTab-detail">
+    <uib-tabset active="0" justified="true">
+        <uib-tab index="0" heading='{{"aws.k8s.dockerNodes.nodesDetails"|translate}}'>
+            <h4 class="nodeTabName">节点概况</h4>
+            <div class="table-content">
+            <table class="table table-info">
+                <colgroup>
+                <col width="20%">
+                <col width="30%">
+                <col width="20%">
+                <col width="30%">
+                </colgroup>
+                <tr>
+                <td>{{"aws.k8s.dockerNodes.name"|translate}}</td>
+                <td>{{selectedNode ? selectedNode.name : ""}}</td>
+                <td>{{"aws.k8s.dockerNodes.creationTimestamp"|translate}}</td>
+                <td>{{selectedNode ? (selectedNode.data.metadata.creationTimestamp | localDate) :
+                    ""}}
+                </td>
+                </tr>
+                <tr>
+                <td>{{"aws.k8s.dockerNodes.InternalIP"|translate}}</td>
+                <td>{{selectedNode ? getNodeIPByType(selectedNode, "InternalIP") : ""}}</td>
+                <td>{{"aws.k8s.dockerNodes.containerRuntimeVersion"|translate}}</td>
+                <td>{{selectedNode ? selectedNode.data.status.nodeInfo.containerRuntimeVersion : ""}}</td>
+                </tr>
+                <tr>
+                <td>{{"aws.k8s.dockerNodes.operatingSystem"|translate}}</td>
+                <td>{{selectedNode ? selectedNode.data.status.nodeInfo.operatingSystem : ""}}</td>
+                <td>{{"aws.k8s.dockerNodes.kubeletVersion"|translate}}</td>
+                <td>{{selectedNode ? selectedNode.data.status.nodeInfo.kubeletVersion : ""}}</td>
+                </tr>
+                <tr>
+                <td>{{"aws.k8s.dockerNodes.architecture"|translate}}</td>
+                <td>{{selectedNode ? selectedNode.data.status.nodeInfo.architecture : ""}}</td>
+                <td>{{"aws.k8s.dockerNodes.kubeProxyVersion"|translate}}</td>
+                <td>{{selectedNode ? selectedNode.data.status.nodeInfo.kubeProxyVersion : ""}}</td>
+                </tr>
+                <tr>
+                <td>{{"aws.k8s.dockerNodes.kernelVersion"|translate}}</td>
+                <td>{{selectedNode ? selectedNode.data.status.nodeInfo.kernelVersion : ""}}</td>
+                <td>{{"aws.k8s.dockerNodes.KubeletReady"|translate}}</td>
+                <td>{{selectedNode ? (getStatusOfType(selectedNode, "Ready") ? "Ready" : "NotReady") : ""}}</td>
+                </tr>
+                <tr>
+                <td>{{"aws.k8s.dockerNodes.osImage"|translate}}</td>
+                <td>{{selectedNode ? selectedNode.data.status.nodeInfo.osImage : ""}}</td>
+                <td>{{"aws.k8s.dockerNodes.KubeletHasSufficientMemory"|translate}}</td>
+                <td>{{selectedNode ? (getStatusOfType(selectedNode, "MemoryPressure") ? "耗尽" : "充足") : ""}}</td>
+                </tr>
+                <tr>
+                <td>{{"aws.k8s.dockerNodes.cpu"|translate}}</td>
+                <td>{{selectedNode ? selectedNode.data.status.capacity.cpu : ""}}</td>
+                <td>{{"aws.k8s.dockerNodes.KubeletHasSufficientDisk"|translate}}</td>
+                <td>{{selectedNode ? (getStatusOfType(selectedNode, "OutOfDisk") ? "耗尽" : "充足") : ""}}</td>
+                </tr>
+                <tr>
+                <td>{{"aws.k8s.dockerNodes.memory"|translate}}</td>
+                <td>{{selectedNode ? selectedNode.data.status.capacity.memory : ""}}</td>
+                <td>{{"aws.k8s.dockerNodes.KubeletHasNoDiskPressure"|translate}}</td>
+                <td>{{selectedNode ? (getStatusOfType(selectedNode, "DiskPressure") ? "有" : "无") : ""}}</td>
+                </tr>
+                <tr>
+                <td>{{"aws.k8s.dockerNodes.pods"|translate}}</td>
+                <td>{{selectedNode ? selectedNode.data.status.capacity.pods : ""}}</td>
+                <td>{{"aws.k8s.dockerNodes.podSchedulable"|translate}}</td>
+                <td>{{selectedNode ?
+                    (selectedNode.data.metadata.annotations['volumes.kubernetes.io/controller-managed-attach-detach']
+                    === 'true' ? '是': '否')
+                    : ""}}
+                </td>
+                </tr>
+            </table>
+            </div>
+        </uib-tab>
+        <uib-tab index="1" heading='{{"aws.k8s.dockerNodes.nodesLabels"|translate}}' select="initLabels()">
+            <h4 class="nodeTabName">标签列表</h4>
+            <div class="table-action">
+            <button type="button" data-toggle="modal" class="btn btn-primary"
+                    ng-click="addNodeLabels()">
+                <i class="icon-aw-add-to2"></i>
+                {{"aws.k8s.dockerNodes.addNodeLabels" |translate}}
+            </button>
+            <button type="button" data-toggle="modal" class="btn btn-info"
+                    ng-click="modifyNodeLabel()" ng-disabled="modifyLabel_btn">
+                <i class="icon-aw-modify"></i>
+                编辑
+            </button>
+            <button type="button" data-toggle="modal" class="btn btn-warning"
+                    ng-click="deleteNodeLabels()" ng-disabled="delLabel_btn">
+                <i class="icon-aw-delete"></i>
+                {{"aws.k8s.dockerNodes.deleteNodeLabels" |translate}}
+            </button>
+            <div class="pull-right">
+                <button class="btn btn-renovat right-ports" ng-click="refreshLabels()">
+                  <i class="icon-aw-refresh"></i>
+                </button>
+                <div class="search-box right-ports">
+                  <form name="searchForm" novalidate ng-keyup="labelGlobalSearch(search.labelSearchTerm)">
+                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="search.labelSearchTerm" placeholder="{{'aws.action.search' | translate}}" />
+                  </form>
+                </div>
+            </div>
+
+
+            <!-- <button type="button" class="btn btn-refresh" ng-click="refreshLabels()">
+                <i class="icon-aw-refresh"></i>
+            </button>
+            <div class="search-box">
+                <form name="searchForm" novalidate ng-keyup="search(searchIterm)">
+                <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+                    <i class="icon-aw-search"></i>
+                </button>
+                <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm"
+                        ng-model="searchIterm" placeholder='{{"aws.action.search"|translate}}'/>
+                </form>
+            </div> -->
+            </div>
+            <div class="table-content">
+            <table ng-table="labeltableParams" class="table" show-filter="false">
+                <colgroup>
+                <col width="20%">
+                <col width="40%">
+                <col width="40%">
+                </colgroup>
+                <tr ng-repeat="item in $data">
+                <td header="'headerCheckboxlabeltableParams.html'">
+                    <label class="checkbox">
+                    <input type="checkbox" ng-model="checkboxeslabeltableParams.items[item.key]"/>
+                    <i class="icon-aw-square"></i>
+                    </label>
+                </td>
+                <td data-title='"aws.k8s.dockerNodes.labelKey"|translate' sortable="'key'">
+                    <span>{{item.key}}</span>
+                </td>
+                <td data-title='"aws.k8s.dockerNodes.labelValue"|translate' sortable="'value'">
+                    <span>{{item.value}}</span>
+                </td>
+                <!-- <td data-title='"aws.k8s.dockerNodes.deleteNodeLabels"|translate'>
+                    <button type="button" data-toggle="modal" class="btn btn-warning"
+                            ng-click="deleteNodeLabels(item.key)">
+                    <i class="icon-aw-delete"></i>
+                    </button>
+                </td> -->
+                </tr>
+            </table>
+            </div>
+        </uib-tab>
+    </uib-tabset>
+</div>
+
+<script type="text/ng-template" id="headerCheckboxlabeltableParams.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="checkboxeslabeltableParams.checked" class="select-all-labeltableParams" value=""/>
+      <i class="icon-aw-square"></i>
+    </label>
+</script>
+<script type="text/ng-template" id="addNodeLabels.html">
+<div class="modal-common">
+    <div class="modal-header">
+    <button type="button" class="close" ng-click="$dismiss()">×</button>
+    <h3 class="modal-title">{{"aws.k8s.dockerNodes.addNodeLabels" |translate}}</h3>
+    </div>
+    <div class="modal-body k8s-modal">
+    <form name="addNodeLabelsForm">
+        <div class="control-group node-label-group" ng-repeat="nodeLabel in nodeLabelsData">
+            <div class="left">
+                <div class="control-group">
+                <label class="control-label" style="width: 28%;">标签名称{{$index + 1}}:</label>
+                <div class="controls" style="width: 70%;">
+                    <!-- https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ -->
+                    <input class="form-controls" name="key{{$index + 1}}"
+                            type="text" ng-model="nodeLabel.key" required
+                            ng-pattern="/^(?:(?=.{4,254}\/)((?:[a-z0-9A-Z]+\.)+[a-z0-9A-Z]+\/))?(?=.{1,63}$)([a-z0-9A-Z](?:[a-z0-9A-Z\.\-\_]*[a-z0-9A-Z])?)$/"/>
+                    <div class="error" ng-show="addNodeLabelsForm['key{{$index + 1}}'].$invalid &&
+                                                    addNodeLabelsForm['key{{$index + 1}}'].$dirty">
+                        <span ng-show="addNodeLabelsForm['key{{$index + 1}}'].$error.required">
+                        {{"aws.k8s.createCluster.labelKeyRequired"|translate}}
+                        </span>
+                    <span ng-show="addNodeLabelsForm['key{{$index + 1}}'].$error.pattern">
+                        {{"aws.k8s.createCluster.labelKeyMismatch"|translate}}
+                        </span>
+                    </div>
+                    <div class="error" ng-show="addNodeLabelsForm['key{{$index + 1}}'].$invalid">
+                        <span ng-show="addNodeLabelsForm['key{{$index + 1}}'].$viewValue.indexOf('/') > -1 ?
+                                        addNodeLabelsForm['key{{$index + 1}}'].$viewValue.split('/')[0].length > 10 : false">
+                        {{"aws.k8s.createCluster.labelKeyDomainToLong"|translate}}
+                        </span>
+                    </div>
+                    <div class="error" ng-show="addNodeLabelsForm['key{{$index + 1}}'].$invalid">
+                        <span ng-show="addNodeLabelsForm['key{{$index + 1}}'].$viewValue.indexOf('/') > -1 ?
+                                        addNodeLabelsForm['key{{$index + 1}}'].$viewValue.split('/')[1].length > 10 :
+                                        addNodeLabelsForm['key{{$index + 1}}'].$viewValue.length > 10">
+                        {{"aws.k8s.createCluster.labelKeyNameToLong"|translate}}
+                        </span>
+                    </div>
+                </div>
+                </div>
+            </div>
+           
+            <div class="right">
+                <div class="control-group">
+                <label class="control-label" style="width: 28%;">标签值{{$index + 1}}:</label>
+                <div class="controls" style="width: 70%;">
+                    <input class="form-controls" name="value{{$index + 1}}"
+                            type="text" ng-model="nodeLabel.value" required
+                            ng-pattern="/^(?=.{1,63}$)([a-z0-9A-Z](?:[a-z0-9A-Z\.\-\_]*[a-z0-9A-Z])?)$/"
+                            ng-minlength="2" ng-maxlength="63"/>
+                    <div class="error" ng-show="addNodeLabelsForm['value{{$index + 1}}'].$invalid &&
+                                                    addNodeLabelsForm['value{{$index + 1}}'].$dirty">
+                        <span ng-show="addNodeLabelsForm['value{{$index + 1}}'].$error.required">
+                        {{"aws.k8s.createCluster.labelValueRequired"|translate}}
+                        </span>
+                    <span ng-show="addNodeLabelsForm['value{{$index + 1}}'].$error.pattern">
+                        {{"aws.k8s.createCluster.labelValueMismatch"|translate}}
+                        </span>
+                    <span ng-show="addNodeLabelsForm['value{{$index + 1}}'].$error.minlength">
+                        {{"aws.k8s.createCluster.labelValueMinLength"|translate}}
+                        </span>
+                    <span ng-show="addNodeLabelsForm['value{{$index + 1}}'].$error.maxlength">
+                        {{"aws.k8s.createCluster.labelValueMaxLength"|translate}}
+                        </span>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <span title="添加标签" class="add">
+                <i ng-click="addNewNodeLabel()" ng-show="$index == nodeLabelsData.length-1 "  class="icon-aw-add-to2"></i>
+            </span>
+            <span title="{{'aws.k8s.createCluster.deleteLabel'|translate}}" class="delete"
+                    ng-if="$index > 0">
+                <i ng-click="deleteNodeLabel(nodeLabel)" class="icon-aw-minus2"></i>
+            </span>
+        </div>
+    </form>
+    </div>
+    <div class="modal-footer">
+    <!-- <button class="btn btn-primary " type="button"
+            ng-click="addNewNodeLabel()">{{"aws.k8s.dockerNodes.addNewNodeLabel" |translate}}
+    </button> -->
+   
+    <button class="btn btn-info" type="button"
+            ng-disabled="addNodeLabelsForm.$invalid"
+            ng-click="$close(nodeLabelsData)">{{"aws.action.ok" |translate}}
+    </button>
+   
+    <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel" |translate}}</button>
+    </div>
+</div>
+</script>
+
+<script type="text/ng-template" id="modifyNodeLabel.html">
+<div class="modal-common modal-smallest">
+    <div class="modal-header">
+    <button type="button" class="close" ng-click="$dismiss()">×</button>
+    <h3 class="modal-title">{{"aws.k8s.dockerNodes.modifyNodeLabel" |translate}}</h3>
+    </div>
+    <div class="modal-body k8s-modal">
+    <form name="modifyNodeLabelForm">
+        <div class="control-group">
+        <label class="control-label">{{"aws.k8s.dockerNodes.labelKey" |translate}}：</label>
+        <div class="controls">
+            <!-- https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ -->
+            <input class="form-controls" name="key" disabled
+                    type="text" ng-model="currentNodeLabel.key"/>
+        </div>
+        </div>
+        <div class="control-group">
+        <label class="control-label">{{"aws.k8s.dockerNodes.labelValue" |translate}}：</label>
+        <div class="controls">
+            <input class="form-controls" name="value"
+                    type="text" ng-model="currentNodeLabel.value" required
+                    ng-pattern="/^(?=.{1,63}$)([a-z0-9A-Z](?:[a-z0-9A-Z\.\-\_]*[a-z0-9A-Z])?)$/"
+                    ng-minlength="2" ng-maxlength="63"/>
+            <div class="error" ng-show="modifyNodeLabelForm['value'].$invalid &&
+                                                modifyNodeLabelForm['value'].$dirty">
+                    <span ng-show="modifyNodeLabelForm['value'].$error.required">
+                    {{"aws.k8s.createCluster.labelValueRequired"|translate}}
+                    </span>
+            <span ng-show="modifyNodeLabelForm['value'].$error.pattern">
+                    {{"aws.k8s.createCluster.labelValueMismatch"|translate}}
+                    </span>
+            <span ng-show="modifyNodeLabelForm['value'].$error.minlength">
+                    {{"aws.k8s.createCluster.labelValueMinLength"|translate}}
+                    </span>
+            <span ng-show="modifyNodeLabelForm['value'].$error.maxlength">
+                    {{"aws.k8s.createCluster.labelValueMaxLength"|translate}}
+                    </span>
+            </div>
+        </div>
+        </div>
+    </form>
+    </div>
+    <div class="modal-footer">
+    <button class="btn btn-info" type="button"
+            ng-disabled="modifyNodeLabelForm.$invalid"
+            ng-click="$close(currentNodeLabel)">{{"aws.action.ok" |translate}}
+    </button>
+   
+    <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel" |translate}}</button>
+    </div>
+</div>
+</script>

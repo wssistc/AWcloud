@@ -1,0 +1,14 @@
+<div class="page-inner overview monitor-view" style="height:800px;min-width:1180px;">
+  <iframe ng-src="http://172.10.13.200/model/ncs7000/home-ncsstack.php" style="min-height:1280px;height:auto;width:100%;" id="previewFrame"></iframe>
+  <div id="loading" style="position:absolute; top:50%;text-align:center; left:50%;margin-left:-65px;margin-top:-85px; background-color:#e6eef0; padding:10px; border-radius:5px;">
+    <img src="../../../../../thegraph/the-graph-editor/ajax-loading.gif">
+    <div id="loading-message">数据加载中....</div>
+  </div>
+</div>
+<script>
+  var iframe = document.getElementById("previewFrame"); 
+  iframe.onload = function(){
+    $("#loading").hide();    
+  }
+</script>
+

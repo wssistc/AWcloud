@@ -1,0 +1,250 @@
+<div class="page-inner overview-single">
+  <div class="box datacenter-title">
+    <span class="single-title">{{'aws.overview.dataclusterOverview'|translate}}：</span>
+    <ul class="nav-tabs choose-box">
+      <li ng-if="regionList.length>1"><a ng-href="/view">{{'aws.overview.situation'|translate}}</a></li>
+      <li ng-repeat="item in regionList" ng-class="{'active':item.regionKey==activeRegionKey}"><a ng-click="intoSingle(item)" title="{{item.regionName}}">{{item.regionName}}</a></li>
+    </ul>
+  </div>
+  <div class="box">
+    <div class="col-8 border-space-left">
+      <div class="box">
+        <div class="col-6">
+          <div class="title">{{'aws.overview.statedistribution'|translate}}</div>
+          <div class="panels clearfix">
+            <div class="pie-wrap">
+              <div class="pie" chart-pie panel='vmStatusData'></div>
+              <div class="pie-center" ng-if="vmStatusData.data.length != 0">
+                <div class="num">{{vmStatusData.total}}</div>
+                <div class="text">{{'aws.monitor.virtual.sum'|translate}}</div>
+              </div>
+            </div>
+            <div class="pie-legend">
+              <dl class="dl-horizontal" ng-repeat="legend in vmStatusData.data">
+                <dt><i style="background-color:{{vmStatusData.colors[$index]}}"></i>{{legend.name}}：</dt>
+                <dd style="color:{{vmStatusData.colors[$index]}}">{{legend.value}}</dd>
+              </dl>
+            </div>
+          </div>  
+        </div>
+        <div class="col-6">
+          <div class="title">{{"aws.overview.cpuUsageRate"|translate}}</div>
+          <div class="panels clearfix">
+            <div class="pie-wrap" >
+              <div class=" pie" chart-pie panel='cpuUseChart.panels'></div>
+            </div>
+            <div class="pie-legend">
+              <dl class="dl-horizontal">
+                <dt>{{"aws.overview.totalCores"|translate}}：</dt>
+                <dd><span class="total">{{hostCPUTotal}}</span></dd>
+              </dl>
+              <dl class="dl-horizontal" ng-repeat="legend in cpuUseChart.panels.data">
+                <dt><i style="background-color:{{cpuUseChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+                <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?cpuUseChart.panels.colors[$index]:'inherit'}>{{legend.value>=0?legend.value:0}}</span></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+       <div class="box">
+        <div class="col-6">
+          <div class="title">
+          {{"aws.overview.storagesUsageRate"|translate}}
+          <a ng-click="seeAllStorage()" ng-if="showStorageType>3">{{"aws.overview.viewMore"|translate}}<i class="icon-aw-angle-double-right"></i></a>
+          </div>
+          <div class="panels clearfix" ng-show ="showStorageType > 1">
+            <!-- <div class="bar-wrap" >
+              <ul>
+                <li ng-repeat = "item in storageAllocateChart" class="clearfix">
+                  <div quota-bar bardata="item" id="storage"></div>
+                </li>
+              </ul>
+            </div> -->
+            <div class="clearfix bar-group">
+              <div quota-bar bardata="item" id="storage" ng-repeat = "item in storageAllocateChart" ng-if="$index<3"></div>
+            </div>
+          </div>
+          <div class="panels clearfix" ng-hide="showStorageType > 1">
+            <div class="pie-wrap">
+              <div class="pie" chart-pie panel='storageChart.panels'></div>
+            </div>
+            <div class="pie-legend">
+              <dl class="dl-horizontal">
+                <dt>{{"aws.overview.totalMemory"|translate}}：</dt>
+                <dd><span class="total">{{storageTotal.b}}{{unit}}</span></dd>
+              </dl>
+              <dl class="dl-horizontal" ng-repeat="legend in storageChart.panels.data">
+                <dt><i style="background-color:{{storageChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+                <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?storageChart.panels.colors[$index]:'inherit'}>{{legend.valueB}}</span></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="title">{{"aws.overview.memoryUsageRate"|translate}}</div>
+          <div class="panels clearfix">
+            <div class="pie-wrap">
+              <div class="pie" chart-pie panel='memoryUseChart.panels'></div>
+            </div>
+            <div class="pie-legend">
+              <dl class="dl-horizontal">
+                <dt>{{"aws.overview.totalMemory"|translate}}：</dt>
+                <dd><span class="total">{{hostMemoryTotal}} GB</span></dd>
+              </dl>
+              <dl class="dl-horizontal" ng-repeat="legend in memoryUseChart.panels.data">
+                <dt><i style="background-color:{{memoryUseChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+                <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?memoryUseChart.panels.colors[$index]:'inherit'}>{{legend.value>=0?legend.value:0}} GB</span></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="col-6">
+          <div class="title">
+            <span class="vlan-title">{{vlanType}}{{"aws.overview.label"|translate}}</span>
+            <span class="total-num">{{"aws.overview.totalNumber"|translate}}：<i title="{{VlanData.totleVlanId}}">{{VlanData.totleVlanId}}</i></span>
+            <span class="used-num">{{"aws.overview.inUsed"|translate}}：<i title="{{VlanData.isUseVlanId}}">{{VlanData.isUseVlanId}}</i></span>
+            <span class="avail-num">{{"aws.overview.unUsed"|translate}}：<i title="{{VlanData.unUseVlanId}}">{{VlanData.unUseVlanId}}</i></span>
+          </div>
+          <div class="inner">
+          <div class="panels clearfix">
+            <div echart-multiline style="height: 260px;" data="vlanData"></div>
+            <!-- <div class="area-chart-wrap" chart-area panel="vlanData" view="true" queue="'vlan'"></div> -->
+          </div>
+        </div>
+        </div>
+        <div class="col-6">
+          <div class="title">
+            <span>{{"aws.overview.externalip"|translate}}</span><a ng-click="seeAllIp()" ng-if="netWorkType.length>5">{{"aws.overview.viewMore"|translate}}<i class="icon-aw-angle-double-right"></i></a>
+          </div>
+          <div class="clearfix bar-group" ng-if="externalType>1">
+            <div quota-bar bardata="item" ng-repeat="item in netWorkType" ng-if="$index<5"></div>
+          </div>
+          <div class="panels clearfix" ng-if="externalType<2">
+            <div class="pie-wrap" >
+              <div class=" pie" chart-pie panel='ipUseChart.panels'></div>
+            </div>
+            <div class="pie-legend">
+              <dl class="dl-horizontal">
+                <dt>{{"aws.overview.name"|translate}}：</dt>
+                <dd class="ip-name"><span title="{{ipDetail.name}}">{{ipDetail.name}}</span></dd>
+              </dl>
+              <dl class="dl-horizontal">
+                <dt>{{"aws.overview.total"|translate}}：</dt>
+                <dd><span class="total">{{ipDetail.total}}</span></dd>
+              </dl>
+              <dl class="dl-horizontal" ng-repeat="legend in ipUseChart.panels.data">
+                <dt><i style="background-color:{{ipUseChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+                <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?ipUseChart.panels.colors[$index]:'inherit'}>{{legend.value>=0?legend.value:0}}</span></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-4 border-space-right">
+      <div class="box space-content">
+        <div class="col-12 add-content">
+          <div class="table-action">
+            <div class="dropdown show-title">
+              <button type="button" class="btn btn-renovat dropdown-toggle" data-toggle="dropdown">
+                  <i class="icon-aw-gear"></i>
+              </button>
+              <ul class="dropdown-menu">
+                <li ng-repeat="title in addMenu track by $index">
+                  <div class="check-left">
+                      <label class="checkbox">
+                          <input type="checkbox" class="form-controls chk" name="assignVlan" ng-model="title.value" ng-disabled="title.able" ng-click="checkBoxFun()"/>
+                          <i class="iconfont"></i>
+                      </label>
+                  </div>
+                  <span>{{'aws.overview.' + title.name|translate}}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <ul class="add-item">
+            <li ng-repeat="item in addMenu" ng-if="item.value">
+              <a ng-if="item.name=='createinstance'" ng-href="#/quickconfig/createins">
+                <div class="inner">
+                    <i class="{{item.icon}}"></i>
+                    <span class="add-pointer">{{'aws.overview.' + item.name|translate}}</span>
+                </div>
+              </a>
+              <div class="inner" ng-if="item.name=='createuser'" ng-controller="easyCtrl" ng-click="easyUser()">
+                <i class="{{item.icon}}"></i>
+                <span class="add-pointer">{{'aws.overview.' + item.name|translate}}</span>
+              </div>
+              <div ng-controller="volumesTabCtrl">
+                <div class="inner" ng-if="item.name=='createdisk'" ng-controller="dataVolumesCtrl" ng-click="addVolume(true)">
+                  <i class="{{item.icon}}"></i>
+                  <span class="add-pointer">{{'aws.overview.' + item.name|translate}}</span>
+                </div>
+              </div>
+              <div class="inner" ng-if="item.name=='createnetwork'" ng-controller="networksCtrl" ng-click="openNetworkModal(true)">
+                <i class="{{item.icon}}"></i>
+                <span class="add-pointer">{{'aws.overview.' + item.name|translate}}</span>
+              </div>
+              <div class="inner" ng-if="item.name=='createvpn'" ng-controller="vpnCtrl" ng-click="updateVpn('new',true)">
+                <i class="{{item.icon}}"></i>
+                <span class="add-pointer">{{'aws.overview.' + item.name|translate}}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+       <div class="box">
+        <div class="col-12">
+          <div class="title">
+            <span>{{"aws.overview.alarmEvent"|translate}}</span><a href="#/monitor/alarmevent">{{"aws.overview.viewMore"|translate}}<i class="icon-aw-angle-double-right"></i></a>
+          </div>
+          <div class="alarmInfo-wrap">
+            <div class="cont">
+             <table class="table">
+              <tbody>
+                <tr ng-repeat="alarm in newAlarms_data">
+                  <td class="limit-length" title="{{alarm.hostname}}">{{alarm.hostname}}</td>
+                  <!-- <td><span class="highlight" ng-class="{'bg-green':alarm.alarmType == 'healthcheck'||alarm.alarmType == 'planwork','bg-orange':alarm.alarmType == 'threshold'||alarm.alarmType == 'hardware','bg-blue':alarm.alarmType == 'computeha'}" >{{alarm._alarmType}}</span></td> -->
+                  <td><span>{{alarm._alarmType}}</span></td>
+                  <td><span ng-class="{'bg-critical':alarm.severity_status == 'critical','bg-moderate':alarm.severity_status == 'moderate','bg-low':alarm.severity_status == 'low'}">{{alarm.severity}}</span></td>
+                  <td>{{alarm.createtime |date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="no-data" ng-if="newAlarms_data.length===0">
+              {{"aws.overview.noAlarmEvent"|translate}}
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/ng-template" id="ipRegion.html">
+  <div class="modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{"aws.overview.externalip"|translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="clearfix bar-group">
+          <div quota-bar bardata="item" ng-repeat="item in netWorkType"></div>
+        </div>
+      </div>
+    </div>
+</script>
+<script type="text/ng-template" id="storageRegion.html">
+  <div class="modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{"aws.overview.storagerate"|translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="clearfix bar-group">
+          <div quota-bar bardata="item" id="storage" ng-repeat = "item in storageAllocateChart"></div>
+        </div>
+      </div>
+    </div>
+</script>

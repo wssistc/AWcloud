@@ -1,0 +1,328 @@
+<div class="view-content">
+    <div class="page-title clearfix">
+        <h3>新建主机</h3>
+        <a class="btn btn-default" href="#/host">返回主机列表</a>
+    </div>
+    <div class="vm-create">
+        <form name="" novalidate autocomplete="off">
+            <uib-tabset active=active justified="true">
+                <uib-tab index="0" heading="1.名称和位置" class="done">
+                    <div class="panel-group col-two" role="tablist">
+                        <div class="panel">
+                            <div class="panel-collapse collapse in" role="tabpanel">
+                            <br>
+                                <div class="control-group" >
+                                    <label class="control-label">主机名或IP地址：</label>
+                                    <div class="controls">
+                                        <div class="half">
+                                            <input type="text" class="form-controls" name="name" placeholder="输入要添加至vCenter Server的主机的名称或IP地址" required />
+                                        </div>
+                                        <span class="val form-tips">输入要添加至vCenter Server的主机的名称或IP地址</span>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">位置：</label>
+                                    <div class="controls">
+                                        <div class="search-box">
+                                            <button class="btn" type="submit"><i class="icon-aw-search"></i></button>
+                                            <input type="text" class="form-control" placeholder="搜索">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">&nbsp;</label>
+                                    <div class="controls">
+                                        <div class="half">
+                                            <div class="angular-ui-tree">
+                                                <ol class="angular-ui-tree-nodes">
+                                                    <li class="angular-ui-tree-node">
+                                                        <div class="angular-ui-tree-handle active">
+                                                            <div class="tree-name">
+                                                                <a class="btn btn-success">
+                                                                    <span>localhost</span>
+                                                                    <span class="glyphicon glyphicon-chevron-right"></span>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                        <span class="form-tips">选择要添加该主机的数据中心、群集或主机文件夹</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </uib-tab>
+                <uib-tab index="1" heading="2.链接设置">
+                    <div class="panel-group col-one" role="tablist">
+                        <br><br><br>
+                        <div class="control-group">
+                            <label class="control-label">用户名：</label>
+                            <div class="controls">
+                                <div class="half">
+                                    <input type="text" class="form-controls" name="name" placeholder="请输入用户名" required/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">用户名：</label>
+                            <div class="controls">
+                                <div class="half">
+                                    <input type="text" class="form-controls" name="name" placeholder="请输入用户名" required/>
+                                </div>
+                            </div>
+                        </div>
+                        <br><br><br>
+
+                        <div class="help-tips">输入主机的管理帐户信息。vSphere Web Client 将使用该信息连接到主机并为其运转建立永久帐户。</div>
+                    </div>
+                </uib-tab>
+                <uib-tab index="2" heading="3.主机摘要">
+                    <div class="panel-group">
+                        <table class="table table-border">
+                            <colgroup>
+                                <col width="300px">
+                            </colgroup>
+                            <tbody>
+                                <tr>
+                                    <td>名称</td>
+                                    <td>192.168.140.24</td>
+                                </tr>
+                                <tr>
+                                    <td>供应商</td>
+                                    <td>Dell Inc.</td>
+                                </tr>
+                                <tr>
+                                    <td>型号</td>
+                                    <td>PowerEdge R610</td>
+                                </tr>
+                                <tr>
+                                    <td>版本</td>
+                                    <td>VMware ESXi 5.5.0 build-1331820</td>
+                                </tr>
+                                <tr>
+                                    <td>虚拟机</td>
+                                    <td>VMware vCenter Server Appliance
+                                        xuao-test (44c5ea28-c4d1-4a9a-be44-8ea877507a48)
+                                        volume-1a1f490a-5099-432c-958c-cb4c65734e5c
+                                        xuao-vmware
+                                        volume-9c0ef42b-e025-422e-950e-d8b77093052b
+                                        wj-test
+                                        gl_test1 (1e87faee-5398-4f4b-9d28-64afd1b9983f)
+                                        volume-e7442831-8982-4b88-a057-8504212eefe5</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </uib-tab>
+                <uib-tab index="3" heading="4.分配许可证">
+                    <div class="panel-group">
+                        <div class="panel">
+                            <div class="panel-collapse">
+                                <uib-tabset active="active" justified="true">
+                                    <uib-tab index="0" heading="分配现有许可证密钥">
+                                        <table class="table table-check">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>许可证密钥</th>
+                                                    <th>产品</th>
+                                                    <th>使用情况</th>
+                                                    <th>容量</th>
+                                                    <th>标签</th>
+                                                    <th>过期</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <div class="radio">
+                                                            <label>
+                                                                <input type="radio" name="radio">
+                                                                <i class="iconfont"></i>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                    <td>（无许可证密钥）</td>
+                                                    <td>评估模式</td>
+                                                    <td>3</td>
+                                                    <td>不受限制</td>
+                                                    <td></td>
+                                                    <td>2017-04-22</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <br>
+                                    </uib-tab>
+                                    <uib-tab index="1" heading="分配新的许可证密钥"></uib-tab>
+                                </uib-tabset>
+                                <br>
+                                <div class="control-items2">
+                                    <div class="control-group">
+                                        <div class="form-title">主机详细信息</div>
+                                        <table class="table table-border">
+                                            <colgroup>
+                                                <col width="50%">
+                                            </colgroup>
+                                            <tbody>
+                                                <tr>
+                                                    <td>CPU总数</td>
+                                                    <td>2</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>虚拟机总数</td>
+                                                    <td>8</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>每个CPU的最大内核数</td>
+                                                    <td>4</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>每个资产的最大CPU数</td>
+                                                    <td>5</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="control-group">
+                                        <div class="form-title">许可证密钥（无许可证密钥）</div>
+                                        <table class="table table-border">
+                                            <colgroup>
+                                                <col width="50%">
+                                            </colgroup>
+                                            <tbody>
+                                                <tr>
+                                                    <td>产品</td>
+                                                    <td>评估模式</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>容量 / 可用</td>
+                                                    <td>不受限制 / 不受限制</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>过期</td>
+                                                    <td>2017-04-22</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>标签</td>
+                                                    <td>--</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </uib-tab>
+                <uib-tab index="4" heading="5.虚拟机位置">
+                    <div class="panel-group">
+                        <div class="panel">
+                            <p class="bg-tips">启用后，锁定模式可防止远程用户直接登录到此主机。该主机将仅可以通过本地控制台或授权的集中管理应用程序进行访问。
+        如果不确定该如何操作，请勿选中此框。您可以在以后通过编辑主机设置中的“安全配置文件”来配置锁定模式。</p>
+                            <div class="panel-collapse collapse in" role="tabpanel">
+                            <br>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" name="">
+                                        <i class="iconfont"></i>启用锁定模式
+                                    </label>
+                                </div>
+                                <br><br><br><br>
+                            </div>
+                        </div>
+                    </div>
+                </uib-tab>
+                <uib-tab index="5" heading="6.虚拟机位置">
+                    <div class="panel-group col-two" role="tablist">
+                        <div class="panel">
+                            <div class="panel-collapse collapse in" role="tabpanel">
+                                <div class="control-group">
+                                    <label class="control-label">虚拟机位置：</label>
+                                    <div class="controls">
+                                        <div class="search-box">
+                                            <button class="btn" type="submit"><i class="icon-aw-search"></i></button>
+                                            <input type="text" class="form-control" placeholder="搜索">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">&nbsp;</label>
+                                    <div class="controls">
+                                        <div class="half">
+                                            <div class="angular-ui-tree">
+                                                <ol class="angular-ui-tree-nodes">
+                                                    <li class="angular-ui-tree-node">
+                                                        <div class="angular-ui-tree-handle active">
+                                                            <div class="tree-name">
+                                                                <a class="btn btn-success">
+                                                                    <span>localhost</span>
+                                                                    <span class="glyphicon glyphicon-chevron-right"></span>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                        <span class="form-tips">选择要添加该主机的数据中心、群集或主机文件夹</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </uib-tab>
+                <uib-tab index="6" heading="7.即将完成">
+                    <div class="panel-group">
+                        <table class="table table-border">
+                            <colgroup>
+                                <col width="300px">
+                            </colgroup>
+                            <tbody>
+                                <tr>
+                                    <td>名称</td>
+                                    <td>192.168.140.24</td>
+                                </tr>
+                                <tr>
+                                    <td>版本</td>
+                                    <td>VMware ESXi 5.5.0 build-1331820</td>
+                                </tr>
+                                <tr>
+                                    <td>许可证密钥</td>
+                                    <td>(无许可证密钥)</td>
+                                </tr>
+                                <tr>
+                                    <td>网络</td>
+                                    <td>
+                                        <span>VM Network</span><br>
+                                        <span>br40</span><br>
+                                        <span>br98</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>数据存储</td>
+                                    <td>datastore1</td>
+                                </tr>
+                                <tr>
+                                    <td>锁定模式</td>
+                                    <td>已禁用</td>
+                                </tr>
+                                <tr>
+                                    <td>虚拟机位置</td>
+                                    <td>awcloud</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </uib-tab>
+            </uib-tabset>
+        </form>
+        <div class="btn-items">
+            <button class="btn btn-default" type="button">上一步</button>
+            <button class="btn btn-info" type="button">下一步</button>
+        </div>
+    </div>
+</div>

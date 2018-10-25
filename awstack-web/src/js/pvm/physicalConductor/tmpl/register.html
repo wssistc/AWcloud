@@ -1,0 +1,117 @@
+<div class="instances-modal pvm-modal  modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{pvmTitle}}</h3>
+    </div>
+    <div class="modal-body ">
+        <form name="registerForm" novalidate>
+            <div class="control-group">
+                <label class="control-label">{{'aws.pvm.pvmName'|translate}}：</label>
+                <div class="controls">
+                       
+                    <input type="text" class="form-controls" name="name" ng-model="nodeName" ng-pattern="/^[a-z0-9-]+$/"  ng-maxlength="32" required/>
+                    <div class="error" ng-messages="(submitValid ||registerForm.name.$dirty) && registerForm.name.$error">
+                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                            <div ng-message="pattern">只能输入小写字母、数字、中划线</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </form>
+        <form name="IPMIForm" autocomplete="off" novalidate>
+            <fieldset>
+                <h5 class="title"><span>IPMI接入信息</span></h5>
+                <div class="control-group ip_cidr">
+                    <label class="control-label">BMC IP地址：</label>
+                    <div class="controls clearfix">
+                        <div class="flex">
+                            <div class="ip_text">
+                                <input type="text" class="form-controls" name="ip_0" id="ip_0" ng-model="ip_0"  min="1" max="255" limitnumrange placeholder="1~255" ng-disabled="canInput"  required/>
+                                <div class="error" ng-messages="(IPMIsubmitValid ||IPMIForm.ip_0.$dirty) && IPMIForm.ip_0.$error">
+                                    <form-validate></form-validate>
+                                    <div ng-message="limitnumrange">{{'aws.errors.limit_1_255'|translate}}</div>
+                                </div>
+                            </div>
+                            <div class="ip-spilt">.</div>
+                            <div class="ip_text">
+                                <input type="text" class="form-controls" name="ip_1" id="ip_1" ng-model="ip_1" min="0" max="255" limitnumrange placeholder="0~255" ng-disabled="canInput" required/>
+                                <div class="error" ng-messages="(IPMIsubmitValid ||IPMIForm.ip_1.$dirty) && IPMIForm.ip_1.$error">
+                                    <form-validate></form-validate>
+                                    <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                </div>
+                            </div>
+                            <div class="ip-spilt">.</div>
+                            <div class="ip_text">
+                                <input type="text" class="form-controls" name="ip_2" id="ip_2" ng-model="ip_2" min="0" max="255" limitnumrange placeholder="0~255" ng-disabled="canInput" required/>
+                                <div class="error" ng-messages="(IPMIsubmitValid ||IPMIForm.ip_2.$dirty) && IPMIForm.ip_2.$error">
+                                    <form-validate></form-validate>
+                                    <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                </div>
+                            </div>
+                            <div class="ip-spilt">.</div>
+                            <div class="ip_text">
+                                <input type="text" class="form-controls" name="ip_3" id="ip_3" ng-model="ip_3" min="0" max="255" placeholder="0~255" limitnumrange ng-disabled="canInput" required/>
+                                <div class="error" ng-messages="(IPMIsubmitValid ||IPMIForm.ip_3.$dirty) && IPMIForm.ip_3.$error">
+                                    <form-validate></form-validate>
+                                    <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">用户名：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="userName" ng-model="driverInfo.ipmi_username" ng-disabled="canInput" placeholder={{"aws.users.placeholder.username"|translate}} ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required/>
+                        <div class="error" ng-messages="(IPMIsubmitValid ||IPMIForm.userName.$dirty) && IPMIForm.userName.$error">
+                            <form-validate></form-validate>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">密码：</label>
+                    <div class="controls">
+                        <input type="password" class="form-controls" name="userpassword"ng-model="driverInfo.ipmi_password" ng-disabled="canInput" placeholder={{"aws.users.placeholder.password"|translate}}   required
+                        />
+                        <div class="error" ng-messages="(IPMIsubmitValid ||IPMIForm.userpassword.$dirty) && IPMIForm.userpassword.$error">
+                            <form-validate ></form-validate>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group" ng-hide="editUser">
+                    <label class="control-label">&nbsp</label>
+                    <div class="controls">
+                    <button class="btn btn-info" ng-disabled="hasVerify||canInput" ng-click="verifyIPMI(IPMIForm)">验证IPMI信息</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+        <fieldset>
+            <!-- <h5 class="title limit-part"></h5>
+            <div class="control-group">
+                <label class="control-label">属性：</label>
+                <div class="controls">
+                    <div class="radio-item clearFix">
+                        <label class="radio"><input type="radio" ng-model="limitPvm" name="limitPvm" value="limitPvm"><i class="iconfont"></i>受限</label>{{limitPvm}}
+                        <label class="radio"><input type="radio" ng-model="limitPvm" name="unlimitPvm" value="unlimitPvm"><i class="iconfont"></i>非受限</label>{{unlimitPvm}}
+                    </div>
+                </div>
+            </div> -->
+            <div class="control-group" ng-show="showInit && limitPvm=='unlimitPvm'">
+                <label class="control-label">注册后初始化：</label>
+                <div class="controls">
+                    <div class="checkbox-item clearFix">
+                        <label class="checkbox"><input type="checkbox" ng-disabled = "!caninitProvision" ng-model="initProvision"><i class="iconfont"></i></label>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        
+        
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled ="!checkIPMIPass&&!canInput" ng-click="confirm(registerForm,settingForm)">{{'aws.instances.addinstances.ok'|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+    </div>
+  </div>

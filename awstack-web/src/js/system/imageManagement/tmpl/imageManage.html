@@ -1,0 +1,58 @@
+<div class="box">
+    <div class="table-action transferImage-info">
+        <into-information modular="'imageManagement'"></into-information>
+    </div>
+    <div class="cloud-box">
+        <div class="page-inner">
+            <form name="transferForm" novalidate>
+                <div class="imageManage-box">
+                    <div class="imageManage-srv">
+                        <div class="control-group">
+                            <label class="control-label">{{"aws.initSetting.datacener"|translate}}：</label>
+                            <div class="controls">
+                                <ui-select ng-model="transfer.region" ng-disabled="true">
+                                    <ui-select-match placeholder="{{'aws.initSetting.placeholder.selectDataCenter'|translate }}">{{$select.selected.regionName}}</ui-select-match>
+                                    <ui-select-choices repeat="region in regionList | filter: {regionName: $select.search}">
+                                        <div ng-bind-html="region.regionName | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">{{"aws.initSetting.transferImage.transferTo"|translate}}：</label>
+                            <div class="controls">
+                                <ui-select ng-model="transfer.device" name="storageDevice" ng-change="changeStorage()" ng-disabled="storageChange" required>
+                                    <ui-select-match placeholder="{{'aws.initSetting.transferImage.selectStorage'|translate }}">{{$select.selected.disPlayName}}</ui-select-match>
+                                    <ui-select-choices repeat="device in deviceList | filter: {disPlayName: $select.search}">
+                                        <div ng-bind-html="device.disPlayName | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <div class="error" ng-messages="(submitValid || transferForm.storageDevice.$dirty) && transferForm.storageDevice.$error">
+                                    <span ng-message="required">{{'aws.errors.required'|translate}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">&nbsp;</label>
+                            <div class="controls">
+                                <button class="btn btn-info" type="button" ng-click="startTransfer(transferForm)" ng-disabled="transferDisabled">{{"aws.initSetting.transferImage.startTransfer"|translate}}</button>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if = "showProgress">
+                            <label class="control-label">&nbsp;</label>
+                            <div class="controls">
+                                <div class="progess-bar">
+                                    <div class="pull-left statusText" ng-class="{'failText': !progess.status}">{{progess.tips}}</div>
+                                    <div class="pull-right">{{progess.number}}</div>
+                                    <div class="progress-step clearfix">
+                                        <div class="progress-base" ng-class="{'pregress-100': progess.number=='100%','fail-color': !progess.status}" ng-style="{width: progess.number}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>    
+</div>

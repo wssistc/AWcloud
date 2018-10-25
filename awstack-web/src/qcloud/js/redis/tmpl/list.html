@@ -1,0 +1,499 @@
+<div class="page-inner">
+	<div class="page-title">
+		<h2>云存储Redis-实例列表</h2>
+
+    <!-- <ui-select class="" ng-model="project.selected" ng-change="changeProject(project.selected)" name="project" title="项目切换">
+      <ui-select-match placeholder="项目切换">{{$select.selected.projectName}}</ui-select-match>
+      <ui-select-choices repeat="item.projectId as item in projectList | filter:{projectName:$select.search}">
+        <div ng-bind-html="item.projectName | highlight: $select.search"></div>
+      </ui-select-choices>
+    </ui-select> -->
+
+    <!-- <ui-select class="" ng-model="region.selected" ng-change="changeRegion(region.selected)" name="regionName" title="地域切换">
+      <ui-select-match placeholder="地域切换">{{$select.selected.regionName}}</ui-select-match>
+      <ui-select-choices repeat="item.region as item in regionList | filter:{regionName:$select.search}">
+        <div ng-bind-html="item.regionName | highlight: $select.search"></div>
+      </ui-select-choices>
+    </ui-select> -->
+    <div class="btn-item-group">
+      <button ng-repeat="item in regionList" ng-click="changeRegion(item)" ng-class="{'active':region.selected.region==item.region}" ng-bind="item.regionName" ng-click="selectedRegion(item)"></button>
+    </div>
+	</div>
+	<div class="table-action">
+		<!-- <button type="button" data-toggle="modal" class="btn btn-primary" ng-click="createRedisInstance()" ><i class="icon-aw-add-to2"></i>新建</button> -->
+    <a ng-href="#/buy/redis" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新建</a>
+    <button type="button" data-toggle="modal" class="btn btn-info" ng-click="changePassword()" ng-disabled="isRadio">修改密码</button>
+    <button type="button" data-toggle="modal" class="btn btn-info" ng-click="renewRedis()" ng-disabled="isRadio">续费</button>
+    <button type="button" data-toggle="modal" class="btn btn-info" ng-click="autoRenew()" ng-disabled="isAutoRenew">设置自动续费</button>
+		<button type="button" data-toggle="modal" class="btn btn-info" ng-click="cancelRenew()" ng-disabled="isCancelRenew">取消自动续费</button>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='根据实例Id、名称、IP搜索' />
+      </form>
+    </div>
+	</div>
+	<div class="table-content">
+      <table ng-table="redisInstanceTable" class="table table-check" show-filter="false">
+        <tr ng-repeat="item in $data">
+          <td header="'headerCheckbox.html'">
+            <label class="checkbox" ng-if="item.status != 0">
+              <input type="checkbox" name="" ng-model="checkboxes.items[item.redisId]" value="{{item.redisId}}"  />
+              <i class="iconfont" ></i>
+            </label>
+            <label class="checkbox disabled" ng-if="item.status == 0" >
+              <i class="iconfont"></i>
+            </label>
+          </td>
+          <td data-title="'实例ID/名称'" sortable="'redisName'">
+            <div class="edit-name">
+              <a ng-href="#/redis/redislist?id={{item.redisId}}&region={{item.region}}" ng-if="item.status != 0"><em class="renew-icon" ng-if=" item.autoRenewFlag == 1">续</em>{{item.redisId}}</a>
+              <div class="grey" ng-if="item.status == 0"><em class="renew-icon" ng-if="item.autoRenewFlag == 1">续</em>{{item.redisId}}</div>
+              <span>{{item.redisName}}</span>
+            </div>
+          </td>
+          <td data-title="'实例状态'" sortable="'statusDesc'">
+             <span ng-class="{orange:item.status==0,grey:item.status == 1,green: item.status == 2}">{{item.statusDesc}}</span>
+          </td>
+          <td data-title="'所属项目'" sortable="'projectName'" header-class="'th-hide'" class="td-hide">
+            {{item.projectName}}
+          </td>
+          <td data-title="'所属区域'" sortable="'region'">
+            {{item.regionName}}
+          </td>
+          <td data-title="'可用区'" sortable="'zoneName'">
+            {{item.zoneName}}
+          </td>
+          <td data-title="'网络'" sortable="'networkName'">
+            {{item.networkName}}
+          </td>
+          <td data-title="'内网地址'" sortable="'wanaddr'">
+            {{item.wanaddr}}
+          </td>
+          <td data-title="'规格'" sortable="'typeIddesc'" header-class="'th-hide'" class="td-hide">
+            {{item.typeIddesc}}
+          </td>
+          <td data-title="'已使用/总容量'" sortable="'sizeinfo'">
+            {{item.sizeinfo}}
+          </td>
+          <td data-title="'创建时间'" sortable="'createtime'" header-class="'th-hide'" class="td-hide">
+            {{item.createtime }}
+          </td>
+          <td data-title="'到期时间'" sortable="'deadlineTime'">
+            {{item.deadlineTime}}
+          </td>
+          <td data-title="'管理'" sortable="''">
+            <a ng-click="addSize(item)" ng-class="{disabled:item.status == 0}">扩容</a>
+          </td>
+        </tr>
+      </table>
+      <!-- <span ng-show="resdiSet.length > 0" class="tableNum">已选 {{checkedItems.length}} 项&nbsp;&nbsp;共 {{resdiSet.length}} 项</span> 
+      <div class="tips" ng-show="resdiSet.length == 0">数据为空</div>-->
+	</div>
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+      <div class="detail-tab">
+        <div class="dt-title">
+          <span class="pull-right">
+            <button type="button" data-toggle="modal" ng-click="clearExa()" class="btn btn-info"><i class="icon-aw-add-to2"></i>清空实例</button>
+          </span>
+          <a class="an-close" ng-href="#/redis/redislist">返回<i class="icon-aw-angle-left"></i></a>
+          <span>{{redisDetail.redisName}}</span>
+        </div>
+        <div class="dt-box">
+          <ul class="nav nav-tabs">
+            <li class="active"><a>实例详情</a></li>
+            <!-- <li><a>系统监控</a></li>
+            <li><a>参数设置</a></li>
+            <li><a>备份与恢复</a></li> -->
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active">
+              <strong>基本信息</strong>
+              <dl class="dl-horizontal">
+                <dt>实例ID</dt>
+                <dd>{{redisDetail.redisId}}</dd>
+                <dt>运行状态</dt>
+                <dd><span class="green">{{redisDetail.statusDesc}}</span></dd>
+                <dt>所属网络</dt>
+                <dd>{{redisDetail.networkName}}</dd>
+                <dt>所属地域</dt>
+                <dd>{{region.selected.regionName}}</dd>
+                <dt>可用区 </dt>
+                <dd>{{redisDetail.zoneName}}</dd>
+                <dt>所属项目</dt>
+                <dd>{{redisDetail.projectName}}</dd>
+                <dt>内网地址</dt>
+                <dd>{{redisDetail.wanIp}}</dd>
+                <dt>端口</dt>
+                <dd>{{redisDetail.port}}</dd>
+                <dt>连接密码<i class="icon-aw-question-mark" uib-tooltip="连接云存储Redis时，连接密码需要输入实例ID:用户设置的密码。如：crs-6pez5h1l:1234567a"></i></dt>
+                <dd>{{redisDetail.redisName}}:********</dd>
+              </dl>
+              <strong>配置信息</strong>
+              <dl class="dl-horizontal">
+                <dt>已使用/总容量</dt>
+                <dd>{{redisDetail.size/1024}}G，已用{{redisDetail.sizeUsed}}MB</dd>
+                <dt>规格</dt>
+                <dd>{{redisDetail.typeIddesc}}</dd>
+                <dt>到期时间</dt>
+                <dd>{{redisDetail.deadlineTime}}</dd>
+                <dt>创建时间</dt>
+                <dd>{{redisDetail.createtime}}</dd>
+              </dl>
+            </div>
+            <div class="tab-pane">2</div>
+          </div>
+        </div>
+      </div>
+    </pane>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="createRedisInstance.html">
+    <div class="modal-common">
+    <form name="newRedis" novalidate>
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">新建云存储Redis</h3>
+      </div>
+      <div class="modal-body">
+          <div class="control-group">
+            <label class="control-label">地域：</label>
+            <div class="controls">
+              <span class="tips">—华南地区——华东地区——华北地区—</span>
+              <div class="btn-item-group">
+                <button ng-class="{'active':item.region==regionCur}" ng-click="selReg(item)" ng-repeat="item in regionList">{{"CN.region."+item.region|translate}}</button>
+              </div>
+              <span class="tips">不同地域云产品之间内网不互通；选择最靠近您客户的地域，可降低访问时延</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">可用区<i class="icon-aw-prompt" uib-tooltip="可用区是同一地域下，电子和网络互相独立的物理区域（一般是一个物理机房）
+              单可用区故障不会影响其他可用区云服务的正常运行"></i>：</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button ng-class="{'active':item==curZoneId}" ng-click="selZone(item)" ng-repeat="item in zoneList">{{"CN.mysql.zoneId."+item|translate}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">网络：</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button ng-class="{'active':curNetC=='base'}" ng-click="curNetC='base'">基础网络</button>
+                <button ng-class="{'active':curNetC=='perNet'}" ng-click="chooseNetwork()">私有网络</button>
+              </div>
+              
+            </div>
+          </div>
+          <div class="control-group" ng-if="curNetC=='perNet'">
+            <label class="control-label">&nbsp;</label>
+            <div class="controls">
+              <div>
+                  <ui-select class="uisel-sm" ng-model="network.select" name="network" ng-change="selNetwork(network.select)" required ng-disabled="!networkList.length>0">
+                    <ui-select-match>{{$select.selected.vpcName}}</ui-select-match>
+                    <ui-select-choices  repeat="item in networkList | filter: {vpcName : $select.search}">
+                      <div ng-bind-html="item.vpcName | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                  <ui-select class="uisel-sm" ng-model="subnet.select" name="subnet" required ng-disabled="!subNetList.length>0">
+                    <ui-select-match>{{$select.selected.subnetName}}</ui-select-match>
+                    <ui-select-choices  repeat="item in subNetList | filter: {subnetName : $select.search} ">
+                      <div ng-bind-html="item.subnetName | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                  <button type="button" class="btn btn-refresh"><i class="icon-aw-refresh green" ng-click="refreshNet()"></i></button>
+              </div>
+              <div class="error" ng-messages="(submitalid || newRedis.subnet.$dirty) && newRedis.subnet.$error">
+                <form-validate></form-validate>
+              </div>  
+              <span class="tips" ng-if="hasSubNet">可用区内无有效子网，请更换可用区或新建子网</span>
+              <span class="tips" ng-if="!hasSubNet">您还可以去控制台 <a target="_blank" ng-href="#/vpc/vpc">新建私有网络</a> 或者 <a target="_blank"  ng-href="#/vpc/subnet">新建子网</a></span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">规格：</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button ng-class="{'active':curTypes.type==val.type}" ng-click="selType(val)" ng-repeat="(key,val) in Types">{{val.typeName}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">容量：</label>
+            <div class="controls rzslider-box">
+              <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+              <input type="text" ng-model="slider.value" min="slider.options.floor" max="slider.options.ceil"/>
+              <span class="unit">GB</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">类型：</label>
+            <div class="controls">热备</div>
+          </div>
+          <!-- <div class="control-group">
+            <label class="control-label">指定项目:</label>
+            <div class="controls">
+              <ui-select ng-model="project.selected" ng-change="selectedProject(project.selected)" name="project" title="项目切换">
+                <ui-select-match placeholder="项目切换">{{$select.selected.projectName}}</ui-select-match>
+                <ui-select-choices repeat="item in projectList | filter:{projectName:$select.search}">
+                  <div ng-bind-html="item.projectName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div> -->
+          <div class="control-group">
+            <label class="control-label">购买数量：</label>
+            <div class="controls">
+              <div class="count-box" count-box count="goodsNum" count-min="1" count-max="10">
+                <span class="minus">-</span>
+                <input type="text" ng-model="goodsNum" ng-model-options="{ updateOn: 'blur' }" class="button-num" required/>
+                <span class="add">+</span>
+              </div> 台
+
+              
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">密码：</label>
+            <div class="controls">
+              <input type="password" name="password" id="password" ng-model="password" class="form-control" required />
+              <form-validate class="error" ng-messages="(submitalid || newRedis.password.$dirty) && newRedis.password.$error"></form-validate>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">确认密码：</label>
+            <div class="controls">
+                <input type="password" name="repassword" ng-model="repassword" class="form-control" required pw-check="password"/>
+                <form-validate class="error" ng-messages="(submitalid || newRedis.repassword.$dirty) && newRedis.repassword.$error"></form-validate>
+            </div>
+
+          </div>
+          <div class="control-group">
+            <label class="control-label">购买时长:</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button ng-class="{'active':item.value==curPeri}" ng-click="selPeri(item)" ng-repeat="item in periodList">{{item.text}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">总计费用:</label>
+            <div class="controls">
+              <span class="unit-box">{{price}}<span class="unit-txt">元</span></span>
+            </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="isTrue" ng-click="confirm(newRedis)">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+      </form>
+    </div>
+</script>
+<script type="text/ng-template" id="renewRedis.html">
+  <div class="modal-common">
+    <form name="renewRedisForm">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">续费所选实例</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">续费时长</label>
+          <div class="controls">
+            <ui-select class="uisel-sm" ng-model="crsPriceUnit.selected" ng-change="changeUnit(crsPriceUnit.selected.name)" title="单位切换">
+              <ui-select-match placeholder="单位切换">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="item in crsPriceUnit | filter:{name:$select.search}">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+
+            <ui-select class="uisel-sm" ng-model="crsPriceTime.selected" ng-change="changeTime(crsPriceTime.selected.time)" title="时常切换">
+              <ui-select-match placeholder="时长切换">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="item in crsPriceTime | filter:{name:$select.search}">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">总费用</label>
+          <div class="controls">
+            <span class="unit-box">{{total.price / 100}}<span class="unit-txt">元</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="autoRenew.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">设为自动续费</h3>
+    </div>
+    <div class="modal-body">
+      <uib-alert type="info" class="alert-tip">
+        下列设备（共{{val.length}}项）到期后将按月自动续费，请您确保设备到期时账户余额充足
+      </uib-alert>
+      <table class="table no-border">
+        <thead>
+          <tr>
+            <th class="text-left">自动续费项</th>
+            <th>到期时间</th>
+            <th>续费后到期时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in val">
+            <td>
+              云存储Redis：{{item.redisName}} <br>
+              所属网络：{{item.networkName}}，内网：{{item.wanaddr}}
+            </td>
+            <td>{{item.deadlineTime | formatDate}}</td>
+            <td><span class="orange">{{item.lastTime}}</span></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="text-right" colspan="3">预计总计费：<strong class="orange">{{totalUnitPrice}}.00</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirm('ok')">确定</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="cancelRenew.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">取消自动续费</h3>
+    </div>
+    <div class="modal-body">
+      <uib-alert type="warning" class="alert-tip">
+        确定取消所选实例的自动续费吗？
+      </uib-alert>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirm('cancel')">确定</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="addsize.html">
+  <div class="modal-common">
+    <form name="addsizeform">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">云存储扩容</h3>
+      </div>
+      <div class="modal-body">
+        <uib-alert type="info" class="alert-tip">
+          <strong>重要提示：</strong></br>扩容实例规格后将按照新规格进行计费，主从版扩容可能会断链
+        </uib-alert>
+        <div class="control-group">
+          <label class="control-label">容量</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+            <input type="text" ng-model="slider.value" max="slider.options.ceil" step="slider.options.step" min="slider.options.floor" num-range />
+            <span class="unit">GB</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">总计费用</label>
+          <div class="controls">
+            <span ng-if="priceIng" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+            <div class="price-tips" ng-class="{'in':!priceIng}">
+              <span class="unit-box">{{price}}<span class="unit-txt">元</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="confirm()" ng-disabled="canUpdate">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>      
+</script>
+<script type="text/ng-template" id="clearExa.html">
+  <div class="modal-common">
+    <form name="clearExaform" ng-if="!changePW">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">清空实例</h3>
+      </div>
+      <div class="modal-body">
+        <uib-alert type="info" class="alert-tip">
+          <strong>重要提示：</strong></br>您正准备清空实例，清空后数据将无法恢复 <br>请输入实例密码以允许执行该操作
+        </uib-alert>
+        <div class="control-group">
+          <label class="control-label"><i class="red">*</i>密码</label>
+          <div class="controls">
+            <input type="password" name="password" id="password" ng-model="EXA.password" class="form-control" required>
+            
+            <div class="error" ng-messages="clearExaform.password.$dirty && clearExaform.password.$error">
+                <form-validate></form-validate>
+              </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="confirm()" ng-disabled="clearExaform.password.$invalid">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+    <form name="changePassword" ng-if="changePW">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">重置密码</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">实例名称</label>
+          <div class="controls">{{exa.redisName}}</div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><i class="red">*</i> 旧密码</label>
+          <div class="controls">
+            <input type="password" name="oldpassword"  ng-model="EXA.oldPassword" class="form-control" ng-minlength="8" ng-maxlength="16" placeholder="请输入旧密码" regpass required>
+            <form-validate  max-num="16" min-num="8" class="error" ng-messages="changePassword.oldpassword.$dirty && changePassword.oldpassword.$error"></form-validate>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><i class="red">*</i> 新密码</label>
+          <div class="controls">
+            <input type="password" name="newPassword" id="newPassword" ng-model="EXA.newPassword" placeholder="至少包含字母、数字和字符（_+-&=!@#$%^*()）中的两种,且长度为8-16个字符" ng-minlength="8" ng-maxlength="16"  class="form-control" regpass required>
+            <form-validate max-num="16" min-num="8" class="error" ng-messages="changePassword.newPassword.$dirty && changePassword.newPassword.$error"></form-validate>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><i class="red">*</i> 确认密码</label>
+          <div class="controls">
+            <input type="password" name="repassword" ng-model="EXA.rePassword" class="form-control" placeholder="请再次输入密码" required pw-check="newPassword">
+            <form-validate class="error" ng-messages="changePassword.repassword.$dirty && changePassword.repassword.$error"></form-validate>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="confirmPassword()" ng-disabled="changePassword.$invalid">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>

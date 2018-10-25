@@ -1,0 +1,72 @@
+<div class="ceph-grid" ng-controller="cephViewChartCtrl">
+	<div class="table-action">
+        <div class="btn-box">
+            <button type="button" class="btn btn-new" ng-disabled="disabled_btn" ng-click="balanceData()">{{'aws.cephView.clustbalance' | translate}}</button>
+            <button type="button" class="btn btn-new" ng-disabled="disabled_btn" ng-click="cephTask()">{{'aws.cephView.cephTask' | translate}}</button>
+            <button type="button" ng-class="{'disabled':view.osd_btn}" class="btn btn-norma"
+            uib-popover="{{isDisabled?('aws.cephView.tips.tip7' | translate):('aws.cephView.tips.tip8' | translate)}}"
+            popover-enable="view.osd_btn" popover-trigger="mouseenter" popover-placement = "bottom" 
+            ng-click="rebootOsdFunc()" >{{'aws.cephView.rebootOsd' | translate}}</button>
+            <div class="fieid-box">
+                <ul>
+                    <li><i class="icon-aw-hdd"></i>HDD</li>
+                    <li><i class="icon-aw-ssd ssd "></i>SSD</li>
+                </ul>
+                <ul>
+                    <li><i class="my-icon"></i>{{"aws.action.empty" | translate}}</li>
+                    <li>
+                        <i class="my-icon"></i>
+                        <i class="rect-half"></i>
+                        {{"aws.action.hasData" | translate}}
+                    </li>
+                </ul>
+                <ul>
+                    <li><i class="my-icon up"></i>{{'aws.cephView.chart.status.up' | translate}}</li>
+                    <li><i class="my-icon down"></i>{{'aws.cephView.chart.status.down' | translate}}</li>
+                    <li><i class="my-icon out"></i>{{'aws.cephView.chart.status.out' | translate}}</li>
+                </ul>
+                <ul>
+                    <li>
+                        <i class="io green" uib-popover="{{'aws.cephView.tips.tip1' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom"></i>
+                        <i class="io orange" uib-popover="{{'aws.cephView.tips.tip1' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom"></i>
+                        <i class="io red" uib-popover="{{'aws.cephView.tips.tip1' | translate}}"   popover-trigger="mouseenter" popover-placement = "bottom"></i>
+                        {{'aws.cephView.IOused' | translate}}
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="pull-right">
+            <into-information modular="'cephManage'"></into-information>
+            <div class="search-list">
+                <ui-select ng-model="chart.searchItem"  ng-change="chartGlobalSearch()">
+                    <ui-select-match placeholder='{{"aws.action.pleaseSelect" | translate}}'>
+                        {{$select.selected.name}}
+                    </ui-select-match>
+                    <ui-select-choices repeat="search in chart.searchList | propsFilter:{name:$select.search}">
+                        <div ng-bind-html="search.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div class="search-box">
+                <form name="searchForm" novalidate ng-keyup="chartGlobalSearch(globalSearchTerm)">
+                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="请输入节点名称或Ip地址" />
+                </form>
+            </div>
+            <button class="btn btn-renovat" ng-click="view.getCephList()"><i class="icon-aw-refresh"></i></button>
+        </div>
+    </div>
+    <service-tip service = "'ceph'"  menus="menuGuide"  menu-href="'/system/storageManagement'"></service-tip>
+    <div class="layout-grid">
+        <div ng-repeat = "item in view.cephlist ">
+            <div class="col-3" >
+                <div ceph-box cephlist="item" osd-btn="rebootBtn"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+

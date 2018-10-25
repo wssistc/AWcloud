@@ -1,0 +1,163 @@
+<div class="page-inner alarmevent-inner">
+  <uib-tabset active="" justified="true" class="tab-offset-right">
+    <uib-tab index="0" heading='{{"aws.monitor.alarmModule.alarmEvent"|translate}}' ng-click="newAlarmTab()">
+      <script type="text/ng-template" id="headerCheckbox.html">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+            <i class="iconfont"></i>
+          </label>
+      </script>
+      <div class="table-content ">
+        <div class="table-action">
+            <button class="btn btn-normal" ng-disabled="delisDisabled" ng-click="handleAlarm(checkedItems,'more')" licence-type="btn" id="monitor-alarmEvent-deal">{{'aws.monitor.alarmModule.handle'|translate}}</button>
+            <button class="btn btn-normal" ng-disabled="delisDisabled" ng-click="ignoreAlarm(checkedItems,'more')" licence-type="btn" id="monitor-alarmEvent-ignore">{{'aws.monitor.alarmModule.ignore'|translate}}</button>
+            <!-- <div class="search-box">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm.item" placeholder="{{'aws.instances.search'|translate}}" />
+                </form>
+            </div> -->
+            <into-information modular="'alarmevent'"></into-information>
+            <setting title-data="titleData" site-title="titleName" search-tearm="alarmEventSearchTerm(obj)" table-data="tableData"></setting>
+            <div type="button" class="btn btn-renovat right-ports" ng-click="refreshNewAlarm()">
+                <i class="icon-aw-refresh"></i>
+            </div>
+            <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch('new')" class="ng-pristine ng-valid ng-valid-maxlength">
+                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm.item" placeholder='{{"aws.action.search"|translate}}' />
+                </form>
+            </div>
+            <div class="status-list alarm-event-new">
+                <ui-select ng-model="statusFrom.name"  ng-change="choiceStatus(statusFrom.name)" ng-disabled="!titleData[1].value">
+                    <ui-select-match title="{{$select.selected.name}}" placeholder='{{"aws.pvm.placeholder.choiceStatus"|translate}}'>
+                        {{$select.selected.name}}
+                    </ui-select-match>
+                    <ui-select-choices repeat="status in statusList | propsFilter:{name:$select.search}">
+                        <div ng-bind-html="status.name | highlight: $select.search" title="{{status.name}}" class="alarmEvent-uiselect"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <empty-tip empty-type="loadNewAlarmData" tip-id="'newAlarm-tip-msg'"></empty-tip>
+        <table ng-table="tableParams_new" class="table">
+          <colgroup>
+            <col width="6%">
+          </colgroup>
+          <tr ng-repeat="item in $data">
+            <td header="'headerCheckbox.html'">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="checkboxes.items[item.id]" />
+                <i class="iconfont"></i>
+              </label>
+            </td>
+            <td data-title="'aws.monitor.alarmModule.hostName'|translate" sortable="'hostname'" ng-if="titleData[0].value">
+              <div class="edit-name edit-sm">
+                <span title="{{item.hostname}}">{{item.hostname}}</span>
+              </div>
+            </td>
+            <td data-title="'aws.monitor.alarmModule.alarmType'|translate" sortable="'_alarmType'" ng-if="titleData[1].value">
+              <!-- <span ng-class="{'bg-green':(item.alarmType == 'healthcheck' || item.alarmType == 'planwork'),'bg-orange':item.alarmType == 'threshold','bg-blue':item.alarmType == 'computeha','bg-red':item.alarmType == 'hardware'}">{{item._alarmType}}</span> -->
+              <span>{{item._alarmType}}</span>
+            </td>
+            <td data-title="'aws.monitor.alarmModule.alarmReason'|translate" sortable="'reason'" ng-if="titleData[2].value">
+              <span class="des des-sm"><a tabindex="0" popover-placement="bottom" popover-trigger="outsideClick" popover-title="{{item.reason.subject}}" uib-popover="{{item.reason.detail || item.reason}}">{{item.reason.subject || item.reason}}</a></span>
+            </td>
+            
+            <td data-title="'aws.monitor.alarmModule.severity'|translate" sortable="'severity'" ng-if="titleData[3].value"><span ng-class="{'bg-critical':item.severity_status == 'critical','bg-moderate':item.severity_status == 'moderate','bg-low':item.severity_status == 'low'}">{{item.severity}}</span></td>
+            <td data-title="'aws.monitor.alarmModule.handleStatus'|translate" sortable="'status'" ng-if="titleData[4].value">{{item.status}}</td>
+            <td data-title="'aws.monitor.alarmModule.alarmTime'|translate" sortable="'createtime'" ng-if="titleData[5].value"><span class="date">{{item.createtime}}</span></td>
+            <!-- <td data-title="'aws.monitor.alarmModule.operate'|translate" ng-if="titleData[6].value">
+              <button class="btn btn-default" ng-click="handleAlarm(item,'one')">{{'aws.monitor.alarmModule.handle'|translate}}</button>
+              <button class="btn btn-default" ng-click="ignoreAlarm(item,'one')">{{'aws.monitor.alarmModule.ignore'|translate}}</button>
+            </td> -->
+          </tr>
+        </table>
+      </div>
+    </uib-tab>
+    <uib-tab index="1" heading='{{"aws.monitor.alarmModule.oldAlarmEvent"|translate}}' ng-click="oldAlarmTab()">
+      <div class="table-content" >
+        <div class="table-action">
+          <!-- <button class="btn btn-refresh" ng-click="refreshOldAlarm()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button> -->
+          <!-- <div class="search-box">
+            <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+              <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+              <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm.item" placeholder="{{'aws.instances.search'|translate}}" />
+            </form>
+          </div> -->
+          <into-information modular="'hisAlarmevent'"></into-information>
+          <setting title-data="oldTitleData" site-title="oldTitleName" search-tearm="alarmEventSearchTerm(obj)" table-data="tableOldData"></setting>
+          <div type="button" class="btn btn-renovat right-ports" ng-click="refreshOldAlarm()">
+              <i class="icon-aw-refresh"></i>
+          </div>
+          <div class="search-box right-ports">
+              <form name="searchForm" novalidate ng-keyup="applyGlobalSearch('old')" class="ng-pristine ng-valid ng-valid-maxlength">
+                  <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                  <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm.item" placeholder='{{"aws.action.search"|translate}}' />
+              </form>
+          </div>
+          <div class="status-list alarm-event-new">
+              <ui-select ng-model="oldStatusFrom.name"  ng-change="choiceStatusOld(oldStatusFrom.name)" ng-disabled="!oldTitleData[1].value">
+                  <ui-select-match placeholder='{{"aws.pvm.placeholder.choiceStatus"|translate}}' title="{{$select.selected.name}}">
+                      {{$select.selected.name}}
+                  </ui-select-match>
+                  <ui-select-choices repeat="status in statusList | propsFilter:{name:$select.search}">
+                      <div ng-bind-html="status.name | highlight: $select.search" title="{{status.name}}" class="alarmEvent-uiselect"></div>
+                  </ui-select-choices>
+              </ui-select>
+          </div>
+        </div>
+        <empty-tip empty-type="loadOldAlarmData" tip-id="'oldAlarm-tip-msg'"></empty-tip>
+        <table ng-table="tableParams_old" class="table oldAlarm-table">
+          <colgroup>
+            <col width="6%">
+          </colgroup>
+          <tr ng-repeat="item in $data">
+            <td data-title="'aws.monitor.alarmModule.hostName'|translate" sortable="'hostname'" ng-if="oldTitleData[0].value">
+              <div class="edit-name edit-sm">
+                <span title="{{item.hostname}}">{{item.hostname}}</span>
+              </div>
+            </td>
+            <td data-title="'aws.monitor.alarmModule.alarmType'|translate" sortable="'_alarmType'" ng-if="oldTitleData[1].value">
+              <!-- <span ng-class="{'bg-green':(item.alarmType == 'healthcheck' || item.alarmType == 'planwork'),'bg-orange':item.alarmType == 'threshold','bg-blue':item.alarmType == 'computeha','bg-red':item.alarmType == 'hardware'}">{{item._alarmType}}</span> -->
+              <span>{{item._alarmType}}</span>
+            </td>
+            <td data-title="'aws.monitor.alarmModule.alarmReason'|translate" sortable="'reason'" ng-if="oldTitleData[2].value">
+              <a tabindex="0" popover-trigger="outsideClick" popover-title="{{item.reason.subject}}" uib-popover="{{item.reason.detail || item.reason}}">{{item.reason.subject || item.reason}}</a>
+            </td>
+            <td data-title="'aws.monitor.alarmModule.alarmTime'|translate" sortable="'createtime'" ng-if="oldTitleData[3].value"><span class="date">{{item.createtime}}</span></td>
+            <td data-title="'aws.monitor.alarmModule.severity'|translate" sortable="'severity'" ng-if="oldTitleData[4].value"><span ng-class="{'bg-critical':item.severity_status == 'critical','bg-moderate':item.severity_status == 'moderate','bg-low':item.severity_status == 'low'}">{{item.severity}}</span></td>
+            <td data-title="'aws.monitor.alarmModule.handleStatus'|translate" sortable="'status'" ng-if="oldTitleData[5].value">{{item.status}}</td>
+            <td data-title="'aws.monitor.alarmModule.handleTime'|translate" sortable="'updateTime'" ng-if="oldTitleData[6].value"><span class="date">{{item.updateTime}}</span></td>
+            <td data-title="'aws.monitor.alarmModule.handleDescription'|translate" sortable="'proDescription'" ng-if="oldTitleData[7].value"><span  title="{{item.proDescription}}" >{{item.proDescription}}</span></td>
+          </tr>
+        </table>
+      </div>
+    </uib-tab>
+  </uib-tabset>
+  <script type="text/ng-template" id="handleAlarm.html">
+    <div class="modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{'aws.monitor.alarmModule.alarmHandleDes'|translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <form name="alarmHandleDesForm" novalidate>
+          <div class="control-group">
+            <label class="control-label">{{'aws.monitor.alarmModule.handleDescription'|translate}}：</label>
+            <div class="controls">
+             <textarea type="text" class="form-controls" name="description" ng-model="handleAlarmForm.description" placeholder={{'aws.monitor.alarmModule.placeholder.handleDescription'|translate}} ng-maxlength="255" ></textarea>
+             <div class="error" ng-messages="alarmHandleDesForm.description.$error">
+                <div ng-message="maxlength">{{'aws.errors.maxlength_255'|translate}}</div>
+             </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="alarmDesConfirm(alarmHandleDesForm)">{{"aws.action.ok"|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+      </div>
+    </div>
+  </script>
+</div>

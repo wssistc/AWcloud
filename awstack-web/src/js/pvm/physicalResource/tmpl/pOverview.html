@@ -1,0 +1,80 @@
+<div class="page-inner pview-page">
+  
+  <!-- 项目 start -->
+  <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='2'}">
+    <p class="plugin-ctrl-text">如需使用物理资源管理块功能，请打开“系统管理 > 系统设置 > <a href="/#/system/plugin">功能管理</a> ”界面添加“物理机管理”模块</p>
+  </div>
+  <div class="plugin-ctrl pvmview-plugin" ng-class="{'shows':pluginSwitch=='1'}">
+    <div class="box">
+    <div class="col-4 ">
+      <div class="title">项目物理机</div>
+      <div class="panels clearfix" >
+        <div class="pie-wrap" >
+        <div class=" pie" chart-pie panel='phyMacChart.panels'></div>
+        </div>
+        <div class="pie-legend">
+          <dl class="dl-horizontal">
+            <dt>{{'aws.quota.totalQuota'|translate}}：</dt>
+            <dd><span class="total">{{phyMacData.total}}</span></dd>
+          </dl>
+          <dl class="dl-horizontal" ng-repeat="legend in phyMacChart.panels.data">
+            <dt><i style="background-color:{{phyMacChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+            <dd><span  style="color:{{phyMacChart.panels.colors[$index]}}">{{legend.value}}</span></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="col-4 ">
+      <div class="title">项目资源详情</div>
+      <div class="panels clearfix" >
+        <div class="pie-wrap" >
+        <div class=" pie" chart-pie  panel='cvmViewInsPieChart.panels'></div>
+        <div class="pie-center" ng-if="cvmViewInsPieChart.panels.data.length != 0">
+          <div class="num">{{proResData.total}}</div>
+          <div class="text" ng-if="cvmViewInsPieChart.panels.data.length != 0">物理机数量</div>
+        </div>
+        </div>
+        <div class="pie-legend">
+          <dl class="dl-horizontal pview-phymac-num">
+            <dt>物理机数量：</dt>
+            <dd><span class="total">{{proResData.total}}</span></dd>
+          </dl>
+          <dl class="dl-horizontal">
+            <dt><i style="background-color:#1abc9c"></i>正常：</dt>
+            <dd><span class="num" style="color:#1abc9c">{{proResData.success}}</span></dd>
+          </dl>
+          <dl class="dl-horizontal">
+            <dt><i style="background-color:#e74c3c"></i>异常：</dt>
+            <dd><span class="num" style="color:#e74c3c">{{proResData.error}}</span></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="col-4">
+      <div class="title">
+        <span>{{'aws.cvmview.alarm_event'|translate}}</span><a  href="#/monitor/alarmevent">{{'aws.cvmview.view_all'|translate}} >></a>
+      </div>
+      <div class="alarmInfo-wrap">
+        <div class="cont">
+         <table class="table">
+          <tbody>
+            <tr ng-repeat="alarm in newAlarms_data">
+              <td>{{alarm.hostname}}</td>
+              <td><span class="highlight" ng-class="{'bg-green':alarm.alarmType == 'healthcheck','bg-orange':alarm.alarmType == 'threshold','bg-blue':alarm.alarmType == 'computeha'}" >{{alarm._alarmType}}</span></td>
+              <td>{{alarm.severity}}</td>
+              <td>{{alarm.createtime |date:'yyyy-MM-dd HH:mm:ss'}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="noData" ng-if="newAlarms_data.length===0">
+          {{'aws.cvmview.event_no'|translate}}
+        </div>
+        </div>
+      </div>
+    </div> -->
+  </div>
+  </div>
+  
+
+</div>
+

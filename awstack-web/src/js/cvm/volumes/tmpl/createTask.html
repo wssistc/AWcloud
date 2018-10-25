@@ -1,0 +1,214 @@
+<div class="modal-common" ng-class="{'modal-middle':getQuotaInfo}">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+		<h3 class="modal-title">{{"aws.instances.snapshot.task." + tasktype | translate}}</h3>
+	</div>
+	<div class="modal-body" >
+        <div class="clearfix">
+            <div class="left-modal">
+                <div class="alert alert-info">
+                    <span ng-show="newObj.taskKind.value==0">{{'aws.instances.snapshot.addtimeSnapTip'|translate}}</span>
+                    <span ng-show="newObj.taskKind.value==1">{{"aws.backups.tips.tip15" | translate}}</span>
+                </div>
+                <div ng-show="newObj.taskKind.value==0">
+                    <div class="alert alert-danger" ng-show="beyondQuota_pro.snapshots">{{"aws.volumes.errorMessage.proSnapNum" | translate}}</div>
+                    <div class="alert alert-danger" ng-show="beyondQuota_dep.snapshots">{{"aws.volumes.errorMessage.depSnapNum" | translate}}</div>
+                </div>
+                <div ng-show="newObj.taskKind.value==1">
+                    <uib-alert ng-if="beyondQuota_pro.backups" type="danger">{{"aws.volumes.errorMessage.proBackupNum" | translate}}</uib-alert>
+                    <uib-alert ng-if="beyondQuota_dep.backups" type="danger">{{"aws.volumes.errorMessage.depBackupNum" | translate}}</uib-alert>
+                    <uib-alert ng-if="beyondQuota_pro.backup_gigabytes" type="danger">{{"aws.volumes.errorMessage.proBackupGig" | translate}}</uib-alert>
+                    <uib-alert ng-if="beyondQuota_dep.backup_gigabytes" type="danger">{{"aws.volumes.errorMessage.depBackupGig" | translate}}</uib-alert>
+                </div>
+                <form name="insForm" novalidate>
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.instances.snapshot.task.type" | translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="newObj.taskKind" ng-change=changeTaskKind(newObj.taskKind) ng-disabled="editOperation"  >
+                                <ui-select-match placeholder="{{'aws.instances.snapshot.task.taskPlace' | translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="type in newObj.taskKinds | propsFilter: {name: $select.search}">
+                                    <div ng-bind-html="type.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.volumes.hostName" | translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="newObj.host" ng-change=changeHost(newObj.host) ng-disabled="editOperation"  >
+                                <ui-select-match placeholder="{{'aws.volumes.lv.pleaseSelectServer'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="host in newObj.hosts | propsFilter: {name: $select.search}">
+                                    <div ng-bind-html="host.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group"  >
+                        <label class="control-label">
+                            {{"aws.instances.snapshot.systemDisk" | translate}}：
+                        </label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{newObj.taskKind.value==1?('aws.helpTip.instances.tip10' | translate):('aws.helpTip.instances.tip8' | translate)}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <ui-select multiple ng-model="newObj.systemDisk" theme="bootstrap" sortable="true" ng-change="changeDisk()" close-on-select="false" >
+                                <ui-select-match placeholder = "{{system_disk_list.length>0?('aws.instances.snapshot.systemDiskPlace' | translate):systemDiskTip}}">{{$item.name}}</ui-select-match>
+                                <ui-select-choices repeat="disk in system_disk_list | propsFilter:  {name: $select.search}">
+                                    <div ng-bind-html="disk.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select> 
+                        </div>
+                    </div>
+                    <div class="control-group" >
+                        <label class="control-label">
+                           {{"aws.instances.snapshot.dataDisk" | translate}}：
+                        </label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{newObj.taskKind.value==1?('aws.helpTip.instances.tip10' | translate):('aws.helpTip.instances.tip8' | translate)}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <ui-select multiple ng-model="newObj.dataDisk" theme="bootstrap" sortable="true" ng-change="changeDisk()" close-on-select="false" >
+                                <ui-select-match placeholder="{{data_disk_list.length>0?('aws.instances.snapshot.dataDiskPlace' | translate):('aws.instances.snapshot.nodataDiskPlace' | translate)}}">{{$item.name}}</ui-select-match>
+                                <ui-select-choices repeat="disk in data_disk_list | propsFilter:  {name: $select.search}">
+                                        <div ng-bind-html="disk.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select> 
+                            <div class="error" ng-show="chooseDiskTipShow">{{"aws.instances.snapshot.leastchooseDisk" | translate}}</div>
+                        </div>
+                    </div>
+                    <!--<div class="control-group">
+                        <label class="control-label" >{{"aws.instances.snapshot.timedSnap" | translate}}：</label>
+                        <div class="controls">
+                            <div class="controls" >
+                                <div class="checkbox switch-btn">
+                                    <label>
+                                        <input type="checkbox" class="form-controls" ng-model="timedSnap">
+                                        <i class="iconfont"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.instances.snapshot.frequency" | translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip65' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <ui-select  ng-model="newObj.unit" ng-change="snapFun(newObj.unit.unit,newObj.taskKind)">
+                                <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="unit in newObj.unit_list | propsFilter:  {name: $select.search}">
+                                        <div ng-bind-html="unit.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-if="newObj.unit.unit">
+                        <label class="control-label">{{"aws.instances.snapshot.timeInterval" | translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip67' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <div class="control-items2 ">
+                                <div class="control-group no-margin">
+                                    <input type="text" class="form-controls" name="frequency" ng-model="newObj.frequency" placeholder="请输入执行快照周期"  required limitnumrange min="snapMin" max="snapMax"/>
+                                </div>
+                                <div class="control-group no-margin">
+                                    <span class="control-span">{{"aws.instances.snapshot.frequencyUnit."+newObj.unit.unit | translate}}</span>
+                                </div>
+                            </div>
+                            <div class="error" ng-messages="(submitInValid ||insForm.frequency.$dirty) && insForm.frequency.$error">
+                                <div ng-if="newObj.unit.unit=='hour'" ng-message="limitnumrange">{{"aws.errors.snap_0_168" | translate}}</div>
+                                <div ng-if="newObj.unit.unit=='day'" ng-message="limitnumrange">{{"aws.errors.snap_1_31" | translate}}</div>
+                                <div ng-if="newObj.unit.unit=='month'||newObj.unit.unit=='week'" ng-message="limitnumrange">{{"aws.errors.snap_1_99" | translate}}</div>
+                                <div ng-if="newObj.unit.unit=='minute'" ng-message="limitnumrange">{{"aws.errors.snap_0_59" | translate}}</div>
+                                <form-validate></form-validate>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" title="{{'aws.instances.snapshot.firstTimedSnap' | translate}}"><span class="red">*</span>{{"aws.instances.snapshot.firstTimedSnap" | translate}}：</label>
+                        <div class="controls" >
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip68' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <div class="control-items2 ">
+                                <div class="control-group no-margin">
+                                    <div range-time>
+                                        <div class="input-group date form_date">
+                                            <input class="form-control" type="text" name="startTime" ng-model="newObj.startTime" ng-change="changeTime()" required lt-curr-time
+                                                ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])\s(([0-1][0-9])|([2][0-3])):([0-5][0-9])$/" placeholder="{{'aws.log.start_at'|translate}}">
+                                            <span class="input-group-addon calendar-cont">
+                                                <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="error" ng-messages="(submitInValid ||insForm.startTime.$dirty) && insForm.startTime.$error">
+                                <form-validate pattern-msg="'aws.errors.timeSecondPattern'|translate"></form-validate>
+                                <div ng-message="ltCurrTime">{{'aws.errors.ltCurrentTimeError'|translate}}</div>
+                            </div>
+                            <div class="red" ng-show="chkCurrentTimeTip">{{'aws.errors.ltCurrentTimeError'|translate}}</div>
+                        </div>
+                    </div>     
+                    <div class="control-group" ng-if="newObj.unit.unit">
+                        <label class="control-label" ng-show="newObj.taskKind.value==0">{{"aws.instances.snapshot.holdNumber" | translate}}：</label>
+                        <label class="control-label" ng-show="newObj.taskKind.value==1" title="{{'aws.instances.snapshot.task.keepBackupsNum' | translate}}">{{'aws.instances.snapshot.task.keepBackupsNum' | translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="newObj.holdNumber" ng-change="change_snap_number(newObj.holdNumber)"  >
+                                <ui-select-match >{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="snap_number in newObj.snap_number_list | propsFilter: {name: $select.search}">
+                                    <div ng-bind-html="snap_number.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-show="newObj.taskKind.value==1 && newObj.unit.unit">
+                        <label class="control-label">&nbsp</label>
+                        <div class="controls">
+                            <span class="des-tip">{{"aws.instances.snapshot.task.backupsTip" | translate}}
+                            </span>
+                        </div>
+                    </div>
+                    <div class= "control-group no-margin">
+                        <label class="control-label">&nbsp</label>
+                        <div class="controls">
+                            <a class="info-right" ng-click="getQuotaInfo =! getQuotaInfo">
+                                <i ng-class="{'icon-aw-angle-double-left':getQuotaInfo,'icon-aw-angle-double-right':!getQuotaInfo}"></i>
+                                {{"aws.common.quotaInfo" | translate}}
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="right-modal" ng-show="getQuotaInfo">
+                <div ng-show="newObj.taskKind.value==0">
+                    <div class="control-group">
+                        <div>{{'aws.volumes.snapQuota'|translate}}：</div>
+                        <div class="clearfix bar-group">
+                            <div quota-bar bardata="project_data.snapshots"></div>
+                            <div quota-bar bardata="domain_data.snapshots" ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="newObj.taskKind.value==1">
+                    <div class="control-group">
+                        <div>{{'aws.common.backupQuota'|translate}}：</div>
+                        <div class="clearfix bar-group">
+                            <div quota-bar bardata="project_data.backups"></div>
+                            <div quota-bar bardata="domain_data.backups"ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div>{{'aws.common.backupGigQuota'|translate}}：</div>
+                        <div class="clearfix bar-group">
+                            <div quota-bar bardata="project_data.backup_gigabytes"></div>
+                            <div quota-bar bardata="domain_data.backup_gigabytes" ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <source-price></source-price>
+	</div>
+	
+	<div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="cannot_Confirm || !canConfirm 
+        || (newObj.taskKind.value==0 && ( beyondQuota_pro.snapshots || beyondQuota_dep.snapshots))
+        || (newObj.taskKind.value==1 && (beyondQuota_pro.backups || beyondQuota_dep.backups || beyondQuota_pro.backup_gigabytes || beyondQuota_dep.backup_gigabytes))"
+        ng-click="createInsSnap(insForm)">{{'aws.action.ok' | translate}}</button>
+		<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+	</div>
+	
+</div>

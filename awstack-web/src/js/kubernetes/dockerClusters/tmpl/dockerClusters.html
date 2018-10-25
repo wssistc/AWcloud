@@ -1,0 +1,1314 @@
+<div class="page-inner">
+    <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='2'}">
+        <div class="table-action">
+            <button type="button" class="btn btn-new" disabled="disabled"><i class="icon-aw-add-to2"></i> {{"aws.k8s.dockerClusters.createCluster" |translate}}</button>
+            <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-dtss"></i> {{"aws.k8s.dockerClusters.scaleCluster" |translate}}</button>
+            <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-delete"></i> {{"aws.k8s.dockerClusters.deleteCluster" |translate}}</button>
+            <div class="pull-right">
+                <into-information modular="'k8sclusters'"></into-information>
+                <button class="btn btn-renovat right-ports" disabled="disabled"><i class="icon-aw-refresh"></i></button>
+                <div class="search-box right-ports">
+                    <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="table-content">
+            <table class="table">
+                <colgroup>
+                    <col width="9%">
+                    <col width="15%">
+                    <col width="14%">
+                    <col width="14%">
+                    <col width="14%">
+                    <col width="20%">
+                    <col width="14%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>
+                            <label class="checkbox">
+                                <input type="checkbox" name="r" disabled="disabled" />
+                                <i class="iconfont"></i>
+                            </label>
+                        </th>
+                        <th>{{"aws.k8s.dockerClusters.name"|translate}}</th>
+                        <th>{{"aws.k8s.dockerClusters.replicas"|translate}}</th>
+                        <th>{{"aws.k8s.dockerClusters.currentTotal"|translate}}</th>
+                        <th>{{"aws.k8s.dockerClusters.currentRunning"|translate}}</th>
+                        <th>{{"aws.k8s.dockerClusters.labels"|translate}}</th>
+                        <th>{{"aws.k8s.dockerClusters.creationTimestamp"|translate}}</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td colspan="7" class="text-center">
+                        如需使用容器管理块功能，请打开”系统管理 > 系统设置 > <a href="/#/system/plugin">功能管理</a> “界面添加”容器管理”模块
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='1'}">
+        <div class="table-action">
+            <button type="button" data-toggle="modal" ng-click="createDockerCluster()" class="btn btn-new">
+                <i class="icon-aw-add-to2" ng-disabled=""></i>{{"aws.k8s.dockerClusters.createCluster" |translate}}
+            </button>
+            <button type="button" data-toggle="modal" class="btn btn-normal" ng-click="scaleDockerCluster()" ng-disabled="!canScale||waitLoading">
+                <i class="icon-aw-dtss"></i>{{"aws.k8s.dockerClusters.scaleCluster" |translate}}
+            </button>
+            <button type="button" data-toggle="modal" class="btn btn-normal" ng-click="deleteDockerClusters()" ng-disabled="!canDelete||waitLoading">
+                <i class="icon-aw-delete"></i>{{"aws.k8s.dockerClusters.deleteCluster" |translate}}
+            </button>
+            <!--<button type="button" data-toggle="modal" class="btn btn-primary"-->
+            <!--ng-click="rollingUpdateCluster()" ng-disabled="!canRollingUpdate">-->
+            <!--<i class="icon-aw-repeat"></i>{{"aws.k8s.dockerClusters.rollingUpdateCluster" |translate}}-->
+            <!--</button>-->
+            <div class="pull-right">
+                <setting title-data="titleData" site-title="titleName" table-data="dockerClustersData"></setting>
+                <div type="button" class="btn btn-renovat right-ports" ng-click="refresh()">
+                    <i class="icon-aw-refresh"></i>
+                </div>
+                <div class="search-box">
+                    <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(dockerClusters_search.globalSearchTerm)">
+                        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="dockerClusters_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+                    </form>
+                </div>
+            </div>
+            <!-- <div class="search-box">
+        <form name="searchForm" novalidate ng-keyup="search(searchIterm)">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+            <i class="icon-aw-search"></i>
+            </button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm"
+                ng-model="searchIterm" placeholder='{{"aws.action.search"|translate}}'/>
+        </form>
+        </div> -->
+        </div>
+        <div class="table-content">
+            <table ng-table="tableParams" class="table" show-filter="false">
+                <colgroup>
+                    <col width="9%">
+                    <col width="15%">
+                    <col width="14%">
+                    <col width="14%">
+                    <col width="14%">
+                    <col width="20%">
+                    <col width="14%">
+                </colgroup>
+                <tr ng-repeat="item in $data">
+                    <td header="'headerCheckbox.html'">
+                        <label class="checkbox">
+                            <input type="checkbox" ng-model="checkboxes.items[item.name]" ng-disabled="waitLoading" />
+                            <i class="icon-aw-square"></i>
+                        </label>
+                    </td>
+                    <td data-title='"aws.k8s.dockerClusters.name"|translate' sortable="'name'" ng-if="titleData[0].value">
+                        <a ng-click="showDetail(item)">{{item.name}}</a>
+                        <!-- <a ng-href="#/k8s/clusters?name={{item.name}}">{{item.name}}</a> -->
+                    </td>
+                    <td data-title='"aws.k8s.dockerClusters.replicas"|translate' sortable="'status.replicas'" ng-if="titleData[1].value">
+                        {{item.status.replicas}}
+                    </td>
+                    <td data-title='"aws.k8s.dockerClusters.currentTotal"|translate' sortable="'status.currentTotal'" ng-if="titleData[2].value">
+                        {{item.status.currentTotal}}
+                    </td>
+                    <td data-title='"aws.k8s.dockerClusters.currentRunning"|translate' sortable="'status.currentRunning'" ng-if="titleData[3].value">
+                        {{item.status.currentRunning}}
+                    </td>
+                    <td data-title='"aws.k8s.dockerClusters.labels"|translate' sortable="'metadata.labels'" ng-if="titleData[4].value">
+                        {{getLabels(item.metadata.labels)}}
+                    </td>
+                    <td data-title='"aws.k8s.dockerClusters.creationTimestamp"|translate' sortable="'metadata.creationTimestamp'" ng-if="titleData[5].value">
+                        {{item.metadata.creationTimestamp | localDate}}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div ng-controller="detailCtrl" class="dockerCluster-content">
+        <pane class="detail-body" animation="animation">
+            <div class="cluster-box">
+                <div class="move-content clearfix" ng-class="{'to-left':moveTo,'to-move-left':moveToLeft}">
+                    <div class="tab-content detail-content">
+                        <div class="detail-row">
+                            <div class="detail-title">
+                                <a class="an-close" ng-click="handleDetail()"><i class="icon-aw-mail-reply"></i></a>
+                                <span class="region-title">{{clustersTitle}}{{'aws.cluster.detailMessage' | translate}}</span>
+                            </div>
+                            <div class="detail-info">
+                                <div class="tab-content-line"></div>
+                                <div>
+                                    <div ng-include="'js/kubernetes/dockerClusters/tmpl/dockerClusterDetails.html'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content detail-content" ng-if="showReplica">
+                        <div class="detail-row">
+                            <div class="detail-title">
+                                <span class="title-cluster" ng-click="toRightOnce()">{{clustersTitle}} 详情</span>
+                                <span class="point-to">></span>
+                                <span class="title-node">{{ReplicaTitle}} 详情</span>
+                            </div>
+                            <div class="detail-info">
+                                <div class="tab-content-line"></div>
+                                <div>
+                                    <div ng-include="'js/kubernetes/dockerClusters/tmpl/dockerClusterReplicaDetails.html'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content detail-content" ng-if="showContainer">
+                        <div class="detail-row">
+                            <div class="detail-title">
+                                <span class="title-cluster" ng-click="toRight()">{{clustersTitle}} 详情</span>
+                                <span class="point-to">></span>
+                                <span class="title-cluster" ng-click="toRightAgain()">{{ReplicaTitle}} 详情</span>
+                                <span class="point-to">></span>
+                                <span class="title-node">{{containerTitle}} 详情</span>
+                            </div>
+                            <div class="detail-info">
+                                <div class="tab-content-line"></div>
+                                <div>
+                                    <div ng-include="'js/kubernetes/dockerClusters/tmpl/dockerContainerDetails.html'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </pane>
+    </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" ng-disabled="waitLoading" />
+        <i class="icon-aw-square"></i>
+    </label>
+</script>
+<!-- 新建容器集群 -->
+<script type="text/ng-template" id="createDockerCluster.html">
+    <div class="k8s-modal modal-common lg-modal modal-step">                
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title  clearfix">新建Docker容器集群</h3>
+            <ul class="steps-item clearfix">
+                <li class="clearfix step-start" ng-class="{'active':!showAdvanced}">
+                    <div class=" clearfix">
+                        <span>基础选项</span>
+                        <i ng-class="{'active':!showAdvanced}">1</i>
+                    </div>
+                </li>
+                <li class="clearfix step-end" ng-class="{'active':showAdvanced}">
+                    <div class="clearfix">
+                        <span>高级选项</span>
+                        <i ng-class="{'active':showAdvanced}">2</i>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!--Basic Options-->
+        <form name="createDockerClusterBasicForm" novalidate="novalidate">
+            <div class="one-group" ng-show="!showAdvanced">
+                <div class="modal-body cluster-first">
+                    <!-- <ul class="setp-box clearfix">
+                        <li class="active"><span class="round"><b>1</b>{{"aws.k8s.createCluster.basic"|translate}}</span></li>
+                        <li><span class="round"><b>2</b>{{"aws.k8s.createCluster.advanced"|translate}}</span></li>
+                    </ul> -->
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{"aws.k8s.createCluster.clusterName"|translate}}</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="clusterName" ng-pattern="/^[a-z]([-a-z0-9]*[a-z0-9])?$/" placeholder='{{"aws.k8s.createCluster.clusterNameRequired"|translate}}' ng-minlength="1" ng-maxlength="32" required ng-model="newDockerClusterData.clusterName" />
+                            <div class="error" ng-show="submintValid||createDockerClusterBasicForm.clusterName.$invalid && createDockerClusterBasicForm.clusterName.$dirty">
+                                <span ng-show="createDockerClusterBasicForm.clusterName.$error.required">
+                                    {{"aws.k8s.createCluster.clusterNameNotEmpty"|translate}}
+                                </span>
+                                <span ng-show="createDockerClusterBasicForm.clusterName.$error.maxlength">
+                                    {{"aws.k8s.createCluster.clusterNameTooLong"|translate}}
+                                </span>
+                                <span ng-show="createDockerClusterBasicForm.clusterName.$error.pattern">
+                                    {{"aws.k8s.createCluster.clusterNameMismatchPattern"|translate}}
+                                </span>
+                            </div>
+                            <div class="error" ng-show="createDockerClusterBasicForm.clusterName.$valid &&
+                                clusterNameRepeated(newDockerClusterData.clusterName)">
+                                <span>{{"aws.k8s.createCluster.clusterNameRepeated"|translate}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.k8s.createCluster.clusterReplicas"|translate}}</label>
+                        <div class="controls">
+                                <!-- ng-pattern="/^[1-9][0-9]{0,2}$/" -->
+                            <input type="text" class="form-controls" name="clusterReplicas" required placeholder='{{"aws.k8s.createCluster.clusterReplicasRequired"|translate}}' ng-model="newDockerClusterData.clusterReplicas" ng-pattern="/^[1-9][0-9]{0,2}$/"/>
+                            <div class="error" ng-show="submintValid||createDockerClusterBasicForm.clusterReplicas.$invalid && createDockerClusterBasicForm.clusterReplicas.$dirty">
+                                <span ng-show="createDockerClusterBasicForm.clusterReplicas.$error.required">
+                                    {{"aws.k8s.createCluster.clusterReplicasNotEmpty"|translate}}
+                                </span>
+                                <span ng-show="createDockerClusterBasicForm.clusterReplicas.$error.pattern">
+                                    {{"aws.k8s.scaleCluster.limit_1000"|translate}}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.k8s.createCluster.dnsPolicy"|translate}}</label>
+                        <div class="controls">
+                            <ui-select ng-model="newDockerClusterData.dnsPolicy" required>
+                                <ui-select-match placeholder="{{'aws.k8s.createCluster.dnsPolicyTips'|translate}}">
+                                    {{$select.selected}}
+                                </ui-select-match>
+                                <ui-select-choices repeat="option in dnsPolicys track by $index">
+                                    <div ng-bind-html="option | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.k8s.createCluster.restartPolicy"|translate}}</label>
+                        <div class="controls">
+                            <ui-select ng-model="newDockerClusterData.restartPolicy" required>
+                                <ui-select-match placeholder="{{'aws.k8s.createCluster.restartPolicyTips'|translate}}">
+                                    {{$select.selected}}
+                                </ui-select-match>
+                                <ui-select-choices repeat="option in restartPolicys track by $index">
+                                    <div ng-bind-html="option | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <!--start of node selectors-->
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.k8s.createCluster.nodeSelectors"|translate}}</label>
+                        <!-- <div class="label-name">
+                            <div class="control-group">
+                                <p>{{"aws.k8s.createCluster.nodeSelectors"|translate}}</p>
+                            </div>
+                        </div> -->
+                        <div class="controls">
+                            <a class="add" ng-show="newDockerClusterData.nodeSelectors.length<1" ng-click="addSelector()">
+                                <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addNodeSelectors"|translate}}
+                            </a>
+                            <a class="add" ng-show="newDockerClusterData.nodeSelectors.length>0&&!selectShowNode" ng-click="selectShowNode=true">
+                                <i class="icon-aw-display"></i>显示选择器
+                            </a>
+                            <a class="add" ng-show="newDockerClusterData.nodeSelectors.length>0&&selectShowNode" ng-click="selectShowNode=false">
+                                <i class="icon-aw-no-display"></i>隐藏选择器
+                            </a>
+                        </div>
+                        <!-- <div class="hide-labels">
+                            <div class="control-group">
+                                <a class="hiden" ng-click="changeSelectorsVisibility()">
+                                                            <i class="icon-aw-eye"></i>
+                                {{selectorsAreVisible ? "aws.k8s.createCluster.hideNodeSelectors"
+                                : "aws.k8s.createCluster.showNodeSelectors"|translate}}
+                                </a>
+                            </div>
+                                            </div> -->
+                                            <!-- <div class="add-label">
+                            <div class="control-group">
+                                <a class="add" ng-click="addSelector()">
+                                                            <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addNodeSelectors"|translate}}
+                                </a>
+                            </div>
+                        </div> -->
+                    </div>
+                    <div class="control-group node-selectors-group" ng-repeat="selector in newDockerClusterData.nodeSelectors" ng-show="selectShowNode">
+                        <label class="label-name">{{"aws.k8s.createCluster.selector"|translate}}#{{$index + 1}}：</label>
+                        <div class="select-key">
+                            <ui-select ng-model="selector.key" name="nodeSelectorsKey" required>
+                                <ui-select-match>{{$select.selected}}</ui-select-match>
+                                <ui-select-choices repeat="option in nodeLabelKeys track by $index">
+                                    <div ng-bind-html="option | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-show="submintValid||createDockerClusterBasicForm.nodeSelectorsKey.$invalid && createDockerClusterBasicForm.nodeSelectorsKey.$dirty">
+                                <span ng-show="createDockerClusterBasicForm.nodeSelectorsKey.$error.required">
+                                    {{"aws.k8s.createCluster.clusterReplicasNotEmpty"|translate}}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="select-type">
+                            <ui-select ng-model="selector.type" required>
+                                <ui-select-match>{{$select.selected}}</ui-select-match>
+                                <ui-select-choices repeat="option in selectorTypes track by $index">
+                                    <div ng-bind-html="option | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                        <div class="select-value">
+                            <ui-select ng-model="selector.value" name="nodeSelectorsValue" required>
+                                <ui-select-match>{{$select.selected}}</ui-select-match>
+                                <ui-select-choices repeat="option in nodeLabelItems[selector.key] track by $index">
+                                    <div ng-bind-html="option | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-show="submintValid||createDockerClusterBasicForm.nodeSelectorsValue.$invalid && createDockerClusterBasicForm.nodeSelectorsValue.$dirty">
+                                <span ng-show="createDockerClusterBasicForm.nodeSelectorsValue.$error.required">
+                                    {{"aws.k8s.createCluster.clusterReplicasNotEmpty"|translate}}
+                                </span>
+                            </div>
+                        </div>
+                        <span title="{{'aws.k8s.createCluster.deleteSelector'|translate}}" class="delete">
+                            <i class="icon-aw-add-to2" ng-click="addSelector()"></i>                                    
+                            <i ng-click="deleteSelector(selector)" class="icon-aw-minus2"></i>                              
+                        </span>
+                    </div>
+                    <div class="control-group node-selectors-group">
+                        <div class="error error-msg" ng-show="selectZeroNode">
+                            <span>
+                                {{"aws.k8s.createCluster.selectZeroNode"|translate}}
+                            </span>
+                        </div>
+                    </div>
+                    <!--end of node selectors-->
+                    <!--start of k8s labels-->
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.k8s.createCluster.clusterLabels"|translate}}</label>
+                        <div class="controls">
+                            <a class="add" ng-click="addLabel()" ng-show="newDockerClusterData.labels.length<1">
+                                <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addClusterLabels"|translate}}
+                            </a>
+                            <a class="add" ng-click="selectShowLabel=true" ng-show="newDockerClusterData.labels.length>0&&!selectShowLabel">
+                                <i class="icon-aw-display"></i>显示标签
+                            </a>
+                            <a class="add" ng-click="selectShowLabel=false" ng-show="newDockerClusterData.labels.length>0&&selectShowLabel">
+                                <i class="icon-aw-no-display"></i>隐藏标签
+                            </a>
+                        </div>
+                                    <!-- <div class="label-name">
+                        <div class="control-group">
+                            <p>{{"aws.k8s.createCluster.clusterLabels"|translate}}</p>
+                        </div>
+                                        </div> -->
+                                        <!-- <div class="hide-labels">
+                        <div class="control-group">
+                            <a class="hiden" ng-click="changeLabelsVisibility()">
+                                                    <i class="icon-aw-eye"></i>
+                            {{labelsAreVisible ? "aws.k8s.createCluster.hideClusterLabels"
+                            : "aws.k8s.createCluster.showClusterLabels"|translate}}
+                            </a>
+                        </div>
+                                        </div> -->
+                                        <!-- <div class="add-label">
+                        <div class="control-group">
+                            <a class="add" ng-click="addLabel()">
+                                                    <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addClusterLabels"|translate}}
+                            </a>
+                        </div>
+                        </div> -->
+                    </div>
+                    <div class="control-group labels-group" ng-repeat="label in newDockerClusterData.labels" ng-show="selectShowLabel">
+                        <div class="left">
+                            <div class="control-group">
+                                <label class="control-label"><span class="red">*</span>Key{{$index + 1}}:</label>
+                                <div class="controls">
+                                    <!-- http://kubernetes.io/docs/user-guide/labels/ -->
+                                    <input class="form-controls" name="key{{$index + 1}}" type="text" ng-model="label.key" required ng-pattern="/^(?:(?=.{4,254}\/)((?:[a-z0-9A-Z]+\.)+[a-z0-9A-Z]+\/))?(?=.{1,63}$)([a-z0-9A-Z](?:[a-z0-9A-Z\.\-\_]*[a-z0-9A-Z])?)$/" />
+                                    <div class="error" ng-show="submintValid||createDockerClusterBasicForm['key{{$index + 1}}'].$invalid &&
+                                        createDockerClusterBasicForm['key{{$index + 1}}'].$dirty">
+                                        <span ng-show="createDockerClusterBasicForm['key{{$index + 1}}'].$error.required">
+                                            {{"aws.k8s.createCluster.labelKeyRequired"|translate}}
+                                        </span>
+                                        <span ng-show="createDockerClusterBasicForm['key{{$index + 1}}'].$error.pattern">
+                                            {{"aws.k8s.createCluster.labelKeyMismatch"|translate}}
+                                        </span>
+                                    </div>
+                                    <div class="error" ng-show="submintValid||createDockerClusterBasicForm['key{{$index + 1}}'].$invalid">
+                                        <span ng-show="createDockerClusterBasicForm['key{{$index + 1}}'].$viewValue.indexOf('/') > -1 ?
+                                                        createDockerClusterBasicForm['key{{$index + 1}}'].$viewValue.split('/')[0].length > 10 : false">
+                                            {{"aws.k8s.createCluster.labelKeyDomainToLong"|translate}}
+                                        </span>
+                                    </div>
+                                    <div class="error" ng-show="submintValid||createDockerClusterBasicForm['key{{$index + 1}}'].$invalid">
+                                        <span ng-show="createDockerClusterBasicForm['key{{$index + 1}}'].$viewValue.indexOf('/') > -1 ?
+                                                        createDockerClusterBasicForm['key{{$index + 1}}'].$viewValue.split('/')[1].length > 10 :
+                                                        createDockerClusterBasicForm['key{{$index + 1}}'].$viewValue.length > 10">
+                                            {{"aws.k8s.createCluster.labelKeyNameToLong"|translate}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div class="control-group">
+                                <label class="control-label"><span class="red">*</span>Value{{$index + 1}}:</label>
+                                <div class="controls">
+                                    <input class="form-controls" name="value{{$index + 1}}" type="text" ng-model="label.value" required ng-pattern="/^(?=.{1,63}$)([a-z0-9A-Z](?:[a-z0-9A-Z\.\-\_]*[a-z0-9A-Z])?)$/" ng-minlength="2" ng-maxlength="63" />
+                                    <div class="error" ng-show="submintValid||createDockerClusterBasicForm['value{{$index + 1}}'].$invalid &&
+                                        createDockerClusterBasicForm['value{{$index + 1}}'].$dirty">
+                                        <span ng-show="createDockerClusterBasicForm['value{{$index + 1}}'].$error.required">
+                                            {{"aws.k8s.createCluster.labelValueRequired"|translate}}
+                                        </span>
+                                        <span ng-show="createDockerClusterBasicForm['value{{$index + 1}}'].$error.pattern">
+                                            {{"aws.k8s.createCluster.labelValueMismatch"|translate}}
+                                        </span>
+                                        <span ng-show="createDockerClusterBasicForm['value{{$index + 1}}'].$error.minlength">
+                                            {{"aws.k8s.createCluster.labelValueMinLength"|translate}}
+                                        </span>
+                                        <span ng-show="createDockerClusterBasicForm['value{{$index + 1}}'].$error.maxlength">
+                                            {{"aws.k8s.createCluster.labelValueMaxLength"|translate}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <span title="{{'aws.k8s.createCluster.deleteLabel'|translate}}" class="delete">
+                            <i class="icon-aw-add-to2" ng-click="addLabel()"></i>
+                            <i ng-click="deleteLabel(label)" class="icon-aw-minus2"></i>
+                        </span>
+                    </div>
+                    <!--end of k8s labels-->
+                    <!--start of pod volumes-->
+                    <!-- ng-if="checkVolumes" -->
+                    <div class="control-group" ng-if="checkVolumes">
+                        <label class="control-label">{{"aws.k8s.createCluster.clusterVolumes"|translate}}</label>
+                        <div class="controls">
+                            <a class="add" ng-click="addVolume()" ng-show="newDockerClusterData.volumes.length<1" >
+                                <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addClusterVolumes"|translate}}
+                            </a>
+                            <a class="add"  ng-click="showVolume()" ng-show="newDockerClusterData.volumes.length>0&&!selectShowVolumes" >
+                                <i class="icon-aw-display"></i>显示云硬盘
+                            </a>
+                            <a class="add" ng-click="hideVolume()" ng-show="newDockerClusterData.volumes.length>0&&selectShowVolumes" >
+                                <i class="icon-aw-no-display"></i>隐藏云硬盘
+                            </a>
+                        </div>
+                        <!-- <div class="label-name">
+                            <div class="control-group">
+                                <p>{{"aws.k8s.createCluster.clusterVolumes"|translate}}</p>
+                            </div>
+                            </div>
+                            <div class="hide-labels">
+                            <div class="control-group">
+                                <a class="hiden" ng-click="changeVolumesVisibility()">
+                                                                <i class="icon-aw-eye"></i>
+                                {{volumesAreVisible ? "aws.k8s.createCluster.hideClusterVolumes"
+                                : "aws.k8s.createCluster.showClusterVolumes"|translate}}
+                                </a>
+                            </div>
+                            </div>
+                            <div class="add-label">
+                            <div class="control-group">
+                                <a class="add" ng-click="addVolume()">
+                                                                <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addClusterVolumes"|translate}}
+                                </a>
+                            </div>
+                        </div> -->
+                    </div>
+                    <div class="control-group labels-group" ng-repeat="volume in newDockerClusterData.volumes" ng-show="selectShowVolumes">
+                        <div class="left">
+                            <div class="control-group">
+                                <label class="control-label"><span class="red">*</span>Vol{{$index + 1}}:</label>
+                                <div class="controls">
+                                    <input class="form-controls" name="volumeName{{$index + 1}}" type="text" ng-model="volume.name" required ng-pattern="/^[a-z]([-a-z0-9]*[a-z0-9])?$/" ng-minlength="1" ng-maxlength="16" />
+                                    <div class="error" ng-show="submintValid||createDockerClusterBasicForm['volumeName{{$index + 1}}'].$invalid &&
+                                        createDockerClusterBasicForm['volumeName{{$index + 1}}'].$dirty">
+                                        <span ng-show="createDockerClusterBasicForm['volumeName{{$index + 1}}'].$error.required">
+                                            {{"aws.k8s.createCluster.volumeNameRequired"|translate}}
+                                        </span>
+                                        <span ng-show="createDockerClusterBasicForm['volumeName{{$index + 1}}'].$error.pattern">
+                                            {{"aws.k8s.createCluster.volumeNameMismatch"|translate}}
+                                        </span>
+                                        <span ng-show="createDockerClusterBasicForm['volumeName{{$index + 1}}'].$error.maxlength">
+                                            {{"aws.k8s.createCluster.volumeNameTooLong"|translate}}
+                                        </span>
+                                    </div>
+                                    <div class="error" ng-show="submintValid||createDockerClusterBasicForm['volumeName{{$index + 1}}'].$touched">
+                                        <span ng-show="volumeNameRepeated(volume, $index)">
+                                            {{"aws.k8s.createCluster.volumeNameRepeated"|translate}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div class="control-group">
+                                <label class="control-label"><span class="red">*</span>Size{{$index + 1}}:</label>
+                                <div class="controls">
+                                    <input class="form-controls" name="volumeSize{{$index + 1}}" type="text" ng-model="volume.size" ng-pattern="/^[1-9][0-9]{0,9}$/" required/>
+                                    <div class="error" ng-show="submintValid||createDockerClusterBasicForm['volumeSize{{$index + 1}}'].$invalid &&
+                                        createDockerClusterBasicForm['volumeSize{{$index + 1}}'].$dirty">
+                                        <span ng-show="createDockerClusterBasicForm['volumeSize{{$index + 1}}'].$error.required">
+                                            {{"aws.k8s.createCluster.volumeSizeRequired"|translate}}
+                                        </span>
+                                        <span ng-show="createDockerClusterBasicForm['volumeSize{{$index + 1}}'].$error.pattern">
+                                            只能输入正整数,且最多10位
+                                        </span> 
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <span title="{{'aws.k8s.createCluster.deleteVolume'|translate}}" class="delete">
+                            <i class="icon-aw-add-to2" ng-click="addVolume()"></i>
+                            <i ng-click="deleteVolume(volume)" class="icon-aw-minus2"></i>
+                        </span>
+                    </div>
+                    <!--end of pod volumes--> 
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-info" type="button" ng-click="goToNext(createDockerClusterBasicForm)">
+                        {{"aws.action.nextStep"|translate}}
+                    </button>
+                    <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                        {{"aws.action.cancel"|translate}}
+                    </button>
+                </div>
+            </div>
+        </form>
+        <!--Advanced Options-->
+        <form name="createDockerClusterAdvancedForm" novalidate="novalidate">
+            <div class="one-group" ng-show="showAdvanced">
+                <div class="modal-body cluster-next">
+                    <!--start of containers-->
+                    <div class="control-group labels-group">
+                        <div class="label-name">
+                            <div class="control-group">
+                                <p>{{"aws.k8s.createCluster.containerList"|translate}}</p>
+                            </div>
+                        </div>
+                        <div class="add-label">
+                            <div class="control-group">
+                                <a class="add" ng-click="addContainer()">
+                                    <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addClusterContainers"|translate}}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container-group" ng-repeat="container in newDockerClusterData.containers">
+                        <label class="container-label">
+                            {{"aws.k8s.createCluster.container"|translate}}{{$index+1}}
+                        </label>
+                        <span title="{{'aws.k8s.createCluster.deleteContainer'|translate}}" class="delete">
+                            <i ng-click="deleteContainer(container)" ng-show="$index !== 0" class="icon-aw-minus2 deleteNotOne"></i>
+                        </span>
+                        <div class="container-detail">
+                            <!--start of container image-->
+                            <div class="control-group">
+                                <label class="control-label">{{"aws.k8s.createCluster.imageName"|translate}}</label>
+                                <div class="controls">
+                                    <span>{{generateCompleteImageName(container)}}</span>
+                                </div>
+                            </div>
+                            <div style='height:85px;'>
+                                <div class="container-image">
+                                    <div class="control-group">
+                                        <div class="image-control">
+                                            <div class="left">
+                                                <label class="image-label"><span class="red">*</span>{{'aws.k8s.createCluster.projectType'|translate}}</label>
+                                                <div class="controls">
+                                                    <ui-select ng-model="container.image.projectType" name="projectType{{$index + 1}}" required>
+                                                        <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                                        <ui-select-choices repeat="option.type as option in projectTypes track by $index">
+                                                            <div ng-bind-html="option.name | highlight: $select.search"></div>
+                                                        </ui-select-choices>
+                                                    </ui-select>
+                                                </div>
+                                            </div>
+                                            <div class="right">
+                                                <label class="image-label"><span class="red">*</span>{{'aws.k8s.createCluster.projectName'|translate}}</label>
+                                                <div class="controls">
+                                                    <ui-select ng-model="container.image.project" name="projectName{{$index + 1}}" required>
+                                                        <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                                        <ui-select-choices repeat="option in projects[container.image.projectType] track by $index">
+                                                            <div ng-bind-html="option.name | highlight: $select.search"></div>
+                                                        </ui-select-choices>
+                                                    </ui-select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="container-image">
+                                    <div class="control-group">
+                                        <div class="image-control">
+                                            <div class="left">
+                                                <label class="image-label"><span class="red">*</span>{{'aws.k8s.createCluster.repoName'|translate}}</label>
+                                                <div class="controls">
+                                                    <ui-select ng-model="container.image.repoName" name="repoName{{$index + 1}}" required>
+                                                        <ui-select-match>{{$select.selected}}</ui-select-match>
+                                                        <ui-select-choices repeat="option in (repos.data.hasOwnProperty(container.image.project.name) ?
+                                                            repos.data[container.image.project.name] : [])">
+                                                            <div ng-bind-html="option | highlight: $select.search"></div>
+                                                        </ui-select-choices>
+                                                    </ui-select>
+                                                </div>
+                                            </div>
+                                            <div class="right">
+                                                <label class="image-label"><span class="red">*</span>{{'aws.k8s.createCluster.tagName'|translate}}</label>
+                                                <div class="controls">
+                                                    <ui-select ng-model="container.image.tagName" name="tagName{{$index + 1}}" required>
+                                                        <ui-select-match>{{$select.selected}}</ui-select-match>
+                                                        <ui-select-choices repeat="option in (tags.data.hasOwnProperty(container.image.repoName) ?
+                                                            tags.data[container.image.repoName] : [])">
+                                                            <div ng-bind-html="option | highlight: $select.search"></div>
+                                                        </ui-select-choices>
+                                                    </ui-select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--end of k8s container image-->
+                            <div class="control-group control-ext">
+                                <label class="control-label"><span class="red">*</span>{{"aws.k8s.createCluster.containerName"|translate}}</label>
+                                <div class="controls">
+                                    <input class="form-controls" name="containerName{{$index + 1}}" placeholder='{{"aws.k8s.createCluster.containerNameRequired"|translate}}' type="text" ng-model="container.name" required ng-pattern="/^[a-z]([-a-z0-9]*[a-z0-9])?$/" ng-minlength="1" ng-maxlength="32" />
+                                    <div class="error" ng-show="createDockerClusterAdvancedForm['containerName{{$index + 1}}'].$invalid &&
+                                        createDockerClusterAdvancedForm['containerName{{$index + 1}}'].$dirty">
+                                        <span ng-show="createDockerClusterAdvancedForm['containerName{{$index + 1}}'].$error.required">
+                                            {{"aws.k8s.createCluster.containerNameRequired"|translate}}
+                                        </span>
+                                        <span ng-show="createDockerClusterAdvancedForm['containerName{{$index + 1}}'].$error.pattern">
+                                            {{"aws.k8s.createCluster.containerNameMismatch"|translate}}
+                                        </span>
+                                        <span ng-show="createDockerClusterAdvancedForm['containerName{{$index + 1}}'].$error.maxlength">
+                                            {{"aws.k8s.createCluster.containerNameTooLong"|translate}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--set the workingDir for current container.-->
+                            <div class="control-group control-ext">
+                                <label class="control-label">{{"aws.k8s.createCluster.workingDir"|translate}}</label>
+                                <div class="controls">
+                                    <input class="form-controls" name="workingDir{{$index + 1}}" placeholder='{{"aws.k8s.createCluster.workingDirOptional"|translate}}' type="text" ng-model="container.workingDir" ng-maxlength="80"/>
+                                    <div class="error" ng-show="createDockerClusterAdvancedForm['workingDir{{$index + 1}}'].$invalid &&
+                                        createDockerClusterAdvancedForm['workingDir{{$index + 1}}'].$dirty">
+                                        <span ng-show="createDockerClusterAdvancedForm['workingDir{{$index + 1}}'].$error.maxlength">
+                                            最多输入80位
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--start of container commands-->
+                            <div class="control-group container-cmds">
+                                <div class="cmd-name">
+                                    <label class="control-label">{{"aws.k8s.createCluster.commands"|translate}}</label>
+                                    <!-- <div class="control-group">
+                                        <p>{{"aws.k8s.createCluster.commands"|translate}}</p>
+                                    </div> -->
+                                </div>
+                                <div class="controls">
+                                    <a class="add" ng-click="addContainerCmd(container)" ng-show="container.commands.length<1">
+                                        <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addContainerCmds"|translate}}
+                                    </a>
+                                    <a class="add" ng-show="container.commands.length>0&&!selectShowContainerCmd" ng-click="selectShowContainerCmd=true">
+                                        <i class="icon-aw-display"></i>显示启动命令
+                                    </a>
+                                    <a class="add" ng-show="container.commands.length>0&&selectShowContainerCmd" ng-click="selectShowContainerCmd=false">
+                                        <i class="icon-aw-no-display"></i>隐藏启动命令
+                                    </a>
+                                </div>
+                                <!-- <div class="hide-cmds"> -->
+                                <!-- <div class="control-group">
+                                        <a class="hiden" ng-click="changeCmdsVisibility(container)">
+                                                                    <i class="icon-aw-eye"></i>
+                                        {{container.cmdsVisibility ? "aws.k8s.createCluster.hideContainerCmds"
+                                        : "aws.k8s.createCluster.showContainerCmds"|translate}}
+                                        </a>
+                                            </div> -->
+                                                        <!-- </div> -->
+                                                        <!-- <div class="add-cmds">
+                                    <div class="control-group">
+                                        <a class="add" ng-click="addContainerCmd(container)">
+                                                                    <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addContainerCmds"|translate}}
+                                        </a>
+                                    </div>
+                                </div> -->
+                            </div>
+                            <div class="container-cmds" ng-repeat="command in container.commands" ng-show="selectShowContainerCmd">
+                                <div class="cmd-control">
+                                    <label class="env-label"><span class="red">*</span>command{{$index + 1}}:</label>
+                                    <input class="env-name" name="command{{command.createAt}}{{$index + 1}}" placeholder="{{'aws.k8s.createCluster.commandsTips'|translate}}" type="text" ng-model="command.name" required ng-maxlength="80"/>
+                                    <span title="{{'aws.k8s.createCluster.deleteContainerCmd'|translate}}" class="delete">
+                                        <i class="icon-aw-add-to2" ng-click="addContainerCmd(container)"></i>
+                                        <i ng-click="deleteContainerCmd(container, command)" class="icon-aw-minus2"></i>
+                                    </span>
+                                </div>
+                                <div class="error" ng-show="createDockerClusterAdvancedForm['command{{command.createAt}}{{$index + 1}}'].$invalid &&
+                                        createDockerClusterAdvancedForm['command{{command.createAt}}{{$index + 1}}'].$dirty">
+                                    <span ng-show="createDockerClusterAdvancedForm['command{{command.createAt}}{{$index + 1}}'].$error.required">
+                                        {{"aws.k8s.createCluster.containerCmdRequired"|translate}}
+                                    </span>
+                                    <span ng-show="createDockerClusterAdvancedForm['command{{command.createAt}}{{$index + 1}}'].$error.maxlength">
+                                        最多输入80位
+                                    </span>
+                                </div>
+                            </div>
+                            <!--end of k8s container commands-->
+                            <!--start of container environments-->
+                            <div class="control-group container-envs">
+                                <div class="env-name">
+                                    <label class="control-label">{{"aws.k8s.createCluster.envs"|translate}}</label>
+                                    <!-- <div class="control-group">
+                                            <p>{{"aws.k8s.createCluster.envs"|translate}}</p>
+                                    </div> -->
+                                </div>
+                                <div class="controls">
+                                    <a class="add" ng-click="addContainerEnv(container)" ng-show="container.envs.length<1">
+                                        <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addContainerEnvs"|translate}}
+                                    </a>
+                                    <a class="add" ng-show="container.envs.length>0&&!selectShowEvn" ng-click="selectShowEvn=true">
+                                        <i class="icon-aw-display"></i>显示环境变量
+                                    </a>
+                                    <a class="add" ng-show="container.envs.length>0&&selectShowEvn" ng-click="selectShowEvn=false">
+                                        <i class="icon-aw-no-display"></i>隐藏环境变量
+                                    </a>    
+                                </div>
+                                <!-- <div class="hide-envs">
+                                    <div class="control-group">
+                                        <a class="hiden" ng-click="changeEnvsVisibility(container)">
+                                                                        <i class="icon-aw-eye"></i>
+                                        {{container.envsVisibility ? "aws.k8s.createCluster.hideContainerEnvs"
+                                        : "aws.k8s.createCluster.showContainerEnvs"|translate}}
+                                        </a>
+                                    </div>
+                                    </div>
+                                    <div class="add-envs">
+                                    <div class="control-group">
+                                        <a class="add" ng-click="addContainerEnv(container)">
+                                                                        <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addContainerEnvs"|translate}}
+                                        </a>
+                                    </div>
+                                </div> -->
+                            </div>
+                            <div class="container-envs" ng-repeat="env in container.envs" ng-show="selectShowEvn">
+                                <div class="env-control">
+                                    <div class="left">
+                                        <label class="env-name-label"><span class="red">*</span>env{{$index + 1}}:</label>
+                                        <input class="env-name" name="envName{{env.createAt}}{{$index + 1}}" placeholder="{{'aws.k8s.createCluster.envsKeyTips'|translate}}" type="text" ng-model="env.name" required ng-maxlength="80" />
+                                    </div>
+                                    <div class="right">
+                                        <label class="env-value-label"><span class="red">*</span>value{{$index + 1}}:</label>
+                                        <input class="env-value" name="envValue{{env.createAt}}{{$index + 1}}" placeholder="{{'aws.k8s.createCluster.envsValueTips'|translate}}" type="text" ng-model="env.value" required ng-maxlength="80"/>
+                                    </div>
+                                    <span title="{{'aws.k8s.createCluster.deleteContainerEnv'|translate}}" class="delete">
+                                        <i ng-click="addContainerEnv(container)" class="icon-aw-add-to2"></i>
+                                        <i ng-click="deleteContainerEnv(container, env)" class="icon-aw-minus2"></i>
+                                    </span>
+                                </div>
+                                <div class="error" ng-show="createDockerClusterAdvancedForm['envName{{env.createAt}}{{$index + 1}}'].$invalid &&
+                                        createDockerClusterAdvancedForm['envName{{env.createAt}}{{$index + 1}}'].$dirty">
+                                    <span ng-show="createDockerClusterAdvancedForm['envName{{env.createAt}}{{$index + 1}}'].$error.required">
+                                        {{"aws.k8s.createCluster.containerEnvNameRequired"|translate}}
+                                    </span>
+                                    <span ng-show="createDockerClusterAdvancedForm['envName{{env.createAt}}{{$index + 1}}'].$error.maxlength">
+                                            环境变量的名称最多输入80位
+                                    </span>
+                                </div>
+                                <div class="error" ng-show="createDockerClusterAdvancedForm['envValue{{env.createAt}}{{$index + 1}}'].$invalid &&
+                                        createDockerClusterAdvancedForm['envValue{{env.createAt}}{{$index + 1}}'].$dirty">
+                                    <span ng-show="createDockerClusterAdvancedForm['envValue{{env.createAt}}{{$index + 1}}'].$error.required">
+                                        {{"aws.k8s.createCluster.containerEnvValueRequired"|translate}}
+                                    </span>
+                                    <span ng-show="createDockerClusterAdvancedForm['envValue{{env.createAt}}{{$index + 1}}'].$error.maxlength">
+                                            环境变量的值和类型最多输入80位
+                                    </span>
+                                </div>
+                            </div>
+                            <!--end of k8s container environments-->
+                            <!--start of container ports-->
+                            <div class="control-group container-ports">
+                                <div class="port-labels">
+                                    <label class="control-label">{{"aws.k8s.createCluster.ports"|translate}}</label>
+                                    <!-- <div class="control-group">
+                                            <p>{{"aws.k8s.createCluster.ports"|translate}}</p>
+                                    </div> -->
+                                </div>
+                                <div class="controls">
+                                    <a class="add" ng-click="addContainerPort(container)" ng-show="container.ports.length<1">
+                                        <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addContainerPorts"|translate}}
+                                    </a>
+                                    <a class="add" ng-show="container.ports.length>0&&!selectShowPort" ng-click="selectShowPort=true">
+                                        <i class="icon-aw-display"></i>显示端口映射
+                                    </a>
+                                    <a class="add" ng-show="container.ports.length>0&&selectShowPort" ng-click="selectShowPort=false">
+                                        <i class="icon-aw-no-display"></i>隐藏端口映射
+                                    </a>
+                                </div>
+                                <!-- <div class="hide-ports">
+                                    <div class="control-group">
+                                        <a class="hiden" ng-click="changePortsVisibility(container)">
+                                                                        <i class="icon-aw-eye"></i>
+                                        {{container.portsVisibility ? "aws.k8s.createCluster.hideContainerPorts"
+                                        : "aws.k8s.createCluster.showContainerPorts"|translate}}
+                                        </a>
+                                    </div>
+                                    </div>
+                                    <div class="add-ports">
+                                    <div class="control-group">
+                                        <a class="add" ng-click="addContainerPort(container)">
+                                                                        <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addContainerPorts"|translate}}
+                                        </a>
+                                    </div>
+                                            </div> -->
+                            </div>
+                            <div class="container-ports" ng-repeat="port in container.ports" ng-show="selectShowPort">
+                                <label class="ports-label">{{"aws.k8s.createCluster.portLabel"|translate}}{{$index+1}}
+                                </label> 
+                                <span title="{{'aws.k8s.createCluster.deleteContainerPort'|translate}}" class="delete">
+                                    <i ng-click="addContainerPort(container)" class="icon-aw-add-to2"></i>
+                                    <i ng-click="deleteContainerPort(container, port)" class="icon-aw-minus2" ng-show="$index>0"></i>
+                                </span>
+                                <div class="control-group">
+                                    <div class="ports-control">
+                                        <div class="left">
+                                            <label class="ports-label-name">{{'aws.k8s.createCluster.portName'|translate}}</label>
+                                            <input class="ports-label-value" name="portName{{port.createAt}}{{$index + 1}}" placeholder="{{'aws.k8s.createCluster.portsOptional'|translate}}" ng-pattern="/^[a-z]([-a-z0-9]*[a-z0-9])?$/" ng-maxlength="32" type="text" ng-model="port.name" />
+                                        </div>
+                                        <div class="right">
+                                            <label class="ports-label-name"><span class="red">*</span>{{'aws.k8s.createCluster.portProtocol'|translate}}</label>
+                                            <div class="controls">
+                                                <ui-select ng-model="port.protocol" name="portProtocol{{port.createAt}}{{$index + 1}}" required>
+                                                    <ui-select-match>{{$select.selected}}</ui-select-match>
+                                                    <ui-select-choices repeat="option in portProtocols">
+                                                        <div ng-bind-html="option | highlight: $select.search"></div>
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="left-error" ng-show="createDockerClusterAdvancedForm['portName{{port.createAt}}{{$index + 1}}'].$invalid">
+                                        <span ng-show="createDockerClusterAdvancedForm['portName{{port.createAt}}{{$index + 1}}'].$error.pattern">
+                                            {{"aws.k8s.createCluster.portNameMismatch"|translate}}
+                                        </span>
+                                        <span ng-show="(!createDockerClusterAdvancedForm['portName{{port.createAt}}{{$index + 1}}'].$error.pattern)&&(createDockerClusterAdvancedForm['portName{{port.createAt}}{{$index + 1}}'].$error.maxlength)">
+                                            {{"aws.k8s.createCluster.portNameLimit"|translate}}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <div class="ports-control">
+                                        <div class="left">
+                                            <label class="ports-label-name"><span class="red">*</span>{{'aws.k8s.createCluster.containerPort'|translate}}</label>
+                                            <input class="ports-label-value" name="containerPort{{port.createAt}}{{$index + 1}}" placeholder="{{'aws.k8s.createCluster.containerPortTips'|translate}}" required ng-pattern="/^((?:[1-9]\d{0,3})|([1-5]\d{4})|(6[0-4]\d{3})|(65[0-4]\d{2})|(655[0-2]\d)|(6553[0-5]))$/" type="text" ng-model="port.containerPort" />
+                                            <div class="left-ports-error" ng-show="createDockerClusterAdvancedForm['containerPort{{port.createAt}}{{$index + 1}}'].$invalid &&
+                                                createDockerClusterAdvancedForm['containerPort{{port.createAt}}{{$index + 1}}'].$dirty">
+                                                <span ng-show="createDockerClusterAdvancedForm['containerPort{{port.createAt}}{{$index + 1}}'].$error.required">
+                                                    {{"aws.k8s.createCluster.containerPortRequired"|translate}}
+                                                </span>
+                                                <span ng-show="createDockerClusterAdvancedForm['containerPort{{port.createAt}}{{$index + 1}}'].$error.pattern">
+                                                    {{"aws.k8s.createCluster.portMismatch"|translate}}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="right">
+                                            <label class="ports-label-name">{{'aws.k8s.createCluster.hostPort'|translate}}</label>
+                                            <input class="ports-label-value" name="hostPort{{port.createAt}}{{$index + 1}}" placeholder="{{'aws.k8s.createCluster.hostPortTips'|translate}}" ng-pattern="/^((?:[1-9]\d{0,3})|([1-5]\d{4})|(6[0-4]\d{3})|(65[0-4]\d{2})|(655[0-2]\d)|(6553[0-5]))$/" type="text" ng-model="port.hostPort" />
+                                            <div class="right-ports-error" ng-show="createDockerClusterAdvancedForm['hostPort{{port.createAt}}{{$index + 1}}'].$invalid">
+                                                <span ng-show="createDockerClusterAdvancedForm['hostPort{{port.createAt}}{{$index + 1}}'].$error.pattern">
+                                                    {{"aws.k8s.createCluster.portMismatch"|translate}}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--end of k8s container ports-->
+                            <!--start of container volumeMounts-->
+                            <!-- ng-if="checkVolumes" -->
+                            <div class="control-group container-volumeMounts" ng-if="checkVolumes">
+                                <div class="volumeMounts-label">
+                                    <label class="control-label">{{"aws.k8s.createCluster.volumeMounts"|translate}}</label>
+                                </div>
+                                <div class="controls">
+                                    <a class="add" ng-click="addContainerVolumeMounts(container)" ng-show="container.volumeMounts.length<1">
+                                        <i class="icon-aw-add-to2"></i>{{"aws.k8s.createCluster.addContainerVolumeMounts"|translate}}
+                                    </a>
+                                    <a class="add" ng-show="container.volumeMounts.length>0&&!selectShowVolumeMounts" ng-click="showVolumeMounts()">
+                                        <i class="icon-aw-display"></i>显示存储卷
+                                    </a>
+                                    <a class="add" ng-show="container.volumeMounts.length>0&&selectShowVolumeMounts" ng-click="hideVolumeMounts()">
+                                        <i class="icon-aw-no-display"></i>隐藏存储卷
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="container-volumeMounts" ng-repeat="volumeMount in container.volumeMounts" ng-show="selectShowVolumeMounts">
+                                <label class="volumeMounts-index">{{"aws.k8s.createCluster.volumeMountsLabel"|translate}}{{$index+1}}</label>
+                                <span title="{{'aws.k8s.createCluster.deleteContainerVolumeMount'|translate}}" class="delete">
+                                    <i ng-click="addContainerVolumeMounts(container)" class="icon-aw-add-to2"></i>
+                                    <i ng-click="deleteContainerVolumeMount(container, volumeMount)" class="icon-aw-minus2"></i>
+                                </span>
+                                <div class="control-group">
+                                    <div class="volumeMount-control">
+                                        <div class="left">
+                                            <label class="volumeMount-name-label">{{'aws.k8s.createCluster.podVolumeName'|translate}}</label>
+                                            <div class="controls">
+                                                <ui-select ng-model="volumeMount.name" required name="volumeMountName{{volumeMount.createAt}}{{$index + 1}}">
+                                                    <ui-select-match placeholder="{{'aws.k8s.createCluster.podVolumeNameTips'|translate}}">
+                                                        {{$select.selected.name}}
+                                                    </ui-select-match>
+                                                    <ui-select-choices repeat="option in newDockerClusterData.volumes">
+                                                        <div ng-bind-html="option.name | highlight: $select.search"></div>
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                        </div>
+                                        <div class="right">
+                                            <label class="volumeMount-readOnly-label"><span class="red">*</span>{{'aws.k8s.createCluster.rwMode'|translate}}</label>
+                                            <div class="controls">
+                                                <ui-select ng-model="volumeMount.rwMode" name="rwMode{{volumeMount.createAt}}{{$index + 1}}" required>
+                                                    <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                                                    <ui-select-choices repeat="option in readWriteModes">
+                                                        <div ng-bind-html="option | highlight: $select.search"></div>
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="left-error" ng-show="createDockerClusterAdvancedForm['volumeMountName{{volumeMount.createAt}}{{$index + 1}}'].$invalid &&
+                                            createDockerClusterAdvancedForm['volumeMountName{{volumeMount.createAt}}{{$index + 1}}'].$dirty">
+                                    <span ng-show="createDockerClusterAdvancedForm['volumeMountName{{volumeMount.createAt}}{{$index + 1}}'].$error.required">
+                                        {{"aws.k8s.createCluster.volumeMountNameRequired"|translate}}
+                                    </span>
+                                </div>
+                                <div class="control-group">
+                                    <div class="volumeMount-control">
+                                        <div class="middle">
+                                            <label class="volumeMount-label-name"><span class="red">*</span>{{'aws.k8s.createCluster.mountPath'|translate}}</label>
+                                            <input class="volumeMount-label-value" name="mountPath{{volumeMount.createAt}}{{$index + 1}}" placeholder="{{'aws.k8s.createCluster.mountPathTips'|translate}}" type="text" ng-model="volumeMount.mountPath" required ng-maxlength="80"/>
+                                            <div class="left-error" ng-show="createDockerClusterAdvancedForm['mountPath{{volumeMount.createAt}}{{$index + 1}}'].$invalid &&
+                                                        createDockerClusterAdvancedForm['mountPath{{volumeMount.createAt}}{{$index + 1}}'].$dirty">
+                                                <span ng-show="createDockerClusterAdvancedForm['mountPath{{volumeMount.createAt}}{{$index + 1}}'].$error.required">
+                                                    {{"aws.k8s.createCluster.mountPathRequired"|translate}}
+                                                </span>
+                                                <span ng-show="createDockerClusterAdvancedForm['mountPath{{volumeMount.createAt}}{{$index + 1}}'].$error.maxlength">
+                                                    最多输入80个字符串
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--end of k8s container volumeMounts-->
+                            <!--start of container resource qutos-->
+                            <div class="control-group container-resources">
+                                <div class="resources-labels">
+                                    <label class="control-label">{{"aws.k8s.createCluster.resources"|translate}}</label>
+                                </div>
+                            </div>
+                            <div class="container-resources" ng-show="container.resourcesVisibility">
+                                <div class="control-group">
+                                    <div class="resource-control">
+                                        <div class="left">
+                                            <label class="resource-label"><span class="red">*</span>{{'aws.k8s.createCluster.requestsCPU'|translate}}</label>
+                                            <input class="resource-value" name="requestsCPU{{$index + 1}}" placeholder="{{'aws.k8s.createCluster.requestsCPUTips'|translate}}" ng-pattern="/^(\d+(?:\.\d+)?|\d+m)$/" required type="text" ng-model="container.resources.requests.cpu" ng-maxlength="11"/>
+                                            <div class="left-error" ng-show="createDockerClusterAdvancedForm['requestsCPU{{$index + 1}}'].$invalid &&
+                                                createDockerClusterAdvancedForm['requestsCPU{{$index + 1}}'].$dirty">
+                                                <span ng-show="createDockerClusterAdvancedForm['requestsCPU{{$index + 1}}'].$error.required">
+                                                    {{"aws.k8s.createCluster.requestsCPURequired"|translate}}
+                                                </span>
+                                                <span ng-show="createDockerClusterAdvancedForm['requestsCPU{{$index + 1}}'].$error.pattern">
+                                                    {{"aws.k8s.createCluster.requestsCPUMismatch"|translate}}
+                                                </span>
+                                                <span ng-show="createDockerClusterAdvancedForm['requestsCPU{{$index + 1}}'].$error.maxlength">
+                                                    最多输入10位
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="right">
+                                            <label class="resource-label"><span class="red">*</span>{{'aws.k8s.createCluster.requestsMemory'|translate}}</label>
+                                            <input class="resource-value" name="requestsMemory{{$index + 1}}" placeholder="{{'aws.k8s.createCluster.requestsMemoryTips'|translate}}" ng-pattern="/^[1-9]\d*[KMGTPE]i$/" required type="text" ng-model="container.resources.requests.memory" ng-maxlength="12"/>
+                                            <div class="right-error" ng-show="createDockerClusterAdvancedForm['requestsMemory{{$index + 1}}'].$invalid &&
+                                                createDockerClusterAdvancedForm['requestsMemory{{$index + 1}}'].$dirty">
+                                                <span ng-show="createDockerClusterAdvancedForm['requestsMemory{{$index + 1}}'].$error.required">
+                                                    {{"aws.k8s.createCluster.requestsMemoryRequired"|translate}}
+                                                </span>
+                                                <span ng-show="createDockerClusterAdvancedForm['requestsMemory{{$index + 1}}'].$error.pattern">
+                                                    {{"aws.k8s.createCluster.requestsMemoryMisMatch"|translate}}
+                                                </span>
+                                                <span ng-show="createDockerClusterAdvancedForm['requestsMemory{{$index + 1}}'].$error.maxlength">
+                                                    最多输入10位
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="resource-control">
+                                        <div class="left">
+                                            <label class="resource-label">{{'aws.k8s.createCluster.limitsCPU'|translate}}</label>
+                                            <input class="resource-value" name="limitsCPU{{$index + 1}}" ng-pattern="/^(\d+(?:\.\d+)?|\d+m)$/" placeholder="{{'aws.k8s.createCluster.limitsCPUTips'|translate}}" type="text" ng-model="container.resources.limits.cpu" required ng-maxlength="11"/>
+                                            <div class="left-error" ng-show="createDockerClusterAdvancedForm['limitsCPU{{$index + 1}}'].$invalid &&
+                                                    createDockerClusterAdvancedForm['limitsCPU{{$index + 1}}'].$dirty">
+                                                <span ng-show="createDockerClusterAdvancedForm['limitsCPU{{$index + 1}}'].$error.required">
+                                                    {{"aws.k8s.createCluster.limitsCPURequired"|translate}}
+                                                </span>
+                                                <span ng-show="createDockerClusterAdvancedForm['limitsCPU{{$index + 1}}'].$error.pattern">
+                                                    {{"aws.k8s.createCluster.limitsCPUMismatch"|translate}}
+                                                </span>
+                                                <span ng-show="createDockerClusterAdvancedForm['limitsCPU{{$index + 1}}'].$error.maxlength">
+                                                    最多输入10位
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="right">
+                                            <label class="resource-label">{{'aws.k8s.createCluster.limitsMemory'|translate}}</label>
+                                            <input class="resource-value" name="limitsMemory{{$index + 1}}" placeholder="{{'aws.k8s.createCluster.limitsMemoryTips'|translate}}" ng-pattern="/^[1-9]\d*[KMGTPE]i$/" required type="text" ng-model="container.resources.limits.memory" ng-maxlength="12"/>
+                                            <div class="right-error" ng-show="createDockerClusterAdvancedForm['limitsMemory{{$index + 1}}'].$invalid &&
+                                                createDockerClusterAdvancedForm['limitsMemory{{$index + 1}}'].$dirty">
+                                                <span ng-show="createDockerClusterAdvancedForm['limitsMemory{{$index + 1}}'].$error.required">
+                                                    {{"aws.k8s.createCluster.limitsMemoryRequired"|translate}}
+                                                </span>
+                                                <span ng-show="createDockerClusterAdvancedForm['limitsMemory{{$index + 1}}'].$error.pattern">
+                                                    {{"aws.k8s.createCluster.limitsMemoryMisMatch"|translate}}
+                                                </span>
+                                                <span ng-show="createDockerClusterAdvancedForm['limitsMemory{{$index + 1}}'].$error.maxlength">
+                                                    最多输入10位
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--end of container resource qutos-->
+                        </div>
+                    </div>
+                    <!--end of containers-->
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" type="button" ng-click="goToLast()">
+                        {{"aws.action.lastStep"|translate}}
+                    </button>
+                    <button class="btn btn-info" type="button" ng-click="$close(newDockerClusterData)" ng-disabled="createDockerClusterAdvancedForm.$invalid ||
+                            createDockerClusterAdvancedForm.clusterName.$valid &&
+                            clusterNameRepeated(newDockerClusterData.clusterName) ||
+                            selectZeroNode">
+                        {{"aws.action.ok"|translate}}
+                    </button>
+                    <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                        {{"aws.action.cancel"|translate}}
+                    </button>
+                </div>
+            </div>
+        </form>    
+    </div>
+</script>
+<script type="text/ng-template" id="scaleDockerCluster.html">
+    <div class="modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{"aws.k8s.dockerClusters.scaleCluster" |translate}}</h3>
+        </div>
+        <div class="modal-body">
+            <form name="scaleClusterForm">
+                <div class="control-group">
+                    <div class="error" ng-show="useRBD">
+                        <span>{{"aws.k8s.scaleCluster.RCUsedRBD" |translate}}</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="error" ng-show="!ready">
+                        <span>{{"aws.k8s.scaleCluster.RCNOTReady" |translate}}</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.scaleCluster.clusterName" |translate}}</label>
+                    <div class="controls">
+                        <input type="text" name="clusterName" class="form-controls" ng-disabled="true" ng-model="scaleDockerClusterData.clusterName" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.scaleCluster.replicas" |translate}}</label>
+                    <div class="controls">
+                        <input type="number" name="replicas" class="form-controls" ng-model="scaleDockerClusterData.replicas" required ng-pattern="/^[1-9][0-9]{0,2}$/"/>
+                        <div class="error" ng-if="! useRBD && scaleClusterForm.replicas.$invalid && scaleClusterForm.replicas.$dirty">
+                            <span ng-if="scaleClusterForm.replicas.$error.required">
+                                {{"aws.k8s.scaleCluster.replicasRequired" |translate}}
+                            </span>
+                            <span ng-if="scaleClusterForm.replicas.$error.pattern">
+                                {{"aws.k8s.scaleCluster.limit_1000" |translate}}
+                            </span>
+                        </div>
+                        <div class="error" ng-show="!useRBD && (
+                          scaleClusterForm.replicas.$dirty && scaleDockerClusterData.replicas === currentReplicas ||
+                          scaleClusterForm.replicas.$touched && scaleDockerClusterData.replicas === currentReplicas)">
+                            <span>{{"aws.k8s.scaleCluster.replicasMustBeDifferent" |translate}}</span>
+                        </div>
+                        <div class="error" ng-show="scaleDockerClusterData.replicas <= 0">
+                            <span>{{"aws.k8s.scaleCluster.replicasMustBePositive" |translate}}</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-info" type="button" ng-disabled="scaleClusterForm.$invalid || useRBD || !ready ||
+                        scaleDockerClusterData.replicas === currentReplicas ||
+                        scaleDockerClusterData.replicas <= 0" ng-click="$close(scaleDockerClusterData)">{{"aws.action.ok" |translate}}
+            </button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel" |translate}}</button>
+        </div>
+    </div>
+</script>
+<!-- 集群动态伸缩 -->
+<script type="text/ng-template" id="rollingUpdateCluster.html">
+    <div class="modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{"aws.k8s.dockerClusters.rollingUpdateCluster" |translate}}</h3>
+        </div>
+        <div class="modal-body k8s-modal rolling-update-group">
+            <form name="rollingUpdateClusterForm">
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.rollingUpdate.oldClusterName" |translate}}</label>
+                    <div class="controls">
+                        <input type="text" name="oldClusterName" class="form-controls" ng-disabled="true" ng-model="rollingUpdateClusterData.oldClusterName" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.rollingUpdate.newClusterName" |translate}}</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="newClusterName" ng-pattern="/^[a-z]([-a-z0-9]*[a-z0-9])?$/" placeholder='{{"aws.k8s.rollingUpdate.newClusterNameNotRequired"|translate}}' ng-minlength="1" ng-maxlength="32" ng-model="rollingUpdateClusterData.newClusterName" />
+                        <div class="error" ng-show="rollingUpdateClusterForm.newClusterName.$invalid &&
+                           rollingUpdateClusterForm.newClusterName.$dirty">
+                            <span ng-show="rollingUpdateClusterForm.newClusterName.$error.maxlength">
+                                {{"aws.k8s.createCluster.clusterNameTooLong"|translate}}
+                            </span>
+                            <span ng-show="rollingUpdateClusterForm.newClusterName.$error.pattern">
+                  {{"aws.k8s.createCluster.clusterNameMismatchPattern"|translate}}
+              </span>
+                        </div>
+                        <div class="error" ng-show="rollingUpdateClusterForm.newClusterName.$valid &&
+                                         newClusterNameRepeated(rollingUpdateClusterData.newClusterName)">
+                            <span>{{"aws.k8s.createCluster.clusterNameRepeated"|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.rollingUpdate.chooseContainer"|translate}}</label>
+                    <div class="controls">
+                        <ui-select ng-model="rollingUpdateClusterData.container" required>
+                            <ui-select-match placeholder="{{'aws.k8s.rollingUpdate.chooseContainerTips'|translate}}">
+                                {{$select.selected.containerName}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="option in containers track by $index">
+                                <div ng-bind-html="option.containerName | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.rollingUpdate.oldImageName"|translate}}</label>
+                    <div class="controls">
+                        <span>{{rollingUpdateClusterData.container.oldImageName}}</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.rollingUpdate.newImageName"|translate}}</label>
+                    <div class="controls">
+                        <span>
+                            {{generateCompleteImageName(rollingUpdateClusterData.container,
+                                                    rollingUpdateClusterData.newImage)}}
+                        </span>
+                    </div>
+                </div>
+                <!--start of container's new image-->
+                <div class="rolling-update-group">
+                    <div class="container-image">
+                        <div class="control-group">
+                            <div class="image-control">
+                                <div class="left">
+                                    <label class="image-label">{{'aws.k8s.rollingUpdate.projectType'|translate}}</label>
+                                    <div class="controls">
+                                        <ui-select ng-model="rollingUpdateClusterData.newImage.projectType" name="projectType" required>
+                                            <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                            <ui-select-choices repeat="option.type as option in projectTypes track by $index">
+                                                <div ng-bind-html="option.name | highlight: $select.search"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                                <div class="right">
+                                    <label class="image-label">{{'aws.k8s.rollingUpdate.projectName'|translate}}</label>
+                                    <div class="controls">
+                                        <ui-select ng-model="rollingUpdateClusterData.newImage.project" name="projectName" required>
+                                            <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                            <ui-select-choices repeat="option in projects[rollingUpdateClusterData.newImage.projectType] track by $index">
+                                                <div ng-bind-html="option.name | highlight: $select.search"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container-image">
+                        <div class="control-group">
+                            <div class="image-control">
+                                <div class="left">
+                                    <label class="image-label">{{'aws.k8s.rollingUpdate.repoName'|translate}}</label>
+                                    <div class="controls">
+                                        <ui-select ng-model="rollingUpdateClusterData.newImage.repoName" name="repoName" required>
+                                            <ui-select-match>{{$select.selected}}</ui-select-match>
+                                            <ui-select-choices repeat="option in (repos.data.hasOwnProperty(rollingUpdateClusterData.newImage.project.name) ?
+                                                              repos.data[rollingUpdateClusterData.newImage.project.name] : [])">
+                                                <div ng-bind-html="option | highlight: $select.search"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                                <div class="right">
+                                    <label class="image-label">{{'aws.k8s.rollingUpdate.tagName'|translate}}</label>
+                                    <div class="controls">
+                                        <ui-select ng-model="rollingUpdateClusterData.newImage.tagName" name="tagName" required>
+                                            <ui-select-match>{{$select.selected}}</ui-select-match>
+                                            <ui-select-choices repeat="option in (tags.data.hasOwnProperty(rollingUpdateClusterData.newImage.repoName) ?
+                                                              tags.data[rollingUpdateClusterData.newImage.repoName] : [])">
+                                                <div ng-bind-html="option | highlight: $select.search"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--end of k8s container's new image-->
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.rollingUpdate.pollInterval" |translate}}</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="pollInterval" ng-pattern="/^([0-9]|[1-9][0-9]*h)?(([0-9]|[1-5][0-9])m)?(([0-9]|[1-5][0-9])s)?$/" placeholder='{{"aws.k8s.rollingUpdate.pollIntervalTips"|translate}}' ng-model="rollingUpdateClusterData.pollInterval" />
+                        <div class="error" ng-show="rollingUpdateClusterForm.pollInterval.$invalid">
+                            <span ng-show="rollingUpdateClusterForm.pollInterval.$error.pattern">
+                                {{"aws.k8s.rollingUpdate.timeMismatchPattern"|translate}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.rollingUpdate.updatePeriod" |translate}}</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="updatePeriod" ng-pattern="/^([0-9]|[1-9][0-9]*h)?(([0-9]|[1-5][0-9])m)?(([0-9]|[1-5][0-9])s)?$/" placeholder='{{"aws.k8s.rollingUpdate.updatePeriodTips"|translate}}' ng-model="rollingUpdateClusterData.updatePeriod" />
+                        <div class="error" ng-show="rollingUpdateClusterForm.updatePeriod.$invalid">
+                            <span ng-show="rollingUpdateClusterForm.updatePeriod.$error.pattern">
+                                {{"aws.k8s.rollingUpdate.timeMismatchPattern"|translate}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.k8s.rollingUpdate.timeout" |translate}}</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="timeout" ng-pattern="/^([0-9]|[1-9][0-9]*h)?(([0-9]|[1-5][0-9])m)?(([0-9]|[1-5][0-9])s)?$/" placeholder='{{"aws.k8s.rollingUpdate.timeoutTips"|translate}}' ng-model="rollingUpdateClusterData.timeout" />
+                        <div class="error" ng-show="rollingUpdateClusterForm.timeout.$invalid">
+                            <span ng-show="rollingUpdateClusterForm.timeout.$error.pattern">
+                                {{"aws.k8s.rollingUpdate.timeMismatchPattern"|translate}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-info" type="button" ng-disabled="rollingUpdateClusterForm.$invalid ||
+                           newClusterNameRepeated(rollingUpdateClusterData.newClusterName)" ng-click="$close(rollingUpdateClusterData)">{{"aws.action.ok" |translate}}
+            </button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel" |translate}}</button>
+        </div>
+    </div>
+</script>

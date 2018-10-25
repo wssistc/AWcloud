@@ -1,0 +1,26 @@
+<div class="page-inner">
+  <div class="table-action">
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="tableParams" class="table">
+      <tr ng-repeat="item in $data">
+        <td data-title="headers.curStep">
+          {{item.curStep}}lllllll
+        </td>
+        <td data-title="headers.startTime">
+          {{item.startTime | date:'yyyy-MM-dd HH:mm:ss'}}
+        </td>
+        <td data-title="headers.status">
+          {{item.startActivityId}}
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,284 @@
+console.log("ccccccccccc");
+loadGraph(
+{
+  "properties": {
+    "environment": {
+      "runtime": "html",
+      "content": "<div class='area' title='.area'><img id='clock' src='http://i.meemoo.me/v1/in/GJPUFPc8ThuRp9itdXC9_clock-face.png' style='position:absolute; width:300px; height:300px; top:0; left:0;' /><img id='hours' src='http://i.meemoo.me/v1/in/fRL213GT1uCRltIqXkK2_clock-hours.png' style='position:absolute; top:50px; left:130px; height:200px;' /><img id='minutes' src='http://i.meemoo.me/v1/in/23DZFKYoRTOIAjPA7sed_clock-minutes.png' style='position:absolute; top:0; left:140px; height:300px;' /><img id='seconds' src='http://i.meemoo.me/v1/in/VU2HqPmuTqucRpnUGGBj_clock-seconds.png' style='position:absolute; top:0; left:145px; height:300px;' /></div>",
+      "width": 300,
+      "height": 300,
+      "src": "./preview/iframe.html"
+    },
+    "name": "NoFlo"
+  },
+  "exports": [],
+"processes":{
+        "2cde2568-f891-4f5b-8582-9b42744e3da0":{
+            "component":"vm",
+            "metadata":{
+                "vm_id":"2cde2568-f891-4f5b-8582-9b42744e3da0",
+                "vm_status":"SHUTOFF",
+                "label":"host_dzw_06171020"
+            }
+        },
+        "a9d6a93d-72b7-48d8-bb84-72629d30f6e0":{
+            "component":"vm",
+            "metadata":{
+                "vm_id":"a9d6a93d-72b7-48d8-bb84-72629d30f6e0",
+                "vm_status":"SHUTOFF",
+                "label":"testvm_0617"
+            }
+        },
+        "39cc30dc-16e7-4973-8f02-c1dfa0cd55ac":{
+            "component":"vm",
+            "metadata":{
+                "vm_id":"39cc30dc-16e7-4973-8f02-c1dfa0cd55ac",
+                "vm_status":"SHUTOFF",
+                "label":"qos-test1"
+            }
+        },
+        "4666bf4b-6c28-496c-b044-fa8b290760d0":{
+            "component":"vm",
+            "metadata":{
+                "vm_id":"4666bf4b-6c28-496c-b044-fa8b290760d0",
+                "vm_status":"SHUTOFF",
+                "label":"qos-test0"
+            }
+        },
+        "7317f95d-95c4-4f8f-9a11-e1cc01dcbcc3":{
+            "component":"vm",
+            "metadata":{
+                "vm_id":"7317f95d-95c4-4f8f-9a11-e1cc01dcbcc3",
+                "vm_status":"SHUTOFF",
+                "label":"dinghh_testvm_06171"
+            }
+        },
+        "730adb15-1f8a-4de1-bc2d-e64631098ce5":{
+            "component":"switch",
+            "metadata":{
+                "switch_id":"730adb15-1f8a-4de1-bc2d-e64631098ce5",
+                "label":"net2-test"
+            }
+        },
+        "ea0107c7-b3d8-489b-a587-2901266317ce":{
+            "component":"router",
+            "metadata":{
+                "router_id":"ea0107c7-b3d8-489b-a587-2901266317ce",
+                "label":"cy-Router"
+            }
+        },
+        "e6015d34-51fa-48c3-affc-f838788e89d5":{
+            "component":"switch",
+            "metadata":{
+                "switch_id":"e6015d34-51fa-48c3-affc-f838788e89d5",
+                "label":"Ext-Net"
+            }
+        },
+        "6307991b-a487-40b2-a324-74e804fb19ef":{
+            "component":"vm",
+            "metadata":{
+                "vm_id":"6307991b-a487-40b2-a324-74e804fb19ef",
+                "vm_status":"ERROR",
+                "label":"testerror"
+            }
+        },
+        "c01200d1-1ba5-4ecb-a3ce-3894eb43c50e":{
+            "component":"vm",
+            "metadata":{
+                "vm_id":"c01200d1-1ba5-4ecb-a3ce-3894eb43c50e",
+                "vm_status":"SHUTOFF",
+                "label":"dinghh_testvm_06170"
+            }
+        },
+        "a03fc562-2404-4674-a66f-c6234cf55c97":{
+            "component":"vm",
+            "metadata":{
+                "vm_id":"a03fc562-2404-4674-a66f-c6234cf55c97",
+                "vm_status":"SHUTOFF",
+                "label":"domain2Test"
+            }
+        },
+        "0c1fedeb-a8e4-4ba6-b95d-cf4616108472":{
+            "component":"switch",
+            "metadata":{
+                "switch_id":"0c1fedeb-a8e4-4ba6-b95d-cf4616108472",
+                "label":"shared-net"
+            }
+        },
+        "535073f1-19cf-4f69-ad01-0ea59b74770e":{
+            "component":"router",
+            "metadata":{
+                "router_id":"535073f1-19cf-4f69-ad01-0ea59b74770e",
+                "label":"Router"
+            }
+        },
+        "ff1220e1-5631-4cd0-9e5e-70d46cff5a7b":{
+            "component":"switch",
+            "metadata":{
+                "switch_id":"ff1220e1-5631-4cd0-9e5e-70d46cff5a7b",
+                "label":"cy-Net"
+            }
+        }
+    },
+    "connections":[
+        {
+            "tgt":{
+                "process":"0c1fedeb-a8e4-4ba6-b95d-cf4616108472",
+                "port":"in"
+            },
+            "src":{
+                "process":"39cc30dc-16e7-4973-8f02-c1dfa0cd55ac",
+                "port":"out"
+            }
+        },
+        {
+            "tgt":{
+                "process":"0c1fedeb-a8e4-4ba6-b95d-cf4616108472",
+                "port":"in"
+            },
+            "src":{
+                "process":"4666bf4b-6c28-496c-b044-fa8b290760d0",
+                "port":"out"
+            }
+        },
+        {
+            "tgt":{
+                "process":"0c1fedeb-a8e4-4ba6-b95d-cf4616108472",
+                "port":"in"
+            },
+            "src":{
+                "process":"6307991b-a487-40b2-a324-74e804fb19ef",
+                "port":"out"
+            }
+        },
+        {
+            "tgt":{
+                "process":"0c1fedeb-a8e4-4ba6-b95d-cf4616108472",
+                "port":"in"
+            },
+            "src":{
+                "process":"7317f95d-95c4-4f8f-9a11-e1cc01dcbcc3",
+                "port":"out"
+            }
+        },
+        {
+            "tgt":{
+                "process":"0c1fedeb-a8e4-4ba6-b95d-cf4616108472",
+                "port":"in"
+            },
+            "src":{
+                "process":"c01200d1-1ba5-4ecb-a3ce-3894eb43c50e",
+                "port":"out"
+            }
+        },
+        {
+            "tgt":{
+                "process":"0c1fedeb-a8e4-4ba6-b95d-cf4616108472",
+                "port":"in"
+            },
+            "src":{
+                "process":"a9d6a93d-72b7-48d8-bb84-72629d30f6e0",
+                "port":"out"
+            }
+        },
+        {
+            "tgt":{
+                "process":"730adb15-1f8a-4de1-bc2d-e64631098ce5",
+                "port":"in"
+            },
+            "src":{
+                "process":"2cde2568-f891-4f5b-8582-9b42744e3da0",
+                "port":"out"
+            }
+        },
+        {
+            "tgt":{
+                "process":"730adb15-1f8a-4de1-bc2d-e64631098ce5",
+                "port":"in"
+            },
+            "src":{
+                "process":"a03fc562-2404-4674-a66f-c6234cf55c97",
+                "port":"out"
+            }
+        },
+        {
+            "tgt":{
+                "process":"535073f1-19cf-4f69-ad01-0ea59b74770e",
+                "port":"in"
+            },
+            "src":{
+                "process":"0c1fedeb-a8e4-4ba6-b95d-cf4616108472",
+                "port":"out"
+            }
+        },
+        {
+            "tgt":{
+                "process":"535073f1-19cf-4f69-ad01-0ea59b74770e",
+                "port":"in"
+            },
+            "src":{
+                "process":"e6015d34-51fa-48c3-affc-f838788e89d5",
+                "port":"out"
+            }
+        },
+        {
+            "tgt":{
+                "process":"ea0107c7-b3d8-489b-a587-2901266317ce",
+                "port":"in"
+            },
+            "src":{
+                "process":"ff1220e1-5631-4cd0-9e5e-70d46cff5a7b",
+                "port":"out"
+            }
+        },
+        {
+            "tgt":{
+                "process":"ea0107c7-b3d8-489b-a587-2901266317ce",
+                "port":"in"
+            },
+            "src":{
+                "process":"e6015d34-51fa-48c3-affc-f838788e89d5",
+                "port":"out"
+            }
+        }
+    ]
+	}
+);
+console.log("openstack----");
+
+console.log(window.editor);
+/*
+var nodes = window.editor.nofloGraph.nodes;
+            var vmNodes=[];
+            var vm_x_init=100
+            var switchNodes=[];
+            var switch_x_init=100;
+            var routerNodes=[];
+            var router_x_init=100;
+            nodes.forEach(function (node) {//add by hao
+            //	console.log(node);
+            	if(node.metadata.vm_status=="ERROR"){
+            		errorNodeId = node.id;
+	                editor.addErrorNode(errorNodeId);
+	                editor.updateErrorNodes();
+            	}
+            	if(node.component=="vm"){
+            	    node.metadata.y=50;
+            	    node.metadata.x=vm_x_init;
+            	    vm_x_init=vm_x_init+100;
+            		vmNodes.push(node);
+            	}
+            	if(node.component=="switch"){
+            	    node.metadata.y=250;
+            	    node.metadata.x=switch_x_init;
+            	    switch_x_init=switch_x_init+100;
+            		switchNodes.push(node);
+            	}
+            	if(node.component=="router"){
+            	    node.metadata.y=450;
+            	    node.metadata.x=router_x_init;
+            	    router_x_init=router_x_init+100;
+            		routerNodes.push(node);
+            	}
+            });
+*/

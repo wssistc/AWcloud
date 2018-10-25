@@ -1,0 +1,358 @@
+<div class="page-inner">
+	<div class="page-title">
+		<h2>快照</h2>
+
+		<!-- <ui-select ng-model="config" >
+			<ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+			<ui-select-choices repeat="config in configList | propsFilter: {name: $select.search}">
+				<div ng-bind-html="config.name | highlight: $select.search"></div>
+			</ui-select-choices>
+		</ui-select> -->
+
+		<div class="btn-item-group">
+			<button ng-class='{"active":"gz" === regionid}' ng-click="changeRegion('gz')">广州</button>
+			<button ng-class='{"active":"sh" === regionid}' ng-click="changeRegion('sh')">上海</button>
+			<button ng-class='{"active":"bj" === regionid}' ng-click="changeRegion('bj')">北京</button>
+		</div>
+	</div>
+	<div>
+		<uib-alert type="alert-info" class="alert-info">
+			温馨提示：</br>
+			1、目前云硬盘的快照服务处于免费内测阶段，商用时间及收费标准另行通知，在正式商业化收费之前，您可以选择删除所有快照，以避免商业化收费后产生相关快照费用</br>
+			使用限制：</br>
+			1、单账户下最多可创建126（云硬盘数 * 7）个快照。您已经为您的云硬盘创建了1个快照，还能创建125个快照文件</br>
+			2、内测期间，每个地域快照容量上限为20TB，剩余容量空间为19990GB
+		</uib-alert>
+	</div>
+	<div class="table-action">
+		<!-- 增删改查操作 -->
+		<button type="button" data-toggle="modal" ng-disabled="!canCreate" ng-click="createVolume(editData)" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新建云硬盘</button>
+		<button type="button" data-toggle="modal" ng-disabled="!canRename" ng-click="rename(editData)" class="btn btn-info">改名</button>
+		<button type="button" data-toggle="modal" ng-disabled="!canDel" ng-click="delSnapshot(checkedItems)" class="btn btn-info">删除</button>
+		<button type="button" uib-popover="{{RollbackTip}}" popover-enable="!canRollback" popover-trigger="mouseenter" popover-placement = "bottom"  ng-class="{'disabled':!canRollback}"
+		 ng-click="rollback(editData)" class="btn btn-info">回滚</button>
+		<button type="button" class="btn btn-info" ng-csv="downloadFunc()"
+            charset="utf-8" add-bom="true"
+            csv-header="['id', '名称', '状态', '大小', '快照类型', '关联磁盘', '创建时间', '保留时间']"
+            filename="snapshot.{{regionid}}.csv">导出信息</button>
+		<div class="search-box">
+			<form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+				<button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+				<input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="搜索" />
+			</form>
+		</div>
+	</div>
+	<div class="table-content">
+		<!-- table的内容列表 -->
+		<table ng-table="snapshotsTable" class="table table-check" show-filter="false">
+			<colgroup>
+				<col>
+				<col width="30%">
+				<col span="6">
+			</colgroup>
+			<tr ng-repeat="snapshot in $data">
+				<td class="check-td" header="'headerCheckbox.html'">
+					<label class="checkbox">
+						<input type="checkbox" ng-model="checkboxes.items[snapshot.snapshotId]" />
+						<i class="iconfont"></i>
+					</label>
+				</td>
+				<td data-title="'ID/名称'" sortable="'snapshotId'">
+					<div class="edit-name">
+						<a ng-href="#/cvm/snapshot?id={{snapshot.snapshotId}}">{{snapshot.snapshotId}}</a>
+						<span ng-click="rename(snapshot)" class="ng-binding">{{snapshot.snapshotName}}<i class="icon-aw-modify blue"></i></span>
+					</div>
+				</td>
+				<td data-title="'状态'" sortable="'snapshotStatus'">
+					<span>{{"CN.cbs.snap.snapshotStatus."+snapshot.snapshotStatus | translate}}</span>
+				</td>
+				<td data-title="'大小'" sortable="'storageSize'">
+					<span>{{snapshot.storageSize}}G</span>
+				</td>
+				<td data-title="'快照类型'" sortable="'diskType'">
+					<span>{{"CN.cbs.snap.diskType."+snapshot.diskType | translate}}</span>
+				</td>
+				<td data-title="'关联磁盘'" sortable="'storageId'">
+					<span><a class="blue" ng-href="#/cvm/cbs?id={{snapshot.storageId}}">{{snapshot.storageId}}</a></span>
+				</td>
+				<td data-title="'创建时间'" sortable="'createTime'">
+					<span>{{snapshot.createTime}}</span>
+				</td>
+				<td data-title="'保留时间'" sortable="''">
+					<span>永久保留</span>
+				</td>
+			</tr>
+		</table>
+		<!-- <page-component total="totalCount" change-page="initSnapshotsTable(obj)" step="pageStep"></page-component> -->
+		<!-- <div paging on-data="initSnapshotsTable(a,b)" select-items="{{checkedItems.length}}" total-count="{{totalCount}}" page-count="{{pageCount}}"> </div> -->
+	</div>
+	<div ng-controller="detailCtrl">
+		<pane class="detail-body" animation="animation">
+			<div class="tab-content">
+				<div class="detail-tab">
+					<div class="dt-title">
+						<a ng-href="#/cvm/snapshot">返回<i class="icon-aw-angle-left"></i></a><span>{{detailData.snapshotId}}({{detailData.snapshotName}})详情</span>
+					</div>
+					<div class="dt-box">
+						<ul class="nav nav-tabs clearfix">
+							<li class="active"><a>参数</a></li>
+							<!-- <li class=""><a>弹性网卡</a></li>
+							<li><a>安全组</a></li>
+							<li><a>操作日志</a></li> -->
+						</ul>
+						<div class="dt-content">
+							<div class="tab-pane active">
+								<strong>快照信息</strong>
+								<dl class="dl-horizontal">
+									<dt>名称</dt>
+									<dd>{{detailData.snapshotName}}</dd>
+									<dt>快照ID</dt>
+									<dd>{{detailData.snapshotId}}</dd>
+									<dt>大小</dt>
+									<dd>{{detailData.storageSize}}G</dd>
+									<dt>关联磁盘</dt>
+									<dd><a class="blue" ng-href="#/cvm/cbs?id={{detailData.storageId}}">{{detailData.storageId}}</a></dd>
+									<dt>地域</dt>
+									<dd>{{"CN.cbs.region."+regionid | translate}}</dd>
+									<dt>快照类型</dt>
+									<dd>{{"CN.cbs.snap.diskType."+detailData.diskType | translate}}</dd>
+									<dt>创建时间</dt>
+									<dd>{{detailData.createTime}}</dd>
+									<dt>保留时间</dt>
+									<dd>永久保留</dd>
+								</dl>
+							</div>
+							<div class="tab-pane">2</div>
+							<div class="tab-pane">3</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</pane>
+	</div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+		<i class="iconfont"></i>
+	</label>
+</script>
+<script type="text/ng-template" id="createVolume.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+			<h3 class="modal-title">新建数据盘</h3>
+		</div>
+		<div class="modal-body">
+			<form name="createVolumeForm" novalidate>
+				<uib-alert type="warning" class="alert-tip">
+					<strong>重要提示：</strong></br>
+					弹性云盘可以单独购买，按包年包月计费，独立存在。数据可靠性达 99.999999%。</br>
+					弹性云盘可以在同一可用区内的虚拟机之间自由挂载和卸载。</br>
+				</uib-alert>
+				<div class="control-group">
+					<label class="control-label">命名</label>
+					<div class="controls">
+						<input type="text" class="form-controls" name="name" ng-model="postData.storageName" placeholder="请输入云硬盘名称" ng-pattern="/^[^`<>]*$/" ng-maxlength="20"/>
+						<div class="error" ng-if="interacted(createVolumeForm.name)" ng-messages="createVolumeForm.name.$error" >
+							<div ng-message="maxlength">请最多输入20个字符</div>
+							<div ng-message="pattern">不允许输入非法字符串</div>
+						</div>
+					</div>
+				</div>
+				<!-- <div class="control-group">
+					<label class="control-label">所属项目</label>
+					<div class="controls">
+						<ui-select ng-model="project" ng-change="changePro()" title="">
+							<ui-select-match placeholder="">{{$select.selected.projectName}}</ui-select-match>
+							<ui-select-choices repeat="project in projectList | propsFilter: {projectName: $select.search}">
+								<div ng-bind-html="project.projectName | highlight: $select.search"></div>
+							</ui-select-choices>
+						</ui-select>
+					</div>
+				</div> -->
+				<div class="control-group">
+	                <label class="control-label"><i class="red">*</i> 地域</label>
+	                <div class="controls">
+	                  <div class="btn-item-group">
+	                    <button type="button" class="type-btn" ng-disabled="true" ng-class='{"active":item.value === postData.Region}' ng-click="changeRegion(item)" ng-repeat="item in regionList">
+	                      <span>{{item.text}}</span>
+	                    </button>
+	                  </div>
+	                </div>
+		        </div>
+		        <div class="control-group">
+		            <label class="control-label"><i class="red">*</i> 可用区</label>
+		            <div class="controls">
+		              <div class="btn-item-group">
+		                <button type="button" class="type-btn" ng-class='{"active":item.zoneId === postData.zoneId}' ng-click="changeZone(item)"  ng-repeat="item in zoneList">
+		                  <span>{{item.zoneName}}</span>
+		                </button>
+		              </div>
+		            </div>
+		        </div>
+		        <div class="control-group">
+		            <label class="control-label"><i class="red">*</i> 计费模式</label>
+		            <div class="controls">
+		              <div class="btn-item-group">
+		                <button type="button" class="type-btn" ng-class='{"active":item.value === postData.payMode}' ng-click="changePayMode(item)" ng-repeat="item in payModeList">
+		                  <span>{{item.text}}</span>
+		                </button>
+		              </div>
+		            </div>
+		        </div>
+		        <div class="control-group">
+		            <label class="control-label"><i class="red">*</i> 云硬盘类型</label>
+		            <div class="controls">
+		              <div class="btn-item-group">
+		                <button type="button" class="type-btn" ng-class='{"active":item.value === postData.storageType}' ng-click="choosenStorageType(item)"  ng-repeat="item in storageTypeList">
+		                  <span>{{item.text}}</span>
+		                </button>
+		              </div>
+		            </div>
+		        </div>
+		        <div class="control-group">
+		            <label class="control-label"><i class="red">*</i> 容量</label>
+		            <div class="controls rzslider-box">
+		              <!-- <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options" ></rzslider>
+		              <input type="text" ng-model="slider.value" max="slider.options.ceil" step="slider.options.step" num-range min="slider.options.floor"/> -->
+		              <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options" ng-mouseleave="pricesize()"></rzslider>
+		              <input type="text" ng-model="showValue" ng-blur="validataValue()"></input> 
+		              <span class="unit">GB</span>
+		            </div>
+		        </div>
+				<div class="control-group">
+					<label class="control-label">快照名称</label>
+					<div class="controls" >
+						<span>{{selectSnap.snapshotName}}</span>
+					</div>
+				</div>
+				<div class="control-group">
+				</div>
+				<div class="control-group">
+					<label class="control-label"><i class="red">*</i> 购买数量</label>
+					<div class="controls">
+						<div class="count-box">
+							<input type="button" ng-disabled="!canReduce()" class="minus" value="-" ng-click="reducenum()"></input>
+							<input type="text" name="goodsNum" ng-pattern="/^[1-9]+[0-9]*$/" ng-model="postData.goodsNum" class="button-num" min="1" max="10" required limitnumrange></input>
+							<input type="button" ng-disabled="!canAdd()" class="add"  value="+" ng-click="addnum()"></input>
+						</div>
+						<div class="error" ng-if="interacted(createVolumeForm.goodsNum)" ng-messages="createVolumeForm.goodsNum.$error" >
+								<div ng-message="required" >必填项</div>
+								<div ng-message="pattern">{{'aws.errors.noZhSpecial'|translate}}</div>
+								<div ng-message="limitnumrange">请输入1~10之间的正整数</div>
+							</div>
+					</div>
+				</div>
+				<div class="control-group">
+	                <label class="control-label"><i class="red">*</i> 购买时长</label>
+	                <div class="controls">
+	                  <div class="btn-item-group">
+	                    <button type="button" class="type-btn" ng-click="changePeriod(item)" ng-class='{"active":item.value === postData.period}' ng-click="choosen(item)"  ng-repeat="item in periodList">
+	                      <span>{{item.text}}</span>
+	                    </button>
+	                  </div>
+	                </div>
+	        	</div>
+				<div class="control-group">
+      			<label class="control-label">费用</label>
+      			<div class="controls">
+        			<span class="unit-box">{{postData.price}}<span class="unit-txt">元</span></span>
+      			</div>
+  			</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" ng-disabled="" ng-click="volumeConfirm()">确认</button>
+			<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="editNameSnap.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+			<h3 class="modal-title">修改快照名称</h3>
+		</div>
+		<div class="modal-body">
+			<form name="editNameForm" novalidate>
+				<div class="control-group">
+					<label class="control-label">新快照名称:</label>
+					<div class="controls">
+						<input type="text" class="form-controls" name="name" ng-model="postData.snapshotName" placeholder="请输入新的快照名称" ng-pattern="/^[^`<>]*$/" ng-maxlength="60" />
+						<div class="error" ng-if="interacted(editNameForm.name)" ng-messages="editNameForm.name.$error" >
+							<div ng-message="maxlength" >请最多输入60个字符</div>
+							<div ng-message="pattern">不允许输入非法字符串</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmEdit()">确认</button>
+			<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="delSnap.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+			<h3 class="modal-title">删除</h3>
+		</div>
+		<div class="modal-body">
+			<form name="createVolumeForm" novalidate>
+				<div class="control-group">
+					<span class="control-span-volume">您已选<strong>{{selectLength}}个快照，</strong></span>
+					<a class="blue" ng-click="showVolume()">查看详情
+					<i ng-show="isShowVolume" class=" icon-aw-angle-down"></i>
+					<i ng-show="!isShowVolume" class="icon-aw-angle-up"></i>
+					</a>
+					<table class="table table-check" ng-if="!isShowVolume">
+						<tbdoy>	
+						<tr ng-repeat="snapshot in selectSnapList">
+							<td>{{$index+1}}</td>
+							<td>{{snapshot.snapshotName}}</td>
+						</tr>
+						</tbdoy>
+					</table>
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmDel()">确认</button>
+			<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="rollback.html">
+	<div class="modal-common min-modal">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+			<h3 class="modal-title">回滚</h3>
+		</div>
+		<div class="modal-body">
+			<div class="plugin-status">
+				<div class="current-plugin">
+					<i class="icon-aw-storage1"></i>
+					<span class="text blue">当前</span>
+				</div>
+				<div class="arrow-cell">
+					<span class="text blue">回滚</span>
+					<span class="arrow blue">>>>>>>></span>
+				</div>
+				<div class="old-plugin">
+					<i class="icon-aw-storage1"></i>
+					<span class="text blue">{{selectSnap.createTime}}</span>
+				</div>
+			</div>
+			<div class="control-group">
+				<div>{{"CN.cbs.snap.diskType."+selectSnap.diskType | translate}}<a ng-href="#/cvm/cbs?id={{selectSnap.storageId}}" ng-mouseDown="shutdownModal()" class="blue">{{selectSnap.storageId}}</a>的数据将回滚到 <strong>{{selectSnap.createTime}}</strong>此时刻之后的数据将被清除，请谨慎操作！</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmRollback()">确认</button>
+			<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+		</div>
+	</div>
+</script>

@@ -1,0 +1,146 @@
+<div class="login-main clearfix">
+  <div class="container">
+    <div class="hadLogined-msg" ng-if="hadLoginedMsg"><sapn>{{'aws.auth.loginAgain'|translate}}</sapn></div>
+    <div ng-show="!isShowPasswordExpired&&!isNewUser">
+        <div class="login-form">
+          <form name="loginForm" class="sign-box" ng-submit="submitForm(loginForm.$valid)" novalidate>
+            <legend>{{'aws.auth.account'|translate}}</legend>
+            <fieldset>
+              <!-- <div class="control-group" ng-if="!isPrivate" ng-class="{'focus':enterpriseLoginNamefocus}">
+                  <input class="form-controls" 
+                       ng-focus="enterpriseLoginNamefocus=true;loginCfmed=false" 
+                       ng-blur="enterpriseLoginNamefocus=false" 
+                       autocomplete="off"
+                             type="text"
+                             name="enterprisename"
+                             id="input_enterpriseLoginName"
+                             ng-model="login.enterpriseLoginName" 
+                             required  />
+                  <label class="control-label" ng-class="{'focused':focused}"><span class="scroll-bg"></span><span>企业名称</span></label>
+              
+                           <div class="error-messages"  ng-if="interacted(loginForm.enterprisename)"  ng-messages="loginForm.enterprisename.$error">
+                      <div ng-message="required">企业名称不能为空</div>
+                      </div> 
+                </div> -->
+              <div class="control-group" ng-class="{'focus':namefocus}">
+                
+                <input class="form-controls" 
+                     ng-focus="namefocus=true;loginCfmed=false" 
+                     ng-blur="namefocus=false" 
+                     autocomplete="off"
+                           type="text"
+                           name="username"
+                           id="input_username"
+                           ng-model="login.username"
+                           placeholder="{{'aws.auth.inputusername'|translate}}"
+                           required 
+                           />
+                <label class="control-label" ng-class="{'focused':focused}"><span class="scroll-bg"></span><span>{{'aws.auth.user'|translate}}</span></label>
+
+                         <div class="error-messages"  ng-if="interacted(loginForm.username)"  ng-messages="loginForm.username.$error">
+                    <div ng-message="required">{{'aws.auth.inputusername'|translate}}</div>
+                    </div> 
+              </div>
+              <div class="control-group" ng-class="{'focus':passwordfocus}">
+                
+                 <input class="form-controls"
+                     ng-focus="passwordfocus=true;loginCfmed=false" 
+                     ng-blur="passwordfocus=false"
+                             type="password"
+                             name="password"
+                             id="input_password"
+                             ng-model="login.password"
+                             autocomplete="new-password"
+                             placeholder="{{'aws.auth.inputpasswd'|translate}}"
+                             required
+                             />
+                 <label class="control-label" ng-class="{'focused':focused}"><span class="scroll-bg"></span><span>{{'aws.auth.passwd'|translate}}&nbsp;&nbsp;&nbsp;</span></label>
+                 
+                  <div class="error-messages" ng-if="interacted(loginForm.password)" ng-messages="loginForm.password.$error">
+                    <div ng-message="required">{{'aws.auth.inputpasswd'|translate}}</div>
+                  </div> 
+              </div>
+              <div class="control-group" ng-class="{'focus':verificationCode}">
+                <input class="form-controls verication"
+                     ng-keyup="loginForm.code.$dirty=true"
+                     ng-change="checkVerication(login.verificationCode)"
+                     ng-focus="verificationCode=true;loginCfmed=false;" 
+                     ng-blur="verificationCode=false;"
+                             type="text"
+                             name="code"
+                             ng-model="login.verificationCode"
+                             autocomplete="off"
+                             placeholder="{{'aws.auth.inputVerificationCode'|translate}}"
+                             required
+                             />
+                 <label class="control-label" ng-class="{'focused':focused}">
+                   <span class="scroll-bg"></span>
+                   <span>{{'aws.auth.verificationCode'|translate}}</span>
+                 </label>
+                 <label class="verication-check">
+                    <i class="icon-aw-yes" ng-if="vericationYes"></i>
+                    <i class="icon-aw-wrong" ng-if="vericationNo"></i>
+                 </label>
+                 <label class="code-img" ng-click="getVerificationCode(loginForm)">
+                   <img ng-src="{{imgUrl}}" id="codeImg">
+                 </label>
+                <div class="error-messages" ng-if="interacted(loginForm.code)" ng-messages="loginForm.code.$error">
+                  <div ng-message="required">{{'aws.auth.inputVerificationCode'|translate}}</div>
+                </div> 
+              </div>
+              <div class="btn-item">
+                <button type="submit" class="btn btn-primary" ng-disabled="loginForm.$invalid || loginCfmed">{{'aws.auth.login'|translate}}<span ng-show="logining"><i class="icon-aw-load aw-spin"></i></span></button>
+              </div>
+              <div class="signuperror" ng-show="loginError>0" >
+                <div ng-if="loginError===1 && loginCfmed">
+                  {{loginError1Msg}}
+                </div>
+                <div ng-if="loginError===2 && loginCfmed">
+                  {{'aws.auth.servererror'|translate}}
+                </div>
+                <div ng-if="loginError===3 && loginCfmed">
+                  {{'aws.auth.ipOut'|translate}}
+                </div>
+                <div ng-if="loginError===4 && loginCfmed">
+                  {{'aws.auth.noPermissions'|translate}}
+                </div>
+                <div ng-if="loginError===5 && loginCfmed">
+                  {{'aws.auth.noProject'|translate}}
+                </div>
+                <div ng-if="loginError===6 && loginCfmed">
+                 {{'aws.auth.loginOverTimes'|translate}} {{errorTime}} {{'aws.auth.pleaseWait'|translate}} {{showTime}} {{'aws.auth.minuteTryAgain'|translate}}
+                </div>
+                <!-- <div ng-if="tryAgain && loginCfmed">
+                  {{'aws.auth.tryAgin'|translate}}
+                </div> -->
+                <div ng-if="loginError===7 && loginCfmed">
+                  {{'aws.auth.repeatLogin'|translate}}
+                </div>
+                <div ng-if="loginError===8 && loginCfmed">
+                  {{'aws.auth.sysUpdate'|translate}}
+                </div>
+                <div ng-if="loginError===9 && loginCfmed">
+                  {{'aws.auth.codeInvalid'|translate}}
+                </div>
+                <div ng-if="loginError===10 && loginCfmed">
+                  {{'aws.auth.codeError'|translate}}
+                </div>
+                <div ng-if="loginError===11 && loginCfmed">
+                  {{'aws.auth.userLocked'|translate}}
+                </div>
+                <div ng-if="loginError===22&& loginCfmed">
+                    授权过期，请联系管理员重新对软件进行授权
+                </div>
+              </div>
+            </fieldset>
+            <!-- <div class="link-wrap">
+              <div class="link-cont">
+                <a href="#">{{'aws.auth.forgetpasswd'|translate}}</a>
+                <p class="pull-right">{{'aws.auth.aws_account'|translate}}<a href="">{{'aws.auth.register'|translate}}&gt;&gt;</i></a></p>
+              </div>
+            </div> -->
+          </form>
+        </div>
+    </div>
+  </div>
+</div>

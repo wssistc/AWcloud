@@ -1,0 +1,154 @@
+<div id="main">
+  <div class="container">
+    <div class="host-box" id="nics">
+      	网卡配置
+		<div class="nics-list">
+			<ul class="no-use">
+				<li ng-repeat = "v in cardJson.nics">
+					<div class="addr" draggable="true" indexNum="{{$index}}">
+						<div class="nic-out nic10">
+							<span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+							<div class="nic-info">
+								<span class="nic-name" title="{{v.name}}">{{v.name}}</span>
+								<span class="nic-speed">{{v.speed}}Mbps</span>
+							</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+			<p class="nic-error hide">网卡已被使用,若要做bond操作请先解除使用!</p>
+		</div>
+		<div class="nics-bonds">
+			<div class="tool-tips" ng-show="toolTips">绑定的网卡速率必须一致!</div>
+			<div class="tool-tips" ng-show="toolUsed">网卡已被使用!</div>
+			<div class="tool-tips" ng-show="toolBond">bond至少包含2张网卡才能被使用!</div>
+			<ul class="bond-merged clearfix">
+				<li class="bond bonddrag" ng-repeat="i in cardJson.bonds" draggable="true">
+					<div class="bond-inner">
+						<div class="bond-desc" indexNum="{{$index}}">
+							<b class="num">{{i.nics.length}}</b>
+							<span class="text">网卡数量</span>
+							<div class="select2-box">
+								<ui-select ng-model="i.selected">
+					                <ui-select-match>{{$select.selected.name}}</ui-select-match>
+					                <ui-select-choices repeat="data in bondsType | filter:{name:$select.search}">
+					                  <div ng-bind-html="data.name | highlight: $select.search"></div>
+					                </ui-select-choices>
+				                </ui-select>
+							</div>
+						</div>
+						<p><span class="bond-name">{{i.name}}</span><i class="icon-aw-delete" ng-click="bondsDelete($index)"></i></p>
+					</div>
+					<ul class="bond-detail">
+						<i class="point-left"></i>
+						<li ng-repeat="item in i.nics">
+							<span class="card-name">{{item.name}}</span>
+							<span class="card-speed">{{item.speed}}Mbps</span>
+							<span class=" icon-aw-wrong" ng-click="cardsDelete($index,i)"></span>
+						</li>
+					</ul>
+				</li>
+				<li class="new-bond bond" ng-show="newBondsShow">
+					<div class="new-bond-inner">
+						<i class="icon-aw-add-to"></i>
+						<span class="text">将网卡拖动至此处创建新组合</span>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<ul class="nics-choose cardconfig-choose">
+			<li class="cluster">
+			  <div class="inner nic-item">
+			    <div class="text">集群网 <span class="net-remove">
+			    	<i class="icon-aw-wrong" ng-click="deleteNetcard('cluster')"></i>
+			    </span></div>
+			    <div class="addr netcontent" name="cluster">
+			    	<span class="text-tip" ng-class="{'hide':cardJson.nic_map.cluster.bonds}">使用拖拽移动组合</span>
+					<div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.cluster.bonds}">
+						<span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+						<div class="nic-info">
+							<span class="nic-name"  title="{{cardJson.nic_map.cluster.bonds}}">{{cardJson.nic_map.cluster.bonds}}</span>
+							<span class="nic-speed">{{cardJson.nic_map.cluster.speed}}Mbps</span>
+						</div>
+					</div>
+			    </div>
+			  </div>
+			</li>
+			<li class="mgmt">
+			  <div class="inner nic-item">
+			    <div class="text">管理网<span class="net-remove">
+			    	<i class="icon-aw-wrong" ng-click="deleteNetcard('mgmt')"></i>
+			    </span></div>
+			    <div class="addr netcontent" name="mgmt">
+			    	<span class="text-tip" ng-class="{'hide':cardJson.nic_map.mgmt.bonds}">使用拖拽移动组合</span>
+					<div class="nic-out"  ng-class="{'nic1000':cardJson.nic_map.mgmt.bonds}">
+						<span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+						<div class="nic-info">
+							<span class="nic-name"  title="{{cardJson.nic_map.mgmt.bonds}}">{{cardJson.nic_map.mgmt.bonds}}</span>
+							<span class="nic-speed">{{cardJson.nic_map.mgmt.speed}}Mbps</span>
+						</div>
+					</div>
+			    </div>
+			  </div>
+			</li>
+			<li class="storage">
+			  <div class="inner nic-item">
+			    <div class="text">存储网<span class="net-remove">
+			    	<i class="icon-aw-wrong" ng-click="deleteNetcard('storage')"></i>
+			    </span></div>
+			    <div class="addr netcontent" name="storage">
+			    	<span class="text-tip" ng-class="{'hide':cardJson.nic_map.storage.bonds}">使用拖拽移动组合</span>
+					<div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.storage.bonds}">
+						<span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+						<div class="nic-info">
+							<span class="nic-name"  title="{{cardJson.nic_map.storage.bonds}}">{{cardJson.nic_map.storage.bonds}}</span>
+							<span class="nic-speed">{{cardJson.nic_map.storage.speed}}Mbps</span>
+						</div>
+					</div>
+			    </div>
+			  </div>
+			</li>
+			<li class="tenant">
+			  <div class="inner nic-item">
+			    <div class="text">租户网<span class="net-remove">
+			    	<i class="icon-aw-wrong" ng-click="deleteNetcard('tenant')"></i>
+			    </span></div>
+			    <div class="addr netcontent" name="tenant">
+			    	<span class="text-tip" ng-class="{'hide':cardJson.nic_map.tenant.bonds}">使用拖拽移动组合</span>
+					<div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.tenant.bonds}">
+						<span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+						<div class="nic-info">
+							<span class="nic-name"  title="{{cardJson.nic_map.tenant.bonds}}">{{cardJson.nic_map.tenant.bonds}}</span>
+							<span class="nic-speed">{{cardJson.nic_map.tenant.speed}}Mbps</span>
+						</div>
+					</div>
+			    </div>
+			  </div>
+			</li>
+			<li class="public">
+			  <div class="inner nic-item">
+			    <div class="text">业务网<span class="net-remove">
+			    	<i class="icon-aw-wrong" ng-click="deleteNetcard('public')"></i>
+			    </span></div>
+			    <div class="addr netcontent" name="public">
+		    		<span class="text-tip" ng-class="{'hide':cardJson.nic_map.public.bonds}">使用拖拽移动组合</span>
+					<div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.public.bonds}">
+						<span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+						<div class="nic-info">
+							<span class="nic-name"  title="{{cardJson.nic_map.public.bonds}}">{{cardJson.nic_map.public.bonds}}</span>
+							<span class="nic-speed">{{cardJson.nic_map.public.speed}}Mbps</span>
+						</div>
+					</div>
+			    </div>
+			  </div>
+			</li>
+		</ul>
+		<div class="text-center">
+			<div class="tool-tips" ng-show="toolNoUsed">请确保所有网络都被绑定网卡!</div>
+			<div class="tool-tips" ng-show="toolSuccess">保存成功!</div>
+			<button class="btn btn-next" ng-click="saveCards()" ng-disabled="" type="button">保存</button>
+			<a ng-click="bacKNodeFun()" class="btn btn-default">返回节点列表</a>
+		</div>
+    </div>
+  </div>
+</div>

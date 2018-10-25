@@ -1,0 +1,308 @@
+<div class="page-inner">
+	<h3 class="page-title">{{'aws.cluster.configure'|translate}}</h3>
+	<div class="table-action datacluster-action">
+	<button type="button" data-toggle="modal" ng-click="createRegion()" class="btn btn-new" licence-type="btn" id="system-dataCenter-create"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+	<button type="button" data-toggle="modal" ng-disabled="!canEdit" ng-click="editRegion(checkedItems)" class="btn btn-normal" licence-type="btn"  id="system-dataCenter-edit"><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+	<button type="button" data-toggle="modal" ng-disabled="!canDel" ng-click="del(checkedItems)" class="btn btn-normal" licence-type="btn" id="system-dataCenter-del" > <i class="icon-aw-delete"></i>{{'aws.action.del' | translate}}</button>
+	<button ng-click="shutDown(editData)" class="btn btn-normal" licence-type="btn" id="system-dataCenter-oneKeyOff" uib-popover="{{shutDownMsg}}" popover-enable="showShutDownMsg" popover-trigger="mouseenter" popover-placement = "right" ng-class="{'disabled':!canShutOff}"><i class="icon-aw-jy"></i>{{'aws.cluster.simJetSoft'|translate}}</button>
+	<!-- <button ng-click="deployRegion(editData)" ng-disabled="!canDeploy"  class="btn btn-info" licence-type="btn" id="system-pm-createHostset" > <i class="icon-process"></i>部署</button> -->
+		<div class="pull-right">
+			<into-information modular="'datacluster'"></into-information>
+			<setting title-data="clusterTitleData" site-title="clusterTitleName" table-data="clusterListData" search-tearm="clusterSearchTerm(obj)"></setting>
+			<button class="btn btn-renovat right-ports" ng-click="refresh()">
+				<i class="icon-aw-refresh"></i>
+			</button>
+			<div class="search-box right-ports">
+				<form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+					<button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+					<input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search' | translate}}" />
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="table-content">
+		<table ng-table="centertableParams" class="table" show-filter="false">
+			<colgroup>
+                <col width="9%">
+                <col width="13%">
+                <col width="13%">
+                <col width="13%">
+                <col width="13%">
+                <col width="10%">
+                <col width="19%">
+                <col width="10%">     
+            </colgroup>
+			<tr ng-repeat="cluster in $data">
+				<td header="'headerCheckboxcentertableParams.html'">
+					<label class="checkbox">
+						<input type="checkbox" name="r" ng-model="checkboxescentertableParams.items[cluster.id]" value="{{cluster.id}}" />
+						<i class="iconfont"></i>
+					</label>
+				</td>
+				<td data-title="headers.name" sortable="'regionName'" ng-if="clusterTitleData[0].value">
+					<div class="edit-name edit-lg" title="{{cluster.regionName}}" ng-if="cluster.status!=0">
+					            {{cluster.regionName}}
+					</div>
+					<a ng-click="handleDetail(cluster)" title="{{cluster.regionName}}" ng-if="cluster.status==0">{{cluster.regionName}}</a>
+				</td>
+				<td data-title="headers.status" sortable="'status_ori'" ng-if="clusterTitleData[1].value">
+					<span ng-class="{'bg-green':(cluster.status==3),'bg-grey':(cluster.status==0||cluster.status==null),'bg-blue':(cluster.status==1||cluster.status==2||cluster.status==4),'bg-red':(cluster.status==5)}">{{cluster.status_ori}}</span>
+					
+				</td>
+				<td data-title="headers.regionKey" sortable="'regionKey'" ng-if="clusterTitleData[2].value">
+					{{cluster.regionKey}}
+				</td>
+				<td data-title="headers.virtualNodeNum" sortable="'instances'" ng-if="clusterTitleData[3].value">
+					{{cluster.instances}}
+				</td>
+				<td data-title="headers.containerNodeNum" sortable="'containerNodeNum'" ng-if="clusterTitleData[4].value">
+					{{cluster.containerNodeNum}}
+				</td>
+				<td data-title="headers.createTime" sortable="'lastTime_ori'" ng-if="clusterTitleData[5].value">
+					{{cluster.lastTime_ori}}
+				</td>
+				<!-- <td data-title="headers.status" sortable="'status'">
+					{{'aws.cluster.status.'+cluster.status|translate}}
+				</td> -->
+				<td data-title="headers.description" sortable="'description'" ng-if="clusterTitleData[6].value">
+					<span class="des des-lg" title="{{cluster.description}}">{{cluster.description}}</span>
+				</td>
+				<!-- <td data-title="headers.lastTime" sortable="'lastTime'">
+					{{cluster.lastTime| date:'yyyy-MM-dd HH:mm:ss'}}
+				</td> -->
+			</tr>
+		</table>
+	</div>
+	<div ng-controller="detailCtrl">
+		<pane class="detail-body" animation="animation">
+			<div class="cluster-box">
+				<div class="move-content clearfix" ng-class="{'to-left':moveTo}">
+					<div class="table-content detail-content">
+						<div class="detail-row">
+							<div class="detail-title">
+								<a class="an-close" ng-click="handleDetail()"><i class="icon-aw-mail-reply"></i></a>
+								<span class="region-title">{{regionName}}{{'aws.cluster.detailMessage' | translate}}</span>
+							</div>
+							<div class="detail-info">
+								<ul class="nav nav-tabs nav-justified">
+									<li ng-class="{active:regionTab.isNodeShow}" class="uib-tab nav-item " ng-click="chooseNode(0)">
+										<a href="">{{'aws.datacluster.virtualNode' | translate}}</a>
+									</li>
+									<li ng-class="{active:!regionTab.isNodeShow}" class="uib-tab nav-item" ng-click="chooseDocker(0)">
+										<a href="">{{'aws.datacluster.containerNode' | translate}}</a>
+									</li>
+								</ul>
+								<div class="tab-content" ng-if="regionTab.isNodeShow">
+									<div ng-include="'js/system/datacluster/tmpl/nodelist.html'"></div>
+								</div>
+
+								<div class="tab-content" ng-if="regionTab.isdockerShow">
+									<div ng-include="'js/kubernetes/dockerNodes/tmpl/dockerNodes.html'"></div>
+								</div>
+								<!-- <uib-tabset active="" justified="true">
+									<uib-tab index="0" heading="虚拟资源节点" ng-click="chooseNode(0)">
+										<div  ng-if="regionTab.isNodeShow">
+											<div ng-include="'js/system/datacluster/tmpl/nodelist.html'"></div>
+										</div>
+									</uib-tab>
+									<uib-tab index="1" heading="容器节点"  ng-click="chooseDocker(0)">
+										<div  ng-if="regionTab.isdockerShow">
+											<div ng-include="'js/kubernetes/dockerNodes/tmpl/dockerNodes.html'"></div>
+										</div>	
+									</uib-tab>
+								</uib-tabset> -->
+							</div>
+						</div>
+					</div>
+					<div class="detail-content" ng-if="regionTab.isNodeShow">
+						<div class="node-detail">
+							<div class="node-detail-title">
+								<span class="title-cluster" ng-click="toRight()">{{regionName}}{{'aws.datacluster.detail' | translate}}</span>
+								<span class="point-to">></span>
+								<span class="title-node">{{hypervisor.hypervisorHostname}}{{'aws.datacluster.detail' | translate}}</span>
+                            </div>
+                            <div class="tab-content-line"></div>
+							<table class="table border">
+				              <thead>
+				                <tr>
+				                  <th>{{'aws.system.hypervisor.netName'|translate}}</th>
+				                  <th>IP</th>
+				                  <th>{{'aws.system.hypervisor.subnetMask'|translate}}</th>
+				                  <th>{{NodedetailData.neutron_type=='vxlan'?'aws.system.hypervisor.vxlanRange':'aws.system.hypervisor.vlanRange'|translate}}</th>
+				                </tr>
+				              </thead>
+				              <tbody>
+				                <tr ng-repeat="net in NodedetailData.network">
+				                  <td class="col-2">
+				                    <span>{{'aws.node.node_detail.'+net.role| translate}}</span>
+				                  </td>
+				                  <td>{{net.ip}}</td>
+				                  <td>{{net.netmask}}</td>
+				                  <td><span ng-show="net.isShow">{{net["vlan-start"]}} ~ {{net["vlan-end"]}}</span></td>
+				                </tr>
+				              </tbody>
+				            </table>
+							<table class="table table-info column">
+		                      <tr>
+		                        <td>物理主机名称</td>
+		                        <td>{{hypervisor.hypervisorHostname}}</td>
+		                        <td>IPMI地址</td>
+		                        <td>{{ipmiInfo.ipmiAddr}}</td>
+		                      </tr>
+		                      <tr>
+		                        <td>虚拟机个数（运行）</td>
+		                        <td>{{hypervisor.runningVM}}</td>
+		                        <td>虚拟化类型</td>
+		                        <td>{{hypervisor.type}}</td>
+		                      </tr>
+		                      <tr>
+		                        <td>已用物理CPU</td>
+		                        <td>{{hypervisor.virtualUsedCPU}}</td>
+		                        <td>物理CPU总数</td>
+		                        <td>{{hypervisor.virtualCPU}}</td>
+		                      </tr>
+		                      <tr>
+		                        <td>已用内存（GB）</td>
+		                        <td>{{hypervisor.localMemoryUsed}}</td>
+		                        <td>总内存（GB）</td>
+		                        <td>{{hypervisor.localMemory}}</td>
+		                      </tr>
+		                      <tr>
+		                        <td>磁盘总容量（GB）</td>
+		                        <td>{{hypervisor.localDisk}}</td>
+		                        <td>空闲内存（GB）</td>
+		                        <td>{{hypervisor.freeRam}}</td>
+		                      </tr>
+		                      <tr>
+		                        <td>已用磁盘容量（GB）</td>
+		                        <td>{{hypervisor.localDiskUsed}}</td>
+		                        <td>当前任务量</td>
+		                        <td>{{hypervisor.currentWorkload}}</td>
+		                      </tr>
+		                      <tr>
+		                        <td>最小可用磁盘（GB）</td>
+		                        <td>{{hypervisor.leastDiskAvailable}}</td>
+		                        <td>空闲磁盘容量（GB）</td>
+		                        <td>{{hypervisor.freeDisk}}</td>
+		                      </tr>
+		                    </table>
+						</div>
+					</div>
+					<div class="detail-content" ng-if="regionTab.isdockerShow" >
+						<div class="node-detail">
+							<div class="node-detail-title">
+								<span class="title-cluster" ng-click="toRight()">{{regionName}} 详情</span>
+								<span class="point-to">></span>
+								<span class="title-node">{{selectedNode.name}}详情</span>
+							</div>
+							<div ng-include="'js/kubernetes/dockerNodes/tmpl/detailpart.html'"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</pane>
+    </div>
+</div>    
+	<script type="text/ng-template" id="headerCheckboxcentertableParams.html">
+		<label class="checkbox">
+			<input type="checkbox" ng-model="checkboxescentertableParams.checked" class="select-all-centertableParams" value="" />
+			<i class="iconfont"></i>
+		</label>
+	</script>
+<script type="text/ng-template" id="createRegion.html">
+	<div class="modal-common modal-smallest">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+				<h3 class="modal-title">{{'aws.cluster.newRegion' | translate}}</h3>
+			</div>
+			<div class="modal-body">
+				<form name="createRegion" novalidate>
+					<div class="control-group">
+						<label class="control-label">{{'aws.datacluster.clusterName' | translate}}：</label>
+						<div class="controls">
+							<input type="text" class="form-controls" name="name" ng-model="postParams.regionName" placeholder="{{'aws.datacluster.clusterNameHolder' | translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="16" required />
+							<div class="error" ng-if="interacted(createRegion)" ng-messages="createRegion.name.$error" >
+								<div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+								<div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.noSpecial'|translate}}</div>
+								<div ng-message="maxlength">{{'aws.errors.maxlength16'|translate}}</div>
+							</div>
+						</div>
+					</div>
+			
+					<!--<div class="control-group">
+						<label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}：</label>
+						<div class="controls">
+							<textarea type="text" class="form-controls volume-text " name="description"  ng-model="postParams.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" ng-maxlength="100" />
+							<div class="error" ng-if="interacted(createRegion)" ng-messages="createRegion.description.$error" >
+								<div ng-message="maxlength">{{'aws.errors.maxlength100'|translate}}</div>
+							</div>
+						</div>
+					</div>-->
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-info" type="button" ng-click="confirm()">{{"aws.action.ok"|translate}}</button>
+				<button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+			</div>
+		</div>
+</script>
+<script type="text/ng-template" id="editRegion.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+			<h3 class="modal-title">{{'aws.cluster.editRegion' | translate}}</h3>
+		</div>
+		<div class="modal-body">
+			<form name="editRegion" novalidate>
+				<div class="control-group">
+					<label class="control-label">{{'aws.cluster.regionName' | translate}}：</label>
+					<div class="controls">
+						<input type="text" class="form-controls" name="name" ng-model="postParams.regionName" placeholder="{{'aws.datacluster.clusterNameHolder' | translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="16" required />
+						<div class="error" ng-if="interacted(editRegion)" ng-messages="editRegion.name.$error" >
+							<div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+							<div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.noSpecial'|translate}}</div>
+							<div ng-message="maxlength">{{'aws.errors.maxlength16'|translate}}</div>
+						</div>
+					</div>
+				</div>
+		
+				<div class="control-group">
+					<label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}：</label>
+					<div class="controls">
+						<textarea type="text" class="form-controls volume-text " name="description"  ng-model="postParams.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" ng-maxlength="100" />
+						<div class="error" ng-if="interacted(editRegion)" ng-messages="editRegion.description.$error" >
+							<div ng-message="maxlength">{{'aws.errors.maxlength100'|translate}}</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-click="confirm()">{{"aws.action.ok"|translate}}</button>
+			<button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="installRegion.html">
+	<div class="modal-smallest modal-common">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+				<h3 class="modal-title">{{'aws.cluster.tips' | translate}}</h3>
+			</div>
+			<div class="modal-body">
+				<div class="install-region clearfix" ng-if="installEntrance">
+					<div class="region-icon">
+						<i class="icon-aw-xnzygl"></i>
+					</div>
+					<div class="region-name">{{'aws.datacluster.ImmediateDeployment' | translate}}{{regionRange}}{{'aws.datacluster.regionAre' | translate}}</div>
+				</div>
+				<div class="imediate-install"  ng-if="!installEntrance">
+					{{'aws.datacluster.deployedTips' | translate}}
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-info" type="button" ng-click="confirm(regionkeyCode)">{{"aws.cluster.ok"|translate}}</button>
+				<button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.cluster.cancel"|translate}}</button>
+			</div>
+		</div>
+</script>

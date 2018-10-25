@@ -1,0 +1,115 @@
+<div class="modal-common easy-modal phynet-modal modal-largest">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+    <h3 class="modal-title">{{"aws.networks.editSubnet"|translate}}</h3>
+  </div>
+  <div class="modal-body editSub-body">
+    <div class="editSub">{{"aws.networks.selectSub"|translate}}</div>
+    <div class="table-content sub-content">
+        <table ng-table="editSubnetTable" class="table" show-filter="false">
+            <colgroup>
+              <col width="4%">
+            </colgroup>                       
+            <tr ng-repeat="subnet in $data">
+              <td data-title="">
+                  <label class="radiobox" ng-if="subnet.ipVersion=='4'">
+                      <input name="subnet" type="radio" ng-model="editSub.selectedSubnet" ng-change="changeSub(subnet)" value={{subnet.id}} required>
+                      <i class="iconfont"></i>
+                  </label>
+              </td>
+              <td data-title="'aws.networks.subnetName'|translate" sortable="'name'">
+                <div class="edit-name edit-sm">
+                  <span title="{{subnet.name}}">{{subnet.name}}</span>
+                </div>
+              </td>
+              <td data-title="'aws.networks.subnetCidr'|translate" sortable="'cidr'">{{subnet.cidr}}<br></td>
+              <td data-title="'aws.networks.gatewayIp'|translate" sortable="'gatewayIp'">{{subnet.gatewayIp}}</td>
+              <td data-title="'aws.networks.availableAddressRange'|translate">
+                <span ng-repeat="allocationPool in subnet.allocationPools track by $index ">
+                  {{allocationPool.start}}~{{allocationPool.end}}<br>
+                </span>
+              </td>
+              <td data-title="'aws.networks.availableIP'|translate" sortable="'networkIpAvailability'">{{subnet.networkIpAvailability}}</td>
+              <td data-title="'aws.networks.subnetType'|translate" sortable="'ipVersion'">{{subnet._ipVersion}}</td>
+            </tr>
+        </table>
+    </div>
+    <div ng-show="editSub.selectedSubnet">
+        <form name="editSubnetForm" novalidate>
+          <div class="control-group">
+            <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.networks.subnetName"|translate}}：</label>
+            <div class="controls subnet-controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.networks.info.subnetName'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+              <input type="text" class="form-controls" name="name"  ng-model="subnetForm.name" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.networks.inputSubnetName"|translate}}' required/>
+              <div class="error" ng-messages='editSubnetForm.name.$error' ng-show="interacted(editSubnetForm.name)">
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+              <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+              <!-- <div ng-message="exceptName">{{'aws.networks.except_external_subnet' | translate}}</div> -->
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{"aws.networks.subnetCidr"|translate}}：</label>
+            <div class="controls subnet-controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.networks.info.subnetCidr'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+              <span class="val">{{subnetForm.cidr}}</span>
+            </div>
+          </div>
+          <div class="ip_pool clearfix editSub_pool">
+            <div class="control-label"><span class="red">*</span>&nbsp;{{"aws.networks.availableAddressRange"|translate}}：</div>
+            <div ng-repeat="pool in subnetForm.allocationPools track by $index" class="group clearfix" ng-class="{'repeat':$index>=1}">
+              <div class="control-group ">
+                <label class="control-label">{{"aws.networks.start"|translate}}:</label>
+                <div class="controls">
+                  <input type="text" class="form-controls" name="start_ip{{$index}}" id="startIp_{{$index}}" ng-model="pool.start" ipformat-validate ng-focus="setIpIsOverlap()" incidr cidr-val="subnetForm.cidr" required />
+                  <div class="error" ng-messages="editSubnetForm['start_ip'+$index].$error" ng-if="interacted(editSubnetForm['start_ip'+$index])">
+                    <div ng-message="ipformat">{{"aws.networks.ipPatternError"|translate}}</div>
+                    <div ng-message="incidr">
+                      <div ng-if="pool.start==networkAddress">{{"aws.networks.ipIsNetworkAdress"|translate}}</div>
+                      <div ng-if="pool.start==broadcastAddress">{{"aws.networks.ipIsBroadcastAdress"|translate}}</div>
+                      <div ng-if="pool.start!=networkAddress&&pool.start!=broadcastAddress">{{"aws.networks.ipNotInSubCidr"|translate}}</div>
+                    </div>
+                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group ">
+                <label class="control-label">{{"aws.networks.end"|translate}}:</label>
+                <div class="controls">
+                  <input type="text" class="form-controls" name="end_ip{{$index}}" id="endIp_{{$index}}" ng-model="pool.end" ng-focus="setIpIsOverlap()" ipformat-validate  gtip="startIp_{{$index}}" incidr cidr-val="subnetForm.cidr" required />
+                  <div class="error" ng-messages="editSubnetForm['end_ip'+$index].$error" ng-if="interacted(editSubnetForm['end_ip'+$index])">
+                    <div ng-message="ipformat">{{"aws.networks.ipPatternError"|translate}}</div>
+                    <div ng-message="gtip">{{'aws.errors.gtIpError'|translate}}</div>
+                    <div ng-message="incidr">
+                      <div ng-if="pool.end==networkAddress">{{"aws.networks.ipIsNetworkAdress"|translate}}</div>
+                      <div ng-if="pool.end==broadcastAddress">{{"aws.networks.ipIsBroadcastAdress"|translate}}</div>
+                      <div ng-if="pool.end!=networkAddress&&pool.end!=broadcastAddress">{{"aws.networks.ipNotInSubCidr"|translate}}</div>
+                    </div>
+                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="del" ng-if="subnetForm.allocationPools.length>1">
+                  <a ng-click="delAllocationPools($index,subnetForm.allocationPools)" ><i class="icon-aw-wrong"></i></a>
+              </div>
+              <div class="add-subpool" ng-if="$index==(subnetForm.allocationPools.length-1)">
+                  <a ng-click="addAllocationPools()"><i class="icon-aw-add-to2"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="red text-center" ng-if="ipIsOverlap"> {{"aws.networks.ipPoolIsOverlap"|translate}}</div>
+          <div class="red text-center" ng-if="ipEqToGateway">{{"aws.networks.ipInPoolEqToGateway"|translate}}({{editData.gatewayIp}})</div>
+          <div class="red text-center" ng-if="poolNarrow">
+            <span ng-if="subnetForm.external">{{"aws.networks.poolNarrow"|translate}}</span>
+            <span ng-if="!subnetForm.external">{{"aws.networks.assignedIpNotInPool"|translate}}</span>
+          </div>
+        </form>
+    </div>
+    
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-info" type="button" ng-click="editSubnetCfm(editSubnetForm)" ng-disabled = "formSubmitted" >{{"aws.action.ok"|translate}}</button>
+    <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+  </div>
+</div>

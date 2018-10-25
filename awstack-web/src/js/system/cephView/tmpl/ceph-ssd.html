@@ -1,0 +1,48 @@
+<div class="diskfield ">
+    <div class="disk-box unbar" ng-class="{'target':bardata.targetAttribute}" ng-click="getDisk(bardata)">
+        <div class="s-h" ng-class="{'journal':bardata.attribute=='journal','available':bardata.attribute=='available'}">
+            <i class="{{bardata.osdStatus}}" ng-class="{'icon-aw-hdd':bardata.type==1,'icon-aw-ssd':bardata.type==0}"></i>
+            <i class="circle green" ng-class="{'orange':bardata.ioUtil>30,'red':bardata.ioUtil>70}" ng-hide="bardata.status =='miss'"></i>
+        </div>
+        <span>{{bardata.total}}GB</span>
+        <i class="close {{bardata.attribute}}"  ng-click="del()">×</i>
+    </div>
+    <!-- <div class="disk-info" ng-class="{'middle':bardata.action}" ng-show="showInfo"> -->
+    <div class="disk-info" ng-class="{'middle':bardata.action}">
+        <div class="angles">
+            <i class="angle-top"></i>
+            <i class="angle-top-opa"></i>
+        
+        </div>
+        <div ng-show = "bardata.action">
+            <span class="sub-title">{{'aws.cephView.excuteAction' | translate}}：</span>
+            {{"aws.cephView.chart.actionTo." + (bardata.action+"_" + bardata.targetAttribute) | translate}}
+        </div>
+        <div ng-show = "bardata.action">
+            <span class="sub-title">{{'aws.cephView.excuteTime' | translate}}：</span>
+            {{bardata.executeTime  | date:'yyyy-MM-dd HH:mm:ss'}}
+        </div>
+        <div>
+            <span class="sub-title">{{'aws.cephView.volumeName' | translate}}：</span>
+            {{bardata.name}}
+        </div>
+        <div>
+            <span class="sub-title">{{'aws.cephView.typeCopy' | translate}}：</span>
+            {{"aws.cephView.chart.diskType." + bardata.type | translate}}
+        </div>
+        <div>
+            <span class="sub-title">{{'aws.cephView.total' | translate}}：</span>
+            {{bardata.total}}G
+        </div>
+        <div>
+            <span class="sub-title">{{'aws.cephView.attribute' | translate}}：</span>
+            {{"aws.cephView.chart.attribute." + bardata.attribute | translate}}
+        </div>
+        <div ng-hide="bardata.attribute == 'available'">
+            <span class="sub-title">{{'aws.cephView.IOused' | translate}}：</span>
+            {{bardata.ioUtil}}%
+        </div>
+    </div>    
+</div>
+
+

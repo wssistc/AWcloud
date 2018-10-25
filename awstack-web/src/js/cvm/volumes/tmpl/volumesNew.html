@@ -1,0 +1,281 @@
+<div class="page-inner">
+    <div class="tab-offset-right">
+        <ul class="nav nav-tabs nav-justified">
+            <li ng-class="{active:volume.curTable == 'data'}" class="uib-tab nav-item " ng-click="volume.getDataTable()">
+                <a>{{'aws.volumes.dataDisk'|translate}}</a>
+            </li>
+            <li ng-class="{active:volume.curTable == 'system'}" class="uib-tab nav-item"  ng-click="volume.getSystemTable()">
+                <a>{{'aws.volumes.systemDisk'|translate}}</a>
+            </li>
+            <li ng-class="{active:volume.curTable == 'cache'}" class="uib-tab nav-item"  ng-click="volume.getCacheTable()">
+                <a>{{'aws.volumes.cacheDisk'|translate}}</a>
+            </li>
+        </ul>
+    </div>
+    <div ng-include="volume.volumeTemp"></div>
+    <div class="detailIns-box">
+        <div class= 'animateContent  {{insAnimation}} '>
+            <div class='detailInner'>
+                <div class="tab-content">
+                    <div class="detail-title">
+                    <a class="an-close" ng-click="closeNewIns()"><i class=" icon-aw-mail-reply"></i></a>
+                    <span>{{'aws.instances.addinstances.newInstance'|translate}}</span>
+                    </div>
+                    <div class="detail-info"  ng-if="insAnimation == 'animateIn'">
+                    <div ng-controller ="createInsCtrl" ng-include = "'js/shortcuts/instances/tmpl/createIns.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class='animate-backup'></div>
+    </div>
+    <div ng-controller="detailCtrl">
+        <pane class="detail-body" animation="animation">
+            <div class="tab-content">
+                <div class="detail-row">
+                    <div class="detail-header">
+                        <table class="table">
+                            <tr>
+                                <td><a>{{detailData.name}}</a></td>
+                                <td>{{detailData.size}}</td>
+                                <td>{{detailData.status}}</td>
+                                <td>{{detailData.instance}}</td>
+                                <td>{{detailData.description}}</td>
+                                <td>{{detailData.type}}</td>
+                                <td>{{detailData.create}}</td>
+                                <td>{{detailData.zone}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="detail-title">
+                        <a class="an-close" ng-href="/cvm/volumes"><i class="icon-aw-mail-reply"></i></a>
+                        <span>{{'aws.volumes.detail'|translate}}</span>
+                    </div>
+                    <div class="detail-info">
+                        <div class="tab-content-line tall"></div>
+                        <div class="table-content table-small" >
+                            <table class="table table-info column">
+                                <tr>
+                                    <td>{{'aws.volumes.volumeName'|translate}}</td>
+                                    <td>{{detailData.name}}</td>
+                                    <td>{{'aws.volumes.zone'|translate}}</td>
+                                    <td>{{detailData.zone}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{'aws.volumes.description'|translate}}</td>
+                                    <td>{{detailData.description}}</td> 
+                                    <td>{{'aws.volumes.config'|translate}}</td>
+                                    <td>{{detailData.size}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{'aws.volumes.status'|translate}}</td>
+                                    <td>{{'aws.volumes.table.status.'+detailData.status| translate}}</td>
+                                    <td>{{'aws.volumes.hostName'|translate}}</td>
+                                    <!-- <td>{{detailData.instance}}</td> -->
+                                    <td>
+                                        <span ng-repeat="ins in detailData.instance">{{ins}}&nbsp&nbsp</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{'aws.volumes.snapshotNum'|translate}}</td>
+                                    <td>{{detailData.snapshotNum}}</td>
+                                    <td>{{'aws.volumes.created'|translate}}</td>
+                                    <td>{{detailData.created | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{'aws.volumes.voltype'|translate}}</td>
+                                    <td>{{detailData.storageInfo.disPlayName}}</td>
+                                    <td>{{'aws.volumes.stpool'|translate}}</td>
+                                    <td>{{detailData.storageInfo.disPlayName}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{'aws.volumes.stfeature'|translate}}</td>
+                                    <td>
+                                        <span ng-repeat = "feature in detailData.feature"> {{'aws.volumes.cv.'+feature | translate }}
+                                            <em ng-show="$index+1<detailData.feature.length">,</em>
+                                        </span>
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <fieldset>
+                            <div class="sub-title">{{'aws.snapshots.snapshotInfo'|translate}}</div>
+                            <div class="table-content table-small">
+                                <table ng-table="snapshotTable" class="table status-in" show-filter="false">
+                                    <tr ng-repeat="snapshot in $data">
+                                    <td data-title="headers.snapshotName" sortable="'name'">
+                                        <div class="edit-name">
+                                            {{snapshot.name}}
+                                        </div>
+                                    </td>
+                                    <td data-title="headers.size" sortable="'size'">{{snapshot.size}}</td>
+                                    <td data-title="headers.status" sortable="'status'">
+                                        <span ng-class="{'bg-green':(snapshot.status=='available'||snapshot.status=='in-use'),'bg-blue':(snapshot.status=='creating'||snapshot.status=='deleting'||snapshot.status=='attaching'||snapshot.status=='detaching'||snapshot.status=='error-deleting'),'bg-orange':(snapshot.status=='inavailable'),'bg-red':(snapshot.status=='error')}">{{"aws.snapshots.table.status."+snapshot.status | translate}}<i ng-class="{'icon-aw-refresh':(snapshot.status=='creating' || snapshot.status=='deleting')}" class="aw-spin"></i>
+                                        </span>
+                                    </td>
+                                    <td data-title="headers.created_at" sortable="'created_at'">{{snapshot.created_at | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+                                    </tr>
+                                </table>
+                                <loading-data  data="snapshotTable.data"></loading-data>
+                            </div>
+                        </fieldset>
+                        <fieldset service-permit service-name="['backups']">
+                            <div class="sub-title">{{"aws.backups.backupInfo" | translate}}</div>
+                            <div class="table-content table-small">
+                                <table ng-table="backupTable" class="table">
+                                    <tr ng-repeat="item in $data">
+                                        <td data-title="translate.name">
+                                            <div class="edit-name " title="{{item.name}}" ng-class="{'show':item.isIncremental}">
+                                                {{item.name}}
+                                            </div>
+                                        </td>
+                                        <td data-title="translate.vm" >
+                                            <span ng-repeat="insName in item.serverNames track by $index">{{insName}}<br></span>
+                                        </td>
+                                        <td data-title="translate.size">{{item.size+' GB'}}</td>
+                                        <td data-title="translate.backupStatus">
+                                            <span ng-class="{'bg-green':(item.status=='available'||item.status=='in-use'),
+                                            'bg-blue':(item.status=='creating'||item.status=='deleting'|| item.status == 'restoring' ),
+                                            'bg-orange':(item.status=='inavailable'),
+                                            'bg-red':(item.status=='error')}">
+                                                {{"aws.backups.table.status."+item.status | translate}}
+                                                <i ng-class="{'icon-aw-refresh':(item.status=='creating' || item.status=='deleting' || item.status == 'restoring' )}" class="aw-spin"></i>
+                                            </span>
+                                        </td>
+                                        <td data-title="translate.backupType">{{"aws.backups.table.isIncremental."+item.isIncremental | translate}}</td>
+                                        <td data-title="translate.createAt">{{item.createdAt |date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <loading-data  data="backupTable.data"></loading-data>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </pane>
+    </div>
+</div>
+
+<script type="text/ng-template" id="volumeUpdateModel.html">
+    <div class="modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+            <h3 class="modal-title">{{volumeModal_title}}</h3>
+        </div>
+        <div class="modal-body">
+            <form name="createVolumeForm">
+                <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>{{'aws.volumes.cv.name'|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="name" ng-model="volumeForm.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\.)*$/" ng-maxlength="32" placeholder="{{'aws.volumes.cv.pInputName'|translate}}" required="required" />
+                        <div class="error-messages error" ng-if="interacted(createVolumeForm.name)" ng-messages="createVolumeForm.name.$error" >
+                            <div ng-message="required" class="volume-form-size-error">{{'aws.errors.required'|translate}}</div>
+                            <div ng-message="pattern" class="volume-form-size-error">{{'aws.errors.nameLimit'|translate}}</div>
+                            <div ng-message="maxlength" class="volume-form-size-error">{{'aws.errors.maxlength'|translate}}</div>
+                        </div>
+                    </div> 
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}：</label>
+                    <div class="controls">
+                        <textarea ng-maxlength="255" class="form-controls" name="description" ng-model="volumeForm.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}"></textarea>
+                        <div class="error" ng-if="interacted(createVolumeForm.description)" ng-messages="createVolumeForm.description.$error" >
+                            <div ng-message="maxlength">{{'aws.errors.maxlength_255'|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{'aws.volumes.bootable'|translate}}：</label>
+                    <div class="controls" class="checkbox">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip5' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" class="form-controls" ng-disabled = "type=='systemEdit'" ng-model="volumeForm.bootable" />
+                                <i class="iconfont"></i>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-info" type="button" ng-disabled="!canConfirmEdit()" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="dist_stock_transfer.html">
+    <div class=" modal-common modal-smallest">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">{{'aws.instances.stockTransfer'|translate}}</h3>
+      </div>
+      <div class="modal-body ">
+        <uib-alert  type="info" ng-show="!Vol_allServerActive">
+            <span>{{'aws.instances.tipMsg.stock_transferTip'|translate}}</span>
+        </uib-alert>
+        <uib-alert  type="info" ng-show="serverHasRetyping">
+            <span>{{'aws.instances.tipMsg.stock_transferTip1'|translate}}</span>
+        </uib-alert>
+        <form name="stockTransferForm">
+            <div class="control-group">
+                <label class="control-label">{{'aws.menu.Storage_Device'|translate}}：</label>
+                <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip8' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                    <ui-select ng-model="storageDevice.name" name="storageDevice" required ng-disabled="" ng-change="chooseStorageDevice(storageDevice.name)">
+                        <ui-select-match placeholder="{{'aws.volumes.placeholder.voltype'|translate}}">{{$select.selected.name}}</ui-select-match>
+                        <ui-select-choices group-by="groupFind" repeat="value in submitInValidList | filter: {name : $select.search}">
+                        <div ng-bind-html="value.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages="(submitInValid ||stockTransferForm.storageDevice.$dirty) && stockTransferForm.storageDevice.$error">
+                        <form-validate></form-validate>
+                    </div>
+                </div>
+            </div>        
+        </form>
+        <p class="showWarning" ng-show="warningUp">{{'aws.volumes.tip.tip12' |translate}}</p>
+        <p class="showWarning" ng-show="warningDown">{{'aws.volumes.tip.tip13' |translate}}</p>      
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled = "!Vol_allServerActive || serverHasRetyping" ng-click="stockTransferConfirm(stockTransferForm)">{{'aws.instances.addinstances.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+      </div>
+    </div>
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

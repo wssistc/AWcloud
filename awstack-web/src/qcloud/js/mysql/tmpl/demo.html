@@ -1,0 +1,257 @@
+<div class="page-inner">
+	<div class="page-title">
+		<h2>MySQL-实例列表</h2>
+		<div class="sel-ct">
+			<ui-select ng-model="image.selected" name="imageName" title="image.selected.type" required>
+				<ui-select-match placeholder="image.selected.type">{{$select.selected.type}}</ui-select-match>
+				<ui-select-choices repeat="image in osType | filter:{type:$select.search}">
+				  <div ng-bind-html="image.type | highlight: $select.search"></div>
+				</ui-select-choices>
+			</ui-select>
+		</div>
+	</div>
+	<div class="table-action">
+		<button type="button" data-toggle="modal" ng-click="create()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新建</button>
+		<button type="button" data-toggle="modal" class="btn btn-default"><i class="icon-aw-add-to2"></i>续费</button>
+		<div class="dropdown">
+			<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" ng-disabled="delisDisabled" aria-expanded="false">更多操作<i class=" icon-aw-angle-down"></i></button>
+			<ul class="dropdown-menu">
+				<li>
+					<button ng-disabled="!canAttach" ng-click="loadingVolume(editData)" class="ng-binding">初始化</button>
+				</li>
+				<li>
+					<button ng-disabled="!canUnstall" ng-click="uninstallVolume(editData)" class="ng-binding" disabled="disabled">分配至项目</button>
+				</li>
+				<li>
+					<button ng-disabled="!canCS" ng-click="createSnapshot(editData)" class="ng-binding">SQL操作</button>
+				</li>
+				<li>
+					<button ng-disabled="!canExtend" ng-click="expandVolumeSize(editData)" class="ng-binding">参数设置</button>
+				</li>
+				<li>
+					<button ng-disabled="!canForeDel" ng-click="forceDelVolumes(checkedItems)" class="ng-binding">设置自动续费</button>
+				</li>
+        <li>
+          <button ng-disabled="!canForeDel" ng-click="forceDelVolumes(checkedItems)" class="ng-binding">取消自动续费</button>
+        </li>
+			</ul>
+		</div>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.instances.search'|translate}}" />
+      </form>
+    </div>
+	</div>
+	<div class="table-content">
+	<table ng-table="tableParams" class="table"> 
+	    <colgroup>
+	      <col width="5%">
+	      <col width="13.5%">
+	      <col width="13.5%">
+	      <col width="13.5%">
+	      <col width="13.5%">
+	      <col width="13.5%">
+	      <col width="14%">
+	      <col width="13.5%">
+	    </colgroup>
+	    <tr ng-repeat="item in $data">
+	      <td header="'headerCheckbox.html'" class="check-td">
+	        <label class="checkbox">
+	          <input type="checkbox" name="r" ng-model="checkboxes.items[item.uInstanceId]" value="{{item.uInstanceId}}" />
+	          <i class="iconfont"></i>
+	        </label>
+	      </td>
+	      <td data-title="'ID/实例名'" sortable="'uInstanceId'"><a ng-href="/cdb/cdblist?id={{item.uInstanceId}}">{{item.uInstanceId}}</a><span>{{item.instanceName}}</span></td>
+	      <td data-title="'状态'" sortable="'status'">
+	        {{item.status}}
+	      </td>
+	      <td data-title="'实例类型'" sortable="'floatingIps'">
+	        <span ng-repeat="floatingIp in item.floatingIps" class="ycx">{{floatingIp}}</span>
+	      </td>
+        <td data-title="'所属项目'" sortable="'imageName'">{{item.imageName}}</td>
+        <td data-title="'所属地域'" sortable="'regionName'">{{item.regionName}}</td>
+        <td data-title="'配置'" sortable="'imageName'">{{item.imageName}}</td>
+        <td data-title="'数据库版本'" sortable="'imageName'">{{item.imageName}}</td>
+        <td data-title="'所属网络'" sortable="'imageName'">{{item.imageName}}</td>
+        <td data-title="'内网地址'" sortable="'imageName'">{{item.imageName}}</td>
+        <td data-title="'计费模式'" sortable="'imageName'">{{item.imageName}}</td>
+        <td data-title="'到期时间'" sortable="'imageName'">{{item.imageName}}</td>
+	      <td data-title="'操作'" sortable="'createtime'">{{item.createtime}}</td>
+	    </tr>
+    </table>  
+	</div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="createMysql.html">
+    <div class="modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">新建云数据库MySQL</h3>
+      </div>
+      <div class="modal-body ">
+        <form name="newMysql">
+          <div class="control-group">
+            <label class="control-label">计费模式:</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button class="active">包年包月</button>
+                <button>按量计费</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">地域:</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button class="active">广州</button>
+                <button>上海</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">可用区:</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button class="active">广州</button>
+                <button>上海</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">网络:</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button class="active">广州</button>
+                <button>上海</button>
+              </div>
+              <div class="shop-dropdown-network">
+                <div class="select">
+                  <ui-select ng-model="disk.volumeId" name="name" required ng-disabled="!attachDiskList.length">
+                    <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices  repeat="value.id as value in attachDiskList | filter: {name : $select.search} ">
+                      <div ng-bind-html="value.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+                <div class="select">
+                  <ui-select ng-model="disk.volumeId" name="name" required ng-disabled="!attachDiskList.length">
+                    <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices  repeat="value.id as value in attachDiskList | filter: {name : $select.search} ">
+                      <div ng-bind-html="value.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+                <span ng-click="refreshNet()"><i class="icon-aw-repeat"></i></span>
+                <span class="shop-tip-word">可用区内无有效子网，请更换可用区或新建子网</span>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">配置类型:</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button class="active">高IO版</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">数据库版本:</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button class="active">MySQL5.5</button>
+                <button>MySQL5.6</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">实例规格:</label>
+            <div class="controls">
+              <ui-select ng-model="disk.volumeId" name="name" required ng-disabled="!attachDiskList.length">
+                <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices  repeat="value.id as value in attachDiskList | filter: {name : $select.search} ">
+                  <div ng-bind-html="value.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">硬盘:</label>
+            <div class="controls">
+              <ui-select ng-model="disk.volumeId" name="name" required ng-disabled="!attachDiskList.length">
+                <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices  repeat="value.id as value in attachDiskList | filter: {name : $select.search} ">
+                  <div ng-bind-html="value.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">数据复制方式:</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button class="active" title="仅MySQL5.6支持半同步和强同步复制.">异步复制</button>
+                <button title="仅MySQL5.6支持半同步和强同步复制。">半同步复制</button>
+                <button title="仅MySQL5.6支持半同步和强同步复制。">强同步复制</button>
+              </div>
+              <span class="help-tips">一主一备组成集群，数据采用异步复制模式。</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">指定项目:</label>
+            <div class="controls">
+              <ui-select ng-model="disk.volumeId" name="name" required ng-disabled="!attachDiskList.length">
+                <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices  repeat="value.id as value in attachDiskList | filter: {name : $select.search} ">
+                  <div ng-bind-html="value.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">购买数量:</label>
+            <div class="controls">
+              <input type="text" name="" class="form-control"/>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">购买时长:</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button class="active">1个月</button>
+                <button>2</button>
+                <button>3</button>
+                <button>半年</button>
+                <button>1年</button>
+                <button>2年</button>
+                <button>3年</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">总计费用:</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button class="active">1个月</button>
+                <button>2</button>
+                <button>3</button>
+                <button>半年</button>
+                <button>1年</button>
+                <button>2年</button>
+                <button>3年</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </div>
+</script>

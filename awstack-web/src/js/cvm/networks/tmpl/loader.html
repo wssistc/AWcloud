@@ -1,0 +1,1035 @@
+<div class="" style="">
+  <span>
+  <button class="btn btn-primary" ng-click="initloader()">负载均衡</button>
+  </span>
+  <span>
+  <button class="btn btn-primary" ng-click="initmem()" style="display: none">成员</button>
+  </span>
+  <span>
+  <button class="btn btn-primary" ng-click="initmonitor()">监控器</button>
+  </span>
+</div>
+<div ng-if="showLoader">
+  1
+  <div class="page-inner">
+    <h3 class="page-title">{{'aws.volumes.volumesManage'|translate}}</h3>
+    <div class="table-action">
+      <button type="button" data-toggle="modal" ng-click="openVolumeModel('new',editData)" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+      <button type="button" data-toggle="modal" ng-disabled="!canEdit" ng-click="openVolumeModel('edit',editData)" ng-class="{true:'btn-info',false:'btn-default'}[canEdit]" class="btn btn-default"><i class="icon-aw-copy"></i>{{'aws.action.edit'|translate}}</button>
+      <button type="button" data-toggle="modal" ng-disabled="!canDel" ng-click="deleteVolumes(checkedItems)" class="btn btn-default" ng-class="{true:'btn-info',false:'btn-default'}[canDel]"> <i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+      <div class="dropdown">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">{{'aws.action.moreAction'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+        <ul class="dropdown-menu">
+          <li>
+            <button ng-disabled="!canAttach" ng-click="loadingVolume(editData)"><i class=" icon-aw-annex"></i>&nbsp{{'aws.loader.createVIP'|translate}}</button>
+          </li>
+          <li>
+            <button ng-disabled="!canUnstall" ng-click="uninstallVolume(editData)"><i class="icon-aw-link"></i>&nbsp{{'aws.loader.editVIP'|translate}}</button>
+          </li>
+          <li>
+            <button ng-disabled="!canCS" ng-click="createSnapshot(editData)"><i class="icon-aw-camera"></i>&nbsp{{'aws.loader.deleteVIP'|translate}}</button>
+          </li>
+          <li>
+            <button ng-disabled="!canExtend" ng-click="expandVolumeSize(editData)"><i class=" icon-aw-maximum"></i>&nbsp{{'aws.loader.bindIP'|translate}}</button>
+          </li>
+          <li>
+            <button ng-click="onlyReadVolume()" ng-disabled="true"><i class="icon-aw-display"></i>&nbsp{{'aws.loader.unbindIP'|translate}}</button>
+          </li>
+          <li>
+            <button ng-click="readAndWriteVolume()" ng-disabled="true"><i class="icon-aw-modify2"></i>&nbsp{{'aws.loader.bindMonitor'|translate}}</button>
+          </li>
+          <li>
+            <button ng-disabled="!canForeDel" ng-click="forceDelVolumes(checkedItems)"><i class="icon-aw-firewall"></i>&nbsp{{'aws.loader.unbindMonitor'|translate}}</button>
+          </li>
+          <li>
+            <button ng-disabled="!canForeDel" ng-click="forceDelVolumes(checkedItems)"><i class="icon-aw-firewall"></i>{{'aws.action.del'|translate}}</button>
+          </li>
+        </ul>
+      </div>
+      <div class="search-box">
+        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+          <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+          <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+        </form>
+      </div>
+    </div>
+    <script type="text/ng-template" id="headerCheckbox.html">
+      <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+        <i class="iconfont"></i>
+      </label>
+    </script>
+    <div class="table-content">
+      <table ng-table="tableParams" class="table " show-filter="false">
+        <tr ng-repeat="volume in $data">
+          <td header="'headerCheckbox.html'">
+            <label class="checkbox">
+              <input type="checkbox" ng-model="checkboxes.items[volume.id]" />
+              <i class="iconfont"></i>
+            </label>
+          </td>
+          <td data-title="headers.loadername" sortable="'loadername'">
+            <a ng-href="/cvm/loadbalancers?id={{volume.id}}">{{volume.loadername}}</a>
+          </td>
+          <td data-title="headers.desc" sortable="'desc'">
+            <span>{{volume.desc}}</span>
+          </td>
+          <td data-title="headers.subnet" sortable="'subnet'">
+            <span>{{volume.subnet}}</span>
+          </td>
+          <td data-title="headers.proto" sortable="'proto'">
+            <span>{{volume.proto}}</span>
+          </td>
+          <td data-title="headers.status" sortable="'status'">
+            <span>{{volume.status}}
+            <i ng-class="{'icon-aw-refresh':(volume.status=='creating' || volume.status=='deleting'|| volume.status=='attaching'|| volume.status=='detaching')}" class="aw-spin"></i>
+            </span>
+          </td>
+          <td data-title="headers.v" sortable="'VIP'">
+            <span>{{volume.VIP}}</span>
+          </td>
+          <td data-title="headers.projectName" sortable="'projectName'">
+            <span>{{volume.projectName}}</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div ng-controller="detailCtrl">
+      <pane class="detail-body" animation="animation">
+        <div class="tab-content">
+          <div class="detail-row">
+            <div class="detail-header">
+              <table class="table">
+                <tr>
+                  <td><a>{{detailData.name}}</a></td>
+                  <td>{{detailData.tenant}}</td>
+                  <td>{{detailData.associatedHost}}</td>
+                  <td>{{detailData.size}}</td>
+                  <td>{{detailData.status}}</td>
+                  <td>{{detailData.instance}}</td>
+                  <td>{{detailData.snapshotNum}}</td>
+                  <td>{{detailData.sharedDisk}}</td>
+                  <td>{{detailData.iops}}</td>
+                  <td>{{detailData.description}}</td>
+                  <td>{{detailData.create}}</td>
+                  <td>{{detailData.zone}}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="detail-title">
+              <a class="an-close" ng-href="/cvm/loadbalancers"><i class="icon-aw-mail-reply"></i></a>
+              <span>{{'aws.loader.detail'|translate}}</span>
+            </div>
+            <div class="detail-info">
+              <table class="table table-info">
+                <tr>
+                  <td>{{'aws.loader.loadername'|translate}}</td>
+                  <td>{{detailData.loadername}}</td>
+                  <td>{{'aws.loader.desc'|translate}}</td>
+                  <td>{{detailData.desc}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.loader.subnet'|translate}}</td>
+                  <td>{{detailData.subnet}}</td>
+                  <td>{{'aws.loader.proto'|translate}}</td>
+                  <td>{{detailData.proto}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.loader.status'|translate}}</td>
+                  <td>{{detailData.status}}</td>
+                  <td>{{'aws.loader.VIP'|translate}}</td>
+                  <td>{{detailData.VIP}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.loader.projectName'|translate}}</td>
+                  <td>{{detailData.projectName}}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </pane>
+    </div>
+    <script type="text/ng-template" id="volumeModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{volumeModal_title}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="createVolumeForm" novalidate>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.loader.loadBalanceName'|translate}}:</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="name" ng-model="volumeForm.name" placeholder="" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+                <div class="error" ng-if="interacted(createVolumeForm)" ng-messages="createVolumeForm.name.$error" >
+                  <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.noSpecial'|translate}}</div>
+                  <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.loader.subnet'|translate}}:</label>
+              <div class="controls" style="display:inline-block;width:70%">
+               <ui-select ng-model="volumeForm.subnet" ng-disabled="options.disabled" title="">
+                <ui-select-match placeholder="">{{$select.selected.hostName}}</ui-select-match>
+                <ui-select-choices repeat="zonehost  in zonehosts.options | propsFilter:{hostName:$select.search}">
+                  <div ng-bind-html="zonehost.hostName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.loader.proto'|translate}}:</label>
+              <div class="controls" style="display:inline-block;width:70%">
+               <ui-select ng-model="volumeForm.proto" ng-disabled="options.disabled" title="">
+                <ui-select-match placeholder="">{{$select.selected.hostName}}</ui-select-match>
+                <ui-select-choices repeat="zonehost  in zonehostsprotos.options | propsFilter:{hostName:$select.search}">
+                  <div ng-bind-html="zonehost.hostName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.loader.method'|translate}}:</label>
+              <div class="controls" style="display:inline-block;width:70%">
+               <ui-select ng-model="volumeForm.method" ng-disabled="options.disabled" title="">
+                <ui-select-match placeholder="">{{$select.selected.hostName}}</ui-select-match>
+                <ui-select-choices repeat="zonehost  in zonehostsmethod.options | propsFilter:{hostName:$select.search}">
+                  <div ng-bind-html="zonehost.hostName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.loader.desc'|translate}}:</label>
+              <div class="controls">
+                <textarea type="text" ng-maxlength="80" class="form-controls volume-text " name="description"  ng-model="volumeForm.desc" placeholder="" />
+                <div class="error-messages error" ng-if="interacted(createVolumeForm.description)" ng-messages="createVolumeForm.description.$error" >
+                <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+              </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="volumeUpdateModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{volumeModal_title}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="createVolumeForm">
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.loader.loadername'|translate}}:</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="name" ng-model="volumeForm.name"  ng-init="volumeForm.name='xxx'" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" placeholder="" required="required" />
+              </div>
+              <div class="error-messages error" ng-if="interacted(createVolumeForm.name)" ng-messages="createVolumeForm.name.$error" >
+                <div ng-message="required" class="volume-form-size-error">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="pattern" class="volume-form-size-error">{{'aws.errors.noSpecial'|translate}}</div>
+                <div ng-message="maxlength" class="volume-form-size-error">{{'aws.errors.maxlength'|translate}}</div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.loader.method'|translate}}:</label>
+              <div class="controls" style="display:inline-block;width:70%">
+               <ui-select ng-model="volumeForm.method" ng-disabled="options.disabled" title="">
+                <ui-select-match placeholder="">{{$select.selected.hostName}}</ui-select-match>
+                <ui-select-choices repeat="zonehost  in zonehostsmethod.options | propsFilter:{hostName:$select.search}">
+                  <div ng-bind-html="zonehost.hostName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.loader.desc'|translate}}:</label>
+              <div class="controls">
+                <textarea type="text" ng-maxlength="80" class="form-controls volume-text " name="description" ng-model="volumeForm.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" />
+                <div class="error-messages error" ng-if="interacted(createVolumeForm.description)" ng-messages="createVolumeForm.description.$error" >
+                  <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="loadingVolumeModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{'aws.volumes.lv.loadVolume'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="createVolumeForm" novalidate>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.lv.selectServer'|translate}}:</label>
+              <div class="controls">
+                <ui-select ng-model="host" ng-change=changeHost(host) ng-disabled="disabled"  title="Choose a host">
+                  <ui-select-match placeholder="{{'aws.volumes.lv.pleaseSelectServer'|translate}}">{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="host in hosts | propsFilter: {name: $select.search}">
+                    <div ng-bind-html="host.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.lv.selectDriver'|translate}}:</label>
+              <div class="controls">
+                <ui-select ng-model="diskDrive" ng-change=changeDrive(diskDrive) ng-disabled="disabled" title="Choose a diskDrive">
+                  <ui-select-match placeholder="{{'aws.volumes.lv.pleaseSelectDriver'|translate}}">{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="diskDrive in diskDrives | propsFilter: {name: $select.search}">
+                    <div ng-bind-html="diskDrive.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="expandVolumeSizeModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{'aws.volumes.ev.extendVolume'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="expandVolumeSize" novalidate>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.volumes.ev.size'|translate}}:</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="size" ng-pattern="/^[1-9]+[0-9]*$/" ng-model="volumeForm.size" placeholder="{{'aws.volumes.cv.pInputSize'|translate}}" required="required" />
+                <div class="error" ng-if="interacted(expandVolumeSize.size)" ng-messages="expandVolumeSize.size.$error" >
+                  <div ng-message="required" class="volume-form-name-error">{{'aws.volumes.cv.pInputSize'|translate}}</div>
+                  <div ng-message="pattern" class="volume-form-name-error">{{'aws.volumes.cv.pInputNum'|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="createSnapshotModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{'aws.volumes.cs.createSnapshot'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="createVolumeForm" novalidate>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.volumes.cv.name'|translate}}:</label>
+              <div class="controls">
+                <input type="text" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" class="form-controls" name="name" ng-model="snapShot.name" placeholder="{{'aws.volumes.cs.pInputName'|translate}}" required/>
+              </div>
+              <div class="error-messages error" ng-if="interacted(createVolumeForm.name)" ng-messages="createVolumeForm.name.$error" >
+                <div ng-message="required" class="volume-form-size-error">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="pattern" class="volume-form-size-error">{{'aws.errors.noSpecial'|translate}}</div>
+                <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}:</label>
+              <div class="controls">
+                <textarea type="text" ng-maxlength="80" class="form-controls" name="description" ng-model="snapShot.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" />
+                <div class="error-messages error" ng-if="interacted(createVolumeForm.description)" ng-messages="createVolumeForm.description.$error" >
+                  <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+  </div>
+</div>
+<div ng-if="showMem">
+  2
+  <div class="page-inner">
+    <h3 class="page-title">{{'aws.volumes.volumesManage'|translate}}</h3>
+    <div class="table-action">
+      <button type="button" data-toggle="modal" ng-click="openVolumeModel('new',editData)" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+      <button type="button" data-toggle="modal" ng-disabled="!canEdit" ng-click="openVolumeModel('edit',editData)" ng-class="{true:'btn-info',false:'btn-default'}[canEdit]" class="btn btn-default"><i class="icon-aw-copy"></i>{{'aws.action.edit'|translate}}</button>
+      <button type="button" data-toggle="modal" ng-disabled="!canDel" ng-click="deleteVolumes(checkedItems)" class="btn btn-default" ng-class="{true:'btn-info',false:'btn-default'}[canDel]"> <i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+      <div class="dropdown">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">{{'aws.action.moreAction'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+        <ul class="dropdown-menu">
+          <li>
+            <button ng-disabled="!canAttach" ng-click="loadingVolume(editData)"><i class=" icon-aw-annex"></i>&nbsp{{'aws.volumes.attachVolume'|translate}}</button>
+          </li>
+          <li>
+            <button ng-disabled="!canUnstall" ng-click="uninstallVolume(editData)"><i class="icon-aw-link"></i>&nbsp{{'aws.volumes.unstallVolume'|translate}}</button>
+          </li>
+          <li>
+            <button ng-disabled="!canCS" ng-click="createSnapshot(editData)"><i class="icon-aw-camera"></i>&nbsp{{'aws.volumes.createSnapshot'|translate}}</button>
+          </li>
+          <li>
+            <button ng-disabled="!canExtend" ng-click="expandVolumeSize(editData)"><i class=" icon-aw-maximum"></i>&nbsp{{'aws.volumes.extendSize'|translate}}</button>
+          </li>
+          <li>
+            <button ng-click="onlyReadVolume()" ng-disabled="true"><i class="icon-aw-display"></i>&nbsp{{'aws.volumes.onlyRead'|translate}}</button>
+          </li>
+          <li>
+            <button ng-click="readAndWriteVolume()" ng-disabled="true"><i class="icon-aw-modify2"></i>&nbsp{{'aws.volumes.readAndWrite'|translate}}</button>
+          </li>
+          <li>
+            <button ng-disabled="!canForeDel" ng-click="forceDelVolumes(checkedItems)"><i class="icon-aw-firewall"></i>&nbsp{{'aws.volumes.forceDelete'|translate}}</button>
+          </li>
+        </ul>
+      </div>
+      <div class="search-box">
+        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+          <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+          <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+        </form>
+      </div>
+    </div>
+    <script type="text/ng-template" id="headerCheckbox.html">
+      <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+        <i class="iconfont"></i>
+      </label>
+    </script>
+    <div class="table-content">
+      <table ng-table="tableParams" class="table " show-filter="false">
+        <tr ng-repeat="volume in $data">
+          <td header="'headerCheckbox.html'">
+            <label class="checkbox">
+              <input type="checkbox" ng-model="checkboxes.items[volume.id]" />
+              <i class="iconfont"></i>
+            </label>
+          </td>
+          <td data-title="headers.volumeName" sortable="'name'">
+            <a ng-href="/cvm/volumes?id={{volume.id}}">{{volume.name}}</a>
+          </td>
+          <td data-title="headers.projectName" sortable="'tenant'">
+            <span>{{volume.tenant}}</span>
+          </td>
+          <td data-title="headers.associatedHost" sortable="'associatedHost'">
+            <span>{{volume.associatedHost}}</span>
+          </td>
+          <td data-title="headers.config" sortable="'size'">
+            <span>{{volume.size}}</span>
+          </td>
+          <td data-title="headers.status" sortable="'status'">
+            <span>{{'aws.volumes.table.status.'+volume.status| translate}}
+            <i ng-class="{'icon-aw-refresh':(volume.status=='creating' || volume.status=='deleting'|| volume.status=='attaching'|| volume.status=='detaching')}" class="aw-spin"></i>
+            </span>
+          </td>
+          <td data-title="headers.hostName" sortable="'instance'">
+            <span>{{volume.instance}}</span>
+          </td>
+          <td data-title="headers.snapshot" sortable="'snapshotNum'">
+            <span>{{volume.snapshotNum}}</span>
+          </td>
+          <td data-title="headers.sharedVolume" sortable="'sharedDisk'">
+            <span>{{'aws.volumes.unsetting'|translate}}</span>
+          </td>
+          <td data-title="headers.type" sortable="'type'">
+            <span>{{volume.type}}</span>
+          </td>
+          <td data-title="headers.description" sortable="'description'">
+            <span>{{volume.description}}</span>
+          </td>
+          <td data-title="'IOPS'" sortable="'iops'">
+            <span>{{'aws.volumes.unsetting'|translate}}</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div ng-controller="detailCtrl">
+      <pane class="detail-body" animation="animation">
+        <div class="tab-content">
+          <div class="detail-row">
+            <div class="detail-header">
+              <table class="table">
+                <tr>
+                  <td><a>{{detailData.name}}</a></td>
+                  <td>{{detailData.tenant}}</td>
+                  <td>{{detailData.associatedHost}}</td>
+                  <td>{{detailData.size}}</td>
+                  <td>{{detailData.status}}</td>
+                  <td>{{detailData.instance}}</td>
+                  <td>{{detailData.snapshotNum}}</td>
+                  <td>{{detailData.sharedDisk}}</td>
+                  <td>{{detailData.iops}}</td>
+                  <td>{{detailData.description}}</td>
+                  <td>{{detailData.create}}</td>
+                  <td>{{detailData.zone}}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="detail-title">
+              <a class="an-close" ng-href="/cvm/volumes"><i class="icon-aw-mail-reply"></i></a>
+              <span>{{'aws.volumes.detail'|translate}}</span>
+            </div>
+            <div class="detail-info">
+              <table class="table table-info">
+                <tr>
+                  <td>{{'aws.volumes.volumeName'|translate}}</td>
+                  <td>{{detailData.name}}</td>
+                  <td>{{'aws.volumes.projectName'|translate}}</td>
+                  <td>{{detailData.tenant}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.associatedHost'|translate}}</td>
+                  <td>{{detailData.associatedHost}}</td>
+                  <td>{{'aws.volumes.config'|translate}}</td>
+                  <td>{{detailData.size}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.status'|translate}}</td>
+                  <td>{{detailData.status}}</td>
+                  <td>{{'aws.volumes.hostName'|translate}}</td>
+                  <td>{{detailData.instance}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.snapshot'|translate}}</td>
+                  <td>{{detailData.snapshotNum}}</td>
+                  <td>{{'aws.volumes.sharedVolume'|translate}}</td>
+                  <td>{{detailData.sharedDisk}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.created'|translate}}</td>
+                  <td>{{detailData.created}}</td>
+                  <td>IOPS</td>
+                  <td>{{detailData.iops}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.description'|translate}}</td>
+                  <td>{{detailData.description}}</td>
+                  <td>{{'aws.volumes.type'|translate}}</td>
+                  <td>{{detailData.type}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.zone'|translate}}</td>
+                  <td>{{detailData.zone}}</td>
+                  <td>{{'aws.volumes.metaData'|translate}}</td>
+                  <td>{{detailData.metaData}}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </pane>
+    </div>
+    <script type="text/ng-template" id="volumeModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{volumeModal_title}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="createVolumeForm" novalidate>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.volumes.cv.name'|translate}}:</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="name" ng-model="volumeForm.name" placeholder="{{'aws.volumes.cv.pInputName'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+                <div class="error" ng-if="interacted(createVolumeForm)" ng-messages="createVolumeForm.name.$error" >
+                  <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.noSpecial'|translate}}</div>
+                  <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.volumes.cv.config'|translate}}:</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="size" ng-model="volumeForm.size" placeholder="{{'aws.volumes.cv.pInputSize'|translate}}" ng-pattern="/^([1-9]\d{0,2}|1000)$/" required />
+              </div>
+              <div class="error-messages error" ng-if="interacted(createVolumeForm.size)" ng-messages="createVolumeForm.size.$error" >
+                <div ng-message="required" class="volume-form-size-error">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="pattern" class="volume-form-size-error">{{'aws.errors.limit_volume'|translate}}</div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}:</label>
+              <div class="controls">
+                <textarea type="text" ng-maxlength="80" class="form-controls volume-text " name="description"  ng-model="volumeForm.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" />
+                <div class="error-messages error" ng-if="interacted(createVolumeForm.description)" ng-messages="createVolumeForm.description.$error" >
+                <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+              </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="volumeUpdateModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{volumeModal_title}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="createVolumeForm">
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.volumes.cv.name'|translate}}:</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="name" ng-model="volumeForm.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" placeholder="{{'aws.volumes.cv.pInputName'|translate}}" required="required" />
+              </div>
+              <div class="error-messages error" ng-if="interacted(createVolumeForm.name)" ng-messages="createVolumeForm.name.$error" >
+                <div ng-message="required" class="volume-form-size-error">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="pattern" class="volume-form-size-error">{{'aws.errors.noSpecial'|translate}}</div>
+                <div ng-message="maxlength" class="volume-form-size-error">{{'aws.errors.maxlength'|translate}}</div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}:</label>
+              <div class="controls">
+                <textarea type="text" ng-maxlength="80" class="form-controls volume-text " name="description" ng-model="volumeForm.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" />
+                <div class="error-messages error" ng-if="interacted(createVolumeForm.description)" ng-messages="createVolumeForm.description.$error" >
+                  <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="loadingVolumeModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{'aws.volumes.lv.loadVolume'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="createVolumeForm" novalidate>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.lv.selectServer'|translate}}:</label>
+              <div class="controls">
+                <ui-select ng-model="host" ng-change=changeHost(host) ng-disabled="disabled"  title="Choose a host">
+                  <ui-select-match placeholder="{{'aws.volumes.lv.pleaseSelectServer'|translate}}">{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="host in hosts | propsFilter: {name: $select.search}">
+                    <div ng-bind-html="host.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.lv.selectDriver'|translate}}:</label>
+              <div class="controls">
+                <ui-select ng-model="diskDrive" ng-change=changeDrive(diskDrive) ng-disabled="disabled" title="Choose a diskDrive">
+                  <ui-select-match placeholder="{{'aws.volumes.lv.pleaseSelectDriver'|translate}}">{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="diskDrive in diskDrives | propsFilter: {name: $select.search}">
+                    <div ng-bind-html="diskDrive.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="expandVolumeSizeModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{'aws.volumes.ev.extendVolume'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="expandVolumeSize" novalidate>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.volumes.ev.size'|translate}}:</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="size" ng-pattern="/^[1-9]+[0-9]*$/" ng-model="volumeForm.size" placeholder="{{'aws.volumes.cv.pInputSize'|translate}}" required="required" />
+                <div class="error" ng-if="interacted(expandVolumeSize.size)" ng-messages="expandVolumeSize.size.$error" >
+                  <div ng-message="required" class="volume-form-name-error">{{'aws.volumes.cv.pInputSize'|translate}}</div>
+                  <div ng-message="pattern" class="volume-form-name-error">{{'aws.volumes.cv.pInputNum'|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="createSnapshotModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{'aws.volumes.cs.createSnapshot'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="createVolumeForm" novalidate>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.volumes.cv.name'|translate}}:</label>
+              <div class="controls">
+                <input type="text" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" class="form-controls" name="name" ng-model="snapShot.name" placeholder="{{'aws.volumes.cs.pInputName'|translate}}" required/>
+              </div>
+              <div class="error-messages error" ng-if="interacted(createVolumeForm.name)" ng-messages="createVolumeForm.name.$error" >
+                <div ng-message="required" class="volume-form-size-error">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="pattern" class="volume-form-size-error">{{'aws.errors.noSpecial'|translate}}</div>
+                <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}:</label>
+              <div class="controls">
+                <textarea type="text" ng-maxlength="80" class="form-controls" name="description" ng-model="snapShot.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" />
+                <div class="error-messages error" ng-if="interacted(createVolumeForm.description)" ng-messages="createVolumeForm.description.$error" >
+                  <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+  </div>
+</div>
+<div ng-if="showMonitor">
+  3
+  <div class="page-inner">
+    <h3 class="page-title">{{'aws.volumes.volumesManage'|translate}}</h3>
+    <div class="table-action">
+      <button type="button" data-toggle="modal" ng-click="openVolumeModel('new',editData)" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+      <button type="button" data-toggle="modal" ng-disabled="!canEdit" ng-click="openVolumeModel('edit',editData)" ng-class="{true:'btn-info',false:'btn-default'}[canEdit]" class="btn btn-default"><i class="icon-aw-copy"></i>{{'aws.action.edit'|translate}}</button>
+      <button type="button" data-toggle="modal" ng-disabled="!canDel" ng-click="deleteVolumes(checkedItems)" class="btn btn-default" ng-class="{true:'btn-info',false:'btn-default'}[canDel]"> <i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+      <div class="search-box">
+        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+          <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+          <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+        </form>
+      </div>
+    </div>
+    <script type="text/ng-template" id="headerCheckbox.html">
+      <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+        <i class="iconfont"></i>
+      </label>
+    </script>
+    <div class="table-content">
+      <table ng-table="monitortableParams" class="table " show-filter="false">
+        <tr ng-repeat="volume in $data">
+          <td header="'headerCheckbox.html'">
+            <label class="checkbox">
+              <input type="checkbox" ng-model="checkboxes.items[volume.id]" />
+              <i class="iconfont"></i>
+            </label>
+          </td>
+          <td data-title="monitorheaders.type" sortable="'type'">
+            <span>{{volume.type}}</span>
+          </td>
+          <td data-title="monitorheaders.delay" sortable="'delay'">
+            <span>{{volume.delay}}</span>
+          </td>
+          <td data-title="monitorheaders.timeout" sortable="'timeout'">
+            <span>{{volume.timeout}}</span>
+          </td>
+          <td data-title="monitorheaders.maxrepeat" sortable="'maxrepeat'">
+            <span>{{volume.maxrepeat}}</span>
+          </td>
+          <td data-title="monitorheaders.projectName" sortable="'projectName'">
+            <span>{{volume.projectName}}
+            </span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div ng-controller="detailCtrl">
+      <pane class="detail-body" animation="animation">
+        <div class="tab-content">
+          <div class="detail-row">
+            <div class="detail-header">
+              <table class="table">
+                <tr>
+                  <td><a>{{detailData.name}}</a></td>
+                  <td>{{detailData.tenant}}</td>
+                  <td>{{detailData.associatedHost}}</td>
+                  <td>{{detailData.size}}</td>
+                  <td>{{detailData.status}}</td>
+                  <td>{{detailData.instance}}</td>
+                  <td>{{detailData.snapshotNum}}</td>
+                  <td>{{detailData.sharedDisk}}</td>
+                  <td>{{detailData.iops}}</td>
+                  <td>{{detailData.description}}</td>
+                  <td>{{detailData.create}}</td>
+                  <td>{{detailData.zone}}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="detail-title">
+              <a class="an-close" ng-href="/cvm/volumes"><i class="icon-aw-mail-reply"></i></a>
+              <span>{{'aws.volumes.detail'|translate}}</span>
+            </div>
+            <div class="detail-info">
+              <table class="table table-info">
+                <tr>
+                  <td>{{'aws.volumes.volumeName'|translate}}</td>
+                  <td>{{detailData.name}}</td>
+                  <td>{{'aws.volumes.projectName'|translate}}</td>
+                  <td>{{detailData.tenant}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.associatedHost'|translate}}</td>
+                  <td>{{detailData.associatedHost}}</td>
+                  <td>{{'aws.volumes.config'|translate}}</td>
+                  <td>{{detailData.size}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.status'|translate}}</td>
+                  <td>{{detailData.status}}</td>
+                  <td>{{'aws.volumes.hostName'|translate}}</td>
+                  <td>{{detailData.instance}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.snapshot'|translate}}</td>
+                  <td>{{detailData.snapshotNum}}</td>
+                  <td>{{'aws.volumes.sharedVolume'|translate}}</td>
+                  <td>{{detailData.sharedDisk}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.created'|translate}}</td>
+                  <td>{{detailData.created}}</td>
+                  <td>IOPS</td>
+                  <td>{{detailData.iops}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.description'|translate}}</td>
+                  <td>{{detailData.description}}</td>
+                  <td>{{'aws.volumes.type'|translate}}</td>
+                  <td>{{detailData.type}}</td>
+                </tr>
+                <tr>
+                  <td>{{'aws.volumes.zone'|translate}}</td>
+                  <td>{{detailData.zone}}</td>
+                  <td>{{'aws.volumes.metaData'|translate}}</td>
+                  <td>{{detailData.metaData}}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </pane>
+    </div>
+    <script type="text/ng-template" id="volumeModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{volumeModal_title}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="createVolumeForm" novalidate>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.volumes.cv.name'|translate}}:</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="name" ng-model="volumeForm.name" placeholder="{{'aws.volumes.cv.pInputName'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+                <div class="error" ng-if="interacted(createVolumeForm)" ng-messages="createVolumeForm.name.$error" >
+                  <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.noSpecial'|translate}}</div>
+                  <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.volumes.cv.config'|translate}}:</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="size" ng-model="volumeForm.size" placeholder="{{'aws.volumes.cv.pInputSize'|translate}}" ng-pattern="/^([1-9]\d{0,2}|1000)$/" required />
+              </div>
+              <div class="error-messages error" ng-if="interacted(createVolumeForm.size)" ng-messages="createVolumeForm.size.$error" >
+                <div ng-message="required" class="volume-form-size-error">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="pattern" class="volume-form-size-error">{{'aws.errors.limit_volume'|translate}}</div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}:</label>
+              <div class="controls">
+                <textarea type="text" ng-maxlength="80" class="form-controls volume-text " name="description"  ng-model="volumeForm.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" />
+                <div class="error-messages error" ng-if="interacted(createVolumeForm.description)" ng-messages="createVolumeForm.description.$error" >
+                <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+              </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="volumeUpdateModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{volumeModal_title}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="createVolumeForm">
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.volumes.cv.name'|translate}}:</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="name" ng-model="volumeForm.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" placeholder="{{'aws.volumes.cv.pInputName'|translate}}" required="required" />
+              </div>
+              <div class="error-messages error" ng-if="interacted(createVolumeForm.name)" ng-messages="createVolumeForm.name.$error" >
+                <div ng-message="required" class="volume-form-size-error">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="pattern" class="volume-form-size-error">{{'aws.errors.noSpecial'|translate}}</div>
+                <div ng-message="maxlength" class="volume-form-size-error">{{'aws.errors.maxlength'|translate}}</div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}:</label>
+              <div class="controls">
+                <textarea type="text" ng-maxlength="80" class="form-controls volume-text " name="description" ng-model="volumeForm.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" />
+                <div class="error-messages error" ng-if="interacted(createVolumeForm.description)" ng-messages="createVolumeForm.description.$error" >
+                  <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="loadingVolumeModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{'aws.volumes.lv.loadVolume'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="createVolumeForm" novalidate>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.lv.selectServer'|translate}}:</label>
+              <div class="controls">
+                <ui-select ng-model="host" ng-change=changeHost(host) ng-disabled="disabled"  title="Choose a host">
+                  <ui-select-match placeholder="{{'aws.volumes.lv.pleaseSelectServer'|translate}}">{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="host in hosts | propsFilter: {name: $select.search}">
+                    <div ng-bind-html="host.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.lv.selectDriver'|translate}}:</label>
+              <div class="controls">
+                <ui-select ng-model="diskDrive" ng-change=changeDrive(diskDrive) ng-disabled="disabled" title="Choose a diskDrive">
+                  <ui-select-match placeholder="{{'aws.volumes.lv.pleaseSelectDriver'|translate}}">{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="diskDrive in diskDrives | propsFilter: {name: $select.search}">
+                    <div ng-bind-html="diskDrive.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="expandVolumeSizeModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{'aws.volumes.ev.extendVolume'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="expandVolumeSize" novalidate>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.volumes.ev.size'|translate}}:</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="size" ng-pattern="/^[1-9]+[0-9]*$/" ng-model="volumeForm.size" placeholder="{{'aws.volumes.cv.pInputSize'|translate}}" required="required" />
+                <div class="error" ng-if="interacted(expandVolumeSize.size)" ng-messages="expandVolumeSize.size.$error" >
+                  <div ng-message="required" class="volume-form-name-error">{{'aws.volumes.cv.pInputSize'|translate}}</div>
+                  <div ng-message="pattern" class="volume-form-name-error">{{'aws.volumes.cv.pInputNum'|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="createSnapshotModel.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h3 class="modal-title">{{'aws.volumes.cs.createSnapshot'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="createVolumeForm" novalidate>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.volumes.cv.name'|translate}}:</label>
+              <div class="controls">
+                <input type="text" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" class="form-controls" name="name" ng-model="snapShot.name" placeholder="{{'aws.volumes.cs.pInputName'|translate}}" required/>
+              </div>
+              <div class="error-messages error" ng-if="interacted(createVolumeForm.name)" ng-messages="createVolumeForm.name.$error" >
+                <div ng-message="required" class="volume-form-size-error">{{'aws.errors.required'|translate}}</div>
+                <div ng-message="pattern" class="volume-form-size-error">{{'aws.errors.noSpecial'|translate}}</div>
+                <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}:</label>
+              <div class="controls">
+                <textarea type="text" ng-maxlength="80" class="form-controls" name="description" ng-model="snapShot.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" />
+                <div class="error-messages error" ng-if="interacted(createVolumeForm.description)" ng-messages="createVolumeForm.description.$error" >
+                  <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+      </div>
+    </script>
+  </div>
+</div>

@@ -1,0 +1,360 @@
+<div class="page-inner">
+    <h3 class="page-title">{{"aws.security.securityGroup"|translate}}</h3>
+    <div class="table-action">
+        <button type="button"  data-toggle="modal" ng-click="updateSecurityGroup('new')" class="btn btn-new" licence-type = "btn" id="resource-security-create"> 
+            <i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}</button>
+        <button type="button"  data-toggle="modal" ng-click="updateSecurityGroup('edit')" ng-disabled="!canEdit" class="btn btn-normal" licence-type = "btn" id="resource-security-edit"> 
+            <i class="iconfont icon-aw-modify"></i>{{"aws.action.edit"|translate}}</button>
+        <button type="button"  data-toggle="modal" ng-click="deleteSecurityGroups()" ng-disabled="!canDel" class="btn btn-normal" licence-type = "btn" id="resource-security-del">
+            <i class="iconfont icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+        <div class="pull-right">
+            <into-information modular="'security_groups'"></into-information>
+            <button type="button" class="btn btn-renovat right-ports" ng-click="refreshSecurityGroup()">
+                <i class="icon-aw-refresh"></i>
+            </button>
+            <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder={{"aws.action.search"|translate}} />
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/ng-template" id="firewallHeaderChkboxes.html">
+        <label class="checkbox">
+            <input type="checkbox" ng-model="securityGroup_chkboxs.checked" class="select-all-securityGroupTable" value="" />
+            <i class="iconfont"></i>
+        </label>
+    </script>
+
+    <div class="table-content">
+        <empty-tip empty-type="loadData"></empty-tip>
+        <table ng-table="securityGroupTable" class="table " show-filter="false">
+            <colgroup>
+              <col width="4%"></col>
+              <col width="48%"></col>
+              <col width="48%"></col>
+            </colgroup>
+            <tr ng-repeat="firewall in $data">
+                <td header="'firewallHeaderChkboxes.html'">
+                    <label class="checkbox" ng-if="firewall.name!='default'">
+                        <input type="checkbox" ng-model="securityGroup_chkboxs.items[firewall.id]" />
+                        <i class="iconfont"></i>
+                    </label>
+                </td>
+                <td data-title="headers.firewallName" sortable="'name'" >
+                    <a ng-href="/cvm/security_groups?id={{firewall.id}}" title="{{firewall.name}}">{{firewall.name}}</a>
+                </td>
+                <td data-title="headers.description" sortable="'description'" >
+                    <span class="des des-lg">{{firewall.description}}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script type="text/ng-template" id="headerCheckboxDetail.html">
+        <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.checked" class="select-all-tableParams" value="" />
+            <i class="iconfont"></i>
+        </label>
+    </script>
+    <div ng-controller="detailCtrl">
+        <pane class="detail-body" animation="animation" >
+            <div class="tab-content">
+                <div class ="detail-row">
+                    <div class="detail-title">
+                        <a class = "an-close" ng-href="/cvm/security_groups"><i class="icon-aw-mail-reply"></i></a>
+                        <span>{{"aws.security.securityGroupDetail"|translate}}</span>
+                    </div>                        
+                    <div class="detail-info tab-offset-right">
+                        <div class="tab-content-line"></div>
+                        <div class="table-action">
+                            <button type="button"  data-toggle="modal" ng-click="addSecurityGroupRule()" class="btn btn-new" licence-type = "btn" id="resource-security-details-create">
+                                <i class="icon-aw-add-to2"></i>{{"aws.security.createRule"|translate}}</button>
+                            <button type="button"  data-toggle="modal" ng-click="deleteSecurityGroupRule(checkedItems)" ng-disabled="delisDisabled" class="btn btn-normal" licence-type = "btn" id="resource-security-details-del"><i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+                            <div class="pull-right">
+                                <setting title-data="secDetailTitleData" site-title="secDetailTitleName" table-data="tableParams.data" search-tearm="secDetailSearchTearm(obj)"></setting>
+                                <button class="btn btn-renovat right-ports" ng-click="refreshSecurityGroupDetail()"><i class="icon-aw-refresh"></i></button>
+                                <div class="search-box right-ports">
+                                    <form name="searchForm" novalidate ng-keyup="applyDetailSearch(firewallDetailSearchTerm.SearchTerm)">
+                                        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="firewallDetailSearchForm" ng-model="firewallDetailSearchTerm.SearchTerm" placeholder={{"aws.action.search"|translate}} />
+                                    </form>
+                                </div> 
+                            </div>
+                        </div>
+                        <empty-tip empty-type="securityDetailData" tip-id="'security-detail-tip-msg'"></empty-tip>
+                        <table ng-table="tableParams" class="table">
+                            <colgroup>
+                                <col width="5%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="15%">
+                                <col width="20%">
+                            </colgroup>
+                            <tr ng-repeat="firewallDetail in $data">
+                                <td header="'headerCheckboxDetail.html'">
+                                    <label class="checkbox">
+                                        <input type="checkbox" ng-model="checkboxes.items[firewallDetail.id]" />
+                                        <i class="iconfont"></i>
+                                    </label>
+                                </td>
+                                <td data-title="headers.direction"  sortable="'direction'" ng-if="secDetailTitleData[0].value">{{firewallDetail.direc}}</td>
+                                <td data-title="headers.inputType" sortable="'ethertype'" ng-if="secDetailTitleData[1].value">{{firewallDetail.ethertype}}</td>
+                                <td data-title="headers.ip_protocol" sortable="'ipProtocol'" ng-if="secDetailTitleData[2].value">{{firewallDetail.ipProtocol | uppercase}}</td>
+                                <td data-title="headers.portRange" sortable="'fromPort'" ng-if="secDetailTitleData[3].value">{{firewallDetail.fromPort}}-{{firewallDetail.toPort}}</td>
+                                <td data-title="headers.typeCodeValue" sortable="'_ipProtocol'" ng-if="secDetailTitleData[4].value">
+                                    {{firewallDetail._ipProtocol}}
+                                </td>
+                                <td data-title="headers.sourceType" sortable="" ng-if="secDetailTitleData[5].value">
+                                    {{firewallDetail.sourceType}}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </pane>
+    </div>
+    <script type="text/ng-template" id="securityGroupModal.html">
+        <div class="firewall-modal modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{securityGroupModal_title}}</h3>
+        </div>
+        <div class="modal-body">
+            <uib-alert ng-if="beyondQuota_pro.security_group" type="danger">{{"aws.security.project_securityGroupQuotas"|translate}}</uib-alert>
+            <uib-alert ng-if="beyondQuota_dep.security_group" type="danger">{{"aws.security.domain_securityGroupQuotas"|translate}}</uib-alert>
+            <form name="securityGroupModalForm">
+                <div class="control-group" >
+                    <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.security.name"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="firewallName"
+                         ng-model="securityGroupForm.name"
+                        ng-change = "checkedName(securityGroupForm.name)"
+                         ng-maxlength="32"
+                         ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"
+                         placeholder={{"aws.security.inputFirewallName"|translate}} repeat-defaultname required />
+                                <div class="error" ng-messages='securityGroupModalForm.firewallName.$error' ng-if="interacted(securityGroupModalForm)" >
+                                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                    <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+                                    <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+                                    <div ng-message="repeatDefaultname">{{'aws.errors.repeatDefault'|translate}}</div>
+                                </div>
+                                <div class="error" ng-if="NameCheck">{{'aws.errors.securityGroupName_check'|translate}}</div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.security.description"|translate}}：</label>
+                    <div class="controls">
+                        <textarea type="text" class="form-controls" ng-maxlength="80" name="description" ng-model="securityGroupForm.description " />
+                        <div class="error-messages error" ng-show="interacted(securityGroupModalForm)" ng-messages="securityGroupModalForm.description.$error" >
+                              <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group" ng-if="!editSecurityGroup">
+                    <label class="control-label">{{"aws.security.quotas"|translate}}：</label>
+                    <div class="controls">
+                      <div class="clearfix bar-group">
+                        <div quota-bar bardata="project_data.security_group"></div>
+                        <div quota-bar bardata="domain_data.security_group" ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                      </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="beyondQuota_pro.security_group || beyondQuota_dep.security_group || formSubmitted " ng-click="securityGroupConfirm()">{{"aws.action.ok"|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+        </div>
+    </script>
+    <script type="text/ng-template" id="addSecurityGroupRule.html">
+        <div class="firewallRule-modal modal-common">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+                <h3 class="modal-title">{{"aws.security.createRule"|translate}}</h3>
+            </div>
+            <div class="modal-body">
+                <uib-alert ng-if="beyondQuota_pro.security_group_rule" type="danger">{{"aws.security.project_securityGroupRulesQuotas"|translate}}</uib-alert>
+                <uib-alert ng-if="beyondQuota_dep.security_group_rule" type="danger">{{"aws.security.domain_securityGroupRulesQuotas"|translate}}</uib-alert>
+                <form name="securityGroupRuleForm">
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.security.rule"|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.security.info.rule"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <ui-select ng-model="securityGroupRule.selectedRule" ng-disabled="options.disabled" ng-change="changeRule(securityGroupRule.selectedRule)"  title={{"aws.security.selectRule"|translate}} >
+                                <ui-select-match placeholder={{"aws.security.selectRule"|translate}} >{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="rule in securityGroupRules.options  ">
+                                <div ng-bind-html="rule.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                           </ui-select>  
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.security.direction"|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.security.info.direction"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <ui-select ng-model="securityGroupRule.direction" ng-disabled="options.disabled"  title={{"aws.security.selectDirection"|translate}} >
+                                <ui-select-match placeholder={{"aws.security.selectDirection"|translate}} >{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="direc in directions.options | propsFilter:{name:$select.search} ">
+                                <div ng-bind-html="direc.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                           </ui-select>
+                        </div>
+                    </div>
+                    <div ng-if="allIcmpShow">
+                        <div class="control-group" ng-if="!isIcmp">
+                            <label class="control-label">{{"aws.security.portWay"|translate}}：</label>
+                            <div class="controls">
+                                <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.security.info.portWay"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                                <ui-select ng-model="securityGroupRule.portType"  ng-disabled="options.disabled" >
+                                    <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="pt in portTypes.options | propsFilter:{name:$select.search} ">
+                                    <div ng-bind-html="pt.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                               </ui-select>  
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="isPort" >
+                            <label class="control-label"><span class="red">*</span>{{"aws.security.port"|translate}}：</label>
+                            <div class="controls">
+                                <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.security.info.port"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                                <input type="text" class="form-controls" name="port"
+                                 ng-model="securityGroupRule.port" 
+                                 ng-pattern="/^\+?[1-9][0-9]*$/"
+                                 required />
+                                <div class="error" ng-messages="securityGroupRuleForm.port.$error" ng-if="interactedPort(securityGroupRuleForm)">
+                                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                  <div ng-show="input_invalid ||securityGroupRuleForm.port.$error.pattern">{{"aws.errors.limit_1_65535"|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="isPortRange" >
+                            <label class="control-label"><span class="red">*</span>{{"aws.security.fromPort"|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="fromPort" 
+                                ng-model="securityGroupRule.from_port" ng-pattern="/^\+?[1-9][0-9]*$/"
+                                 required />
+                                 <div class="error" ng-messages="securityGroupRuleForm.fromPort.$error" ng-if="interactedPortRange(securityGroupRuleForm)">
+                                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                  <div ng-show="input_invalid ||securityGroupRuleForm.fromPort.$error.pattern">{{"aws.errors.limit_1_65535"|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="isPortRange" >
+                            <label class="control-label"><span class="red">*</span>{{"aws.security.endPort"|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="toPort" id="toPort" ng-model="securityGroupRule.to_port" ng-pattern="/^\+?[1-9][0-9]*$/"
+                                    required />
+                                <div class="error" ng-messages="securityGroupRuleForm.toPort.$error" ng-if="interactedPortRange(securityGroupRuleForm)">
+                                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                  <div ng-show="toPort_invalid ||securityGroupRuleForm.toPort.$error.pattern">{{'aws.errors.input_gtorequit'|translate}}{{securityGroupRule.from_port}}{{'aws.errors.less_65535_integer'|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--<div class="control-group" ng-if="isIcmp" >
+                            <label class="control-label">{{"aws.security.type"|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="fromPort" 
+                                ng-model="securityGroupRule.from_port" ng-keyup="checkIcmpValue(securityGroupRule.from_port,'fromPort')" ng-pattern="/^\+?[0-9][0-9]*$/" placeholder={{"aws.security.placeholder.type"|translate}}
+                                 required />
+                                 <div class="error" ng-messages="securityGroupRuleForm.fromPort.$error" ng-if="interactedPortRange(securityGroupRuleForm)">
+                                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                  <div ng-show="invalid.fromPort ||securityGroupRuleForm.fromPort.$error.pattern">{{"aws.errors.limit_-_255"|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="isIcmp" >
+                            <label class="control-label">{{"aws.security.coding"|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="toPort" id="toPort" ng-model="securityGroupRule.to_port" ng-keyup="checkIcmpValue(securityGroupRule.to_port,'toPort')" ng-pattern="/^\+?[0-9][0-9]*$/"  placeholder={{"aws.security.placeholder.coding"|translate}} required />
+                                <div class="error" ng-messages="securityGroupRuleForm.toPort.$error" ng-if="interactedPortRange(securityGroupRuleForm)">
+                                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                  <div ng-show="invalid.toPort ||securityGroupRuleForm.toPort.$error.pattern">{{"aws.errors.limit_-_255"|translate}}</div>
+                                </div>
+                            </div>
+                        </div>-->
+                        <div class="control-group" ng-if="isIcmp">
+                            <label class="control-label">{{"aws.security.type"|translate}}：</label>
+                            <div class="controls">
+                                <ui-select ng-model="securityGroupRule.from_port"  ng-change="changeType(securityGroupRule.from_port)" >
+                                    <ui-select-match>{{$select.selected}}</ui-select-match>
+                                    <ui-select-choices repeat="type as type in types.options">
+                                    <div ng-bind-html="type | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                               </ui-select>  
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="isIcmp">
+                            <label class="control-label">{{"aws.security.coding"|translate}}：</label>
+                            <div class="controls">
+                                <ui-select ng-model="securityGroupRule.to_port" ng-disabled="options.disabled" >
+                                    <ui-select-match>{{$select.selected}}</ui-select-match>
+                                    <ui-select-choices repeat="coding as coding in codings.options">
+                                    <div ng-bind-html="coding | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                               </ui-select>  
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-if="elseProtocol" >
+                        <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.security.protocol"|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="protocol"  ng-model="securityGroupRule.protocol" placeholder="{{'aws.errors.limit_0_255'|translate}}"
+                                limitnumrange min="0" max="255" required />
+                            <div class="error" ng-messages="securityGroupRuleForm.protocol.$error" ng-if="interactedProtocol(securityGroupRuleForm)">
+                                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                  <div ng-message="limitnumrange">{{"aws.errors.limit_0_255"|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group radio-wrap">
+                        <label class="control-label">{{"aws.security.way"|translate}}：</label>
+                        <div class="controls">
+                            <div class="radio-item clearFix">
+                            <label class="radio"><input type="radio" ng-model="securityGroupRule.way" name="cidrWay"  value="cidr"/><i class="iconfont"></i>CIDR</label>
+                            <label class="radio"><input type="radio" ng-model="securityGroupRule.way" name="firewallWay" value="firewall"/><i class="iconfont"></i>{{"aws.security.securityGroup"|translate}}</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-if="isCidrWay" >
+                        <label class="control-label">CIDR：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.security.info.cidr"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <input type="text" class="form-controls" name="cidr" ng-model="securityGroupRule.cidr" >
+                        </div>
+                    </div>
+                    <div class="control-group" ng-if="isFirewallWay">
+                        <label class="control-label">{{"aws.security.securityGroup"|translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="securityGroupRule.firewall" ng-disabled="options.disabled" >
+                                <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="firewallGroup in firewallGroups.options  ">
+                                <div ng-bind-html="firewallGroup.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                           </ui-select>  
+                        </div>
+                    </div>
+                     <div class="control-group">
+                        <label class="control-label">{{"aws.security.quotas"|translate}}：</label>
+                        <div class="controls">
+                          <div class="clearfix bar-group">
+                            <div quota-bar bardata="project_data.security_group_rule"></div>
+                            <div quota-bar bardata="domain_data.security_group_rule" ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                          </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+        <button class="btn btn-info" type="button" ng-disabled="beyondQuota_pro.security_group_rule || beyondQuota_dep.security_group_rule || formSubmitted "  ng-click="securityGroupRuleConfirm(securityGroupRule)">{{"aws.action.ok"|translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+            </div>
+        </div>
+    </script>
+</div>

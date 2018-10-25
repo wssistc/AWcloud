@@ -1,0 +1,396 @@
+<div class="page-inner balance">
+  <div class="detail-info">
+    <uib-tabset active="0" justified="true">
+      <uib-tab index="0" heading="{{'aws.loadbalancers.pl.overview'|translate}}" ng-click="getPoolsDetail()">
+        <div class="table-action">
+          <a type="button" class="btn btn-primary" ng-href="#/cvm/loadbalancers/{{loadbalancerId}}?active=2">
+            <i class="icon-aw-mail-reply"></i>{{'aws.loadbalancers.pl.back'|translate}}
+          </a>
+          <span class="title">{{'aws.loadbalancers.ui.poolDetail'|translate}}</span>
+        </div>
+        <table class="table table-info column">
+          <tbody>
+            <tr>
+              <td>{{'aws.loadbalancers.pl.name'|translate}}</td>
+              <td>{{detailData.name}}</td>
+              <td>ID</td>
+              <td>{{detailData.id}}</td>
+            </tr>
+            <tr>
+              <td>{{'aws.h_monitor.monitor'|translate}}</td>
+              <td>{{detailData.healthmonitor_id}}</td>
+              <td>{{'aws.loadbalancers.pl.listener'|translate}}</td>
+              <td>{{detailData.listeners[0].name}}</td>
+            </tr>
+            <tr>
+              <td>{{'aws.loadbalancers.pl.lbAlgorithm'|translate}}</td>
+              <td>{{'aws.loadbalancers.lbAlgorithm.'+detailData.lb_algorithm| translate}}</td>
+              <td>{{'aws.loadbalancers.pl.protocol'|translate}}</td>
+              <td>{{detailData.protocol}}</td>
+            </tr>
+            <tr>
+              <td>{{'aws.loadbalancers.ui.operating_status'| translate}}</td>
+              <td>{{'aws.loadbalancers.ui.table.'+detailData.operating_status| translate}}</td>
+              <td>{{'aws.loadbalancers.ui.provisioning_status'| translate }}</td>   
+              <td>{{'aws.loadbalancers.ui.table.'+detailData.provisioning_status| translate}}</td>
+            </tr>
+            <tr>
+              <td>{{'aws.loadbalancers.pl.description'|translate}}</td>
+              <td>{{detailData.description}}</td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </uib-tab>
+      <uib-tab index="1" heading="{{'aws.loadbalancers.mb.member'|translate}}" ng-click="getMembers()">
+        <div class="table-action">
+          <a type="button" class="btn btn-primary" ng-href="#/cvm/loadbalancers/{{loadbalancerId}}?active=2"><i class="icon-aw-mail-reply"></i>{{'aws.loadbalancers.pl.back'|translate}}</a>
+          <button type="button" data-toggle="modal" ng-click="createMembers('new')" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+          <button type="button" data-toggle="modal" ng-click="createMembers('edit')" ng-disabled="isDisabled" class="btn btn-info"><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+          <button type="button" data-toggle="modal" ng-click="deleteMembers(checkedItems)" ng-disabled="delisDisabled"  class="btn btn-warning"> <i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+          <button class="btn btn-refresh" ng-click="getMembers()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button>
+          <div class="search-box">
+            <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+              <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+              <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="search.globalSearchTerm" placeholder="{{'aws.instances.search'|translate}}" />
+            </form>
+          </div>
+        </div>
+        <div class="table-content">
+          <table ng-table="tableParamsMember" class="table" show-filter="false">
+            <colgroup>
+              <col width="8%">
+              <col width="23%">
+              <col width="23%">
+              <col width="23%">
+              <col width="23%">
+            </colgroup>
+            <tbody>
+              <tr ng-repeat="item in $data">
+                <td header="'headerCheckbox.html'">
+                  <label class="checkbox">
+                    <input type="checkbox" ng-model="checkboxes.items[item.id]"/>
+                    <i class="icon-aw-square"></i>
+                  </label>
+                </td>
+                <td data-title="'aws.loadbalancers.mb.name'|translate" sortable="'name'">
+                  <div class="edit-name edit-lg">
+                    <a ng-href="#/cvm/loadbalancers/{{loadbalancerId}}/{{poolId}}?id={{item.id}}&type=Member" title="{{item.name}}">{{item.name}}</a>
+                  </div>
+                </td>
+                <!-- <td data-title="'aws.loadbalancers.mb.subnet'|translate" sortable="'subnetId'">{{item.subnetId}}</td> -->
+                <td data-title="'aws.loadbalancers.mb.address'|translate" sortable="'address'">{{item.address}}</td>
+                <td data-title="'aws.loadbalancers.mb.protocol_port'|translate" sortable="'protocol_port'">{{item.protocol_port}}</td>
+                <td data-title="'aws.loadbalancers.mb.weight'|translate" sortable="'weight'">{{item.weight}}</td>
+              </tr>
+            </tbody>
+          </table>
+          <loading-data  data="membsertabledata"></loading-data>
+        </div>
+        <div ng-controller="detailCtrl">
+          <pane class="detail-body" animation="animation" >
+            <div class="tab-content">
+            <div class ="detail-row">
+              <div class="detail-header">
+              </div>
+              <div class="detail-title">
+                <a class = "an-close" ng-href="#/cvm/loadbalancers/{{loadbalancerId}}/{{poolId}}"><i class="icon-aw-mail-reply"></i></a>
+                <span>{{'aws.loadbalancers.ui.memberDetail'|translate}}</span>
+              </div>
+              <div class="detail-info">
+                <table class="table table-info column">
+                  <tbody>
+                  <tr>
+                    <td>{{'aws.loadbalancers.mb.name'|translate}}</td>
+                    <td>{{detailMembers.name}}</td>
+                    <td>ID</td>
+                    <td>{{detailMembers.id}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{'aws.loadbalancers.mb.address'|translate}}</td>
+                    <td>{{detailMembers.address}}</td>
+                    <td>{{'aws.loadbalancers.mb.weight'|translate}}</td>
+                    <td>{{detailMembers.weight}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{'aws.loadbalancers.ui.operating_status'| translate}}</td>
+                    <td>{{'aws.loadbalancers.ui.table.'+detailMembers.operating_status| translate}}</td>
+                    <td>{{'aws.loadbalancers.ui.provisioning_status'| translate }}</td>   
+                    <td>{{'aws.loadbalancers.ui.table.'+detailMembers.provisioning_status| translate}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{'aws.loadbalancers.mb.protocol_port'|translate}}</td>
+                    <td>{{detailMembers.protocol_port}}</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+                
+            </div>
+          </pane>
+        </div>
+      </uib-tab>
+      <uib-tab index="2" heading="{{'aws.h_monitor.monitor'|translate}}" ng-click="getHealthMonitors()">
+        <div class="table-action">
+          <a type="button" class="btn btn-primary" ng-href="#/cvm/loadbalancers/{{loadbalancerId}}?active=2"><i class="icon-aw-mail-reply"></i>{{'aws.loadbalancers.pl.back'|translate}}</a>
+          <button type="button"  ng-disabled="healthmonitorData.length" ng-click="newMonitor('new')" class="btn btn-primary"> <i class="icon-aw-add-to2"></i></i>{{'aws.action.create'|translate}}</button>
+          <button type="button"  ng-click="newMonitor('edit')"  ng-disabled="isDisabled" class="btn btn-info"> <i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+          <button class="btn btn-warning" ng-disabled="delisDisabled" ng-click="delMonitors()"><i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+          <button class="btn btn-refresh" ng-click="getHealthMonitors()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button>
+        </div>
+        <div class="table-content">
+          <table ng-table="tableParams" class="table " > 
+            <colgroup>
+              <col width="5%" >
+              <col width="19%">
+              <col width="19%">
+              <col width="19%">
+              <col width="19%">
+              <col width="19%">
+            </colgroup>
+            <tr ng-repeat="item in $data">
+              <td header="'headerCheckbox.html'" class="check-td">
+                <label class="checkbox">
+                  <input type="checkbox" name="r" ng-model="checkboxes.items[item.id]" value="{{item.id}}" />
+                  <i class="iconfont"></i>
+                </label>
+              </td>
+              <td data-title="'aws.h_monitor.name'|translate" sortable="'type'">
+                <div class="edit-name edit-lg">
+                  <a ng-href="#/cvm/loadbalancers/{{loadbalancerId}}/{{poolId}}?id={{item.id}}&type=Monitor" title="{{item.name}}">{{item.name}}</a>
+                </div>
+              </td>
+              <td data-title="'aws.h_monitor.type'|translate" sortable="'type'">{{item.type}}</td>
+              <td data-title="'aws.h_monitor.delay'|translate" sortable="'delay'">{{item.delay}}</td>
+              <td data-title="'aws.h_monitor.timeout'|translate" sortable="'timeout'">{{item.timeout}}</td>
+              <td data-title="'aws.h_monitor.max_retries'|translate" sortable="'max_retries'">{{item.max_retries}}</td>
+            </tr>
+          </table>  
+          <loading-data  data="healthmonitorData"></loading-data>
+        </div>
+        <div ng-controller="detailCtrl">
+          <pane class="detail-body" animation="animation">
+            <div class="tab-content">
+              <div class="detail-row">
+                <div class="detail-header">
+                    
+                </div>
+                <div class="detail-title">
+                  <a class="an-close" ng-href="#/cvm/loadbalancers/{{loadbalancerId}}/{{poolId}}"><i class="icon-aw-mail-reply"></i></a>
+                  <span>{{'aws.h_monitor.monitor_detail'|translate}}</span>
+                </div>
+                <div class="detail-info">
+                  <table class="table table-info column">
+                    <tr>
+                      <td>{{'aws.h_monitor.name'|translate}}</td>
+                      <td>{{detailData.name}}</td>
+                      <td>{{'aws.h_monitor.type'|translate}}</td>
+                      <td>{{detailData.type}}</td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.h_monitor.delay'|translate}}</td>
+                      <td>{{detailData.delay}}</td>
+                      <td>{{'aws.h_monitor.timeout'|translate}}</td>
+                      <td>{{detailData.timeout}}</td>
+                    </tr>
+                    <tr>
+                      <td>{{'aws.h_monitor.max_retries'|translate}}</td>
+                      <td>{{detailData.max_retries}}</td>
+                      <td>{{'aws.loadbalancers.ui.provisioning_status'| translate }}</td>   
+                      <td>{{'aws.loadbalancers.ui.table.'+detailData.provisioning_status| translate}}</td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </pane>
+        </div>
+      </uib-tab>
+    </uib-tabset>
+  </div>
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value=""/>
+    <i class="icon-aw-square"></i>
+  </label>
+</script>
+
+<!-- start Member -->
+<script type="text/ng-template" id="newMember.html">
+  <div class="modal-common">
+    <form name="memberForm" autocomplete="off">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">{{'aws.loadbalancers.ui.' + member.title | translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.mb.name'|translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="name" ng-model="member.name" placeholder="{{'aws.loadbalancers.mb.name_placeholder'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||memberForm.name.$dirty) && memberForm.name.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <!--新建成员的时候必须传一个子网，这个子网跟成员的IP地址没有关系-->
+        <!-- <div class="control-group" ng-if="!member.isEdit">
+          <label class="control-label">{{'aws.loadbalancers.mb.subnet'|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="member.selectedId"  ng-change="changesubnet()" name= "subnet"ng-disabled="member.isEdit" required>
+              <ui-select-match placeholder="{{'aws.loadbalancers.mb.subnet_placeholder'|translate}}">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="item in member.subnet | filter: {name: $select.search}">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="(submitInValid ||memberForm.subnet.$dirty) && memberForm.subnet.$error">
+              <form-validate ></form-validate>
+            </div>
+          </div>
+        </div> -->
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.mb.address'|translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="address" ng-model="member.address" placeholder="{{'aws.loadbalancers.mb.address_placeholder'|translate}}" ng-disabled="member.isEdit||!ipStart" required
+             ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-4]|2[0-4]\d|((1\d{2})|[1-9]|([1-9][0-9]))))$/"/>
+            <div class="error" ng-messages="(submitInValid ||memberForm.address.$dirty) && memberForm.address.$error">
+              <form-validate pattern-msg="'aws.errors.ip_inputError'|translate"></form-validate>
+            </div>
+            <div class="error" ng-if ="Ipcheck">
+                <div>{{'aws.loadbalancers.pl.ipRangeCheck'|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.mb.protocol_port'|translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="protocol_port" ng-model="member.protocol_port" placeholder="{{'aws.loadbalancers.mb.protocol_port_placeholder'|translate}}"   
+            ng-disabled="member.isEdit" required min="1" max="65535" limitnumrange/>
+            <div class="error" ng-messages="(submitInValid ||memberForm.protocol_port.$dirty) && memberForm.protocol_port.$error">
+              <form-validate></form-validate>
+              <div ng-message="limitnumrange">{{"aws.errors.limit_1_65535"|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.mb.weight'|translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="weight" ng-model="member.weight" placeholder="{{'aws.loadbalancers.mb.weight_placeholder'|translate}}"  ng-pattern="/(25[0-5])|(2[0-4]\d)|(1\d\d)|([1-9]\d)|[1-9]/"  min="1" max="255" required limitnumrange/>
+            <div class="error" ng-messages="(submitInValid ||memberForm.weight.$dirty) && memberForm.weight.$error">
+              <form-validate pattern-msg="'aws.errors.integer'|translate"></form-validate>
+              <div ng-message="limitnumrange">{{'aws.errors.limit_1_255'|translate}}</div>
+            </div>
+          </div>
+        </div>  
+        <!-- <div class="control-group">
+          <label class="control-label">{{'aws.loadbalancers.mb.admin_state_up'|translate}}：</label>
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" name="admin_state_up" ng-model="member.admin_state_up">
+              <i class="icon-aw-square"></i>
+            </label>
+          </div>
+        </div> -->
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmMember(memberForm)">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+      </div>
+    </form>
+  </div>
+</script>
+
+<!-- start Monitor -->
+<script type="text/ng-template" id="new-monitor.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$close()">×</button>
+      <h3 class="modal-title">{{"aws.h_monitor."+ new.title|translate}}</h3>
+    </div>
+    <div class="modal-body ">
+      <form name="newMonitorForm" novalidate>
+        <div class="control-group">
+          <label class="control-label">{{"aws.h_monitor.name"|translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="name" ng-model="new.name" placeholder="{{'aws.h_monitor.name_placeholder'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required/>
+            <div class="error" ng-messages="(submitInValid ||newMonitorForm.name.$dirty) && newMonitorForm.name.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.h_monitor.type'|translate}}：</label>
+          <div class="controls">
+            <ui-select ng-model="new.type" name="type" required ng-disabled="isEdit">
+              <ui-select-match >{{$select.selected}}</ui-select-match>
+              <ui-select-choices repeat="type in typeList">
+                <div ng-bind-html="type | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div  class="error" ng-messages="(submitInValid ||newMonitorForm.type.$dirty) && newMonitorForm.type.$error">
+              <form-validate ></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.h_monitor.delay"|translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="delay" ng-model="new.delay"  placeholder="{{'aws.h_monitor.delay_placeholder'|translate}}" min="1" max="65535" limitnumrange required ng-pattern="/^\d*$/"/>
+            <div class="error" ng-messages="(submitInValid ||newMonitorForm.delay.$dirty) && newMonitorForm.delay.$error">
+              <form-validate pattern-msg="'aws.errors.integer'|translate"></form-validate>
+              <div ng-message="limitnumrange">{{"aws.errors.limit_1_65535"|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.h_monitor.timeout"|translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="timeout" ng-model="new.timeout" placeholder="{{'aws.h_monitor.timeout_placeholder'|translate}}" min="1" max="65535" limitnumrange required ng-pattern="/^\d*$/"/>
+            <div class="error" ng-messages="(submitInValid ||newMonitorForm.timeout.$dirty) && newMonitorForm.timeout.$error">
+              <form-validate pattern-msg="'aws.errors.integer'|translate"></form-validate>
+              <div ng-message="limitnumrange">{{"aws.errors.limit_1_65535"|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.h_monitor.max_retries"|translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="maxRetries" ng-model="new.maxRetries" placeholder="{{'aws.h_monitor.max_retries_placeholder'|translate}}" ng-pattern="/^([0-9]|10)$/" required/>
+            <div class="error" ng-messages="(submitInValid ||newMonitorForm.maxRetries.$dirty) && newMonitorForm.maxRetries.$error">
+              <form-validate pattern-msg="'aws.errors.zerototen'|translate"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-if="new.type==='HTTP' || new.type==='HTTPS'">
+          <label class="control-label">URL：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="url" ng-model="new.urlPath" placeholder="{{'aws.h_monitor.url_placeholder'|translate}}" ng-required="new.type==='HTTP' || new.type==='HTTPS'" ng-maxlength="128" ng-pattern="/^\//"/>
+            <div class="error" ng-messages="(submitInValid ||newMonitorForm.url.$dirty) && newMonitorForm.url.$error">
+              <div ng-message="maxlength">{{'aws.errors.maxlength128'|translate}}</div>
+              <form-validate pattern-msg="'aws.errors.httpCheck'|translate"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-if="new.type==='HTTP' || new.type==='HTTPS'">
+          <label class="control-label">{{'aws.h_monitor.expected_codes'|translate}}：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="codes" ng-model="new.expectedCodes" placeholder="{{'aws.h_monitor.codes_placeholder'|translate}}"  ng-required="new.type==='HTTP' || new.type==='HTTPS'" />
+            <div class="error" ng-messages="(submitInValid ||newMonitorForm.codes.$dirty) && newMonitorForm.codes.$error">
+              <form-validate ></form-validate>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="newconfirm(newMonitorForm)">{{'aws.action.ok'|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+    </div>
+  </div>
+</script>

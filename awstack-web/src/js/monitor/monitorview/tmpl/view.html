@@ -1,0 +1,104 @@
+<div class="page-inner monitor-view">
+  <div class="box">
+    <div class="col-4">
+      <div class="title">{{'aws.monitor.overview.alarm'|translate}}
+        <span class="additional-tip">{{'aws.monitor.overview.alarmTip'|translate}}</span>
+      </div>
+      <div class="value-decr-list">
+        <div class="value-decr">
+          <div loading-data data="PhyAlarmBar" class="loading"></div>
+          <div ng-if="alarmphy>=0 && phyTotal>=0">
+            <div class="value-decr-num">
+              <span class="text">{{alarmphy}}</span>/{{phyTotal}}
+            </div>
+            <span class="value-decr-title">{{'aws.monitor.overview.phyalarm'|translate}}</span>
+          </div>
+        </div>
+        <div class="value-decr">
+          <div loading-data data="VmAlarmBar" class="loading"></div>
+          <div ng-if="alarmVm>=0 && vmTotal>=0">
+            <div class="value-decr-num">
+              <span class="text">{{alarmVm}}</span>/<span>{{vmTotal}}</span>
+            </div>
+            <span class="value-decr-title">{{'aws.monitor.overview.virtualalarm'|translate}}</span>
+          </div>
+        </div>
+        
+        
+      </div>
+    </div>
+    <!-- <div class="col-3">
+      <div class="title">{{'aws.monitor.overview.virtualalarm'|translate}}</div>
+      <div class="paint-box">
+        <div loading-data data="VmAlarmBar"></div>
+        <div class="flex" ng-if="alarmVm>=0 && vmTotal>=0">
+          <ul class="line-list clearfix">
+            <li></li>
+            <li class="line">
+              <div class="progress width">
+                <div class='progress-bar {{VmAlarmBar}}' ng-style="{width: alarmVm*100/vmTotal + '%'}"></div>
+              </div>
+            </li>
+            <li></li>
+          </ul>
+        </div>
+      </div>
+    </div> -->
+    <div class="col-4">
+      <!-- <div class="title">{{'aws.monitor.overview.phyTop5'|translate}}</div>
+      <div class="paint-box">
+        <div loading-data data="phyTopData"></div>
+        <ul ng-repeat="item in phyTopData" class="line-list clearfix" ng-if="phyTopData.length>0">
+          <li class="name"><a ng-href="/monitor/physical" ng-click="goToChartView(item)">{{item.host}}</a></li>
+          <li class="text">{{(item.usage_total).toFixed(1)}}%</li>
+          <li class="line">
+            <div class="progress width">
+              <div class='progress-bar {{item.phyTopBar}}' ng-style="{width: item.usage_total*100/100 + '%'}"></div>
+            </div>
+          </li>
+        </ul>
+      </div> -->
+      <div class="echarts-wrap-line" echarts-line chart-title="phyTopData.title" data="phyTopData.data"></div>
+    </div>
+    <div class="col-4">
+      <!-- <div class="title">{{'aws.monitor.overview.virtualTop5'|translate}}</div>
+      <div class="paint-box">
+        <div>
+          <p ng-if='cpuInfo.noData'>{{'aws.common.noMonitorData'|translate}}</p>
+        </div>
+        <ul ng-repeat="item in virtualTopData" class="line-list clearfix" ng-if="virtualTopData.length>0">
+          <li class="name"><a ng-href="/monitor/vmhost?id={{item.vm_id}}">{{item.host}}</a></li>
+          <li class="text">{{(item.usage_total).toFixed(1)}}%</li>
+          <li class="line">
+            <div class="progress width">
+              <div class='progress-bar {{item.vmTopBar}}' ng-style="{width: item.usage_total*100/100 + '%'}"></div>
+            </div>
+          </li>
+        </ul>
+      </div> -->
+      <div class="echarts-wrap-line" echarts-line chart-title="virtualTopData.title" data="virtualTopData.data"></div>
+    </div>
+  </div>
+  <div ng-if="visionPermission=='enterprise'">
+    <div class="clearfix">
+      <div class="title view-title pull-left">{{'aws.monitor.overview.resdistribute'|translate}}</div>
+      <div class="pull-left">
+        <div my-daterangepicker filter-data="filterData" query="resourceQuery()"></div>
+      </div>
+      <div class="pull-left">
+          <i class="icon-aw-question-mark question-tip" uib-popover="当采集周期为5分钟时，选择时间超过3天且小于7天时，曲线上显示15分钟一个点，当选择时间大于7天时，曲线上显示30分钟一个点。" popover-trigger="mouseenter" popover-placement="bottom"></i>   
+      </div>
+    </div>
+    <div class="box layout-grid areaChart ">
+      <div class="col-4" ng-repeat="item in barDatas | orderBy: 'order'">
+        <div class="inner">
+          <div class="panels clearfix">
+            <!-- <div class="area-chart-title">{{item.title}}</div>
+            <div class="area-chart-wrap" chart-area panel="item" queue="item.chartName" view="true"></div> -->
+            <div class="echarts-wrap-line" echarts-line chart-title="item.title" data="item.data" click="chartClick(item.chartName)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

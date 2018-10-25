@@ -1,0 +1,173 @@
+<div class="modal-common modal-sm">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+        <h3 class="modal-title">迁移虚拟机</h3>
+    </div>
+    <div class="modal-body">
+        <div class="migration-box clearfix">
+            <ul class="text-list">
+                <li ng-class="{'active':show_page[0]}" ng-click="select_page('0',true)">1.选择迁移类型</li>
+                <li ng-class="{'active':show_page[1]}" class="{{class_2}}" ng-click="select_page('1',two_step)">2.选择目标资源</li>
+                <li ng-class="{'active':show_page[2]}" ng-click="select_page('2',three_step)" class="{{class_3}}">3.选择主机</li> 
+                <!-- <li ng-class="{'active':show_page[3]}" ng-click="select_page('3')">4.选择数据存储</li> -->
+                <li ng-class="{'active':show_page[3]}" ng-click="select_page('3',four_step)" class="{{class_4}}">4.检查选择</li>
+            </ul>
+            <div class="text-box">
+                <!-- firstPage start -->
+                <div class="radio vertical" ng-show="show_page[0]">
+                    <!-- <label ng-class="{'disabled':selectedvm.powerStatus=='poweredOn'}"> -->
+                    <label>
+                        <input type="radio" name="migration" ng-disabled="selectedvm.powerStatus=='poweredOn'" ng-click="migMethod('host')"> 
+                        <!-- <input type="radio" name="migration" ng-disabled="true" ng-click="migMethod('host')"> -->
+                        <i class="iconfont"></i>更改主机
+                        <span class="text">将虚拟机移动到另一主机</span>
+                        <span class="text">vMotion未在此主机上启用。要执行该迁移，请启用vMotion或关闭虚拟机电源。</span>
+                    </label>
+                    <label class="disabled" style="display: none;">
+                        <input type="radio" name="migration" ng-disabled="true" ng-click="migMethod('store')">
+                        <i class="iconfont"></i>更改数据存储
+                        <span class="text">将虚拟机的存储器移动到另一数据存储</span>
+                    </label>
+                    <label class="disabled" style="display: none;">
+                        <input type="radio" name="radio" ng-disabled="true" ng-click="migMethod('store')">
+                        <i class="iconfont"></i>更改主机和数据存储
+                        <span class="text">将虚拟机移动到另一主机，将虚拟机的存储器移动到另一数据存储</span>
+                        <span class="text">vMotion未在此主机上启用。要执行该迁移，请启用vMotion或关闭虚拟机电源。</span>
+                    </label>
+                </div>
+
+                <!-- twoPage start -->
+                <div class="control-group" ng-show="show_page[1]">
+                    <label class="control-label">迁移目标：</label>
+                    <div class="controls">
+                        <div class="search-box">
+                            <button class="btn" type="submit"><i class="icon-aw-search"></i></button>
+                            <input type="text" class="form-control" autocomplete="off" ng-change="findNodes()" ng-model="query.cluster" placeholder="根据数据中心folder进行搜索">
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group" ng-show="show_page[1]">
+                    <label class="control-label">&nbsp;</label>
+                    <div class="controls">
+                        <div ui-tree id="tree-root">
+                            <ol ui-tree-nodes="" ng-model="resource_list">
+                              <li ng-repeat="node in resource_list" ui-tree-node data-collapsed="true" data-expand-on-hover="true" ng-include="'nodes_renderer_target.html'"  ></li>
+                            </ol>
+                        </div>
+                        <span class="help-tips">选择一个数据中心或虚拟机文件夹用于在其中创建新虚拟机</span>
+                    </div>
+                </div> 
+
+                <!-- threePage start -->
+                <div class="control-group" ng-show="show_page[2]">
+                    <table class="table  table-check">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>主机名称</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in host_list">
+                                <td>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" name="radio" ng-click=selecte_host(item)>
+                                            <i class="iconfont"></i>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>{{item.name}}</td>
+                                <td>{{"vmware.vm.table.powerStatus."+item.powerStatus | translate}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- forePage start -->
+                <!-- <div class="control-group" ng-show="show_page[3]">
+                    <table class="table  table-check">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>名称</th>
+                          <th>容量</th>
+                          <th>已制备</th>
+                          <th>可用空间</th>
+                          <th>类型</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                          <tr ng-repeat="item in datastoreList" >
+                          <td>
+                            <div class="radio">
+                              <label>
+                                <input type="radio" name="radio" ng-click=selectedDSFunc(item)>
+                                <i class="iconfont"></i>
+                              </label>
+                            </div>
+                          </td>
+                          <td>{{item.name}}</td>
+                          <td>{{item.capacity}}</td>
+                          <td>{{item.usage}}</td>
+                          <td>{{item.freeSpace}}</td>
+                          <td>{{item.type}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                </div> --> 
+
+                <!-- fivePage start -->
+                <div class="panel-group step-three" role="tablist" ng-show="show_page[3]">
+                    <table class="table table-border">
+                        <tbody>
+                          <tr>
+                            <td>虚拟机</td>
+                            <td>{{selectedvm.name}}</td>
+                          </tr>
+                          <tr>
+                            <td>迁移类型</td>
+                            <td>{{postdata.relocateType}}</td>
+                          </tr>
+                          <tr>
+                            <td>资源池</td>
+                            <td>{{pool_name}}</td>
+                          </tr>
+                          <tr>
+                            <td>主机</td>
+                            <td>{{host_name}}</td>
+                          </tr>
+                        </tbody>
+                    </table>
+                    <!-- <div class="help-tips">兼容性：ESX/ESXi 3.5 及更高版本 (虚拟机版本 4)</div> -->
+                </div>
+
+            </div>
+        </div>
+    
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-default" type="button" ng-show="show_page[0]!=true" ng-click="forwardPage()">上一步</button>
+        <button class="btn btn-default" type="button" ng-show="show_page[3]!=true" ng-click="backPage()" ng-disabled="!can_back">下一步</button>
+        <button class="btn btn-default" type="button" ng-show="show_page[3]==true" ng-disabled="" ng-click="migration()">完成</button>
+        <button class="btn btn-default" type="button" ng-click="cancel()">{{'vmware.action.cancel'|translate}}</button>
+    </div>
+</div>
+<script type="text/ng-template" id="nodes_renderer_target.html">
+  <div ui-tree-handle class="clearfix" ng-class="{'active':node.name==selected_cluster.name}">
+    <div class="tree-name">
+      <a class="btn btn-success" data-nodrag>
+        <span class="glyphicon"
+              ng-class="{'glyphicon-chevron-right': collapsed, 'glyphicon-chevron-down': !collapsed}"  ng-click="toggle_dc(node,this)">
+        </span>
+        <span ng-click="select_cluster(node)">{{node.name}}</span>
+
+      </a>
+    </div>
+  </div>
+  <ol ui-tree-nodes="" ng-model="node.childs" ng-class="{hidden: collapsed}">
+    <li ng-repeat="node in node.childs" ui-tree-node data-collapsed="true" data-expand-on-hover="true" ng-include="'nodes_renderer_target.html'" ng-show="visible(node)">
+    </li>
+  </ol>
+</script>

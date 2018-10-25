@@ -1,0 +1,18 @@
+<div class="modal-common nickname-modal">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{modelTitle}}</h3>
+    </div>
+    <div class="modal-body">
+        <uib-alert type="info">
+            <div>
+                <span>{{modelTitle}}</span>
+            </div>
+          </uib-alert>
+          <div my-daterangepicker filter-data="filterData" time-type="timeType" query="query()"></div>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="$dismiss()">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+    </div>
+</div>

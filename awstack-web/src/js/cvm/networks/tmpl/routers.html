@@ -1,0 +1,573 @@
+<div class="page-inner">
+    <h3 class="page-title">{{"aws.routers.router"|translate}}</h3>
+    <div class="table-action">
+      <button type="button" data-toggle="modal" ng-click="openRouterModel()" class="btn btn-new" licence-type = "btn" id="resource-router-create"  ng-show="ListApplication"><i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}</button>
+      <button type="button" data-toggle="modal" ng-click="editRouterModel(editRouterData)" class="btn btn-normal" ng-disabled="!canEdit" licence-type = "btn" id="resource-router-edit"><i class="icon-aw-modify" ></i>{{"aws.action.edit"|translate}}</button>
+      <button type="button" data-toggle="modal" ng-click="setGateway(editRouterData)" ng-disabled="!setGatewayBtn" class="btn btn-normal" licence-type = "btn" id="resource-router-gateway"><i class="icon-aw-gateway"></i>{{"aws.routers.setGateway" | translate}}</button>
+      <button type="button" data-toggle="modal" ng-click="deleteGateway(editRouterData)" ng-disabled="!delGatewayBtn" class="btn btn-normal" licence-type = "btn" id="resource-router-delgateway"><i class="icon-aw-deletegateway"></i>{{"aws.routers.delGateway" | translate}}</button>
+      <button type="button" data-toggle="modal" ng-click="deleteRouters()" ng-disabled="!canDel" class="btn btn-normal" licence-type = "btn" id="resource-router-del"><i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+      
+      <div class="pull-right">
+        <into-information modular="'routers'"></into-information>
+        <!-- <setting title-data="titleData" site-title="titleName" table-data="networksTableData" search-tearm="networkSearchTearm(obj)"></setting> -->
+        <button type="button" class="btn btn-renovat right-ports" ng-click="refreshRouter()"><i class="icon-aw-refresh"></i></button>
+        <div class="search-box right-ports">
+          <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+          </form>
+        </div>
+      </div>
+    </div>
+    <script type="text/ng-template" id="routersHeaderChkboxes.html">
+      <label class="checkbox">
+        <input type="checkbox" ng-model="routers_chkboxs.checked" class="select-all-routersTable" value="" />
+        <i class="iconfont"></i>
+      </label>
+    </script>
+    <div class="table-content">
+      <empty-tip empty-type="loadData"></empty-tip>
+      <table ng-table="routersTable" class="table" show-filter="false">
+        <tr ng-repeat="router in $data">
+          <td header="'routersHeaderChkboxes.html'">
+            <label class="checkbox">
+              <input type="checkbox" ng-model="routers_chkboxs.items[router.id]" />
+              <i class="iconfont"></i>
+            </label>
+          </td>
+          <td data-title="headers.routerName" sortable="'name'">
+            <div class="edit-name">
+              <a ng-href="/cvm/routers?id={{router.id}}" title="{{router.name}}">{{router.name}}</a>
+            </div>
+          </td>
+          <td data-title="headers.status" sortable="'_status'">
+            <span ng-class="{'bg-green':(router.status=='YES'||router.status=='ACTIVE'||router.status=='inUsed'||router.status=='AVAILABLE'),'bg-blue':(router.status=='LOADING'),'bg-orange':(router.status=='NO'||router.status=='DOWN'||router.status=='EMPTY'||router.status=='UNREASONABLE')}">
+            {{'aws.routers.status.'+router.status.toString().toLowerCase() | translate}}
+            </span>
+          </td>
+          <td data-title="headers.extNetwork" sortable="'network'" id="extNetwork-td-cont" >{{router.network}}</td>
+          <!-- <td data-title="headers.adminState" sortable="'adminState'">{{router._adminState}}</td> -->
+          <td data-title="headers.gatewayIp" sortable="'gatewayIp'">{{router.gatewayIp}}</td>
+          <td data-title="headers.enableSnat" sortable="'enableSnat'">{{router._enableSnat}}</td>
+          <!-- <td data-title="headers.projectName" sortable="'projectName'">{{router.projectName}}</td> -->
+        </tr>
+      </table>
+    </div>
+    <script type="text/ng-template" id="routerSubHeaderCheckbox.html">
+      <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all-routerSubTable" value="" />
+        <i class="iconfont"></i>
+      </label>
+    </script>
+    <script type="text/ng-template" id="staticRouteHeaderCheckbox.html">
+      <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all-staticRouteTable" value="" />
+        <i class="iconfont"></i>
+      </label>
+    </script>
+    <script type="text/ng-template" id="PortForwardingCheckbox.html">
+        <label class="checkbox">
+          <input type="checkbox" ng-model="checkFirst.checked" class="select-all" value="" />
+          <i class="iconfont"></i>
+        </label>
+      </script>
+
+    <div ng-controller="detailCtrl" class="router-detail">
+        <pane class="detail-body" animation="animation">
+            <div class="tab-content">
+                <div class="detail-row">
+                    <div class="detail-title">
+                        <a class="an-close" ng-href="/cvm/routers"><i class="icon-aw-mail-reply"></i></a>
+                        <span>{{"aws.routers.routerDetail"|translate}}</span>
+                    </div>
+                    <div class="detail-info  tab-offset-right">
+                        <uib-tabset active="active" justified="true">
+                            <uib-tab index="0" heading='{{"aws.routers.subnetList" | translate}}' ng-click="interfaceListTab()" >
+                                <div class="table-action">
+                                    <button type="button" ng-click="updateSubnet('new')" class="btn btn-new" licence-type = "btn" id="resource-router-subnet-relateSubnet"><i class="icon-aw-xz"></i>{{"aws.routers.linkSubnet"|translate}}</button>
+                                    <button type="button" ng-click="updateSubnet('edit',editData)" ng-disabled="editRouterSubBtn" class="btn btn-normal" licence-type = "btn" id="resource-router-subnet-edit"><i class="icon-aw-modify"></i>{{"aws.action.edit"|translate}}</button>
+                                    <button type="button" ng-click="unLinkSubnet(routerSubTable.checkedItems)" class="btn btn-normal" ng-disabled="delRouterSubBtn" licence-type = "btn" id="resource-router-subnet-relieveSubnet"> <i class="icon-aw-jcgl"></i>{{"aws.routers.unLinkSubnet"|translate}}</button>
+                                    
+                                    <div class="pull-right">
+                                        <setting title-data="routerDetailTitleData" site-title="routerDetailTitleName" table-data="routerSubTable.data" search-tearm="routerDetailSearchTearm(obj)"></setting>
+                                        <button type="button" class="btn btn-renovat right-ports" ng-click="refreshRouterDetail()"><i class="icon-aw-refresh"></i></button>
+                                        <div class="search-box right-ports">
+                                            <form name="searchForm" novalidate ng-keyup="routerSubSearch()">
+                                                <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+                                                <i class="icon-aw-search"></i>
+                                                </button>
+                                                <input type="text" class="form-control" autocomplete="off" maxlength="128" name="routerSub" ng-model="routerDetailSearch.routerSubItem" placeholder='{{"aws.action.search"|translate}}' />
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <empty-tip empty-type="loadRouterSubData" tip-id="'routerSub-detial-tip-msg'"></empty-tip>
+                                <table ng-table="routerSubTable" class="table">
+                                    <tr ng-repeat="routerDetail in $data">
+                                        <td header="'routerSubHeaderCheckbox.html'">
+                                            <label class="checkbox" ng-if="routerDetail.deviceOwner !='network:router_gateway'">
+                                            <input type="checkbox" ng-model="checkboxes.items[routerDetail.id]" />
+                                            <i class="iconfont"></i>
+                                            </label>
+                                        </td>
+                                        <td data-title="headers.portName" sortable="'name'" ng-if="routerDetailTitleData[0].value">{{routerDetail._name}}</td>
+                                        <td data-title="headers.portIp" ng-if="routerDetailTitleData[1].value"><span ng-repeat="ipAddr in routerDetail.ip">{{ipAddr}}<br/></span></td>
+                                        <td data-title="headers.linkSubnet" ng-if="routerDetailTitleData[2].value"><span ng-repeat="subIp in routerDetail.subnetIP">{{subIp}}<br/></span></td>
+                                        <td data-title="headers.status" sortable="'status'" ng-if="routerDetailTitleData[3].value" >{{routerDetail._status}}</td>
+                                        <td data-title="headers.adminState" sortable="'adminState'" ng-if="routerDetailTitleData[4].value" >{{routerDetail._adminState}}</td>
+                                        <td data-title="headers.deviceOwner" sortable="'deviceOwner'" ng-if="routerDetailTitleData[5].value" >{{routerDetail.deviceOwner}}</td>
+                                    </tr>
+                                </table>
+                            </uib-tab>
+                            <uib-tab index="1" heading="{{'aws.routers.staticRouteTable' | translate}}" ng-click="staticRouteTab()" >
+                                <div class="table-action">
+                                    <button type="button" data-toggle="modal" ng-click="addStaticRoute()" class="btn btn-new" licence-type = "btn" id="resource-router-staticRoute-addRouter"><i class="icon-aw-add-to2"></i>{{'aws.routers.addRouteTable' | translate}}</button>
+                                    <button type="button" data-toggle="modal" ng-click="delStaticRoute(checkedItems)" ng-disabled="staticRouterBtn" class="btn btn-normal" licence-type = "btn" id="resource-router-staticRoute-delRouter"><i class="icon-aw-modify"></i>{{'aws.routers.delRouteTable' | translate}}</button>
+                                    <div class="pull-right">
+                                        <button type="button" class="btn btn-renovat right-ports" ng-click="refreshStaticRoute()"><i class="icon-aw-refresh"></i></button>
+                                        <div class="search-box right-ports">
+                                            <form name="searchForm" novalidate ng-keyup="staticRouterSearch()">
+                                                <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+                                                <i class="icon-aw-search"></i>
+                                                </button>
+                                                <input type="text" class="form-control" autocomplete="off" maxlength="128" name="staticRouter" ng-model="routerDetailSearch.staticRouterItem" placeholder='{{"aws.action.search"|translate}}' />
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <empty-tip empty-type="loadStaticRouteData" tip-id="'routerStatic-detial-tip-msg'"></empty-tip>
+                                <table ng-table="staticRouteTable" class="table">
+                                    <tr ng-repeat="staticRoute in $data">
+                                        <td header="'staticRouteHeaderCheckbox.html'">
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="checkboxes.items[staticRoute.index]" />
+                                                <i class="iconfont"></i>
+                                            </label>
+                                        </td>
+                                        <td data-title="'aws.routers.destinationCIDR' | translate " sortable="'destination'">{{staticRoute.destination}}</td>
+                                        <td data-title="'aws.routers.nexthop' | translate " sortable="'nexthop'">{{staticRoute.nexthop}}</td>
+                                    </tr>
+                                </table>
+                            </uib-tab>
+                            <uib-tab index="2" heading="{{'aws.routers.portForwarding' | translate}}" ng-click="portForwardingTab()" >
+                                <div class="alert alert-gray-font multi-mes alert-no-close">
+                                    <div class="alert-content">
+                                        <div class="alert-text">
+                                          {{'aws.routers.portForwardingInfo'|translate}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-action">
+                                  <button type="button" ng-click="creatPortForwarding(editData)" class="btn btn-new"  ng-disabled="prompt" licence-type = "btn" id="resource-router-portFor-create" ><i class="icon-aw-add-to2"></i>{{'aws.action.create' | translate}}</button>
+                                  <button type="button" ng-click="delPortForwarding()" ng-disabled="!isPortForwarding" class="btn btn-normal" licence-type = "btn" id="resource-router-portFor-del"><i class="icon-aw-delete"></i>{{'aws.action.del' | translate}}</button>                          
+                                <!-- <button type="button" class="btn btn-refresh set-up" ng-click="portForwardSetUp()"><i class="icon-aw-gear"></i></button>                           -->
+                                <!-- <div class='dropdown show-title'>
+                                    <button type='button' class='btn btn-renovat dropdown-toggle' data-toggle='dropdown'>
+                                    <i class='icon-aw-gear'></i>
+                                    </button>
+                                    <ul class='dropdown-menu'>
+                                        <li ng-repeat='title in titleData track by $index'>
+                                            <div class='check-left'>
+                                                <label class='checkbox'>
+                                                    <input type='checkbox' ng-model='title.value' ng-change='isShowTitle($index,title)' ng-disabled='title.disable'/>
+                                                    <i class='iconfont'></i>
+                                                    <span>{{'aws.'+title.name|translate}}</span>
+                                                </label>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div> -->
+                                <div type="button" class="btn btn-renovat right-ports" ng-click="portForwardReset()">
+                                    <i class="icon-aw-refresh"></i>
+                                </div>
+                                <div class="search-box port-forwarding">
+                                    <form name="searchForm" novalidate ng-keyup="portForwardingSearch()">
+                                        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="portForwardTab" ng-model="routerDetailSearch.portForwardingItem" placeholder='{{"aws.action.search"|translate}}' />
+                                    </form>
+                                </div>
+
+                                </div>
+                                    <table ng-table="portForwardingTable" class="table">
+                                        <tr ng-repeat="portForwarding in $data">
+                                            <td header="'PortForwardingCheckbox.html'" class="check-td"> 
+                                                <label class="checkbox">
+                                                    <input type="checkbox" ng-model="checkFirst.items[portForwarding.id]" value="portForwarding.id" />
+                                                    <i class="iconfont"></i>
+                                                </label>
+                                            </td>
+                                            <td data-title="'aws.routers.agreement' | translate " sortable="'protocol'" ng-if="titleData[0].value">{{portForwarding.protocol}}</td>
+                                            <td data-title="'aws.routers.outerAddress' | translate " sortable="'outer_add'" ng-if="titleData[1].value">{{portForwarding.outer_add}}</td>
+                                            <td data-title="'aws.routers.outerPort' | translate " sortable="'out_port'" ng-if="titleData[2].value">{{portForwarding.out_port}}</td>
+                                            <td data-title="'aws.routers.innerAddress' | translate " sortable="'in_addr'" ng-if="titleData[3].value">{{portForwarding.in_addr}}</td>
+                                            <td data-title="'aws.routers.innerPort' | translate " sortable="'in_port'" ng-if="titleData[4].value">{{portForwarding.in_port}}</td>
+                                        </tr>
+                                    </table>
+                                    <div class="alert-tip alert ng-isolate-scope alert-warning" ng-class="['alert-' + (type || 'warning'), closeable ? 'alert-dismissible' : null]" role="alert" type="warning" ng-if="prompt">
+                                        <div>
+                                            <span class="ng-binding ng-scope">{{'aws.routers.placeholder.noPortForwarding' | translate}}</span>
+                                        </div>
+                                    </div>    
+                                    <p ng-if="noData">{{'aws.common.empty' | translate}}</p>
+                            </uib-tab>
+                        </uib-tabset>
+                    </div>
+                </div>
+            </div>    
+        </pane>
+    </div>
+    <script type="text/ng-template" id="editRouterModel.html">
+      <div class="modal-common modal-smallest">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">{{"aws.routers.editRouter"|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="editRouterForm">
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.routerName"|translate}}：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="name" ng-model="routerForm.name" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.routers.routerName"|translate}}' required>
+                <div class="error" ng-messages='editRouterForm.name.$error' ng-if="submitted || editRouterForm.name.$dirty">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                  <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="editConfirm(editRouterForm)" ng-disabled="formInvalid">{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="setGatewayModal.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">{{"aws.routers.setRouteGateway" | translate }}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="addGatewayForm">
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.routerExtNet"|translate}}：</label>
+              <div class="controls">
+                <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.routerExtNet'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                <ui-select ng-model="setGatewayForm.selectedNet"  ng-change="changeExtNet(setGatewayForm.selectedNet)" name="extnet" title='{{"aws.routers.placeholder.routerExtNet"|translate}}' required>
+                  <ui-select-match placeholder={{extNetsPlaceholder}} >{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="extNet in extNets.options | propsFilter:{name:$select.search}">
+                    <div ng-bind-html="extNet.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <div class="error" ng-messages="addGatewayForm.extnet.$error" ng-if="interacted(addGatewayForm)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{"aws.routers.assignExternalSubnet"|translate}}：</label>
+              <div class="controls">
+                <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.assignExternalSubnet'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                <label class="checkbox">
+                  <input type="checkbox" class="form-controls chk" name="assignSub" ng-model="setGatewayForm.assignSub"  />
+                  <i class="iconfont"></i>
+                </label>
+              </div>
+            </div>
+            <div ng-show="setGatewayForm.assignSub" >
+              <div class="control-group">
+                <label class="control-label">{{"aws.floatingIps.placeholder.choseSubnet"|translate}}：</label>
+                <div class="controls">
+                  <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.choseSubnet'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                  <ui-select ng-model="setGatewayForm.selectedSubnet"  class="ui-select-tips"  ng-change="changeSubnet(setGatewayForm.selectedSubnet)"  title='{{"aws.floatingIps.placeholder.choseSubnet"|translate}}' >
+                    <ui-select-match placeholder='{{"aws.floatingIps.placeholder.choseSubnet"|translate}}' >{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="subnet in subnets track by $index">
+                      <div ng-mouseover="mouseSub(subnet,'over')" ng-mouseleave="mouseSub(subnet,'out')">
+                        <div ng-bind-html="subnet.name | highlight: $select.search"></div>
+                        <div class="ui-select-tips-detail" ng-show="selectedSubPoolList.length">
+                          <div class="arrow-up"></div>
+                          <ul>
+                            <li ng-repeat="sub in subPool_detail track by $index" ng-if="sub.showSubSegDetail">{{sub.sub_pool}}</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label">{{"aws.routers.assignExternalGatewayIp"|translate}}：</label>
+                <div class="controls">
+                  <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.assignExternalGatewayIp'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                  <label class="checkbox">
+                    <input type="checkbox" class="form-controls chk" name="assignIP" ng-model="setGatewayForm.assignIP"  />
+                    <i class="iconfont"></i>
+                  </label>
+                </div>
+              </div>
+              <div class="control-group" ng-show="setGatewayForm.assignIP" >
+                <label class="control-label">{{"aws.routers.subSegment"|translate}}：</label>
+                <div class="controls">
+                  <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.subSegment'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                  <ui-select ng-model="setGatewayForm.selectedSubPool" ng-change="changeSubPool(setGatewayForm.selectedSubPool)"  title='{{"aws.routers.choseSubSegment"|translate}}' >
+                    <ui-select-match placeholder={{"aws.routers.choseSubSegment"|translate}} >{{$select.selected.sub_pool}}</ui-select-match>
+                    <ui-select-choices repeat="subnet in selectedSubPoolList track by $index">
+                      <div ng-bind-html="subnet.sub_pool | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+              <div class="control-group ip_cidr" ng-show="setGatewayForm.assignIP" >
+                <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.routerGatewayIp"|translate}}：</label>
+                <div class="controls clearfix">
+                  <div class="flex">
+                    <div class="ip_text">
+                      <input type="text" class="form-controls" name="ip_0" id="ip_0" ng-model="setGatewayForm.init_cidr.ip_0" ng-keyup="setCheckValueFunc()" placeholder="{{setGatewayForm.placeholder.ip_0}}" ng-readonly="setGatewayForm.readonly.ip_0" />
+                      <div class="error ip_0" ng-if="interacted(addGatewayForm)">
+                        <div ng-show="required.ip_0">{{'aws.errors.required'|translate}}</div>
+                        <div ng-show="invalid.ip_0">{{"aws.routers.enter"|translate}}{{setGatewayForm.min_num.ip_0}}~{{setGatewayForm.max_num.ip_0}} {{"aws.routers.integer"|translate}}</div>
+                      </div> 
+                    </div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip_text">
+                      <input type="text" class="form-controls" name="ip_1" id="ip_1" ng-model="setGatewayForm.init_cidr.ip_1" ng-keyup="setCheckValueFunc()" placeholder="{{setGatewayForm.placeholder.ip_1}}" ng-readonly="setGatewayForm.readonly.ip_1" />
+                      <div class="error ip_1" ng-if="interacted(addGatewayForm)">
+                          <div ng-show="required.ip_1">{{'aws.errors.required'|translate}}</div>
+                          <div ng-show="invalid.ip_1">{{"aws.routers.enter"|translate}}{{setGatewayForm.min_num.ip_1}}~{{setGatewayForm.max_num.ip_1}} {{"aws.routers.integer"|translate}}</div>
+                      </div>
+                    </div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip_text">
+                      <input type="text" class="form-controls" name="ip_2" id="ip_2" ng-model="setGatewayForm.init_cidr.ip_2" ng-keyup="setCheckValueFunc()" placeholder="{{setGatewayForm.placeholder.ip_2}}" ng-readonly="setGatewayForm.readonly.ip_2" />
+                      <div class="error ip_2"  ng-if="interacted(addGatewayForm)">
+                        <div ng-show="required.ip_2">{{'aws.errors.required'|translate}}</div>
+                        <div ng-show="invalid.ip_2">{{"aws.routers.enter"|translate}}{{setGatewayForm.min_num.ip_2}}~{{setGatewayForm.max_num.ip_2}} {{"aws.routers.integer"|translate}}</div>
+                      </div>
+                    </div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip_text">
+                      <input type="text" class="form-controls" name="ip_3" id="ip_3" ng-model="setGatewayForm.init_cidr.ip_3" ng-keyup="setCheckValueFunc()" placeholder="{{setGatewayForm.placeholder.ip_3}}" ng-readonly="setGatewayForm.readonly.ip_3" />
+                      <div class="error ip_3" ng-if="interacted(addGatewayForm)">
+                        <div ng-show="required.ip_3">{{'aws.errors.required'|translate}}</div>
+                        <div ng-show="invalid.ip_3">{{"aws.routers.enter"|translate}}{{setGatewayForm.min_num.ip_3}}~{{setGatewayForm.max_num.ip_3}} {{"aws.routers.integer"|translate}}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="setGatewayConfirm(addGatewayForm)" ng-disabled="formSubmitted">{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="routerDetailModal.html">
+      <div class="modal-common modal-smallest">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">{{modalTitle}}</h3>
+        </div>
+        <div class="modal-body">
+          <form name="routerDetailForm">
+            <div class="control-group router-subnet-add" ng-if="!editRouterDetail" >
+                <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.subnet"|translate}}：</label>
+                <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.linkSubnet'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                    <ui-select ng-model="routerDetail.selectedSub" name="tenantsub" ng-disabled="options.disabled" title='{{"aws.routers.choseSubnet"|translate}}' required >
+                    <ui-select-match placeholder={{subPlaceholder}} >{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="sub in subnetsInfo.options | propsFilter:{name:$select.search} ">
+                        <div ng-bind-html="sub.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages="routerDetailForm.tenantsub.$error" ng-if="interacted(routerDetailForm.tenantsub)">
+                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group router-subnet-edit" ng-if="editRouterDetail">
+                <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.portName"|translate}}：</label>
+                <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.portName'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                    <input type="text" class="form-controls" name="portName" ng-model="routerDetail.portName" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.routers.portName"|translate}}' style="width:100%;" required>
+                    <div class="error" ng-messages='routerDetailForm.portName.$error' ng-if="interacted(routerDetailForm.portName)">
+                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                    <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                    <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+                    </div>
+                </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="routerDetailConfirm(routerDetail,routerDetailForm)" ng-disabled="formSubmitted" >{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="addStaticRoute.html">
+      <div class="modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">{{"aws.routers.addRouteTable" | translate }}</h3>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-dismissable alert-info">
+            <span>{{"aws.routers.addRouteTableInstruction" | translate }}</span>
+          </div>
+          <form name="staticRouteForm">
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.destinationCIDR" | translate }}：</label>
+              <div class="controls">
+                <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.destinationCIDR'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                <input type="text" class="form-controls" name="destination_cidr" ng-model="addStaticRoute.destination"  placeholder="{{'aws.routers.placeholder.ipExample' | translate }}" cidr required>
+                <div class="error" ng-messages='staticRouteForm.destination_cidr.$error' ng-if="interacted(staticRouteForm.destination_cidr)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="cidr">{{"aws.errors.cidrPatternError"|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.nexthop" | translate }}：</label>
+              <div class="controls">
+                <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.nexthop'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                <input type="text" class="form-controls" name="nexthop" ng-model="addStaticRoute.nexthop" placeholder= "{{'aws.routers.unusedIp' | translate }}" ipaddrpattern required>
+                <div class="error" ng-messages='staticRouteForm.nexthop.$error' ng-if="interacted(staticRouteForm.nexthop)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="ipaddrpattern">{{"aws.errors.ipAddrPatternError"|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="staticRouteConfirm(staticRouteForm)" ng-disabled="formSubmitted" >{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="createPortForwarding.html">
+        <div class="modal-common portForwarding">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+                <h3 class="modal-title">{{'aws.action.create' | translate}}</h3>
+            </div>
+            <div class="modal-body">
+                <form name="portForwardingForm">
+                    <!-- 协议 -->
+                    <div class="control-group" >
+                        <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.agreement"|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.agreement'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <ui-select ng-model="agreement.name" name="protocol" ng-disabled="" title='{{"aws.routers.choseSubnet"|translate}}' required >
+                                <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="protocol as protocol in protocolList | propsFilter:{name:$select.search} ">
+                                <div ng-bind-html="protocol.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <!-- <div class="error" ng-messages="(submitInValid ||portForwardingForm.protocol.$dirty) && portForwardingForm.protocol.$error">
+                                <form-validate></form-validate>
+                            </div> -->
+                        </div>
+                    </div>
+                    <!-- 外网地址 -->
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.routers.outerAddress"|translate}}：</label>
+                        <div class="controls"> 
+                             <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.outerAddress'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <input type="text" class="form-controls" ng-model="routerIpAddress" disabled="false">
+                        </div>    
+                    </div>
+                    <!-- 外网端口 -->
+                    <div class="control-group port" >
+                        <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.outerPort"|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.outerPort'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <input type="text" class="form-controls" name="outPort" ng-model="newPortForwarding.outPort" placeholder='{{"aws.routers.placeholder.outerPort"|translate}}' required ng-pattern="/(^[1-9]\d{0,3}$)|(^[1-5]\d{4}$)|(^6[0-4]\d{3}$)|(^65[0-4]\d{2}$)|(^655[0-2]\d$)|(^6553[0-5]$)/"/>
+                            <span class="markedWord">{{"aws.routers.innerlimite"|translate}}</span>
+                            <div class="error clearfix" ng-messages="(submitInValid ||portForwardingForm.outPort.$dirty) && portForwardingForm.outPort.$error">
+                                <form-validate pattern-msg="portLimit"></form-validate>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <!-- 内网地址单选框 -->
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.routers.innerAddress'|translate}}：</label>
+                        <div class="controls">
+                            <div class="radio-item clearFix">
+                                <label class="radio"><input type="radio" ng-model="choiceOrcustom" name="innerAddress" value="1"/><i class="iconfont"></i>{{'aws.routers.ipAddress'|translate}}</label>
+                                <label class="radio"><input type="radio" ng-model="choiceOrcustom" name="innerAddress" value="0" ng-disabled = "!isGetCouldIpAddressList"/><i class="iconfont"></i>{{'aws.routers.custom'|translate}}</label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 云主机ip地址 -->
+                    <div class="control-group" ng-if="choiceOrcustom==1">
+                        <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.ipAddress"|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.insIpAddress'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <ui-select ng-model="couldIpAddress.name" name="ipAddress"  title='{{"aws.routers.choseSubnet"|translate}}' required ng-change="changeIt(couldIpAddress.name)" ng-disabled="!couldIpAddressList.length">
+                                <ui-select-match placeholder= "{{couldIpAddressList.length>0?('aws.routers.placeholder.choiceVm' | translate):('aws.routers.placeholder.noVm' | translate)}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="sub in couldIpAddressList | propsFilter:{name:$select.search} ">
+                                <div ng-bind-html="sub.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-messages="(submitInValid ||portForwardingForm.ipAddress.$dirty) && portForwardingForm.ipAddress.$error">
+                                <form-validate></form-validate>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 自定义ip地址 -->
+                   
+                    <div class="control-group" ng-if="choiceOrcustom==0">{{inAddr}}
+                        <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.customIpAddress"|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.customIpAddress'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <!-- <input type="text" class="form-controls" name="name" ng-model="routerForm.name" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.routers.routerName"|translate}}' required> -->
+                            <!-- <input type="text" class="form-controls" name="innerPort" ng-model="innerPort" ng-pattern="" placeholder='{{"aws.routers.placeholder.innerPort"|translate}}' required ng-pattern="/^(0|6553[6-9]|655[4-9][0-9]|65[6-9][0-9]{2}|6[6-9][0-9]{3}|[7-9][0-9]{4}|[1-9][0-9]{5,})$/"> -->
+
+                            <input type="text" class="form-controls" name="customIpAddress" ng-disabled="!noSubnetLimit||!subnetLimitList.length" ng-model="customIpAddress.inAddr" placeholder= "{{!subnetLimitList.length>0?('aws.routers.placeholder.noPortLimit' | translate):('aws.routers.placeholder.ipAddress' | translate)}}" port-transfer  subnetlist="subnetLimitList" required>
+                            <div class="error" ng-messages="(submitInValid ||portForwardingForm.customIpAddress.$dirty) && portForwardingForm.customIpAddress.$error">
+                                <div ng-message="required">{{"aws.message.required"|translate}}</div>
+                                <div ng-message="ipinrange">{{"aws.routers.placeholder.subnetLimit"|translate}}
+                                    <span ng-repeat="items in subnetLimitList">
+                                       {{items.start}}-{{items.end}}
+                                    </sapn>&nbsp;&nbsp;
+                                </div>
+                            </div> 
+                            <p ng-show="subnetLimit">{{"aws.routers.placeholder.subnetLimit"|translate}}
+                                <span ng-repeat="items in subnetLimitList">
+                                    <a>{{items.start}}</a>
+                                    <a>-</a>
+                                    <a>{{items.end}}</a>
+                                </sapn>
+                            </p> 
+                            <p ng-if="noPortLimit">{{"aws.routers.placeholder.noPortLimit"|translate}}</p> 
+                        </div>    
+                    </div>
+                    <!-- 内网端口 -->
+                    <div class="control-group port">
+                        <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.routers.innerPort"|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.routers.info.innerPort'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <input type="text" class="form-controls" name="innerPort" ng-model="newPortForwarding.inPort" placeholder='{{"aws.routers.placeholder.innerPort"|translate}}' required ng-pattern="/(^[1-9]\d{0,3}$)|(^[1-5]\d{4}$)|(^6[0-4]\d{3}$)|(^65[0-4]\d{2}$)|(^655[0-2]\d$)|(^6553[0-5]$)/">
+                            <span class="markedWord">{{"aws.routers.innerlimite"|translate}}</span>
+                            <div class="error" ng-messages="(submitInValid ||portForwardingForm.innerPort.$dirty) && portForwardingForm.innerPort.$error">
+                                <form-validate pattern-msg="portLimit"></form-validate>
+                            </div>    
+                        </div>
+                    </div>
+                </form>
+            </div>
+           
+            <div class="modal-footer">
+		<button class="btn btn-normal" type="button" ng-click="portForwardingConfirm(portForwardingForm,choiceOrcustom)">{{"aws.action.ok"|translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+            </div>
+        </div>
+    </script>
+</div>

@@ -1,0 +1,307 @@
+<div class="instances-modal modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">物理机申请</h3>
+        </div>
+        <div class="modal-body clearFix">
+          <uib-alert ng-show="phyinsProText " type="danger" >
+              <div>
+                <span ng-class='{"tip":phyinsProText}' ng-hide="phyinsDomText">{{phyinsProText}}</span>
+                <span ng-class='{"tip":phyinsDomText}'>{{phyinsDomText}}</span>
+              </div>
+            </uib-alert>
+          <div class="left">
+            <form action="" name="InstanceForm" novalidate>
+              <fieldset>
+                <h5 class="title"><span>{{'aws.instances.addinstances.detail'|translate}}</span></h5>
+                <div class="control-items2 clearfix">
+                  <div class="control-group">
+                    <label class="control-label"title="{{'aws.instances.addinstances.instanceName'|translate}}"><span class="red">*</span>物理机名称：</label>
+                    <div class="controls"> 
+                      <input type="text" class="form-controls" name="hostName" ng-model="insForm.name" placeholder="请输入物理机名称" ng-pattern="/^([0-9a-zA-Z]|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required/>
+                      <div class="error" ng-messages="(submitInValid ||InstanceForm.hostName.$dirty) && InstanceForm.hostName.$error">
+                        <form-validate pattern-msg="'aws.errors.vmNamevalidate'|translate"></form-validate>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>{{'aws.instances.addinstances.num'|translate}}：</label>
+                    <div class="controls">
+                      <input type="text" class="form-controls" name="hostNum"  ng-model="insForm.hostNum" ng-disabled="true" min="1" max="10"  limitnumrange required/>
+                      <div class="error" ng-messages="(submitInValid ||InstanceForm.hostNum.$dirty) && InstanceForm.hostNum.$error">
+                        <form-validate pattern-msg="'aws.errors.maxinteger'|translate"></form-validate>
+                        <div ng-message="limitnumrange">{{"aws.errors."+['limit_1_10']|translate}}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <fieldset>
+                <h5 class="title"><span>{{'aws.instances.addinstances.imgChoice'|translate}}</span></h5>
+                <div class="control-items2 clearfix">
+                  <!-- 系统架构 -->
+                  <div class="control-group">
+                    <label class="control-label">{{'aws.instances.addinstances.arch'|translate}}：</label>
+                    <div class="controls btn-item2">
+                      <div class="btn-item-group">
+                        <button type="button" class="type-btn" ng-disabled="options.disabled" ng-class='{"active":item.value === options.arch}' ng-click="framework(item)" ng-repeat="item in vm.framework"><span>{{item.text}}</span></button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- 镜像类型是否公有 -->
+                  <div class="control-group">
+                    <label class="control-label">{{'aws.instances.addinstances.type'|translate}}：</label>
+                    <div class="controls">
+                      <div class="btn-item-group">
+                        <button type="button" class="type-btn" ng-class='{"active":item.value === options.img}' ng-click="choosen(item)" data-value="{{item.value}}" ng-repeat="item in vm.imgType">
+                          <span>{{item.text}}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-items2 clearfix">
+                  <!-- 系统类型 -->
+                  <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>{{'aws.instances.addinstances.os'|translate}}：</label>
+                    <div class="controls">
+                      <ui-select ng-model="image.selected" ng-change="os_changed()" name="imageName" ng-disabled="!osType.length" title="{{image.selected.type}}"required>
+                        <ui-select-match placeholder="{{'aws.instances.addinstances.oxChoice'|translate}}">{{$select.selected.type}}</ui-select-match>
+                        <ui-select-choices repeat="image in osType | filter:{type:$select.search}">
+                          <div ng-bind-html="image.type | highlight: $select.search"></div>
+                        </ui-select-choices>
+                      </ui-select>
+                      <div  class="error" ng-messages="(submitInValid ||InstanceForm.imageName.$dirty) && InstanceForm.imageName.$error">
+                        <form-validate ></form-validate>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- 镜像名称-->
+                  <div class="control-group">
+                    <label class="control-label"><span class="red">*</span>{{'aws.instances.imgName'|translate}}：</label>
+                    <div class="controls">
+                      <ui-select ng-model="arch.selected" name="archName" title="{{arch.selected.name}}" ng-change="changeArchName(arch.selected)" required ng-disabled="!images2.length" >
+                        <ui-select-match placeholder="{{'aws.instances.addinstances.imgNameChoice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                        <ui-select-choices repeat="arch  in images2 | filter: {name: $select.search}">
+                          <div ng-bind-html="arch.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                      </ui-select>
+                      <div  class="error" ng-messages="(submitInValid ||InstanceForm.archName.$dirty) && InstanceForm.archName.$error">
+                        <form-validate ></form-validate>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <fieldset>
+                <h5 class="title"><span>规格</span></h5>
+                <div class="control-group">
+                  <label class="control-label"><span class="red">*</span>规格：</label>
+                  <div class="controls">
+                    <ui-select ng-model="options.flavor" name="flavorName" ng-change="chooseCpuMem(options.flavor)" required ng-disabled="!flavorNormalList.length">
+                      <ui-select-match placeholder="{{'aws.instances.addinstances.choiceConfig'|translate}}">{{$select.selected.text}}</ui-select-match>
+                      <ui-select-choices repeat="conf in flavorNormalList  | filter: {id: $select.search}">
+                        <div ng-bind-html="conf.text | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages="(submitInValid ||InstanceForm.flavorName.$dirty) && InstanceForm.flavorName.$error">
+                      <form-validate ></form-validate>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <fieldset>
+                <h5 class="title"><span>{{'aws.instances.addinstances.net_setting'|translate}}</span></h5>
+                <div class="control-group">
+                  <label class="control-label"><span class="red">*</span>{{'aws.instances.addinstances.net'|translate}}：</label>
+                  <div class="controls">
+                    <ui-select ng-model="network.selected" class="ui-select-tips" name="netName" ng-change="changeNet(network.selected)" ng-disabled="!insForm.networkList.length" required >
+                      <ui-select-match placeholder="{{'aws.instances.addinstances.netChoice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="network in insForm.networkList track by $index">
+                        <div  ng-mouseover="mouseNet(network,'over')" ng-mouseleave="mouseNet(network,'out')">
+                          <div ng-bind-html="network.name | highlight: $select.search"></div>
+                          <div class="ui-select-tips-detail" ng-show="insForm.net_subSegDetail.length">
+                            <div class="arrow-up"></div>
+                            <ul>
+                              <li ng-repeat="sub in insForm.net_subSegDetail track by $index" ng-if="sub.showSubSegDetail && sub.id==network.id " >{{sub.sub_name}}</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </ui-select-choices>
+                    </ui-select>
+                    <div  class="error" ng-messages="(submitInValid ||InstanceForm.netName.$dirty) && InstanceForm.netName.$error">
+                      <form-validate ></form-validate>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-group" ng-if="network.selected">
+                  <label class="control-label">{{'aws.instances.addinstances.config_ip'|translate}}：</label>
+                  <div class="controls">
+                    <label class="checkbox">
+                      <input type="checkbox" class="form-controls chk" name="assignIP" ng-model="network.assignIP" ng-disabled="insForm.hostNum != 1"  />
+                      <i class="iconfont"></i>
+                    </label>
+                  </div>
+                </div>
+                <div class="control-group" ng-if="network.assignIP && insForm.hostNum == 1">
+                  <label class="control-label"><span class="red">*</span>子网网段：</label>
+                  <div class="controls">
+                    <ui-select ng-model="network.subSegment" name="subSegment" ng-change="changeSubSegment(network.subSegment)" ng-disabled="!subSegmentList.length" required >
+                      <ui-select-match placeholder="请选择子网网段">{{$select.selected.sub_name}}</ui-select-match>
+                      <ui-select-choices repeat="seg in subSegmentList track by $index">
+                        <div ng-bind-html="seg.sub_name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                    <div  class="error" ng-messages="(submitInValid ||InstanceForm.subSegment.$dirty) && InstanceForm.subSegment.$error">
+                      <form-validate ></form-validate>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-group ip_cidr" ng-if="network.assignIP && insForm.hostNum == 1">
+                  <label class="control-label" title="{{'aws.instances.addinstances.ipAddr'|translate}}"><span class="red">*</span>{{"aws.instances.addinstances.ipAddr"|translate}}：</label>
+                  <div class="controls clearfix">
+                    <div class="flex">
+                      <div class="ip_text">
+                        <input type="text" class="form-controls" name="ip_0" id="ip_0" ng-model="network.init_cidr.ip_0" ng-keyup="setCheckValueFunc()" placeholder="{{network.placeholder.ip_0}}" ng-readonly="network.readonly.ip_0" ng-focus="network.repeatIp=false;"  />
+                        <div class="error ip_0" ng-if="interacted(InstanceForm)">
+                          <div ng-show="required.ip_0">{{'aws.errors.required'|translate}}</div>
+                          <div ng-show="invalid.ip_0">{{'aws.instances.addinstances.enter'|translate}}{{network.min_num.ip_0}}~{{network.max_num.ip_0}}{{'aws.instances.addinstances.integer'|translate}}</div>
+                        </div> 
+                      </div>
+                      <div class="ip-spilt">.</div>
+                      <div class="ip_text">
+                        <input type="text" class="form-controls" name="ip_1" id="ip_1" ng-model="network.init_cidr.ip_1" ng-keyup="setCheckValueFunc()" placeholder="{{network.placeholder.ip_1}}" ng-readonly="network.readonly.ip_1" ng-focus="network.repeatIp=false;"  />
+                        <div class="error ip_1" ng-if="interacted(InstanceForm)">
+                            <div ng-show="required.ip_1">{{'aws.errors.required'|translate}}</div>
+                            <div ng-show="invalid.ip_1">{{'aws.instances.addinstances.enter'|translate}}{{network.min_num.ip_1}}~{{network.max_num.ip_1}}{{'aws.instances.addinstances.integer'|translate}}</div>
+                        </div>
+                      </div>
+                      <div class="ip-spilt">.</div>
+                      <div class="ip_text">
+                        <input type="text" class="form-controls" name="ip_2" id="ip_2" ng-model="network.init_cidr.ip_2" ng-keyup="setCheckValueFunc()" placeholder="{{network.placeholder.ip_2}}" ng-readonly="network.readonly.ip_2" ng-focus="network.repeatIp=false;"  />
+                        <div class="error ip_2"  ng-if="interacted(InstanceForm)">
+                          <div ng-show="required.ip_2">{{'aws.errors.required'|translate}}</div>
+                          <div ng-show="invalid.ip_2">{{'aws.instances.addinstances.enter'|translate}}{{network.min_num.ip_2}}~{{network.max_num.ip_2}}{{'aws.instances.addinstances.integer'|translate}}</div>
+                        </div>
+                      </div>
+                      <div class="ip-spilt">.</div>
+                      <div class="ip_text">
+                        <input type="text" class="form-controls" name="ip_3" id="ip_3" ng-model="network.init_cidr.ip_3" ng-keyup="setCheckValueFunc()" placeholder="{{network.placeholder.ip_3}}" ng-readonly="network.readonly.ip_3" ng-focus="network.repeatIp=false;"  />
+                        <div class="error ip_3" ng-if="interacted(InstanceForm)">
+                          <div ng-show="required.ip_3">{{'aws.errors.required'|translate}}</div>
+                          <div ng-show="invalid.ip_3">{{'aws.instances.addinstances.enter'|translate}}{{network.min_num.ip_3}}~{{network.max_num.ip_3}}{{'aws.instances.addinstances.integer'|translate}}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="error" ng-if="network.repeatIp">
+                      <span>{{'aws.img.repeatIP'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <fieldset>
+                <h5 class="title systemInfoTitle"><span  ng-click="fold =!fold">系统信息<i class="conf-icon" ng-class="{'icon-aw-angle-up':fold,'icon-aw-angle-down':!fold}"></span></i></h5>
+              </fieldset>
+              <fieldset ng-show="fold">
+                <div class="control-group">
+                  <label class="control-label">主机名：</label>
+                  <div class="controls">
+                    <input type="text" class="form-control"  name="host_name" ng-model="insForm.hostname" placeholder="{{'aws.instances.addinstances.hostNameInput'|translate}}"  ng-maxlength="32" ng-pattern="/^[a-zA-Z][a-zA-Z0-9-]*$/"></input>
+                    <div class="error" ng-messages="(submitInValid ||InstanceForm.host_name.$dirty) && InstanceForm.host_name.$error">
+                      <form-validate pattern-msg="'aws.errors.hostnameValidate'|translate"></form-validate>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-items2 clearFix">
+                  <div class="control-group">
+                    <label class="control-label">{{'aws.instances.addinstances.passwd'|translate}}：</label>
+                    <div class="controls">
+                      <input type="password" class="form-controls" name="admin_pass" ng-model="insForm.admin_pass" id="pw2" ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,\/\-\^\%])[0-9a-zA-Z!@._:,\/\-\^\%]{8,16}$/" placeholder="{{'aws.instances.addinstances.password'|translate}}" />
+                      <div ng-messages="InstanceForm.admin_pass.$error">
+                        <div class="error" ng-message="pwCheck">{{'aws.instances.addinstances.notSamePasswd'|translate}}</div>
+                        <div class="error" ng-message="pattern">{{'aws.register.info.special_8_16'|translate}}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label class="control-label">{{'aws.instances.addinstances.repeatPasswd'|translate}}：</label>
+                    <div class="controls">
+                      <input type="password" class="form-controls" name="admin_comfirmpass" ng-model="admin_comfirmpass" ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,\/\-\^\%])[0-9a-zA-Z!@._:,\/\-\^\%]{8,16}$/" pw-check="pw2" placeholder="{{'aws.instances.addinstances.comfirmpassword'|translate}}" />
+                      <div ng-messages="InstanceForm.admin_comfirmpass.$error">
+                        <div class="error" ng-message="pwCheck">{{'aws.instances.addinstances.notSamePasswd'|translate}}</div>
+                        <div class="error" ng-message="pattern">{{'aws.register.info.special_8_16'|translate}}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            </form>
+          </div>
+          <div class="right">
+            <h5 class="title">{{'aws.instances.addinstances.conf_detail'|translate}}</h5>
+            <table class="table">
+              <tr>
+                <td>{{'aws.instances.addinstances.num'|translate}}</td>
+                <td>{{insForm.hostNum}}</td>
+              </tr>
+              <tr>
+                <td>{{'aws.instances.addinstances.arch'|translate}}</td>
+                <td>{{'aws.instances.addinstances.'+ options.arch |translate}}</td>
+              </tr>
+              <tr>
+                <td>{{'aws.instances.addinstances.os'|translate}}</td>
+                <td><span title="{{image.selected.type}}">{{image.selected.type}}</span></td>
+              </tr>
+              <tr>
+               <td>{{'aws.instances.imgName'|translate}}</td>
+               <td><span title="{{arch.selected.name}}">{{arch.selected.name}}</span></td>
+              </tr>
+              <tr>
+                <td>CPU</td>
+                <td>{{options.flavor.vcpus}} {{'aws.instances.addinstances.core'|translate}}</td>
+              </tr>
+              <tr>
+                <td>{{'aws.instances.addinstances.memory'|translate}}</td>
+                <td>{{options.flavor.ram_gb}} GB</td>
+              </tr>
+              <tr>
+                <td>硬盘</td>
+                <td>{{options.flavor.disk}} GB</td>
+              </tr>      
+            </table>
+            <div class="bar-wrap ins-quota addpInstanceQuota">
+                <div ng-show="ADMIN || DOMAIN_ADMIN">
+                  <div class="title">{{'aws.instances.quota.domInfo'|translate}}</div>
+                  <ul class="clearFix" >
+                    <li ng-if="domPhyInsNum">
+                      <div class="wrap-box">
+                        <span class="left">物理主机数量</span>
+                        <span class="right">{{'aws.instances.quota.used'|translate}}{{domPhyInsNum.used}}/{{domPhyInsNum.total}}</span>
+                      </div>
+                      <progress-bar progress-value="domPhyInsNum" bar-type="'width'" ></progress-bar>
+                    </li>
+                  </ul>
+                </div>
+                <div class="title">{{'aws.instances.quota.proInfo'|translate}}</div>
+                <ul class="clearFix" >
+                  <li ng-if="proPhyInsNum">
+                    <div class="wrap-box">
+                      <span class="left">物理主机数量</span>
+                      <span class="right">{{'aws.instances.quota.used'|translate}}{{proPhyInsNum.used}}/{{proPhyInsNum.total}}</span>
+                    </div>
+                    <progress-bar progress-value="proPhyInsNum" bar-type="'width'" ></progress-bar>
+                  </li>
+                </ul>
+              </div>
+            
+          </div>
+        </div>
+        <div class='price-box' ng-if="showPrice">
+            总价格：<span>¥{{price}}</span> 每小时 × 1 =  <span>¥{{priceFix}}</span> 每小时 (合 ¥{{totalPrice}} 每月)
+        </div>
+        
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="phyinsProText || phyinsDomText" ng-click="createInstance(InstanceForm)">{{'aws.instances.addinstances.ok'|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+        </div>
+      </div>

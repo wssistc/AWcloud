@@ -1,0 +1,69 @@
+<div class="modal-common">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+		<h3 class="modal-title">快照信息页面</h3>
+
+	</div>
+	<div class="modal-body">
+		<div class="control-group">
+			<button class="btn btn-info" type="button" ng-disabled="!canDelSnap" ng-click="delSnap()">删除所选快照</button>
+			<button class="btn btn-info" type="button" ng-disabled="!canDelAllSnap" ng-click="delAllSnap()">删除全部快照</button>
+			<button class="btn btn-info" type="button" ng-disabled="!canDelSnap" ng-click="restore_vm()" title="当虚拟机恢复到生成快照时其所处的状况">恢复</button>
+		</div>
+
+		
+		<div class="control-items2 clearfix">
+			<div class="control-group" style="width: 48%;">
+				<div class="table-box">
+					<div class="title">快照列表</div>
+					<div class="text-box">
+						<div ui-tree id="tree-root">
+	        				<ol ui-tree-nodes="" ng-model="snapshotList">
+	          					<li ng-repeat="node in snapshotList" ui-tree-node  ng-include="'nodes_renderer_snap.html'" ng-show="true"></li>
+	        				</ol>
+	      				</div>
+					</div>
+				</div>
+			</div>
+			<div class="control-group" style="width: 48%; margin-left:4%">
+				<div class="table-box">
+						<div class="title">信息</div>
+						<ul class="text-list">
+							<li ng-if=selectedSnapValue>
+								<span class="name">快照名称：</span>
+								<span class="text" title="{{selectedSnap.name}}">{{selectedSnap.name}}</span>
+							</li>
+							<li ng-if=selectedSnapValue>
+								<span class="name">快照描述：</span>
+								<span class="text" title="{{selectedSnap.description}}">{{selectedSnap.description}}</span>
+							</li>
+							<li ng-if=selectedSnapValue>
+								<span class="name">创建时间：</span>
+								<span class="text" title="{{selectedSnap.createTime| date:'yyyy-MM-dd HH:mm:ss'}}">{{selectedSnap.createTime| date:'yyyy-MM-dd HH:mm:ss'}}</span>
+							</li>
+						</ul>
+					</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<!-- <button class="btn btn-primary" type="button" ng-click="cancel()">确定</button> -->
+		<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+	</div>
+</div>
+<script type="text/ng-template" id="nodes_renderer_snap.html">
+  <div ui-tree-handle class="clearfix" ng-class="{active:node.name===selectedSnap.name}">
+    <div class="tree-name" >
+      <a class="btn btn-success" data-nodrag >
+        <span class="glyphicon"
+              ng-class="{'glyphicon-chevron-right': collapsed, 'glyphicon-chevron-down': !collapsed}" ng-click="toggle(this)">
+        </span>
+        <span ng-click="selectSnap(node)" >{{node.name}} <i class="icon-aw-dot-circle1" ng-show="node.isCurrent"></i>  {{node.current_font}}</span>
+      </a>
+    </div>
+  </div>
+  <ol ui-tree-nodes="" ng-model="node.childSnapshotList" ng-class="{hidden: collapsed}">
+    <li ng-repeat="node in node.childSnapshotList" ui-tree-node  ng-include="'nodes_renderer_snap.html'">
+    </li>
+  </ol>
+</script>

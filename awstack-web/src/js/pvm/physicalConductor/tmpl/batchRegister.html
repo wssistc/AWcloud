@@ -1,0 +1,67 @@
+<div class="batchRegister-modal pvm-modal  modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()" ng-if="showResultWrap">×</button>
+      <button type="button" class="close" ng-click="hideWrap()" ng-if="!showResultWrap">x</button>
+      <h3 class="modal-title">批量注册</h3>
+    </div>
+    <div class="modal-body ">
+        <form name="registerForm" novalidate ng-show="showResultWrap">
+            <div class="control-group">
+                <label class="control-label">下载模板：</label>
+                <div class="controls">
+                    <button class="btn btn-default" ng-click="download()">下载</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">注册文件：</label>
+                <div class="controls">
+                    <div class="file-box">
+                        <input type="text" class="form-left" name="license" required ng-model="selected_file" ng-readonly='true'>
+                        <div class="file-item">
+                            <a href="javascript:void(0);" class="file-btn">
+                                <input  name="file" type="file" id="upload" class="file-input" onchange="angular.element(this).scope().fileNameChanged()">
+                            </a>
+                            <button type="button" class="btn btn-info" >导入</button>
+                        </div>
+                    </div>
+                    <div class="error" ng-messages="(submitInValid ||ilForm.license.$dirty) && ilForm.license.$error">
+                        <form-validate></form-validate>
+                    </div>
+                </div>
+                <div class="doIt">
+                    <div>
+                        <button class="btn btn-primary" ng-click="doIt(registerForm,settingForm)" ng-disabled="canClick">执行</button>
+                    </div>
+                    <span class="showResult">
+                        <a ng-click="showResult()">查看执行结果</a>
+                        <span ng-show="waiting">*正在注册中...</span>
+                        <span ng-show="leading">*请导入列表</span>
+                        <span ng-show="canDoIt">*请点击执行</span>
+                        <span ng-show="fileError">*导入文件错误或者注册失败</span>
+                    </span>
+                </div>
+            </div>
+            <div class="control-group lead-out" >
+                    <label class="control-label">导出执行结果：</label>
+                    <div class="controls">
+                        <button class="btn btn-info" ng-click="exportResult()" ng-disabled="canLeadResult">导出</button>
+                        <span ng-if="noResultExport">*暂时没有文件可导出</span>
+                    </div>
+                </div>
+        </form>
+        <div class="resultWrap" ng-show="!showResultWrap">
+            <ul>
+                <li ng-repeat="result in checkResult">
+                    <span>{{$index}}</span>
+                    <span>名称：{{result.nodeName}}</span>
+                    <span>ipmi地址：{{result.ipmiAddress}}</span>
+                    <span>注册结果：{{result.createSuc?"创建成功":"创建失败"}}</span>
+                    <span>验证ipmi信息结果：{{result.checkSuc?"验证通过":"验证失败"}}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+    </div>
+  </div>

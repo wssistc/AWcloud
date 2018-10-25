@@ -1,0 +1,91 @@
+<div>
+	<div>
+		<table class="table table-border">
+			<tbody>
+				<tr>
+					<td>客户机操作系统</td>
+					<td>{{vm_detail.guestFullName}}</td>
+				</tr>
+				<!-- <tr>
+					<td>兼容性</td>
+					<td></td>
+				</tr> -->
+				<!-- <tr>
+					<td>托管主体</td>
+					<td></td>
+				</tr> -->
+				<!-- <tr>
+					<td>VMware Tools</td>
+					<td></td>
+				</tr> -->
+				<!-- <tr>
+					<td>DNS地址</td>
+					<td></td>
+				</tr> -->
+				<!-- <tr>
+					<td>IP地址</td>
+					<td></td>
+				</tr> -->
+			</tbody>
+  	</table>
+	</div>
+	<div>
+		<div>
+			<h2>虚拟机硬件部分</h2>
+			<table class="table table-border">
+				<tbody>
+					<tr>
+						<td>名称</td>
+						<td>{{vm_detail.name}}</td>
+					</tr>
+					<tr>
+						<td>CPU(核)</td>
+						<td>{{vm_detail.numCPUs}}</td>
+					</tr>
+					<tr>
+						<td>内存（MB）</td>
+						<td>{{vm_detail.memoryMB}}</td>
+					</tr>
+					<tr>
+						<td>硬盘</td>
+						<td>{{vm_detail.disks[0].diskSizeMB}}</td>
+					</tr>
+					<tr>
+						<td>CD/DVD驱动器</td>
+						<td>{{vm_detail.cdrom}}</td>
+					</tr>
+					<tr>
+						<td>网络适配器</td>
+						<td>{{vm_detail.networks[0].adapter}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<!-- <div>虚拟机存储策略</div> -->
+	</div>
+	<div>
+		<div>
+			<h2>相关对象</h2>
+			<table class="table table-border">
+				<tr>
+					<td>主机</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>资源池</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>网络</td>
+					<td>{{vm_detail.networks[0].adapter}}</td>
+				</tr>
+				<tr>
+					<td>存储器</td>
+					<td></td>
+				</tr>
+			</table>
+		</div>
+			
+		<!-- <div>高级配置</div> -->
+	</div>
+</div>

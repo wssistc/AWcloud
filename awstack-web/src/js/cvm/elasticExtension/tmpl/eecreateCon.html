@@ -1,0 +1,142 @@
+
+<div class="modal-common">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+		<h3 class="modal-title">创建伸缩配置</h3>
+	</div>
+	<div class="modal-body">
+		<form name="eeFormCon" novalidate>
+			<div class="control-group">
+				<label class="control-label">配置名称：</label>
+				<div class="controls">
+					<input type="text" class="form-controls" name="name" ng-model="newObj.name" placeholder="请输入配置名称" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\_)*$/" ng-maxlength="32" required />
+					<div class="error" ng-if="interacted(eeFormCon.name)" ng-messages="eeFormCon.name.$error" >
+							<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+							<div ng-message="pattern">只能输入中文、字母、数字、横线以及下划线</div>
+							<div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+						</div>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">负载均衡权重：</label>
+				<div class="controls">
+					<input type="text" class="form-controls" name="weight" ng-model="newObj.weight" placeholder="请输入负载均衡权重"  ng-pattern="/^[1-9][0-9]*$/" min="1" max="100" limitnumrange required />
+					<div class="error" ng-if="interacted(eeFormCon.weight)" ng-messages="eeFormCon.weight.$error" >
+						<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+						<div ng-message="pattern">{{'aws.errors.integer'|translate}}</div>
+						<div ng-message="limitnumrange">请输入1~100之间的整数</div>
+					</div>
+				</div>
+			</div>
+			<!-- <div class="control-group">
+				<label class="control-label">最大云主机数：</label>
+				<div class="controls">
+					<input type="text" class="form-controls" name="maxSize" ng-model="newObj.maxSize" placeholder="请输入最大云主机数" ng-pattern="/^[1-9][0-9]*$/" min="newObj.minSize" max="100" vaild-size="minSize" id="maxSize" required />
+					<div class="error" ng-if="interacted(eeForm.maxSize)" ng-messages="eeForm.maxSize.$error" >
+						<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+						<div ng-message="vaildSize">最大云主机数大于最小云主机数，且小于项目配额（100）</div>
+					</div>
+				</div>
+			</div> -->
+			<!-- <div class="control-group">
+				<label class="control-label">默认冷却时间（秒）：</label>
+				<div class="controls">
+					<input type="text" class="form-controls" name="defaultCooldown" ng-model="newObj.defaultCooldown" placeholder="请输入默认冷却时间" ng-pattern="/^[0-9]*$/" min="0" max="86400" limitnumrange required />
+					<div class="error" ng-if="interacted(eeForm.defaultCooldown)" ng-messages="eeForm.defaultCooldown.$error" >
+						<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+						<div ng-message="pattern">{{'aws.errors.integer'|translate}}</div>
+						<div ng-message="limitnumrange">请输入0~86400之间的整数</div>
+					</div>  
+				</div>
+			</div> -->
+			<div class="control-group">
+				<label class="control-label">安全组：</label>
+				<div class="controls">
+					<ui-select ng-model="newObj.securityGroup" ng-change="change_security_group(newObj.securityGroup)"  title="">
+						<ui-select-match placeholder="请选择安全组">{{$select.selected.name}}</ui-select-match>
+						<ui-select-choices repeat="securityGroup in newObj.securityGroup_list | propsFilter: {name: $select.search}">
+							<div ng-bind-html="securityGroup.name | highlight: $select.search"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">实例规格：</label>
+				<div class="controls">
+					<ui-select ng-model="newObj.flavor" ng-change="change_flavor(newObj.flavor)">
+						<ui-select-match placeholder="请选择实例规格">{{$select.selected.text}}</ui-select-match>
+						<ui-select-choices repeat="flavor in newObj.flavor_list | propsFilter: {text: $select.search}">
+							<div ng-bind-html="flavor.text | highlight: $select.search"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">镜像：</label>
+				<div class="controls">
+					
+					<div class="control-items3 half">
+						<div class="control-group">
+							<ui-select ng-model="newObj.arch" ng-change="change_arch(newObj.arch)">
+								<ui-select-match placeholder="请选择系统架构">{{$select.selected.name}}</ui-select-match>
+								<ui-select-choices repeat="arch in newObj.arch_list | propsFilter: {name: $select.search}">
+									<div ng-bind-html="arch.name | highlight: $select.search"></div>
+								</ui-select-choices>
+							</ui-select>
+						</div>
+						<div class="control-group">
+							<ui-select ng-model="newObj.os_type" ng-change="change_os_type(newObj.os_type)">
+								<ui-select-match placeholder="请选择系统架构">{{$select.selected.name}}</ui-select-match>
+								<ui-select-choices repeat="os_type in newObj.os_type_list | propsFilter: {name: $select.search}">
+									<div ng-bind-html="os_type.name | highlight: $select.search"></div>
+								</ui-select-choices>
+							</ui-select>
+						</div>
+						<div class="control-group">
+							<ui-select ng-model="newObj.image_type" ng-change="change_image_type(newObj.image_type)">
+								<ui-select-match placeholder="请选择镜像类型：">{{$select.selected.name}}</ui-select-match>
+								<ui-select-choices repeat="image_type in newObj.image_type_list | propsFilter: {name: $select.search}">
+									<div ng-bind-html="image_type.name | highlight: $select.search"></div>
+								</ui-select-choices>
+							</ui-select>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">&nbsp;</label>
+				<div class="controls">
+					<ui-select ng-model="newObj.image" ng-change="change_image(newObj.image)">
+						<ui-select-match placeholder="请选择镜像：">{{$select.selected.name}}</ui-select-match>
+						<ui-select-choices repeat="image in newObj.image_list | propsFilter: {name: $select.search}">
+							<div ng-bind-html="image.name | highlight: $select.search"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</div>			
+			<div class="control-group">
+				<label class="control-label">网络：</label>
+				<div class="controls">
+					<ui-select ng-model="newObj.network" ng-change="change_listener(newObj.network)">
+						<ui-select-match placeholder="请选择网络">{{$select.selected.net_sub_name}}</ui-select-match>
+						<ui-select-choices repeat="network in newObj.network_list | propsFilter: {net_sub_name: $select.search}">
+							<div ng-bind-html="network.net_sub_name | highlight: $select.search" title="{{network.net_sub_name}}"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</div>
+   
+    	<!-- <div class="control-group" >
+				<label class="control-label"></label>
+				<div class="controls">
+					<span>你还没有负载均衡器，去创建负载均衡器</span>
+				</div>
+			</div> -->
+		</form>
+	</div>
+	
+	<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-disabled="!can_confirm()" ng-click="create()">{{'aws.action.ok' | translate}}</button>
+		<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+	</div>
+</div>

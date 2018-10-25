@@ -1,0 +1,106 @@
+<div ng-controller="dockerImageManifestsCtrl">
+    <uib-tabset active="0" justified="true">
+    <uib-tab index="0" heading='{{"aws.k8s.dockerImages.dockerImagesOverview"|translate}}'>
+        <div class="table-content">
+        <table class="table table-info">
+            <colgroup>
+            <col width="20%">
+            <col width="40%">
+            <col width="20%">
+            <col width="20%">
+            </colgroup>
+            <tr>
+            <td>{{"aws.k8s.dockerImages.imageName"|translate}}</td>
+            <td>{{imageManifests ? (imageManifests.harbor + "/" + decodedRepoName + ":" + tag) : ""}}</td>
+            <td>{{"aws.k8s.dockerImages.creationTimestamp"|translate}}</td>
+            <td>{{imageManifests.created | localDate}}</td>
+            </tr>
+            <tr>
+            <td>{{"aws.k8s.dockerImages.imageAuthor"|translate}}</td>
+            <td>{{imageManifests ? (imageManifests.author || "None") : ""}}</td>
+            <td>{{"aws.k8s.dockerImages.imageOS"|translate}}</td>
+            <td>{{imageManifests ? (imageManifests.os) : ""}}</td>
+            </tr>
+            <tr>
+            <td>{{"aws.k8s.dockerImages.imageDockerVersion"|translate}}</td>
+            <td>{{imageManifests ? (imageManifests.docker_version) : ""}}</td>
+            <td>{{"aws.k8s.dockerImages.imageArchitecture"|translate}}</td>
+            <td>{{imageManifests ? (imageManifests.architecture) : ""}}</td>
+            </tr>
+        </table>
+        </div>
+    </uib-tab>
+    <uib-tab index="1" heading='{{"aws.k8s.dockerImages.dockerImageHistory"|translate}}' select="showHistory()">
+        <div class="table-content">
+        <table ng-table="tableParams" class="table" show-filter="false">
+            <colgroup>
+            <col width="40%">
+            <col width="30%">
+            <col width="10%">
+            <col width="20%">
+            </colgroup>
+            <tr ng-repeat="item in $data">
+            <td data-title='"aws.k8s.dockerImages.createInstruct"|translate'>
+                <span ng-init="popoverOpened=false"
+                    ng-mouseover="popoverOpened=true"
+                    ng-mouseleave="popoverOpened=false">
+                <style type="text/css">
+                    pre {
+                    height: auto;
+                    width: auto;
+                    max-height: 500px;
+                    overflow: auto;
+                    background-color: #eeeeee;
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    /*word-break: normal;*/
+                    }
+
+                    .popover {
+                    max-width: 450px;
+                    }
+                </style>
+                <a uib-popover-html="getPopoverText(item['created_by'])"
+                    popover-trigger="none"
+                    popover-is-open="popoverOpened">
+                    <span>{{getShortInstruct(item['created_by'])}}</span>
+                </a>
+                </span>
+            </td>
+            <td data-title='"aws.k8s.dockerImages.imageBuiltAuthor"|translate'>
+                <span>{{item["author"] || "None"}}</span>
+            </td>
+            <td data-title='"aws.k8s.dockerImages.isEmptyLayer"|translate'>
+                <span>{{item["empty_layer"] ? "是" : "否"}}</span>
+            </td>
+            <td data-title='"aws.k8s.dockerImages.createdTime"|translate'>
+                <span>{{item["created"] | localDate}}</span>
+            </td>
+            </tr>
+        </table>
+        </div>
+    </uib-tab>
+    <uib-tab index="2" heading='{{"aws.k8s.dockerImages.dockerImageLsyers"|translate}}' select="showLayers()">
+        <div class="table-content">
+        <table ng-table="tableParams" class="table" show-filter="false">
+            <colgroup>
+            <col width="50%">
+            <col width="30%">
+            <col width="20%">
+            </colgroup>
+            <tr ng-repeat="item in $data">
+            <td data-title='"aws.k8s.dockerImages.layerDigest"|translate'>
+                <span>{{item["digest"] || ""}}</span>
+            </td>
+            <td data-title='"aws.k8s.dockerImages.layerMediaType"|translate'>
+                <span>{{item["mediaType"] || ""}}</span>
+            </td>
+            <td data-title='"aws.k8s.dockerImages.layerSize"|translate'>
+                <span>{{getBytesForHuman(item["size"]) || ""}}</span>
+            </td>
+            </tr>
+        </table>
+        </div>
+    </uib-tab>
+    </uib-tabset>
+</div>     

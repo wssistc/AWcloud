@@ -1,0 +1,232 @@
+<div class="tab-content" ng-controller="piecewiseManageCtrl">    
+    <div class="table-action">
+        <button type="button"  class="btn btn-new" ng-click="addPiece()"><i class="icon-aw-add-to2"></i> {{'aws.tdsql.addPiece'|translate}} </button>
+        <button type="button" class="btn btn-normal" ng-click="dilatationSlice()"><i class="icon-aw-modify"></i> {{'aws.tdsql.dilatationSlice'|translate}}</button>
+        <div class="pull-right">
+            <setting title-data="titleData" site-title="titleName" table-data="accountData" search-tearm="accountSearchTearm(obj)"></setting>
+            <div type="button" class="btn btn-renovat right-ports" ng-click="refreshPiece()">
+                <i class="icon-aw-refresh"></i>
+            </div>
+            <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(account_search.searchTearm)">
+                  <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                  <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="account_search.searchTearm" placeholder="{{'aws.action.search'|translate}}" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="table-content">
+        <empty-tip empty-type="loadPieceData"></empty-tip>
+        <table ng-table="pieceTable" class="table">
+            <tr ng-repeat="piece in $data track by $index">
+                <td header="'pieceCheckbox.html'">
+                  <label class="checkbox" >
+                    <input type="checkbox" ng-model="pieceCheckbox.items[piece.id]" />
+                    <i class="iconfont"></i>
+                  </label>
+                </td>
+                <td data-title="'aws.tdsql.pieceId'|translate" sortable="'name'" ng-if="titleData[0].value">
+                    {{piece.name}}
+                </td>
+                <td data-title="'aws.tdsql.sqlTransmissionId'|translate" sortable="'protocol'" ng-if="titleData[1].value">
+                    {{piece.protocol}}
+                </td>
+                <td data-title="'aws.tdsql.monitor'|translate" sortable="'protocol_port'" ng-if="titleData[2].value">
+                    {{piece.protocol_port}}
+                </td>
+                <td data-title="'aws.tdsql.status'|translate" sortable="'lb_algorithm'" ng-if="titleData[3].value">
+                    {{piece.lb_algorithm | translate}}
+                </td>
+                <td data-title="'aws.tdsql.pieceVersion'|translate" sortable="'connection_limit'" ng-if="titleData[4].value">
+                    {{piece.connection_limit}}
+                </td> 
+                <td data-title="'aws.tdsql.insType'|translate" sortable="'connection_limit'" ng-if="titleData[5].value">
+                    {{piece.connection_limit}}
+                </td>
+                <td data-title="'aws.tdsql.specifications'|translate" sortable="'connection_limit'" ng-if="titleData[6].value">
+                    {{piece.connection_limit}}
+                </td>
+                <td data-title="'aws.tdsql.diskUsageRate'|translate" sortable="'connection_limit'" ng-if="titleData[7].value">
+                    {{piece.connection_limit}}
+                </td>  
+            </tr>  
+        </table>
+    </div>
+</div>
+<script type="text/ng-template" id="pieceCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="pieceCheckbox.checked" class="select-all-accountTable" value="" />
+      <i class="iconfont"></i>
+    </label>
+</script>
+<script type="text/ng-template" id="addPieceModal.html">
+  <div class="modal-common addPiece-modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.tdsql.addPiece"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warning">{{"aws.tdsql.alert.addPiece"|translate}}</div>
+      <form name="addPieceForm" novalidate>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.insName'|translate}}：</label>
+            <div class="controls text-controls">
+              tdsql109
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.insVersion'|translate}}：</label>
+            <div class="controls text-controls">
+              tdsql109
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.pieceId'|translate}}：</label>
+            <div class="controls text-controls">
+              tdsql109
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.currentPieceSpec'|translate}}：</label>
+            <div class="controls text-controls">
+              tdsql109
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.newPieceSpec'|translate}}：</label>
+            <div class="controls text-controls">
+              <ui-select ng-model="formData.newPieceSpec" name="newPieceSpec"required>
+                  <ui-select-match placeholder="{{'aws.tdsql.placeholder.selectPieceSpec'|translate}}" title="{{$select.selected.name}}">{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="spec as specList in netTypes.options">
+                      <div title="{{spec.name}}" class="piece-select">{{spec.name}}</div>
+                  </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-messages='addPieceForm.newPieceSpec.$error' ng-if="interactedAddPiece(addPieceForm.newPieceSpec)">
+                  <form-validate></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group bind-group">
+                <label class="control-label bind-label">
+                    {{"aws.tdsql.newPieceDisk"|translate}}：
+                </label>
+                <div class="controls bind-controls">
+                    <div class="bind-bar" id="aaa">
+                      <input type="text" id="newPieceDiskBar" >
+                    </div>
+                    <div class="bind-input">
+                       <step-control step="newPieceDiskStep" value="formData.newPieceDisk" min="30" max="3000" change-value-func="changePieceDisk" unit="newPieceDiskUnit"></step-control>
+                       <span class="step-trans">(步长为5GB)</span>
+                       <!-- <div class="step-control-component">
+                          <button ng-class="reduce" ng-click="reduceStep()">-</button>
+                          <input class="bind-value">
+                          <button ng-class="increase" ng-click="increaseStep()">+</button>
+                       </div> -->
+                       <!-- <input type="text" ng-model="networkForm.netBandValue" name="bindValue" ng-change="changeBindWidth(networkForm.netBandValue)" num-range min="1" max="10000" ng-model-options="{ updateOn: 'blur' }"> -->
+                    </div>
+                </div>
+          </div>
+          <div class="control-group balance-group">
+                <label class="control-label bind-label">
+                    {{"aws.tdsql.dataRebalancingRatio"|translate}}：
+                </label>
+                <div class="controls balance-controls">
+                   <step-control step="balanceStep" value="formData.balancePercent" min="0" max="100" unit="balanceUnit"></step-control>
+                </div>
+                <div class="step-trans">相应比例的数据将自动再均衡到新分片；由于部分业务数据分布不均匀，可能导致均衡后数据并非严格按比例均衡。</div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.updateWasteTime'|translate}}：</label>
+            <div class="controls text-controls">
+              预计3小时10分钟
+            </div>
+          </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="addPieceConfirm(addPieceForm)">{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="dilatationSlice.html">
+  <div class="modal-common addPiece-modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.tdsql.extensionPiece"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warning">{{"aws.tdsql.alert.extensionPiece"|translate}}</div>
+      <form name="dilatationSliceForm" novalidate>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.insName'|translate}}：</label>
+            <div class="controls text-controls">
+              tdsql109
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.insVersion'|translate}}：</label>
+            <div class="controls text-controls">
+              tdsql109
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.pieceId'|translate}}：</label>
+            <div class="controls text-controls">
+              tdsql109
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.currentPieceSpec'|translate}}：</label>
+            <div class="controls text-controls">
+              tdsql109
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.newPieceSpec'|translate}}：</label>
+            <div class="controls text-controls">
+              <ui-select ng-model="formData.newPieceSpec" name="newPieceSpec"required>
+                  <ui-select-match placeholder="{{'aws.tdsql.placeholder.selectPieceSpec'|translate}}" title="{{$select.selected.name}}">{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="spec as specList in netTypes.options">
+                      <div title="{{spec.name}}" class="piece-select">{{spec.name}}</div>
+                  </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-messages='dilatationSliceForm.newPieceSpec.$error' ng-if="interactedDilatationSlice(dilatationSliceForm.newPieceSpec)">
+                  <form-validate></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group bind-group">
+                <label class="control-label bind-label">
+                    {{"aws.tdsql.newPieceDisk"|translate}}：
+                </label>
+                <div class="controls bind-controls">
+                    <div class="bind-bar" id="aaa">
+                      <input type="text" id="dilatation" >
+                    </div>
+                    <div class="bind-input">
+                       <step-control step="newPieceDiskStep" value="formData.newPieceDisk" min="30" max="3000" change-value-func="changePieceDisk" unit="newPieceDiskUnit"></step-control>
+                       <span class="step-trans">(步长为5GB)</span>
+                       <!-- <div class="step-control-component">
+                          <button ng-class="reduce" ng-click="reduceStep()">-</button>
+                          <input class="bind-value">
+                          <button ng-class="increase" ng-click="increaseStep()">+</button>
+                       </div> -->
+                       <!-- <input type="text" ng-model="networkForm.netBandValue" name="bindValue" ng-change="changeBindWidth(networkForm.netBandValue)" num-range min="1" max="10000" ng-model-options="{ updateOn: 'blur' }"> -->
+                    </div>
+                </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.updateWasteTime'|translate}}：</label>
+            <div class="controls text-controls">
+             预计3小时10分钟<span class="time-trans">实例负载高或大量数据写入时我们将延长升级时间，优先保障实例稳定运行</span>
+            </div>
+          </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="dilatationSliceFormConfirm(dilatationSliceForm)">{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>

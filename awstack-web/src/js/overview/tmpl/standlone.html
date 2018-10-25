@@ -1,0 +1,206 @@
+<div class="page-inner">
+  <!-- 概况 start -->
+  	<div class="box box-top">
+  	<h2>{{"aws.overview.welcome"|translate}}，<span ng-bind="userName"></span></h2>
+	    <div class="col-4">
+	      <div class="user-box">
+	        <ul class="text-list clearfix">
+	          <li class="copy-li"><span><i class="icon-aw-cloud-server"></i></span></li>
+	          <li class="copy-text">
+	          	<a ng-click="gotoCvm(defaultPro.name,defaultPro.projectUid,'default','instances')">{{insNum}}<em>{{"aws.overview.vmHost"|translate}}</em></a>
+	          </li>
+	        </ul>
+	      </div>
+	    </div>
+    	<div class="col-4">
+	        <div class="user-box">
+	          <ul class="text-list clearfix">
+	            <li class="copy-li"><span><i class="icon-aw-network"></i></span></li>
+	            <li class="copy-text">
+	            	<a ng-click="gotoCvm(defaultPro.name,defaultPro.projectUid,defaultDep.domainUid,'network')" >{{netTotal}}<em>{{"aws.overview.network"|translate}}</em></a>
+	            </li>
+	            <!-- <li class="copy-text">
+	            	<a ng-click="gotoCvm(defaultPro.name,defaultPro.projectUid,defaultDep.domainUid,'project')" >{{projectTotal}}<em>{{"aws.overview.project"|translate}}</em></a>
+	            </li> -->
+	          </ul> 
+	        </div>
+	    </div>
+	    <div class="col-4">
+	      <div class="user-box">
+	        <ul class="text-list clearfix">
+	          <li class="copy-li"><span><i class="icon-aw-warning"></i></span></li>
+	          <li class="copy-text">
+	          	<a ng-click="gotoCvm(defaultPro.name,defaultPro.projectUid,defaultDep.domainUid,'alarmEvents')" >{{alarmEventsTotal}}<em>{{"aws.overview.alarmEvent"|translate}}</em></a>
+	          </li>
+	          
+	        </ul>
+	      </div>
+	    </div>
+	    <!-- <div class="col-4">
+	      <div class="title">
+	        <span>{{"aws.overview.alarmEvent"|translate}}</span><a href="#/monitor/alarmevent">{{"aws.overview.viewMore"|translate}} >></a>
+	      </div>
+	      <div class="alarmInfo-wrap">
+	        <div class="cont">
+	         <table class="table">
+	          <tbody>
+	            <tr ng-repeat="alarm in newAlarms_data">
+	              <td><strong>{{alarm.hostname}}</strong></td>
+	              <td><span class="highlight" ng-class="{'green':alarm.alarmType == 'healthcheck','orange':alarm.alarmType == 'threshold','blue':alarm.alarmType == 'computeha'}" >{{alarm._alarmType}}</span></td>
+	              <td>{{alarm.severity}}</td>
+	              <td>{{alarm.createtime |date:'yyyy-MM-dd HH:mm:ss'}}</td>
+	            </tr>
+	          </tbody>
+	        </table>
+	        <div ng-if="newAlarms_data.length===0">
+	          {{"aws.overview.noAlarmEvent"|translate}}
+	        </div>
+	        </div>
+	      </div>
+    	</div> -->
+    	
+  	</div>
+  	<div class="box">
+  		<div class="col-4">
+	      <div class="title">{{"aws.overview.cpuUsageRate"|translate}}</div>
+	      <div class="panels clearfix">
+	        <div class="pie-wrap" >
+	        <div class=" pie" chart-pie panel='cpuUseChart.panels'></div>
+	        </div>
+	        <div class="pie-legend">
+	          <dl class="dl-horizontal">
+	            <dt>{{"aws.overview.totalCores"|translate}}：</dt>
+	            <dd><span class="total">{{hostCPUTotal}}</span></dd>
+	          </dl>
+	          <dl class="dl-horizontal" ng-repeat="legend in cpuUseChart.panels.data">
+	            <dt><i style="background-color:{{cpuUseChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+	            <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?cpuUseChart.panels.colors[$index]:'inherit'}>{{legend.value>=0?legend.value:0}}</span></dd>
+	          </dl>
+	        </div>
+	      </div>
+	    </div>
+  		<div class="col-4">
+	      <div class="title">{{"aws.overview.memoryUsageRate"|translate}}</div>
+	      <div class="panels clearfix">
+	        <div class="pie-wrap">
+	          <div class="pie" chart-pie panel='memoryUseChart.panels'></div>
+	        </div>
+	        <div class="pie-legend">
+	          <dl class="dl-horizontal">
+	            <dt>{{"aws.overview.totalMemory"|translate}}：</dt>
+	            <dd><span class="total">{{hostMemoryTotal}} GB</span></dd>
+	          </dl>
+	          <dl class="dl-horizontal" ng-repeat="legend in memoryUseChart.panels.data">
+	            <dt><i style="background-color:{{memoryUseChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+	            <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?memoryUseChart.panels.colors[$index]:'inherit'}>{{legend.value>=0?legend.value:0}} GB</span></dd>
+	          </dl>
+	        </div>
+	      </div>
+	    </div>
+	    <div class="col-4">
+	      <div class="title">{{"aws.overview.storageUsageRate"|translate}}</div>
+	      <div class="panels clearfix">
+	        <div class="pie-wrap">
+	        <div class="pie" chart-pie panel='storageChart.panels'></div>
+	        </div>
+	        <div class="pie-legend">
+	          <dl class="dl-horizontal">
+	            <dt>{{"aws.overview.totalMemory"|translate}}：</dt>
+	            <dd><span class="total">{{storageTotal.b}}{{unit}}</span></dd>
+	          </dl>
+	          <dl class="dl-horizontal" ng-repeat="legend in storageChart.panels.data">
+	            <dt><i style="background-color:{{storageChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+	            <dd><span ng-class="{'num':$index==0}" ng-style={'color':$index==0?storageChart.panels.colors[$index]:'inherit'}>{{legend.valueB}}</span></dd>
+	          </dl>
+	        </div>
+	      </div>
+	    </div>
+  	</div>
+  	<div class="box">
+    	<div class="col-12" >
+	        <div class="title">
+	         	<span>{{"aws.overview.logsInfo"|translate}}</span>
+	        	<a href="#/logs/operatelogs">{{"aws.overview.viewMore"|translate}} >></a>
+	      	</div>
+	      	<div class="logsInfo-wrap">
+	        	<div class="cont">
+	          		<table class="table">
+	            		<tbody>
+	              <tr ng-repeat="log in logsTable">
+	              <!-- <td><span>{{log.businessName}}</span></td> -->
+	              <td><span>{{log.createUserName}}</span></td>
+	              <td><span title="{{log.description}}">{{log.description}}</span></td>
+	              <!-- <td><span>{{log.state}}</span></td> -->
+	              <td><span>{{log.createTime |date:'yyyy-MM-dd HH:mm:ss'}}</span></td>
+	              </tr>
+	            </tbody>
+	          </table>
+	           <div ng-if="logsTable.length===0">
+	          {{"aws.overview.noLogs"|translate}}
+	        </div>
+	        </div>
+	      </div>
+    	</div>
+  	</div>
+  	
+</div>
+<script type="text/ng-template"  id="registedInsTable.html">
+    <table class="table ins-tip">
+      <thead>
+        <tr>
+          <th>{{"aws.overview.hostName"|translate}}</th>
+          <th>{{"aws.overview.vmHostNumber"|translate}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="host in insRegistedInfo">
+          <td><span>{{host.phyInsName}}</span></td>
+          <td><span>{{host.vmNum}}</span></td>
+        </tr>
+      </tbody>
+    </table>
+</script>
+<script type="text/ng-template" id="headerCheckbox.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+		<i class="iconfont"></i>
+	</label>
+</script>
+<script type="text/ng-template" id="creatProject.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+			<h3 class="modal-title">{{projectTitle}}</h3>
+		</div>
+		<div class="modal-body">
+			<form name="projectName" novalidate>
+				<div class="control-group">
+					<label class="control-label">{{'aws.project.newProject.pro_name' | translate}}：</label>
+					<div class="controls">
+						<input type="text" name="name" class="form-controls"  title="{{notEditTip}}" ng-disabled="notEditName" placeholder="{{'aws.project.proName' | translate}}" ng-model="project.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+							<span class="error-messages error" ng-if="interactedName(projectName.name)" ng-messages="projectName.name.$error" >
+								<div ng-message="required" class="error">{{'aws.errors.required'|translate}}</div>
+								<div ng-message="pattern" class="error">{{'aws.errors.noSpecial'|translate}}</div>
+								<div ng-message="maxlength" >{{'aws.errors.maxlength'|translate}}</div>
+							</span> 
+
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">{{'aws.project.newProject.pro_desc' | translate}}：</label>
+					<div class="controls">
+						<input type="text" class="form-controls" name="desc" ng-maxlength="256" ng-model="project.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" />
+						<span class="error-messages error" ng-if="interactedName(projectName.desc)" ng-messages="projectName.desc.$error" >
+							<div ng-message="maxlength" >{{'aws.errors.maxlength256'|translate}}</div>
+						</span> 
+					</div>
+				</div>
+				<div class="clear"></div>
+			</form>
+		</div>
+		<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-click="confirmPro()">{{'aws.action.ok' | translate}}</button>
+			<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+		</div>
+	</div>
+</script>

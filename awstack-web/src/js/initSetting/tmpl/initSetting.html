@@ -1,0 +1,331 @@
+﻿<div class="modal-common initSetting-modal">
+    <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="closeInitModel()">×</button>
+        <div class="settingBody">
+           <div class="settingList" ng-if="ADMIN">
+               <div class="listTitle">
+                    <span>{{"aws.initSetting.settingTranslate.suggestSetting" | translate }}</span>
+               </div>
+               <div ng-if="canSetInitVpc&&canSetInitStorage">
+                   <div class="listItem">
+                       <div class="title">
+                           <span ng-click="changeToVpc()">1、{{"aws.networks.vpcNetWork" | translate }}</span>
+                       </div>
+                       <div class="description">
+                           <span>{{"aws.initSetting.settingTranslate.vpcDesc" | translate }}</span>
+                       </div>
+                       <div class="status" ng-class="{'statusTrue': vpcStatus}">
+                           <span ng-click="changeToVpc()">{{vpcStatus?setupEnd:unSetup}}</span>
+                       </div>
+                   </div>
+                   <div class="listItem" ng-if = "ADMIN">
+                       <div class="title">
+                       <span ng-click="changeToAlarm()">2、{{"aws.initSetting.settingTranslate.alarmSetting" | translate }}</span>
+                       </div>
+                       <div class="description">
+                           <span>{{"aws.initSetting.settingTranslate.alarmDesc" | translate }}</span>
+                       </div>
+                       <div class="status" ng-class="{'statusTrue': alarmStatus}">
+                           <span ng-click="changeToAlarm()">{{alarmStatus?setupEnd:unSetup}}</span>
+                       </div>
+                   </div>
+                   <div class="listItem" ng-if = "ADMIN">
+                       <div class="title">
+                           <span ng-click="changeToStorage()">3、{{"aws.initSetting.settingTranslate.storageSetting" | translate }}</span>
+                       </div>
+                       <div class="description">
+                           <span>{{"aws.initSetting.settingTranslate.storageDesc" | translate }}</span>
+                       </div>
+                       <div class="status" ng-class="{'statusTrue': storageStatus}">
+                           <span ng-click="changeToStorage()">{{storageStatusText}}</span>
+                       </div>
+                   </div>
+                   <div class="listItem" ng-if = "ADMIN">
+                       <div class="title">
+                           <span ng-click="changeToTransfer()">4、{{"aws.initSetting.settingTranslate.transferSetting" | translate }}</span>
+                       </div>
+                       <div class="description">
+                           <span>{{"aws.initSetting.settingTranslate.transferDesc" | translate }}</span>
+                       </div>
+                       <div class="status" ng-class="{'statusTrue': transferStatus}">
+                           <span ng-click="changeToTransfer()">{{transferStatusText}}</span>
+                       </div>
+                   </div>
+               </div>
+               <div ng-if="canSetInitVpc&&!canSetInitStorage">
+                   <div class="listItem">
+                       <div class="title">
+                           <span ng-click="changeToVpc()">1、{{"aws.networks.vpcNetWork" | translate }}</span>
+                       </div>
+                       <div class="description">
+                           <span>{{"aws.initSetting.settingTranslate.vpcDesc" | translate }}</span>
+                       </div>
+                       <div class="status" ng-class="{'statusTrue': vpcStatus}">
+                           <span ng-click="changeToVpc()">{{vpcStatus?setupEnd:unSetup}}</span>
+                       </div>
+                   </div>
+                   <div class="listItem" ng-if = "ADMIN">
+                       <div class="title">
+                       <span ng-click="changeToAlarm()">2、{{"aws.initSetting.settingTranslate.alarmSetting" | translate }}</span>
+                       </div>
+                       <div class="description">
+                           <span>{{"aws.initSetting.settingTranslate.alarmDesc" | translate }}</span>
+                       </div>
+                       <div class="status" ng-class="{'statusTrue': alarmStatus}">
+                           <span ng-click="changeToAlarm()">{{alarmStatus?setupEnd:unSetup}}</span>
+                       </div>
+                   </div>
+               </div>
+               <div ng-if="!canSetInitVpc&&canSetInitStorage">
+                   <div class="listItem" ng-if = "ADMIN">
+                       <div class="title">
+                       <span ng-click="changeToAlarm()">1、{{"aws.initSetting.settingTranslate.alarmSetting" | translate }}</span>
+                       </div>
+                       <div class="description">
+                           <span>{{"aws.initSetting.settingTranslate.alarmDesc" | translate }}</span>
+                       </div>
+                       <div class="status" ng-class="{'statusTrue': alarmStatus}">
+                           <span ng-click="changeToAlarm()">{{alarmStatus?setupEnd:unSetup}}</span>
+                       </div>
+                   </div>
+                   <div class="listItem" ng-if = "ADMIN">
+                       <div class="title">
+                           <span ng-click="changeToStorage()">2、{{"aws.initSetting.settingTranslate.storageSetting" | translate }}</span>
+                       </div>
+                       <div class="description">
+                           <span>{{"aws.initSetting.settingTranslate.storageDesc" | translate }}</span>
+                       </div>
+                       <div class="status" ng-class="{'statusTrue': storageStatus}">
+                           <span ng-click="changeToStorage()">{{storageStatusText}}</span>
+                       </div>
+                   </div>
+                   <div class="listItem" ng-if = "ADMIN">
+                       <div class="title">
+                           <span ng-click="changeToTransfer()">3、{{"aws.initSetting.settingTranslate.transferSetting" | translate }}</span>
+                       </div>
+                       <div class="description">
+                           <span>{{"aws.initSetting.settingTranslate.transferDesc" | translate }}</span>
+                       </div>
+                       <div class="status" ng-class="{'statusTrue': transferStatus}">
+                           <span ng-click="changeToTransfer()">{{transferStatusText}}</span>
+                       </div>
+                   </div>
+               </div>
+               <div ng-if="!canSetInitVpc&&!canSetInitStorage">
+                   <div class="listItem" ng-if = "ADMIN">
+                       <div class="title">
+                       <span ng-click="changeToAlarm()">1、{{"aws.initSetting.settingTranslate.alarmSetting" | translate }}</span>
+                       </div>
+                       <div class="description">
+                           <span>{{"aws.initSetting.settingTranslate.alarmDesc" | translate }}</span>
+                       </div>
+                       <div class="status" ng-class="{'statusTrue': alarmStatus}">
+                           <span ng-click="changeToAlarm()">{{alarmStatus?setupEnd:unSetup}}</span>
+                       </div>
+                   </div>
+               </div>
+               <!-- <div class="listItem" ng-if = "false">
+                   <div class="title">
+                       <span ng-click="changeToCheckIp()">5、高可用探测IP地址（两物理机环境专用）</span>
+                   </div>
+                   <div class="description">
+                       <span>根据物理机能否ping通相应的逻辑网络探测IP地址，来判断物理机是否出现故障。建议配置的IP地址应为稳定存在。</span>
+                   </div>
+                   <div class="status" ng-class="{'statusTrue': checkIpStatus}">
+                       <span>{{checkIpStatus?"已设置":"未设置"}}</span>
+                   </div>
+               </div> -->
+           </div>
+           <div class="settingInfo" ng-class="{'notAdmin': !ADMIN}">
+                <div ng-if="vpcShow">
+                    <div ng-include="'js/initSetting/tmpl/vpcSetting.html'"></div>
+                </div>
+                <div ng-if="alarmShow">
+                    <div ng-include="'js/initSetting/tmpl/alarmSetting.html'"></div>
+                </div>
+                <div ng-if="ADMIN && storageShow">
+                    <div ng-include="'js/initSetting/tmpl/storageSetting.html'"></div>
+                </div>
+                <div ng-if="ADMIN && transferShow">
+                    <div ng-include="'js/initSetting/tmpl/transferSetting.html'"></div>
+                </div>
+                <!-- <div ng-if="ADMIN && checkIpShow">
+                    <div ng-include="'js/initSetting/tmpl/checkIpSetting.html'"></div>
+                </div> -->
+                <div ng-if="regionShow">
+                    <div class="regionSetting">
+                        <div class="title">
+                            <span>&nbsp;</span>
+                        </div>
+                        <div class="region">
+                            <div class="region-title">
+                                <span>{{setting.region.regionName}}</span>
+                            </div>
+                            <div class="region-tips">
+                                <span>您对{{setting.region.regionName}}的操作完成以下内容，我们将跳转至未完成内容：</span>
+                            </div>
+                        </div>
+                        <div class="step-title">
+                            <ul class="steps-sytle-ver clearfix">
+                                <li class="clearfix step-start regionStepOne" ng-class="{'active':vpcStatus}">
+                                    <div class="inner">
+                                        <span>VPC网络</span>
+                                        <i>1</i>
+                                    </div>
+                                </li>
+                                <li class="clearfix step-middle regionStepTwo" ng-class="{'active':alarmStatus}">
+                                    <div class="inner">
+                                        <span>添加告警设置</span>
+                                        <i>2</i>
+                                    </div>
+                                </li>
+                                <li class="clearfix step-middle regionStepThree" ng-class="{'active':storageStatus}">
+                                    <div class="inner">
+                                        <span>配置云主机后端共享存储</span>
+                                        <i>3</i>
+                                    </div>
+                                </li>
+                                <li class="clearfix step-end" ng-class="{'active':transferStatus}">
+                                    <div class="inner">
+                                        <span>迁移镜像库到共享存储中</span>
+                                        <i>4</i>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="region-btn">
+                            <button class="btn btn-info" ng-disabled="vpcStatus && alarmStatus && storageStatus && transferStatus" ng-click="gotoSetting()">前往</button>
+                            <button class="btn btn-default" ng-click="cancelRegion()">{{'aws.action.cancel'|translate}}</button>
+                        </div>
+                    </div>
+                </div>
+           </div>
+        </div>
+    </div>
+    <div class="modal-footer" ng-if="vpcShow">
+        <div ng-show = "inStepOne"> 
+            <button class="btn btn-info" type="button" ng-disabled="vpcStatus" ng-click="stepToTwo()">
+                {{'aws.action.nextStep'|translate}}
+            </button>
+        </div>
+        <div ng-show = "inStepTwo"> 
+            <div>
+                <button class="btn btn-default" type="button" ng-click="stepToOne()">
+                    {{'aws.action.lastStep'|translate}}
+                </button>
+                <button class="btn btn-info" type="button" ng-click="stepToThree()">
+                    {{'aws.action.nextStep'|translate}}
+                </button>
+            </div>
+        </div>
+        <div ng-show = "inStepThree">
+            <div>
+                <button class="btn btn-default" type="button" ng-disabled="vpcStatus" ng-click="stepThreeToTwo()">
+                    {{'aws.action.lastStep'|translate}}
+                </button>
+                <button class="btn btn-info" type="button" ng-disabled="vpcStatus" ng-click="createVpc()">
+                    {{"aws.initSetting.settingTranslate.saveSetting" | translate }}
+                </button>
+                <button class="btn btn-default lastBtn" type="button" ng-if="ADMIN" ng-class="{'disabled': !vpcStatus}" uib-popover="{{'aws.initSetting.settingTranslate.nextStepTips' | translate }}" popover-enable="!vpcStatus" popover-trigger="mouseenter" popover-placement = "right" ng-click="gotoAlarm()">
+                    {{"aws.initSetting.settingTranslate.alarmSetting" | translate }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer" ng-if="ADMIN && alarmShow">
+        <div ng-show = "inStepOne"> 
+            <button class="btn btn-info" type="button" ng-click="stepToTwo()" ng-disabled="alarmStatus">
+                {{'aws.action.nextStep'|translate}}
+            </button>
+            <button class="btn btn-default" type="button" ng-click="closeInitModel()">
+                {{'aws.action.cancel'|translate}}
+            </button>
+        </div>
+        <div ng-show = "inStepTwo">
+            <div>
+                <button class="btn btn-default" type="button" ng-click="stepToOne()" ng-disabled="alarmStatus">
+                    {{'aws.action.lastStep'|translate}}
+                </button>
+                <button class="btn btn-info" type="button" ng-disabled="alarmStatus" ng-click="contactGroupConfirm()">
+                    {{'aws.action.save'|translate}}
+                </button>
+                <button class="btn btn-default lastBtn" type="button" ng-class="{'disabled': !alarmStatus}" uib-popover="{{'aws.initSetting.settingTranslate.nextStepTips' | translate }}" popover-enable="!alarmStatus" popover-trigger="mouseenter" popover-placement = "right" ng-click="gotoStorage()" ng-if="canSetInitStorage">
+                    {{'aws.action.storageSetting'|translate}}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer" ng-if="ADMIN && storageShow">
+        <div ng-if = "storageStepOne">
+            <button class="btn btn-info" type="button" ng-disabled="storageStatus || storageDisabled" ng-click="storageConfirm()">
+                {{'aws.action.save'|translate}}
+            </button>
+            <button class="btn btn-default lastBtn" type="button" ng-class="{'disabled': !storageStatus}" uib-popover="{{'aws.initSetting.settingTranslate.nextStepTips' | translate }}" popover-enable="!storageStatus" popover-trigger="mouseenter" popover-placement = "right" ng-click="gotoTransfer()">
+                {{"aws.initSetting.settingTranslate.transferImage" | translate }}
+            </button>
+        </div>
+        <div ng-if="storageStepTwo">
+            <div ng-show = "inStepOne"> 
+                <button class="btn btn-info" type="button" ng-click="stepToTwo()">
+                    {{'aws.action.nextStep'|translate}}
+                </button>
+                <button class="btn btn-default" type="button" ng-click="closeInitModel()">
+                    {{'aws.action.cancel'|translate}}
+                </button>
+            </div>
+            <div ng-show = "inStepTwo">
+                <div>
+                    <button class="btn btn-default" type="button" ng-disabled="storageStatus" ng-click="stepToOne()">
+                        {{'aws.action.lastStep'|translate}}
+                    </button>
+                    <button class="btn btn-info" type="button" ng-disabled="storageStatus || storageDisabled" ng-click="storageConfirm()">
+                        {{'aws.action.save'|translate}}
+                    </button>
+                    <button class="btn btn-default lastBtn" type="button" ng-class="{'disabled': !storageStatus}" uib-popover="{{'aws.initSetting.settingTranslate.nextStepTips' | translate }}" popover-enable="!storageStatus" popover-trigger="mouseenter" popover-placement = "right" ng-click="gotoTransfer()">
+                        {{"aws.initSetting.settingTranslate.transferImage" | translate }}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div ng-if="storageStepThree">
+            <div ng-show = "inStepOne"> 
+                <button class="btn btn-info" type="button" ng-click="stepToTwo()">
+                    {{'aws.action.nextStep'|translate}}
+                </button>
+                <button class="btn btn-default" type="button" ng-click="closeInitModel()">
+                    {{'aws.action.cancel'|translate}}
+                </button>
+            </div>
+            <div ng-show = "inStepTwo">
+                <button class="btn btn-default" type="button" ng-click="stepToOne()">
+                    {{'aws.action.lastStep'|translate}}
+                </button>
+                <button class="btn btn-info" type="button" ng-click="stepToThree()">
+                    {{'aws.action.nextStep'|translate}}
+                </button>
+            </div>
+            <div ng-show = "inStepThree">
+                <button class="btn btn-default" type="button" ng-disabled="storageStatus" ng-click="stepThreeToTwo()">
+                    {{'aws.action.lastStep'|translate}}
+                </button>
+                <button class="btn btn-info" type="button" ng-disabled="storageStatus || storageDisabled" ng-click="storageConfirm()">
+                    {{'aws.action.save'|translate}}
+                </button>
+                <button class="btn btn-default lastBtn" type="button" ng-class="{'disabled': !storageStatus}" uib-popover="{{'aws.initSetting.settingTranslate.nextStepTips' | translate }}" popover-enable="!storageStatus" popover-trigger="mouseenter" popover-placement = "right" ng-click="gotoTransfer()">
+                    {{"aws.initSetting.settingTranslate.transferImage" | translate }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer" ng-if="ADMIN && transferShow">
+        <button class="btn btn-info" type="button" ng-class="{'disabled': !transferStatus}" uib-popover="{{'aws.initSetting.settingTranslate.compeleteTransfer' | translate }}" popover-enable="!transferStatus" popover-trigger="mouseenter" popover-placement = "left" ng-click="completeInit()">
+            {{'aws.action.complete'|translate}}
+        </button>
+        <button class="btn btn-default" type="button" ng-click="closeInitModel()">
+            {{'aws.action.cancel'|translate}}
+        </button>
+    </div>
+</div>

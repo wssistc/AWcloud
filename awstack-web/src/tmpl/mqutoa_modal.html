@@ -1,0 +1,32 @@
+<!-- <div>
+	<div class="total clearfix" ng-if='progressValue.icon'>
+		<i class="{{progressValue.icon}}"></i>
+		<div class="quotaNum">
+		</div>
+	</div>
+	<div style="margin-left: 10%;">
+		<div style="margin-top: 10%;width: 20%;">
+			{{progressValue.icon}}
+		</div>
+		<div style="margin-top: 20%;">
+			{{progressValue.total}}
+			<div class='progress {{barType}}' style="width: 50%;margin-left: 20%;margin-top: -13px;">
+				<div class='progress-bar {{progressValue.bar_style}}'>
+				</div>
+			</div>
+			<div class="used" ng-if="progressValue.icon" style="width: 30%;margin-left: 80%;margin-top: -13px;">{{progressValue.used}}</div>
+		</div>	
+	</div>
+</div> -->
+
+
+
+<ul class="line-list clearfix">
+	<li>{{progressValue.total}}</li>
+	<li class="line">
+		<div class='progress {{barType}}'>
+			<div class='progress-bar {{progressValue.bar_style}}'></div>
+		</div>
+	</li>
+	<li>{{progressValue.used}}</li>
+</ul>

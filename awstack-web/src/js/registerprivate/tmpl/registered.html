@@ -1,0 +1,110 @@
+<div class="container">
+    <div class="registered-box clearfix" ng-show="!isregSuccess">
+        <p class="text-right">{{'aws.register.reg.haveAccount'|translate}}，<a ng-href="#/">{{'aws.register.reg.backlogin'|translate}} </a>>></p>
+        <div class="title">{{'aws.register.reg.register'|translate}}</div>
+        <form name="regForm" class="form-horizontal">
+            <fieldset>
+                <div class="form-group">
+                    <label class="control-label"><i class="red">*</i> {{'aws.register.reg.EName'|translate}}：</label>
+                    <div class="control-item">
+                        <input type="text" placeholder="{{'aws.register.reg.EName'|translate}}" autocomplete="off" repeatname required id="inputEmail" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\(|\))*$/" name="loginName" ng-minlength="4" ng-maxlength="16" ng-blur="exist(reg.loginName)" ng-disabled="isdisabled" ng-model="reg.loginName" class="form-control" />
+                        <div ng-if="regForm.loginName.$invalid   && regForm.loginName.$dirty">
+                            <span class="help-block" ng-if="regForm.loginName.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                            <span class="help-block" ng-if="regForm.loginName.$error.pattern || regForm.loginName.$error.minlength || regForm.loginName.$error.maxlength">{{'aws.register.reg.char4_16_cn'|translate}}</span>
+                            <span class="help-block" ng-if="regForm.loginName.$error.repeatname && !regForm.loginName.$error.required && !regForm.loginName.$error.pattern && !regForm.loginName.$error.minlength && !regForm.loginName.$error.maxlength">{{'aws.register.reg.accountexit'|translate}}</span>
+                        </div>
+                        <div ng-if="idExist && !regForm.loginName.$error.repeatname" class="help-block">{{'aws.register.reg.accountexit'|translate}}</div>
+                    </div>
+                </div>
+                <!-- <div class="form-group">
+                    <label class="control-label"><i class="red">*</i> {{'aws.register.reg.EName'|translate}}：</label>
+                    <div class="control-item">
+                        <input type="text" placeholder="{{'aws.register.reg.ENamesetting'|translate}}" autocomplete="off" name="name" required ng-model="reg.name" class="form-control" />
+                        <div ng-if="regForm.name.$invalid && regForm.name.$dirty">
+                            <span class="help-block" ng-if="regForm.name.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                        </div>
+                        <div ng-if="regForm.name.$valid" class="help-success"><i class="icon-aw_correct"></i></div>
+                    </div>
+                </div> -->
+                <div class="form-group">
+                    <label class="control-label"><i class="red">*</i> {{'aws.register.reg.email'|translate}}：</label>
+                    <div class="control-item">
+                        <input type="text" placeholder="{{'aws.register.reg.emailSet'|translate}}" autocomplete="off" name="email" checkemail required ng-model="reg.email" class="form-control" />
+                        <div ng-if="regForm.email.$invalid && regForm.email.$dirty ||emailRequired || errorPattern ">
+                            <span class="help-block" ng-if="emailRequired && regForm.email.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                            <span class="help-block" ng-if="errorPattern && regForm.email.$error.checkemail">{{'aws.register.reg.emailtest'|translate}}</span>
+                            <span class="help-block" ng-if="!errorPattern && regForm.email.$error.checkemail && !emailRequired">{{'aws.register.reg.emailExist'|translate}}</span>
+                        </div>
+                        <div ng-if="regForm.email.$valid" class="help-success"><i class="icon-aw_correct"></i></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"><i class="red">*</i> {{'aws.register.reg.tel'|translate}}：</label>
+                    <div class="control-item">
+                        <input type="text" placeholder="{{'aws.register.reg.telinput'|translate}}" autocomplete="off" required name="phone" ng-pattern="/^[1-9]\d*$/" ng-model="reg.phone" class="form-control">
+                        <div ng-if="regForm.phone.$invalid && regForm.phone.$dirty">
+                            <span class="help-block" ng-if="regForm.phone.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                            <span class="help-block" ng-if="regForm.phone.$error.pattern">{{'aws.register.reg.formaterror'|translate}}</span>
+                        </div>
+                        <div ng-if="regForm.phone.$valid" class="help-success"><i class="icon-aw_correct"></i></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"><i class="red">*</i> {{'aws.register.reg.passwd'|translate}}：</label>
+                    <div class="control-item">
+                        <input type="password" placeholder="{{'aws.register.reg.passwdSet'|translate}}" autocomplete="off" id="password" required ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,/\-\^\%])[0-9a-zA-Z!@._:,/\-\^\%]{8,16}$/" name="password" ng-model="reg.password" class="form-control">
+                        <div ng-if="regForm.password.$invalid && regForm.password.$dirty">
+                            <span class="help-block" ng-if="regForm.password.$error.required">{{'aws.register.reg.required'|translate}}</span>
+                            <span class="help-block" ng-if="regForm.password.$error.pattern">{{'aws.register.info.special_8_16'|translate}}</span>
+                        </div>
+                        <div ng-if="regForm.password.$valid" class="help-success"><i class="icon-aw_correct"></i></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"><i class="red">*</i> {{'aws.register.reg.confirmPasswd'|translate}}：</label>
+                    <div class="control-item">
+                        <input type="password" placeholder="{{'aws.register.reg.inputpasswdagain'|translate}}" autocomplete="off" required pw-check="password" name="repassword" ng-model="reg.repassword" class="form-control">
+                        <div ng-if="regForm.repassword.$invalid  && regForm.repassword.$dirty">
+                            <span class="help-block" ng-if="regForm.repassword.$error.pwCheck">{{'aws.register.reg.passwddiff'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"></label>
+                    <div class="control-item">
+                        <button type="button" class="btn btn-next" ng-disabled="regForm.$invalid" ng-click="regsub(reg)">{{'aws.register.reg.confirm'|translate}}</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    <div ng-if="isError" class="red text-center">
+        {{'aws.register.reg.servererror'|translate}}
+    </div>
+    <div class="reg-modal" ng-if="isregSuccess">
+        <h4 class="modal-title"><i class="icon-aw-correct"></i>{{'aws.register.reg.succeed'|translate}}</h4>
+        <ul class="detail-list">
+            <li>
+                {{'aws.register.reg.loginname'|translate}}:<span class="name">{{regData.loginName}}</span>
+                <p>{{'aws.register.reg.loginder'|translate}}</p>
+            </li>
+            <li class="line"></li>
+            <li>
+                {{'aws.register.reg.regionKey'|translate}}:<span class="key">{{regData.regionKey}}</span>
+                <p>{{'aws.register.reg.regionder'|translate}}</p>
+            </li>
+        </ul>
+        <br>
+        <br>
+        <br>
+        <br>
+        <!-- <ul class="tips-list">
+            <li class="first">注册过程:</li>
+            <li>1.同意AWStack可通过电话 (包括语音通 话、短信、或传真) 有针对性地向我提供新的产品/服务的信息。</li>
+            <li>2.同意AWStack可通过电话 (包括语音通 话、短信、或传真) 有针对性地向我提供新的产品/服务的信息。</li>
+        </ul> -->
+        <div class="text-center">
+            <a ng-href="#/" class="btn btn-next">{{'aws.register.reg.backloginpage'|translate}}</a>
+        </div>
+    </div>
+</div>

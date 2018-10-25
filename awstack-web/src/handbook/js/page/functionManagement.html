@@ -1,0 +1,199 @@
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>功能管理</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	支持通过页面，安装云平台的高级扩展功能，包括物理机管理、容器管理以及腾讯PaaS服务管理。</p>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<b>注意：</b></p>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	当系统进行对接存储或者修改密码时，建议不要进行容器管理和物理机管理的功能安装，并且，不能同时进行容器管理和物理机管理的功能安装。</p>
+<h3 style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;">
+	添加容器管理</h3>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<b>前提条件</b></p>
+<ul style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<li>
+		<p>
+			需要至少两台物理服务器来安装kubernetes集群。</p>
+	</li>
+	<li>
+		<p>
+			Master节点Node节点必须和云管平台的管理网连通。</p>
+	</li>
+	<li>
+		<p>
+			当选择使用Ceph集群时，每台服务器需要至少三个网卡，分别连接云管平台的管理网，存储网，集群网，并需要事先配置好相应网段的IP地址。</p>
+	</li>
+	<li>
+		<p>
+			服务器操作系统必须为CentOS-7.3及以上版本。</p>
+	</li>
+	<li>
+		<p>
+			获取文件<a href="http://192.168.138.225/weike/kube-kit/images/kube-kit-v1.5.tar.gz">&nbsp;kube-kit-v1.8.tar.gz</a>并放置在物理节点相应路径（如/opt）下，执行如下命令解压并上传镜像到docker images。&nbsp;<b>gzip -dc kube-kit-v1.8.tar.gz |docker load</b></p>
+	</li>
+</ul>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<b>操作步骤</b></p>
+<ol style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<li>
+		<p>
+			在云管平台的Web控制台上，选择&ldquo;产品和服务 &gt;系统管理 &gt;系统设置&rdquo;，进入系统设置导航菜单。</p>
+	</li>
+	<li>
+		<p>
+			在左侧导航菜单中单击&ldquo;功能管理&rdquo;，进入功能管理页面。</p>
+	</li>
+	<li>
+		<p>
+			单击&ldquo;添加&rdquo;按钮。</p>
+	</li>
+	<li>
+		<p>
+			在下拉列表中选择&ldquo;容器管理&rdquo;，配置容器管理功能相关信息。</p>
+	</li>
+	<li>
+		<p>
+			单击&ldquo;确定&rdquo;按钮。</p>
+	</li>
+	<li>
+		<p>
+			在容器管理页签，单击&ldquo;安装&rdquo;按钮。 待安装完成后，操作状态为&ldquo;安装成功&rdquo;。在导航栏可以查看容器管理菜单。如安装失败，单击&ldquo;清除&rdquo;按钮，然后重新安装。</p>
+	</li>
+	<li>
+		<p>
+			单击功能名称列的&ldquo;容器管理&rdquo;，查看安装日志。</p>
+	</li>
+</ol>
+<h3 style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;">
+	添加物理机管理</h3>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<b>注意：</b></p>
+<ol style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<li>
+		<p>
+			使用软件交付模式部署的云管平台需要对接共享存储后，才能进行物理机管理功能安装。</p>
+	</li>
+	<li>
+		<p>
+			被纳管的物理机和宿主机集群网必须是连通的，被纳管的物理机IPMI和宿主机管理网必须网络连通。</p>
+	</li>
+</ol>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<b>前提条件</b></p>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	需要将获取到的<a href="http://192.168.140.11/master/awstack-ironic-vm/inspector-vm.qcow2"><b>&nbsp;inspector-vm.qcow2</b></a>和<a href="http://192.168.140.11/master/awstack-ironic-vm/ironic-vm.qcow2"><b>&nbsp;ironic-vm.qcow2</b></a>文件放置所有物理节点的&ldquo;/var/lib/awstack/&rdquo;路径下。</p>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<b>操作步骤</b></p>
+<ol style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<li>
+		<p>
+			在云管平台的Web控制台上，选择&ldquo;产品和服务 &gt;系统管理 &gt;系统设置&rdquo;，进入系统设置导航菜单。</p>
+	</li>
+	<li>
+		<p>
+			在左侧导航菜单中单击&ldquo;功能管理&rdquo;，进入功能管理页面。</p>
+	</li>
+	<li>
+		<p>
+			单击&ldquo;添加&rdquo;按钮。</p>
+	</li>
+	<li>
+		<p>
+			在下拉列表中选择&ldquo;物理机管理&rdquo;，配置物理机业务网络相关信息。</p>
+	</li>
+	<li>
+		<p>
+			单击&ldquo;确定&rdquo;按钮。</p>
+	</li>
+	<li>
+		<p>
+			在物理机管理页签，单击&ldquo;安装&rdquo;按钮。 待安装完成后，操作状态为&ldquo;安装成功&rdquo;。如安装失败，单击&ldquo;清除&rdquo;按钮，然后重新安装。</p>
+	</li>
+	<li>
+		<p>
+			单击功能名称列的&ldquo;物理机管理&rdquo;，查看安装日志。</p>
+	</li>
+</ol>
+<h3 style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;">
+	管理PaaS服务</h3>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	云管平台通过功能管理模块控制云管平台启用哪些PaaS服务，只有在功能管理中添加的PaaS服务才能在云管平台页面中显示。其中功能管理中可添加功能项应受到Licence控制。</p>
+<h3 style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;">
+	添加PaaS服务</h3>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<b>前提条件</b></p>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	各PaaS服务已在物理服务器或云主机上部署完成。部署方法请参考服务提供商提供的相关文档。</p>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<b>操作步骤</b></p>
+<ol style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	<li>
+		<p>
+			在云管平台的Web控制台上，选择&ldquo;系统管理系统设置&rdquo;，进入系统设置导航菜单。</p>
+	</li>
+	<li>
+		<p>
+			在左侧导航菜单中单击&ldquo;功能管理&rdquo;，进入功能管理页面。</p>
+	</li>
+	<li>
+		<p>
+			单击&ldquo;添加&rdquo;按钮。</p>
+	</li>
+	<li>
+		<p>
+			在下拉列表中选择对应的&ldquo;PaaS服务&rdquo;，PaaS服务可选项有：TDSQL、CTSDB、TBase、TBDS、云镜、织云、灵雀。配置PaaS服务相关信息。</p>
+	</li>
+	<li>
+		<p>
+			单击&ldquo;确定&rdquo;按钮。</p>
+	</li>
+</ol>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	当在功能管理中，添加成功PaaS服务后，会在顶部导航页中，看到对应PaaS服务的入口信息。</p>
+<h3 style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;">
+	清除服务</h3>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	若PaaS服务需要从云平台中移除，可通过&ldquo;清除&rdquo;按钮，来将PaaS服务移除。</p>
+<h3 style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;">
+	织云同步数据</h3>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;; font-size: medium;">
+	当织云服务安装完成后，系统会自动将云主机、物理机等信息导入织云的CMDB。同时，也可通过&ldquo;同步数据&rdquo;操作将云管平台的云主机、物理机等信息手动同步至织云的CMDB。</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

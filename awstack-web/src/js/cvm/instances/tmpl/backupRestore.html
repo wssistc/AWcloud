@@ -1,0 +1,44 @@
+<div class="modal-common">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{"aws.instances.backupRestore.title" | translate}}</h3>
+    </div>
+    <div class="modal-body" >
+        <form name="resoreForm" novalidate>
+            <div class="control-group"  >
+                <label class="control-label">
+                    {{"aws.instances.backupRestore.systemDisk" | translate}}：
+                </label>
+                <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip11' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                    <ui-select multiple ng-model="newObj.systemDiskBackup" theme="bootstrap" sortable="true" ng-change="changeSystemBackup(newObj.systemDiskBackup)" close-on-select="false" >
+                        <ui-select-match  placeholder="{{system_backup_list.length>0?('aws.instances.backupRestore.systemDiskPlace' | translate):('aws.instances.backupRestore.nosystemDiskPlace' | translate)}}">{{$item.name}}</ui-select-match>
+                        <ui-select-choices repeat="disk in system_backup_list | propsFilter:  {name: $select.search}">
+                            <div ng-bind-html="disk.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select> 
+                </div>
+            </div>
+            <div class="control-group" >
+                <label class="control-label">
+                    {{"aws.instances.backupRestore.dataDisk" | translate}}：
+                </label>
+                <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.instances.tip11' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                    <ui-select multiple ng-model="newObj.dataDiskBackup" theme="bootstrap" sortable="true" ng-change="changeDataBackup(newObj.dataDiskBackup)" close-on-select="false" >
+                        <ui-select-match placeholder="{{data_backup_list.length>0?('aws.instances.backupRestore.dataDiskPlace' | translate):('aws.instances.backupRestore.nodataDiskPlace' | translate)}}">{{$item.name}}</ui-select-match>
+                        <ui-select-choices repeat="snap in data_backup_list | propsFilter:  {name: $select.search}">
+                                <div ng-bind-html="snap.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select> 
+                    <div class="error" ng-show="chooseBackupTipShow">{{"aws.instances.backupRestore.leastchooseDisk" | translate}}</div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="cannot_Confirm" ng-click="confirmRestore(insForm)">{{'aws.action.ok' | translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+        
+</div>

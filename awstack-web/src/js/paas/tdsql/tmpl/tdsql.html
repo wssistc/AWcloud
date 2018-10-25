@@ -1,0 +1,429 @@
+<div class="page-inner tdsql">
+  <div class="table-action">
+    <button type="button" class="btn btn-new" ng-click="createTdsql()">{{'aws.action.create'|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="initTdsql(editData)" ng-disabled="!handleBtn.canInit">初始化</button>
+    <button type="button" class="btn btn-normal" ng-click="upgradeTdsql(editData)" ng-disabled="!handleBtn.canInit">升级</button>
+   <!--  <button type="button" class="btn btn-normal" ng-click="bindInstance(editData)" ng-disabled="!handleBtn.canInit">绑定云主机</button> -->
+    <div class="dropdown" licence-type="btn-group">
+      <button type="button" class="btn btn-normal dropdown-toggle" data-toggle="dropdown">{{'aws.action.moreAction'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+      <ul class="dropdown-menu">
+        <li >
+          <button ng-click="isolationDestruction(editData)" ng-disabled="handleBtn.isolation">实例隔离</button>
+        </li>
+        <li >
+          <button ng-click="cancelDestruction(editData)" ng-disabled="handleBtn.delEnable">实例取消隔离</button>
+        </li>
+        <li >
+          <button ng-click="delDestruction(editData)" ng-disabled="handleBtn.delEnable">实例销毁</button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="pull-right">
+        <into-information modular="'databasetdsql'"></into-information>
+        <div class="search-box">
+          <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(tdsql_search.globalSearchTerm)">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="tdsql_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+          </form>
+        </div>
+        <div type="button" class="btn btn-renovat" ng-click="refreshTdsql()">
+          <i class="icon-aw-refresh"></i>
+        </div>
+        <setting title-data="titleData" site-title="titleName" table-data="tdsqlData" search-tearm="tdsqlSearchTerm(obj)"></setting>
+    </div>  
+  </div>
+  <div class="table-content">
+    <empty-tip empty-type="loadtdsqlData"></empty-tip>
+    <table ng-table="tdsqlTable" class="table"> 
+    <!-- <colgroup>
+      <col width="9%">
+      <col width="13%">
+      <col width="13%">
+      <col width="13%">
+      <col width="13%">
+      <col width="13%">
+      <col width="13%">
+      <col width="13%">
+    </colgroup> -->
+    <tr ng-repeat="item in $data">
+      <td header="'tdsqlheaderCheckbox.html'" class="check-td">
+        <label class="checkbox">
+          <input type="checkbox" name="r" ng-model="checkboxestdsqlTable.items[item.id]" value="{{item.id}}" />
+          <i class="iconfont"></i>
+        </label>
+      </td>
+      <td class="tdsql_name" data-title="'aws.tdsql.header.id_name'|translate" sortable="''" ng-if="titleData[0].value">
+        <span ng-show="item.status==1">{{item.instanceId}}</span>
+        <a ng-show="item.status!=1" ng-href="#/database/relationalTdsql">{{item.instanceId}}</a>
+<!--         <span>{{item.id}}</span>
+ -->      </td>
+      <td data-title="'aws.tdsql.header.status'|translate" sortable="'statusDisplay'" ng-if="titleData[1].value">
+        <span ng-class="{'bg-green':item.instanceStatus=='3','bg-qing':item.instanceStatus=='0','bg-orange':item.instanceStatus=='4','bg-red':item.instanceStatus=='1'}">
+          {{item.statusDisplay}}
+        </span>
+      </td>
+      <td data-title="'aws.tdsql.header.type'|translate" sortable="''" ng-if="titleData[2].value">
+        {{item.instanceType}}
+      </td>
+      <td data-title="'aws.tdsql.header.edition'|translate" ng-if="titleData[3].value">
+        {{item.edition}}
+      </td>
+      <td data-title="'aws.tdsql.header.specifications'|translate" sortable="''" ng-if="titleData[4].value">
+        {{item.specifications}}
+      </td>
+      <td data-title="'aws.tdsql.header.address'|translate" sortable="'hosts'" ng-if="titleData[5].value">
+        {{item.hosts}}
+      </td>
+    </tr>
+    </table>  
+  </div>
+  <div class="detailIns-box">
+    <div class= 'animateContent  {{tdsqlAnimation}} '>
+      <div class='detailInner'>
+          <div class="tab-content">
+            <div class="detail-title">
+              <a class="an-close" ng-click="closeTdsql()"><i class=" icon-aw-mail-reply"></i></a>
+              <span>新建</span>
+            </div>
+            <div class="detail-info"  ng-if="tdsqlAnimation == 'animateIn'">
+              <div ng-controller ="createTdsqlCtrl" ng-include = "'js/paas/tdsql/tmpl/createTdsql.html'"></div>
+            </div>
+          </div>
+      </div>
+    </div>
+    <div class='animate-backup'></div>
+  </div>
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+      <div class="tab-content">
+          <div class="detail-row">
+            <div class="detail-title">
+              <a class="an-close" ng-href="/database/relationalTdsql"><i class=" icon-aw-mail-reply"></i></a>
+              <span>{{'aws.tdsql.detail'|translate}}</span>
+            </div>
+            <div class="detail-info tab-offset-right">
+              <ul class="nav nav-tabs">
+                  <li ng-class="{active:tab.active == 'insDetail'}" class="uib-tab nav-item " ng-click="activeTab('insDetail')">
+                      <a>{{'aws.tdsql.insDetail'|translate}}</a>
+                  </li>
+                  <li ng-class="{active:tab.active == 'piecewiseManage'}" class="uib-tab nav-item " ng-click="activeTab('piecewiseManage')">
+                      <a>{{'aws.tdsql.piecewiseManage'|translate}}</a>
+                  </li>
+                  <li ng-class="{active:tab.active == 'insMonitor'}" class="uib-tab nav-item"  ng-click="activeTab('insMonitor')">
+                      <a>{{'aws.tdsql.insMonitor'|translate}}</a>
+                  </li>
+                  <li ng-class="{active:tab.active == 'paramSet'}" class="uib-tab nav-item"  ng-click="activeTab('paramSet')">
+                      <a>{{'aws.tdsql.paramConfig'|translate}}</a>
+                  </li>
+                  <li ng-class="{active:tab.active =='accountManage' }" class="uib-tab nav-item"  ng-click="activeTab('accountManage')">
+                      <a>{{'aws.tdsql.acconutconfig'|translate}}</a>
+                  </li>
+              </ul>
+              <div class="tdsql-detail-inner">
+                 <div ng-include="activeDetailTmpl"></div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </pane>
+  </div>
+
+</div>
+<script type="text/ng-template" id="tdsqlheaderCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxestdsqlTable.checked" class="select-all-tdsqlTable" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="instanceheaderCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxesinstancesTable.checked" class="select-all-instancesTable" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+
+
+<script type="text/ng-template" id="initTdsql.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">实例初始化</h3>
+    </div>
+    <div class="modal-body tdsql-modal">
+      <form name="initForm" novalidate>
+          <div class="control-group radio-wrap">
+              <label class="control-label">支持字符集：</label>
+              <div class="controls">
+                  <div class="radio-item clearFix">
+                    <label class="radio" ng-repeat="item in supportCharacter"><input type="radio" ng-model="initParams.character" name="character"  value="{{item.type}}" /><i class="iconfont"></i>{{item.name}}</label>
+                  </div>
+                  <div class="help-tips">仅存活1个节点时，集群将自动退化为异步同步</div>
+              </div>
+          </div>
+          <div class="control-group radio-wrap">
+            <label class="control-label">表名大小写敏感：</label>
+            <div class="controls">
+                <div class="checkbox switch-btn">
+                  <label>
+                    <input type="checkbox"  class="form-controls" ng-model="initParams.case">
+                    <i class="iconfont"></i>
+                  </label>
+                </div>
+            </div>
+          </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="initConfirm(initForm)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="bindInstance.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">绑定云主机</h3>
+    </div>
+    <div class="modal-body">
+      <form name="bindInstanceForm" novalidate>
+        <div class="table-action">
+          <button type="button" class="btn btn-new" ng-click="bind()">绑定</button>
+          <button type="button" class="btn btn-new" ng-click="unbind()">解除绑定</button>
+          <div class="pull-right">
+              <ui-select ng-model="filterselect" >
+                  <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="item in filterList | filter: {name: $select.search}">
+                      <div ng-bind-html="item.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+              </ui-select>
+              <div class="search-box">
+                <form name="searchForm" novalidate >
+                  <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                  <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" ng-keyup="applyGlobalSearch(globalSearchTerm)" placeholder="{{'aws.action.search'|translate}}" />
+                </form>
+              </div>
+              <div type="button" class="btn btn-renovat" ng-click="refreshInstancesTable()">
+                <i class="icon-aw-refresh"></i>
+              </div>
+          </div>  
+        </div>
+        <div class="table-content">
+          <empty-tip empty-type="instancesData"></empty-tip>
+          <table ng-table="instancesTable" class="table"> 
+          <colgroup>
+            <col width="9%">
+            <col width="18%">
+            <col width="18%">
+            <col width="18%">
+            <col width="18%">
+            <col width="18%">
+          </colgroup>
+          <tr ng-repeat="item in $data">
+            <td header="'instanceheaderCheckbox.html'" class="check-td">
+              <label class="checkbox">
+                <input type="checkbox" name="r" ng-model="checkboxesinstancesTable.items[item.id]" value="{{item.id}}" />
+                <i class="iconfont"></i>
+              </label>
+            </td>
+            <td class="tdsql_name" data-title="'云主机名称'" sortable="''" >
+              <span>{{item.name}}</span>
+            </td>
+            <td data-title="'状态'">
+              <span ng-class="{'bg-green':item.status=='1','bg-qing':item.status=='3','bg-red':item.status=='2'}">
+                {{item.status}}
+              </span>
+            </td>
+            <td data-title="'私网IP'" sortable="''">
+              {{item.privateIp}}
+            </td>
+            <td data-title="'公网IP'">
+              {{item.publicIp}}
+            </td>
+            <td data-title="'绑定状态'" sortable="''">
+              {{item.bindStatus}}
+            </td>
+          </tr>
+          </table>  
+        </div>      
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="initConfirm(initForm)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="upgradeTdsql.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">实例升级</h3>
+    </div>
+    <div class="modal-body tdsql-modal">
+      <div class="alert alert-warning" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="close()"><span aria-hidden="true">×</span></button>
+        <div class="alert-content">
+            <div class="alert-text">
+升级过程中存在一次秒级连接中断，升级后实例IP不会变化，建议您在低峰期执行升级操作</div>
+        </div>
+      </div>
+      <form name="upgradeForm" novalidate>
+          <div class="control-group" >
+            <label class="control-label">实例名称：</label>
+            <div class="controls">
+              <span class="con-item">
+                {{upgradeData.name}}
+              </span>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">实例版本：</label>
+            <div class="controls">
+              <span class="con-item">
+                {{upgradeData.edition}}
+              </span>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">当前规格：</label>
+            <div class="controls">
+              <span class="con-item">
+                {{upgradeData.specifications}}
+              </span>
+            </div>
+          </div>
+          <div class="control-group">
+              <label class="control-label">升级规格：</label>
+              <div class="controls">
+                <ui-select ng-model="storage.storageDeviceSelected" ng-disabled="" ng-change="changeStorage(storage.storageDeviceSelected)" name="device" required>
+                    <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="storage in storageDeviceList | filter: {name: $select.search}">
+                        <div ng-bind-html="storage.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+                <div class="error" ng-messages="(submitInValid ||step2InsForm.device.$dirty) && step2InsForm.device.$error">
+                    <form-validate></form-validate>
+                </div>
+            </div>
+          </div>
+          <div class="control-group">
+                <label class="control-label">磁盘容量：</label>
+                <div class="controls">
+                    <div class="bind-bar">
+                        <input type="text" id="upgradeBar">
+                    </div>
+                    <div class="bind-input">
+                        <button ng-click="changeSize('subtraction')">-</button>
+                        <input type="text" ng-model="upgradeData.disksize" name="upgradeValue" ng-keyup="changeDiskSize(upgradeData.disksize)" num-range min="1" max="10000" ng-model-options="{ updateOn: 'blur' }">
+                        <button ng-click="changeSize('add')">+</button>
+                    </div>
+                </div>
+            </div>
+
+          <div class="control-group" >
+            <label class="control-label">适用：</label>
+            <div class="controls">
+              <span class="con-item">
+                {{upgradeData.suit}}
+              </span>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">升级耗时：</label>
+            <div class="controls">
+              <span class="con-item">
+                {{upgradeData.useTime}}
+              </span>
+              <span class="time-help">实例负载高或大量数据写入时我们将延长升级时间，优先保障实例稳定运行</span>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">指定时间切换：</label>
+            <div class="controls">
+              <div class="checkbox switch-btn">
+                <label>
+                  <input type="checkbox"  class="form-controls" ng-model="upgradeData.change">
+                  <i class="iconfont"></i>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-show="upgradeData.change">
+            <label class="control-label">&nbsp;</label>
+            <div class="controls" >
+                <div class="control-items2">
+                    <div class="control-group no-margin  formdata-view">
+                      <div class="input-group date form_date">
+                          <input class="form-control" type="text" name="startTime" ng-model="newObj.startTime"  ng-change="changeTime()" required lt-curr-time
+                          ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])\s(([0-1][0-9])|([2][0-3])):([0-5][0-9])$/"  placeholder="{{'aws.log.start_at'|translate}}">
+                          <span class="input-group-addon calendar-cont">
+                              <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                          </span>
+                      </div>
+                    </div>
+                    <div class="control-group no-margin  formdata-time">
+                      <input class="formdata-item" type="text" name="startTime" ng-model="newObj.startTime" required placeholder="请输入">
+                      <span>时</span>
+                    </div>
+                    <div class="control-group no-margin  formdata-time">
+                      <input class="formdata-item" type="text" name="startTime" ng-model="newObj.startTime" required placeholder="请输入">
+                      <span>分</span>
+                    </div>
+                    <div class="control-group no-margin  formdata-time">
+                      <input class="formdata-item" type="text" name="startTime" ng-model="newObj.startTime" required placeholder="请输入">
+                      <span>秒</span>
+                    </div>
+
+
+                </div>
+                
+            </div>
+        </div>
+
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="upgradeConfirm(upgradeForm)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="modifyDataSync.html">
+   <div class="modal-common dataSync-modal">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{"aws.tdsql.modifyDataSyncType"|translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <form name="modifyDataSyncForm" novalidate>
+            <div class="control-group radio-wrap">
+              <label class="control-label">{{'aws.tdsql.readonlyAccount'|translate}}：</label>
+              <div class="controls">
+                <div class="radio-item clearFix">
+                  <label class="radio">
+                    <input type="radio" ng-model="type.syncType" name="Sync"  value="Synchronous" /><i class="iconfont"></i>
+                    强同步（可退化）
+                  </label>
+                  <label class="radio">
+                    <input type="radio" ng-model="type.syncType" name="async" value="asynchronous" /><i class="iconfont"></i>
+                    异步
+                  </label>
+                </div>
+                <div class="readonly-msg">
+                  <span>仅存活1个节点时，集群将自动退化为异步同步</span>
+                </div>
+              </div>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+            <button class="btn btn-info" type="button" ng-click="modifyDataSyncConfirm(modifyDataSyncForm)">{{"aws.action.ok"|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+      </div>
+    </div>
+</script>
+
+
+

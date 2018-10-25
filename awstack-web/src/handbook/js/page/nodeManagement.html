@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>节点管理</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <h3>
+	加入集群</h3>
+<p>
+	<strong>说明</strong>：<br />
+	新增节点注册成功后才能进行初始化配置后加入集群。注册过程请参见《AWCloud云计算管理平台 安装部署手册》。</p>
+<p>
+	<strong>注意</strong>：<br />
+	选择&ldquo;系统设置&gt; 软件授权&rdquo;查看当前软件的授权信息，当&ldquo;支持节点数&rdquo;为&ldquo;N/A&rdquo;时，在&ldquo;节点管理&rdquo;页面添加节点数将不受限制。当&ldquo;支持节点数&rdquo;为具体的数值时，则&ldquo;节点管理&rdquo;页面已使用的虚拟资源节点数必须小于&ldquo;支持节点数&rdquo;时，才能进行新增节点操作。</p>
+<ol>
+	<li>
+		在云管平台的Web控制台上，选择&ldquo;产品和服务&gt;系统管理&gt;运维管理&rdquo;，进入运维管理导航菜单。</li>
+	<li>
+		在左侧导航菜单中单击&ldquo;节点管理&rdquo;，进入节点管理页面。</li>
+	<li>
+		在节点管理页面，选择&ldquo;虚拟资源节点&rdquo;页签，新节点注册成功后，显示状态为&ldquo;未配置&rdquo;，单击&ldquo;加入集群&rdquo;按钮，对节点进行网卡、网络、硬盘配置。</li>
+	<li>
+		依次配置完成后，在配置页面单击&ldquo;加入集群&rdquo;按钮，系统状态变为&ldquo;开始新增节点&rdquo;，配置成功后，健康状态由&ldquo;N/A&rdquo;变为&ldquo;健康&rdquo;，节点状态变为&ldquo;节点管理成功&rdquo;。</li>
+</ol>
+<h3>
+	节点晋升</h3>
+<p>
+	云管平台使用两节点安装部署时，通过节点晋升功能将新增纯计算节点晋升为管理+计算的节点。并将新加入的第三个物理节点也晋升为管理+计算节点。</p>
+<p>
+	<strong>注意</strong>：<br />
+	节点晋升功能只针对两节点晋升为三节点。节点晋升过程中两节点高可用功能将不可用，且晋升过程不可逆。</p>
+<ol>
+	<li>
+		在云管平台的Web控制台上，选择&ldquo;产品和服务 &gt;系统管理 &gt;运维管理&rdquo;，进入运维管理导航菜单。</li>
+	<li>
+		在左侧导航菜单中单击&ldquo;节点管理&rdquo;，进入节点管理页面。</li>
+	<li>
+		在节点管理页面，选择&ldquo;虚拟资源节点&rdquo;页签，在节点列表中选择两个状态为&ldquo;节点管理成功&rdquo;的节点，单击&ldquo;启动多节点高可用架构&rdquo;按钮。</li>
+	<li>
+		在配置页面单击&ldquo;节点晋升&rdquo;按钮，并在弹出的确认框内单击&ldquo;确定&rdquo;。</li>
+	<li>
+		单击&ldquo;下一步&rdquo;按钮，在节点列表中勾选注册的新节点，单击&ldquo;加入集群&rdquo;按钮。</li>
+	<li>
+		对新节点的网卡信息、网络信息和硬盘信息依次进行配置，配置完成后，单击&ldquo;加入集群&rdquo;按钮，节点状态变为&ldquo;节点配置成功&rdquo;。</li>
+	<li>
+		选择加入集群的新节点，单击&ldquo;新节点晋升&rdquo;按钮，将第三个物理节点也晋升为管理+计算节点。</li>
+	<li>
+		在弹出的确认框里单击&ldquo;确定&rdquo;按钮然后单击&ldquo;完成&rdquo;按钮。</li>
+</ol>
+<h3>
+	维护虚拟资源节点</h3>
+<p>
+	<strong>注意</strong>：<br />
+	使用两个或三个节点部署时，不允许对任一节点进行维护操作。使用四个节点部署时，仅支持对其中一个节点进行维护。</p>
+<p>
+	当虚拟资源节点出现硬件问题时，对虚拟资源节点进行维护。维护节点前需确保当前节点的所有云主机已经迁移或清空，否则会造成数据丢失。</p>
+<p>
+	在&ldquo;虚拟资源节点&rdquo;页签列表区，勾选待操作的节点，单击&ldquo;维护&rdquo;按钮。在弹出的确认框里单击&ldquo;确定&rdquo;按钮。</p>
+<h3>
+	激活虚拟资源节点</h3>
+<p>
+	<strong>注意</strong>：<br />
+	使用两个或三个节点部署时，不允许进行激活操作。</p>
+<p>
+	当虚拟资源节点从维护状态重新启用时，单击&ldquo;激活&rdquo;按钮，将节点重新启用。</p>
+<h3>
+	删除虚拟资源节点</h3>
+<p>
+	<strong>注意</strong>：<br />
+	云管平台存在三个节点时，不允许进行删除操作。删除节点前需确保当前节点的所有云主机已经迁移或清空。当使用软件交付模式部署云管平台时，不允许删除node-1节点，因为镜像和glance-api都保存在node-1上。</p>
+<p>
+	在&ldquo;虚拟资源节点&rdquo;页签列表区，勾选待操作的节点，单击&ldquo;删除&rdquo;按钮。在弹出的确认框里单击&ldquo;确定&rdquo;按钮。</p>
+<h3>
+	强制删除虚拟资源节点</h3>
+<p>
+	当云管平台部署了多个数据中心时，由于某种原因直接重装了某个数据中心，导致数据库有残留的节点信息。通过强制删除操作将残留的节点信息删除。</p>
+<p>
+	在&ldquo;虚拟资源节点&rdquo;页签列表区，勾选待操作的节点，在&ldquo;更多操作&rdquo;列表选择&ldquo;强制删除&rdquo;按钮。在弹出的确认框里输入超级管理员admin登录信息。</p>
+<p>
+	&nbsp;</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<div class="modal-common">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">启动顺序管理</h3>
+    </div>
+    <div class="modal-body bootOrderForm" >
+        <form name="bootOrderForm" novalidate>
+            <div class="control-group">
+                <label class="control-label">&nbsp</label>
+                <div class="controls">
+                    <div class="btn-item-group">
+                        <button type="button" class="type-btn type-btn-middle"  ng-click="adjustMenu('up')"><i class=" icon-aw-angle-up"></i><span>上移</span></button>
+                        <button type="button" class="type-btn type-btn-middle"  ng-click="adjustMenu('down')"><i class="icon-aw-angle-down-1"></i><span>下移</span></button>
+                        <button type="button" class="type-btn type-btn-middle"  ng-click="adjustFunEdge('top')"><i class="icon-aw-zd"></i><span>置顶</span></button>
+                        <button type="button" class="type-btn type-btn-middle"  ng-click="adjustFunEdge('bottom')"><i class="icon-aw-zdi"></i><span>置底</span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">&nbsp</label>
+                <div class="controls border-box">
+                    <div class="checkbox" ng-repeat="menu in osMenus">
+                        <label>
+                            <input type="checkbox" ng-model="menu.checked" >
+                            <i class="iconfont"></i>{{menu.name}}
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+        </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button"  ng-disabled="cannot_Confirm "  ng-click="bootMenus()">{{'aws.action.ok' | translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+    
+</div>

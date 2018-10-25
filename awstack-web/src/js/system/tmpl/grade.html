@@ -1,0 +1,239 @@
+<div class="page-inner">
+  <div class="table-action">
+    <button type="button" class="btn btn-new" ng-click="updatePatch()" ng-disabled="checkClickBtn"  licence-type="btn" id="system-CloudPlatform-upload">
+      <i class="icon-aw-upload"></i>{{"aws.action.update_patch"|translate}}
+    </button>
+    <button type="button" class="btn btn-normal" ng-click="checkSaasStatus()" ng-disabled="checkClickBtn"  licence-type="btn" id="system-containerMag-testUpdata">
+      <i class="icon-aw-gx"></i>{{"aws.action.checking_saasStatus"|translate}}
+    </button>
+    <into-information modular="'grade'"></into-information>
+<!--     <button class="btn btn-refresh" ng-click="refreshFlavors()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button>
+<div class="search-box">
+  <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+    <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+      <i class="icon-aw-search"></i>
+    </button>
+    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm"
+           ng-model="globalSearchTerm" placeholder="{{'aws.action.search'|translate}}"/>
+  </form>
+</div> -->
+  </div>
+  <div class="table-content">
+    <table ng-table="tableParams" class="table" show-filter="false">
+      <colgroup>
+        <col width="20%">
+        <col width="20%">
+        <col width="35%">
+        <col width="15%">
+        <col width="5%">
+        <col width="5%">
+      </colgroup>
+      <tr ng-repeat="item in $data">  
+        <!-- <td header="'headerCheckbox.html'">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[flavor.id]"/>
+            <i class="iconfont"></i>
+          </label>
+        </td> -->
+        <td data-title="'底层版本变更'" sortable="'sysPostVersion'">
+          <span>{{item.sysPreVersion}}->{{item.sysPostVersion}}</span>
+        </td>
+        <td data-title="'云管版本变更'" sortable="'sysPreVersion'">
+          <span>{{item.saasPreVersion}}->{{item.saasPostVersion}}</span>
+        </td>
+        <td data-title="'升级包描述'" sortable="'packDesc'">
+          {{item.packDesc }}
+        </td>
+        <td data-title="'更新时间'" sortable="'updateTime'">
+          {{item.updateTime | date:'yyyy-MM-dd HH:mm:ss'}}
+        </td>
+        <td data-title="'状态'" sortable="'updateTime'">
+          <span ng-class="{'bg-green':item.status=='5','bg-red':item.status=='6','bg-blue':item.status<5}">{{item.statusAs}} <i ng-if="item.status<5" class="icon-aw-refresh aw-spin"></i></span>
+        </td> 
+        <td data-title="'操作'">
+          <!-- <button  ng-show="item.status<6" class="btn btn-default" ng-click="checkIn(item)">查看</button> -->
+          <button ng-show="item.status==6" class="btn btn-default" ng-click="reGrade(item)">重试</button>
+        </td>
+      </tr>
+    </table>
+    <loading-data data="historyList"></loading-data>
+  </div>
+</div>
+<div ng-if="checkUpdateStatus" class="update-check">
+  <div class="backup-bg"></div>
+  <div class="update-box">
+    <p></p>
+    <span>
+      检查更新中....
+    </span>
+  </div>
+</div>
+
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value=""/>
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="update.html">
+  <div class="modal-common modal-smallest">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">上传升级包</h3>
+    </div>
+    <div class="modal-body" ng-class="">
+      <div class="download-soft">
+        <div class="alert">
+          <div>请通过下面SFTP地址上传软件升级包，如需Windows SFTP客户端请</div>
+          <span ng-click="showSoft()">点击下载</span>
+        </div>
+        <div ng-if="downloadPatch" class="download-patch">
+          <div class="item">
+            <p>FILEZILLA 32位 免安装版</p>
+            <a href="/FileZilla_3.24.0_win32.zip" class="btn btn-default">下载</a>
+          </div>
+          <div class="item">
+            <p>FILEZILLA 64位 免安装版</p>
+            <a href="/FileZilla_3.24.0_win64.zip" class="btn btn-default">下载</a>
+          </div>
+        </div>
+      </div>
+      <form name="sftpForm">
+        <div class="control-group">
+          <label class="control-label">SFTP地址：</label>
+          <div class="controls">
+            <!--<i class="icon-aw-question-mark question-tip" uib-popover='提示'  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+            <span class="val" ng-bind="sftp.mangerIp"></span>            
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">用户名：</label>
+          <div class="controls">
+              <!--<i class="icon-aw-question-mark question-tip" uib-popover='提示'  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+              <span class="val" ng-bind="sftp.sftpUser">33333</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">端口：</label>
+          <div class="controls">
+              <!--<i class="icon-aw-question-mark question-tip" uib-popover='提示'  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+              <span class="val">22</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">过期时间：</label>
+          <div class="controls">
+              <!--<i class="icon-aw-question-mark question-tip" uib-popover='提示'  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+              <span class="val" ng-bind="sftp.expireTime| date:'yyyy-MM-dd HH:mm:ss'">33333</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">密码：</label>
+          <div class="controls">
+            <!--<i class="icon-aw-question-mark question-tip" uib-popover='提示'  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+            <div class="input-group">
+              <input type="text" name="password" readonly class="form-control" id="gradepassword" ng-model="sftp.sftpPwd" required />
+              <span popover-placement="bottom" popover-trigger="mouseenter" uib-popover="{{copytext}}">
+                <i class="icon-aw-copy" copy-text data-copytarget="#gradepassword"></i>
+              </span>
+              <span class="btn btn-primary" ng-click="getRandomPassword()">获取随机密码</span>
+            </div>
+            <div class="error" ng-if="getRandomPasswordResult">获取随机密码失败,请再试一次</div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-loading" ng-if="showLoading">
+      <div class="modal-loading-backup"></div>
+      <i class="icon-aw-load aw-spin"></i>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="installer.html">
+  <div class="modal-common updatepack-modal">
+    <div ng-class="{'hide':hide}">
+      <div class="modal-header">
+        <button type="button" class="close" ng-disabled="currentPack.globalDisabled" ng-click="$dismiss()">×</button>
+        <span class="title-num" ng-show="!packType">检测到<b class="green">{{num}}</b>个升级包</span>
+        <div class="alert alert-info"  ng-if="!noPatch">
+          升级时请勿手动关闭窗口或刷新页面(升级过程中由于系统版本和网络差异，升级页面可能会自动刷新！)
+        </div>
+      </div>
+      <div class="modal-body">
+        <p class="orange no-patch" ng-if="noPatch">暂无可用升级包</p>
+        <ul class="update-list" ng-show="!noPatch">
+          <li ng-repeat="item in updateList track by $index" ng-class="{'active':item.update_pack_id==currentPack.PackId,'success':item.status=='success'}">
+            <div class="status">
+              <span ng-if="!item.status"><i class="icon-aw-prompt"></i></span>
+              <span ng-if="item.status=='success'"><i class="icon-aw-correct"></i></span>
+              <span ng-if="item.status=='fail'"><i class="icon-aw-1shut-down"></i></span>
+              <span ng-if="item.status=='update'"><i class="icon-aw-refresh aw-spin"></i></span>
+            </div>
+            <div class="icon-box">
+              <span><i class="icon-aw-up"></i></span>
+            </div>
+            <div class="update-detail-box">
+              <div ng-show="item.canUp">
+                <h5>{{item.update_pack_title}}</h5>
+                <div class="detail-message-more">
+                  <ul class="messages">
+                    <li>
+                      <span ng-repeat="component in item.update_components">{{$index+1+"."+component.description}}</span>
+                    </li>
+                  </ul>
+                  <span class="blue" ng-click="readMore(item)">更多详情</span>
+                </div>
+              </div>
+              <div ng-show="!item.canUp">
+                <span class="orange">升级包版本不匹配，无法升级</span>
+              </div>
+            </div>
+            <div class="version-info">
+              <div ng-show="!item.status||item.status=='fail'">
+                <span>已装版本 :<b title="{{sys_version}}" ng-bind="sys_versionCon"></b></span>
+                <span>最新版本 :<b class="green" title="{{item.update_platform_versions.sys_version.post}}" ng-bind="item.update_platform_versions.sys_versionCon"></b></span>
+              </div>
+              <div ng-show="item.status=='update'||item.status=='success'">{{currentPack.Percent}}</div>
+            </div>
+            <div class="action">
+              <div ng-show="item.canUp">
+                <span class="success-text" ng-class="{'show':item.status=='success'}"><i class="icon-aw-correct"></i> 升级已完成</span>
+                <button ng-class="{'show':item.status=='fail'}" ng-disabled="currentPack.globalDisabled" class="btn btn-default" ng-click="update(item)">重试</button>
+                <button class="btn btn-default" ng-disabled="currentPack.globalDisabled" ng-class="{'show':!item.status}" ng-click="update(item)">升级</button>
+              </div>
+              
+            </div>
+            <div class="progress-present" ng-style="{width:currentPack.Percent}" ng-show="item.update_pack_id==currentPack.PackId&&item.status=='update'"></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="update-detail-info" ng-class="{'show':infoShow}">
+      <div class="update-detail-info-head">
+        <div class="img-box">
+          <i class="icon-aw-up"></i>
+        </div>
+        <div class="text-box">
+          <h5>升级包描述</h5>
+          <p>
+            <span>云管已装版本：<b class="green grade-tip" title="{{saas_version}}" ng-bind="saas_versionCon"></b></span>
+            <span>云管最新版本：<b class="green grade-tip" title="{{updateInfo.update_platform_versions.saas_version.post}}" ng-bind="updateInfo.update_platform_versions.saas_versionCon"></b></span>
+          </p>
+          <p>
+            <span>底层已装版本：<b class="green grade-tip" title="{{sys_version}}"  ng-bind="sys_versionCon"></b></span>
+            <span>底层最新版本：<b class="green grade-tip" title="{{updateInfo.update_platform_versions.sys_version.post}}" ng-bind="updateInfo.update_platform_versions.sys_versionCon"></b></span>
+          </p>
+        </div>
+        <button type="button" class="close" ng-click="cancel()">×</button>
+      </div>
+      <div class="update-detail-info-body">
+        <span>更新内容</span>
+        <ul>
+          <li ng-repeat="item in updateInfo.update_components track by $index"><span class="green">{{$index+1+"."}}</span>{{item.description}}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</script>
+

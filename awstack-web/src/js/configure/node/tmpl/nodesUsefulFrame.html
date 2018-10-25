@@ -1,0 +1,204 @@
+<div class="modal-common lg-modal modal-step nodes-userful-modal">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title  clearfix">{{'aws.node.clusterNode.enableHa'| translate}}</h3>
+        <ul class="steps-sytle-ver clearfix">
+            <li class="clearfix step-start" ng-class="{'active':inStepOneBar<inStep}">
+                <div class="inner">
+                    <span>{{'aws.node.clusterNode.twoNodesP'| translate}}</span>
+                    <i>1</i>
+                </div>
+            </li>
+            <li class="clearfix step-middle"  ng-class="{'active':inStepTwoBar<inStep}">
+                <div class="inner">
+                    <span>{{'aws.node.clusterNode.addCluster'| translate}}</span>
+                    <i>2</i>
+                </div>
+            </li>
+            <li class="clearfix step-end"  ng-class="{'active':inStepThreeBar<inStep}">
+                <div class="inner">
+                    <span>{{'aws.node.clusterNode.promotionNode'| translate}}</span>
+                    <i>3</i>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="modal-body ">
+        <form name="createUserForm">
+            <div class="control-group  one-group" ng-show="inStep=='1'">
+                <div class="table-action">
+                    <button type="button" ng-disabled="!checKTwoNodesPromote" ng-click="twoNodePromote()" class="btn btn-info">{{'aws.node.clusterNode.nodePromote'| translate}}</button>
+                    <p ng-if="showTwoNodePromoteBtn">{{'aws.node.clusterNode.twoNodePTips'| translate}}</p>
+                </div>
+                <div class="table-content">
+                    <table ng-table="tableCanAddNodes" class="table" show-filter="false">
+                        <colgroup>
+                            <col width="4%">
+                        </colgroup>
+                        <tr ng-repeat="item in $data" ng-class="{true:'deleteNode',false:'none'}[item.status==21]">
+                            <td data-title="'aws.node.hypervisorHostname'|translate" sortable="'hostName'">
+                                {{item.hostName}}
+                            </td>
+                            <td data-title="'aws.node.regionName2'|translate" sortable="'regionName'">
+                                {{item.regionName}}
+                            </td>
+                            <td data-title="'aws.node.management_IP'|translate" sortable="'hostInfoMap.ip'">
+                                {{item.hostInfoMap.ip}}
+                            </td>
+                            <td data-title="'aws.node.lastTime'|translate" sortable="'lastTime'">
+                                <span class="date">{{item.lastTime| date:'yyyy-MM-dd HH:mm:ss'}}</span>
+                            </td>
+                            <td data-title="'aws.node.roles'|translate" sortable="'roles'">
+                                {{item.roles}}
+                            </td>
+                            <td data-title="'aws.node.useStatus'|translate" sortable="'useStatus'">
+                                {{'aws.node.useStatusValues.'+item.useStatus| translate}}
+                            </td>
+                            <td data-title="'aws.node.healthStaus.status'|translate" sortable="'healthStatus'">
+                                <span ng-class="{'bg-green':(item.healthStatus=='status' || item.healthStatus==true),'bg-orange':(item.healthStatus=='repair')}" class="orange">{{'aws.node.healthStaus.'+item.healthStatus| translate}}
+                                </span>
+                            </td>
+                            <td data-title="'aws.node.Status'|translate" sortable="'status'">
+                                <span>{{'aws.node.status.'+item.status| translate}}</span>
+                                <span><button type="button"  ng-show="item.canActivation" ng-click="activation(item)" class="btn btn-info" ng-disabled="actionCan">{{'aws.node.activation'| translate}}</button></span>
+                                <span><button type="button"  ng-show="item.canRetry" ng-click="retry(item)" ng-disabled="retryCan" class="btn btn-info">{{'aws.node.retry'| translate}}</button></span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="control-group one-group" ng-show="inStep=='2'">
+                <div class="table-action">
+                    <button type="button" ng-disabled="!canInitNodes" ng-click="initConfig(addcheckedItems)" class="btn btn-info">{{'aws.node.clusterNode.addCluster'| translate}}</button>
+                    <p ng-if="showInitNodesBtn">{{'aws.node.clusterNode.nodePTips'| translate}}</p>
+                </div>
+                <div class="table-content">
+                    <table ng-table="tableInitNodes" class="table" show-filter="false">
+                        <colgroup>
+                            <col width="4%">
+                        </colgroup>
+                        <tr ng-repeat="item in $data" ng-class="{true:'deleteNode',false:'none'}[item.status==21]">
+                            <td>
+                                <label class="checkbox" ng-if="!item.useStatus">
+                                    <input type="checkbox" ng-model="checkInitPage.items[item.nodeUid]" />
+                                    <i class="iconfont"></i>
+                                </label>
+                            </td>
+                            <td data-title="'aws.node.hypervisorHostname'|translate" sortable="'hostName'">
+                                {{item.hostName}}
+                            </td>
+                            <td data-title="'aws.node.regionName'|translate" sortable="'regionName'">
+                                {{item.regionName}}
+                            </td>
+                            <td data-title="'aws.node.management_IP'|translate" sortable="'hostInfoMap.ip'" >
+                                {{item.hostInfoMap.ip}}
+                            </td>
+                            <td data-title="'aws.node.lastTime'|translate" sortable="'lastTime'">
+                                <span class="date">{{item.lastTime| date:'yyyy-MM-dd HH:mm:ss'}}</span>
+                            </td>
+                            <td data-title="'aws.node.roles'|translate" sortable="'roles'">
+                                {{item.roles}}
+                            </td>
+                            <td data-title="'aws.node.useStatus'|translate" sortable="'useStatus'">
+                                {{'aws.node.useStatusValues.'+item.useStatus| translate}}
+                            </td>
+                            <td data-title="'aws.node.healthStaus.status'|translate" sortable="'healthStatus'">
+                                <span ng-class="{'bg-green':(item.healthStatus=='status' || item.healthStatus==true),'bg-orange':(item.healthStatus=='repair')}" class="orange">{{'aws.node.healthStaus.'+item.healthStatus| translate}}
+                                </span>
+                            </td>
+                            <td data-title="'aws.node.Status'|translate" sortable="'status'" >
+                                <span>{{'aws.node.status.'+item.status| translate}}</span>
+                                <span><button type="button"  ng-show="item.canActivation" ng-click="activation(item)" class="btn btn-info" ng-disabled="actionCan">{{'aws.node.activation'| translate}}</button></span>
+                                <span><button type="button"  ng-show="item.canRetry" ng-click="retry(item)" ng-disabled="retryCan" class="btn btn-info">{{'aws.node.retry'| translate}}</button></span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="control-group two-group" ng-show="inStep=='3'">
+                <div class="table-action">
+                    <button type="button" ng-disabled="!canInsertNodes" ng-click="threeNodePromote(InsertCheckedItems)" class="btn btn-info">{{'aws.node.clusterNode.promotionNode'| translate}}</button>
+                    <p ng-if="showThreeNodePromoteBtn">{{'aws.node.clusterNode.twoNodePSTips'| translate}}</p>
+                </div>
+                <div class="table-content">
+                    <table ng-table="tableInsertToCount" class="table" show-filter="false">
+                        <colgroup>  
+                            <col width="4%">
+                        </colgroup>
+                        <tr ng-repeat="item in $data" ng-class="{true:'deleteNode',false:'none'}[item.status==21]">
+                            <td>
+                                <label class="checkbox" ng-if="item.roles =='client'">
+                                    <input type="checkbox" ng-model="checkInsertToCount.items[item.nodeUid]" />
+                                    <i class="iconfont"></i>
+                                </label>
+                            </td>
+                            <td data-title="'aws.node.hypervisorHostname'|translate" sortable="'hostName'">
+                               {{item.hostName}}
+                            </td>
+                            <td data-title="'aws.node.regionName'|translate" sortable="'regionName'">
+                                {{item.regionName}}
+                            </td>
+                            <td data-title="'aws.node.management_IP'|translate" sortable="'hostInfoMap.ip'">
+                                {{item.hostInfoMap.ip}}
+                            </td>
+                            <td data-title="'aws.node.lastTime'|translate" sortable="'lastTime'">
+                                <span class="date">{{item.lastTime| date:'yyyy-MM-dd HH:mm:ss'}}</span>
+                            </td>
+                            <td data-title="'aws.node.roles'|translate" sortable="'roles'">
+                                {{item.roles}}
+                            </td>
+                            <td data-title="'aws.node.useStatus'|translate" sortable="'useStatus'">
+                                {{'aws.node.useStatusValues.'+item.useStatus| translate}}
+                            </td>
+                            <td data-title="'aws.node.healthStaus.status'|translate" sortable="'healthStatus'">
+                                <span ng-class="{'bg-green':(item.healthStatus=='status' || item.healthStatus==true),'bg-orange':(item.healthStatus=='repair')}" class="orange">{{'aws.node.healthStaus.'+item.healthStatus| translate}}
+                                </span>
+                            </td>
+                            <td data-title="'aws.node.Status'|translate" sortable="'status'">
+                                <span>{{'aws.node.status.'+item.status| translate}}</span>
+                                <span><button type="button"  ng-show="item.canActivation" ng-click="activation(item)" class="btn btn-info" ng-disabled="actionCan">{{'aws.node.activation'| translate}}</button></span>
+                                <span><button type="button"  ng-show="item.canRetry" ng-click="retry(item)" ng-disabled="retryCan" class="btn btn-info">{{'aws.node.retry'| translate}}</button></span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <div ng-show = "inStep=='1'"> 
+            <button class="btn btn-info" type="button" ng-click="stepNext(2)">
+                {{'aws.action.nextStep'|translate}}
+            </button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                {{'aws.action.cancel'|translate}}
+            </button>
+        </div>
+        <div ng-show = "inStep=='2'"> 
+            <div>
+                <!-- <button class="btn btn-default" type="button" ng-click="stepUp()" >
+                    {{'aws.action.lastStep'|translate}}
+                </button> -->
+                <button class="btn btn-info" type="button" ng-click="stepNext(3)">
+                    {{'aws.action.nextStep'|translate}}
+                </button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                    {{'aws.action.cancel'|translate}}
+                </button>
+            </div>
+        </div>
+        <div ng-show = "inStep=='3'"> 
+            <div>
+                <!-- <button class="btn btn-default" type="button" ng-click="stepUp()">
+                    {{'aws.action.lastStep'|translate}}
+                </button> -->
+                <button class="btn btn-info" type="button" ng-click="confirm()" >
+                    {{'aws.node.clusterNode.compelete'| translate}}
+                </button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                    {{'aws.action.cancel'|translate}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>      

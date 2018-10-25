@@ -1,0 +1,93 @@
+<div class="page-inner deploy-box" ng-controller="stepthreeCtrl">
+  <div class="step-box">
+    <ul class="text-list clearfix">
+      <li class="first active" ng-class="{'active': stepOneActive}">
+        <i class="icon-aw-pc"></i>
+        <p>{{'aws.register.info.hostChoice'|translate}}</p>
+      </li>
+      <li class="active">
+        <i class="icon-aw-internet"></i>
+        <p>{{'aws.register.info.netSetting'|translate}}</p>
+        <div class="state-items">
+          <span class="icon-aw-angle-right"></span>
+          <span class="icon-aw-correct"></span>
+        </div>
+      </li>
+      <li class="active">
+        <i class="icon-aw-user"></i>
+        <p>{{'aws.register.info.accSetting'|translate}}</p>
+        <div class="state-items">
+          <span class="icon-aw-angle-right"></span>
+          <span class="icon-aw-correct"></span>
+        </div>
+      </li>
+      <li class="last" ng-class="{'active': stepFourActive}">
+        <i class="icon-aw-information"></i>
+        <p>{{'aws.register.info.infoSummary'|translate}}</p>
+        <div class="state-items">
+          <span class="icon-aw-angle-right"></span>
+          <span class="icon-aw-correct"></span>
+        </div>
+      </li>
+    </ul>
+  </div>
+    <div class="account-box">
+      <form class="form-horizontal" name="accountForm">
+        <fieldset>
+          <!-- <div class="control-group">
+            <label class="control-label">{{'aws.register.info.area'|translate}}:</label>
+            <div class="controls">
+              <input type="text" placeholder="" name="regionName" required class="form-control" ng-minlength="4" ng-maxlength="16" ng-blur="threeModule.change(threeModule.accountData.region)" ng-model="threeModule.accountData.region" ng-pattern="/^[a-zA-Z0-9_]{4,16}$/" />
+              <div ng-if="accountForm.regionName.$invalid && accountForm.regionName.$dirty">
+                <span class="help-block" ng-if="accountForm.regionName.$error.required">{{'aws.register.info.required'|translate}}</span>
+                <span class="help-block" ng-if="accountForm.regionName.$error.pattern">{{'aws.register.info.char4_16'|translate}}</span>
+              </div>
+            </div>
+          </div> -->
+          <div class="control-group">
+            <label class="control-label">
+              <!-- <a class="icon-tip" data-toggle="tooltip" data-placement="bottom" title=""><i class="icon-aw-question-mark"></i></a> --> {{'aws.register.info.Administrator'|translate}}:
+            </label>
+            <div class="controls">
+              <input type="text" placeholder="" required name="username" ng-disabled="threeModule.isdisabled" autocomplete="false" repeatusername class="form-control" ng-model="threeModule.accountData.username" ng-pattern="/^[a-zA-Z0-9_]{4,16}$/" />
+              <div ng-if="accountForm.username.$invalid && accountForm.username.$dirty">
+                <span class="help-block" ng-if="accountForm.username.$error.required">{{'aws.register.info.required'|translate}}</span>
+                <span class="help-block" ng-if="accountForm.username.$error.pattern">{{'aws.register.info.char4_16'|translate}}</span>
+                <span class="help-block" ng-if="accountForm.username.$error.repeatusername && !accountForm.username.$error.pattern && !accountForm.username.$error.required">{{'aws.register.info.accountexit'|translate}}</span>
+              </div>
+              <div ng-if="threeModule.idExist && !accountForm.username.$error.repeatusername" class="help-block">{{'aws.register.info.accountexit'|translate}}</div>
+              <!-- <div ng-if="threeModule.canUsed" class="help-success"><i class="icon-aw-correct"></i></div> -->
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{'aws.register.info.passwd'|translate}}:</label>
+            <div class="controls">
+              <input type="password" placeholder="" name="accpassword" required id="accpassword" ng-minlength="6" ng-maxlength="16" class="form-control" ng-model="threeModule.accountData.password" />
+              <div ng-if="accountForm.accpassword.$invalid && accountForm.accpassword.$dirty">
+                <span class="help-block" ng-if="accountForm.accpassword.$error.required">{{'aws.register.info.required'|translate}}</span>
+                <span class="help-block" ng-if="accountForm.accpassword.$error.minlength">{{'aws.register.info.passwd6'|translate}}</span>
+                <span class="help-block" ng-if="accountForm.accpassword.$error.maxlength">{{'aws.register.info.passwd16'|translate}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{'aws.register.info.confirm'|translate}}:</label>
+            <div class="controls">
+              <input type="password" placeholder="" name="reaccpassword" required pw-check="accpassword" class="form-control" ng-model="threeModule.accountData.repassword" />
+              <div ng-if="accountForm.reaccpassword.$invalid && accountForm.reaccpassword.$dirty">
+                <span class="help-block" ng-if="accountForm.reaccpassword.$error.pwCheck || accountForm.reaccpassword.$error.required">{{'aws.register.info.passwddiff'|translate}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">&nbsp;</label>
+            <div class="controls">
+              <a ng-href="/configure/cluster/steptwo" class="btn btn-default">{{'aws.register.info.last'|translate}}</a>
+              <button class="btn btn-info" ng-disabled="accountForm.$invalid || fourModule.isdisabled" ng-click="threeModule.completeThree()" type="button">{{'aws.register.info.next'|translate}}</button>
+            </div>
+          </div>
+          <div ng-if="threeModule.serverError" class="help-block">服务器错误</div>
+        </fieldset>
+      </form>
+    </div>
+</div>

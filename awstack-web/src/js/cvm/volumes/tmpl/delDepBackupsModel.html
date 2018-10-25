@@ -1,0 +1,29 @@
+<div class="modal-common">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{'aws.backups.delBackup' | translate}}</h3>
+    </div>
+    <div class="modal-body delDep-box">
+        <div class="delTips">
+            <span>{{'aws.backups.deltip1' | translate}} {{del_current}} {{'aws.backups.deltip2' | translate}}</span>
+        </div>
+        <div ng-repeat = "backup in backupList" class="del-group clearfix">
+            <div class="delName">
+                <span>{{backup.isIncremental?{{'aws.backups.table.isIncremental.true' | translate}}:{{'aws.backups.table.isIncremental.false' | translate}}}}：{{backup.name}}</span>
+            </div>
+            <div class="delImg" ng-if = "$index == (backupList.length-1)">
+                <span ng-click="delDepBackup($index, backup)"><i class="icon-aw-delete"></i></span>
+            </div>
+            <div class="delImg" ng-if = "$index == (backupList.length-1) && delLoadingShow">
+                <span>{{'aws.backups.table.status.deleting' | translate}}<i class="aw-spin icon-aw-refresh"></i></span>
+            </div>
+            <div class="arrow" ng-if = "$index != (backupList.length-1)">
+                <span><i class="icon-aw-yingdao-down"></i></span>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="$dismiss()">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+    </div>
+</div>

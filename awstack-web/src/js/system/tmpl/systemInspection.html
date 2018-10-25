@@ -1,0 +1,113 @@
+<div class="page-inner">
+  <div class="table-action">
+    <button type="button" class="btn btn-new" ng-click="startCheck()" ng-disabled="!canStartChek"><i class=" icon-aw-start-up"></i>{{"aws.system.systemInspection.startExamination"|translate}}
+    </button>
+    <!--  icon-aw-dc -->
+    <!-- <button class="btn btn-info" ng-disabled="isDisabled" ng-click="aggregate('edit',editData)" licence-type="btn" id="system-pm-editHostset">
+      <i class="icon-aw-modify"></i>{{"aws.system.systemInspection.pauseExamination"|translate}}
+    </button> -->
+    <button class="btn btn-normal" ng-disabled="!canStopCheck" ng-click="stopCheck()"><i class="icon-aw-jy"></i>{{"aws.system.systemInspection.stop"|translate}}
+    </button>
+    <button class="btn btn-normal" ng-csv="downloadAllData()" charset="utf-8" add-bom="true"
+        csv-header="[inspectionType,inspectionItemFile, expectedResultsFile, actualResultsFile, statusFile]"
+        filename="{{downloadFileName}}" ng-disabled="!canExportCheckResult"><i class="icon-aw-dc"></i>{{"aws.system.systemInspection.exportReport"|translate}}
+    </button> 
+    <button class="btn btn-normal" ng-if="(exceptionNum+failureNum)!=0" ng-click="goErrorDetails()"><i class="icon-aw-ck"></i>{{"aws.system.systemInspection.errorDetails"|translate}}</button>
+    <into-information modular="'inspection'"></into-information>
+  </div>
+  <!-- 巡检正常 -->
+  <div class="inspection-box" ng-if="inspection.isShowResult">
+     <div class="totalMsg"><strong>{{'aws.system.systemInspection.inspectionResultStatistics'|translate}}</strong></div>
+     <div class="totalDetail">
+       <div class="detail">{{'aws.system.systemInspection.inspectionTime'|translate}}：<span>{{consumingTime}}</span></div>
+       <div class="detail">{{'aws.system.systemInspection.inspectionItem'|translate}}：<span>{{totalCeckItem}}</span>{{'aws.system.systemInspection.term'|translate}}</div>
+       <div class="detail">{{'aws.system.systemInspection.normal'|translate}}：<span class="normal-item">{{nomalNum+inapplicableNum}}</span>{{'aws.system.systemInspection.term'|translate}}</div>
+       <!-- 异常项不为0 -->
+       <div class="detail" ng-if="(exceptionNum+failureNum)!=0">{{'aws.system.systemInspection.abnormal'|translate}}：<span class="abnormal-item"><a ng-href="/system/systeminspection?id=123">{{exceptionNum+failureNum}}</a></span>{{'aws.system.systemInspection.term'|translate}}</div>
+       <!-- 异常项为0 -->
+       <div class="detail" ng-if="(exceptionNum+failureNum)==0">{{'aws.system.systemInspection.abnormal'|translate}}：<span class="abnormal-item">{{exceptionNum+failureNum}}</span>{{'aws.system.systemInspection.term'|translate}}</div>
+     </div>
+  </div>
+  <!-- 巡检失败 -->
+  <div class="inspection-box" ng-if="inspection.checkFail">
+     <div class="totalMsg"><strong>{{'aws.system.systemInspection.inspectionResultStatistics'|translate}}</strong></div>
+     <div class="totalDetail">
+       <div class="detail">{{'aws.system.systemInspection.checkFail'|translate}}</div>
+     </div>
+  </div>
+  <div class="alert alert-info" ng-if="canStopCheck">
+    <div class="inspection-load">巡检中<sapn><i class="icon-aw-load aw-spin"></i></sapn></div>
+  </div>
+  <div class="alert alert-info" ng-if="stopingCheck">
+    <div class="inspection-load">终止巡检中<sapn><i class="icon-aw-load aw-spin"></i></sapn></div>
+  </div>
+  <div ng-repeat="check in checkList track by $index" class="inspectionResult-box" ng-if="check.isShow">
+     <div class="checkTitle"><strong>{{check.name}}</strong></div>
+     <table ng-table="tableList[check.name+'Table']" class="table" show-filter="false">
+        <colgroup>
+            <col width="20%">
+            <col width="20%">
+            <col width="50%">
+            <col width="10%">
+        </colgroup>
+        <tr ng-repeat="item in $data track by $index" ng-if="item.isShow">
+           <td data-title="'aws.system.systemInspection.inspectionItem'|translate">
+               {{item.name}}
+            </td>
+            <td data-title="'aws.system.systemInspection.expectedResults'|translate">
+               {{item.expectedResult}}
+            </td>
+            <td data-title="'aws.system.systemInspection.actualResults'|translate" ng-bind-html="item.result">
+                
+            </td>
+            <td data-title="'aws.system.systemInspection.status'|translate">
+              <span ng-class="{'bg-green':(item.status=='normal'||item.status=='inapplicable'),'bg-orange':(item.status=='exception'),'bg-red':(item.status=='failure')}" ng-if="item.state">
+                {{item.state}}
+              </span>
+            </td>
+        </tr>
+     </table>
+  </div>
+  <div ng-controller="detailCtrl">
+        <pane class="detail-body" animation="animation">
+            <div class="tab-content">
+                <div class ="detail-row">
+                    <div class="detail-title">
+                        <a class = "an-close" ng-href="/system/systeminspection"><i class="icon-aw-mail-reply"></i></a>
+                        <span>{{'aws.system.systemInspection.abnormalInspectionResults'|translate}}</span>
+                    </div>                        
+                    <div class="detail-info">
+                      <div class="tab-content-line"></div>
+                        <div ng-if="exceptionNum==0">{{'aws.system.systemInspection.noExceptionItems'|translate}}</div>
+                        <div ng-repeat="check in exceptionCheckList track by $index" class="inspectionResult-box" ng-if="check.exceptionNum!=0">
+                           <div class="checkTitle"><strong>{{check.name}}</strong></div>
+                           <table ng-table="tableList[check.name+'Table']" class="table" show-filter="false">
+                              <colgroup>
+                                  <col width="20%">
+                                  <col width="20%">
+                                  <col width="50%">
+                                  <col width="10%">
+                              </colgroup>
+                              <tr ng-repeat="check in $data track by $index" ng-if="check.status=='exception'||check.status=='failure'">
+                                 <td data-title="'aws.system.systemInspection.inspectionItem'|translate">
+                                     {{check.name}}
+                                  </td>
+                                  <td data-title="'aws.system.systemInspection.expectedResults'|translate">
+                                     {{check.expectedResult}}
+                                  </td>
+                                  <td data-title="'aws.system.systemInspection.actualResults'|translate" ng-bind-html="check.result">
+                                  </td>
+                                  <td data-title="'aws.system.systemInspection.status'|translate">
+                                    <span ng-class="{'bg-green':(check.status=='normal'||check.status=='inapplicable'),'bg-orange':(check.status=='exception'),'bg-red':(check.status=='failure')}" ng-if="check.state">
+                                      {{check.state}}
+                                    </span>
+                                  </td>
+                              </tr>
+                           </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </pane>
+  </div>
+</div>

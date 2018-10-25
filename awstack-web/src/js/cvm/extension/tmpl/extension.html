@@ -1,0 +1,783 @@
+<div class="page-inner">
+    <h3 class="page-title">弹性扩展</h3>
+    <div class="table-action">
+        <button type="button" data-toggle="modal" ng-click="newExtension()" class="btn btn-new btn-createExtension" licence-type="btn" id="resource-extension-create" uib-popover="{{'aws.extension.ui.canNotCreateExtension'|translate}}"  popover-enable="!localVolumeCreteIns" popover-trigger="mouseenter" popover-placement = "right" ng-class="{'disabled':!localVolumeCreteIns}"><i class="icon-aw-add-to2"></i>{{'aws.extension.ui.newScaleCluster'|translate}}</button>
+        <button type="button" data-toggle="modal" ng-disabled="!canAddIns" ng-click="addInstances(checkedItems)" class="btn btn-normal" licence-type="btn" id="resource-extension-del"> <i class="icon-aw-add-to2"></i>{{'aws.extension.tipMsg.addInstances'|translate}}</button>
+        <!-- <button type="button" data-toggle="modal" ng-disabled="" ng-click="editorExtension(editData)" class="btn btn-info"><i class="icon-aw-modify"></i>编辑</button> -->
+        <button type="button" data-toggle="modal" ng-disabled="!canDelete" ng-click="deleteExtension(checkedItems)" class="btn btn-normal" licence-type="btn" id="resource-extension-del"> <i class="icon-aw-delete"></i>{{'aws.img.del'|translate}}</button>
+        <div class="pull-right">
+            <into-information modular="'extension'"></into-information>
+            <button class="btn btn-renovat right-ports" ng-click="refreshExtension()"><i class="icon-aw-refresh"></i></button>
+            <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <script type="text/ng-template" id="headerCheckbox.html">
+        <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+            <i class="iconfont"></i>
+        </label>
+    </script>
+    <div class="table-content">
+        <empty-tip empty-type="loadData"></empty-tip>
+        <table ng-table="tableParams" class="table " show-filter="false">
+            <colgroup>
+                <col width="5%">
+                <col width="15%">
+                <col width="10%">
+                <col width="15%">
+                <col width="30%">
+                <col width="25%">
+            </colgroup>
+            <!-- <empty-tip empty-type="loadData"></empty-tip> -->
+            <tr ng-repeat="extension in $data">
+                <td header="'headerCheckbox.html'">
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="checkboxes.items[extension.id]" />
+                        <i class="iconfont"></i>
+                    </label>
+                </td>
+                <td data-title="'aws.extension.ui.scaleClusterName'|translate" sortable="'name'">
+                    <div class="edit-name edit-lg">
+                        <a ng-href="/cvm/extension?id={{extension.id}}" title="{{extension.name}}">{{extension.name}}</a>
+                    </div>
+                </td>
+                <td data-title="'aws.extension.ui.currentSize'|translate" sortable="'currentSize'">{{extension.currentSize}}</td>
+                <td data-title="'aws.extension.ui.clusterStatus'|translate" sortable="'status'">
+                    <span ng-class="{'bg-green':(extension.status=='active'||extension.status=='normal'||extension.status=='success'),'bg-orange':(extension.status=='delete-server-failed'||extension.status=='create-failed'||extension.status=='delete-failed'||extension.status=='scale-failed'),'bg-blue':(extension.status=='creating'||extension.status=='deleting'||extension.status=='scaling')}">{{"aws.extension.status."+extension.status |translate}}
+					<i ng-class="{'icon-aw-refresh':(extension.status=='creating'|| extension.status=='deleting'||
+					extension.status=='scaling')}" class="aw-spin">
+					</i>
+					</span>
+                </td>
+                <td data-title="'aws.extension.ui.description'|translate" sortable="'reason'">
+                    <span class="des">{{extension.reason}}</span>
+                </td>
+                <td data-title="'aws.extension.ui.createTime'|translate" sortable="'createTime'"><span class="nowrap">{{extension.createTime| date:'yyyy-MM-dd HH:mm:ss'}}</span></td>
+            </tr>
+        </table>
+    </div>
+    <div ng-controller="detailCtrl">
+        <pane class="detail-body" animation="animation">
+            <div class="tab-content">
+                <div class="detail-row">
+                    <div class="detail-header">
+                    </div>
+                    <div class="detail-title">
+                        <a class="an-close" ng-href="/cvm/extension"><i class="icon-aw-mail-reply"></i></a>
+                        <span>{{'aws.extension.detail.ScaleClusterDetail'|translate}}</span>
+                    </div>
+                    <div class="detail-info tab-offset-right">
+                        <div class="tab-content-line"></div>
+                        <div class="detail-title-ex">{{'aws.extension.detail.basicInformation'|translate}}</div>
+                        <div class="table-content table-small">
+                            <table class="table table-info column">
+                                <tr>
+                                    <td>{{'aws.extension.detail.scaleClusterName'|translate}}</td>
+                                    <td>{{baseInfo.name}}</td>
+                                    <td>{{'aws.extension.detail.currentSize'|translate}}</td>
+                                    <td>{{baseInfo.currentSize}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{'aws.extension.detail.initialSize'|translate}}</td>
+                                    <td>{{baseInfo.initSize}}</td>
+                                    <td>{{'aws.extension.detail.status'|translate}}</td>
+                                    <td>{{"aws.extension.status."+baseInfo.status|translate}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{'aws.extension.detail.maxSize'|translate}}</td>
+                                    <td>{{baseInfo.maxSize}}</td>
+                                    <td>{{'aws.extension.detail.minSize'|translate}}</td>
+                                    <td>{{baseInfo.minSize}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{'aws.extension.detail.createTime'|translate}}</td>
+                                    <td>{{baseInfo.createTime| date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                                    <td>{{'aws.extension.detail.updateTime'|translate}}</td>
+                                    <td>{{baseInfo.updateTime| date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div>
+                            <ul class="nav nav-tabs nav-justified">
+                              <li ng-class="{active:tab.tabShow==0}" class="uib-tab nav-item " ng-click="selectIndex(0)">
+                                <a href="">{{'aws.extension.detail.serverInfor'|translate}}</a>
+                              </li>
+                              <li ng-class="{active:tab.tabShow==1}" class="uib-tab nav-item" ng-click="selectIndex(1)" licence-type="btn" id="system-dataCenter-containerNode">
+                                <a href="">{{'aws.extension.detail.LoadBalanceInfor'|translate}}</a>
+                              </li>
+                              <li ng-class="{active:tab.tabShow==2}" class="uib-tab nav-item" ng-click="selectIndex(2)" licence-type="btn" id="system-dataCenter-containerNode">
+                                <a href="">{{'aws.extension.detail.ScaleRuleInfor'|translate}}</a>
+                              </li>
+                              <li ng-class="{active:tab.tabShow==3}" class="uib-tab nav-item" ng-click="selectIndex(3)" licence-type="btn" id="system-dataCenter-containerNode">
+                                <a href="">{{'aws.extension.detail.ScaleRecord'|translate}}</a>
+                              </li>
+                           </ul>
+                           <div class="tab-content table-content table-small" ng-if="tab.tabShow==0">
+                                <table ng-table="instanceForm" class="table " show-filter="false">
+                                    <tr ng-repeat="ins in $data">
+                                        <td data-title="'aws.instances.cloudInstanceName'|translate" sortable="'name'">
+                                            <span ng-if="ins['OS-EXT-STS:vm_state']=='soft-delete'">
+                                                <a ng-href="#/cvm/recycle?id={{ins.id}}">{{ins.name}}</a>
+                                            </span>
+                                            <span ng-if="ins['OS-EXT-STS:vm_state']!='soft-delete'">
+                                                <a ng-href="#/cvm/instances?id={{ins.id}}">{{ins.name}}</a>
+                                            </span>
+                                        </td>
+                                        <td data-title="'aws.instances.createtime'|translate" sortable="'createTime'">
+                                            <span>{{ins.createTime}}</span>
+                                        </td>
+                                        <td data-title="'aws.extension.detail.updateTime'|translate" sortable="'updateTime'">
+                                            <span>{{ins.updateTime}}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                           </div>
+                           <div class="tab-content table-content table-small" ng-if="tab.tabShow==1">
+                                <table class="table table-info column">
+                                    <tr>
+                                        <td>{{'aws.loader.loadBalanceName'|translate}}</td>
+                                        <td>
+                                            <span ng-if="lbInfo[0].id">
+                                                <a href="#/cvm/loadbalancing?id={{lbInfo[0].id}}">{{lbInfo[0].name}}</a>
+                                            </span>
+                                        </td>
+                                        <td>{{'aws.loader.status'|translate}}</td>
+                                        <td><span ng-if="lbInfo[0].status">{{'aws.loadbalancers.ui.table.'+ lbInfo[0].status| translate}}</span></td>
+                                        </tr>
+                                        <tr>
+                                        <td>{{'aws.loadbalancers.pl.pool'|translate}}</td>
+                                        <td>
+                                            {{lbInfo[0].poolName}}
+                                        </td>
+                                        <td>{{'aws.loadbalancers.ls.listener'|translate}}</td>
+                                        <td>
+                                            {{lbInfo[0].listenerName}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{'aws.extension.ui.createTime'|translate}}</td>
+                                        <td>{{lbInfo[0].createTime| date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                                        <td>{{'aws.extension.ui.updateTime'|translate}}</td>
+                                        <td>{{lbInfo[0].updateTime| date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{'aws.loadbalancers.ls.protocol_port'|translate}}</td>
+                                        <td>{{lbInfo[0].port}}</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </table>    
+                           </div>
+                           <div class="tab-content table-content table-small" ng-if="tab.tabShow==2">
+                                <div ng-repeat="ins in alarmScalePolicy" class='scale-policy' ng-if="ins.alarmTemps.length>0">
+                                    <p ng-repeat="temp in ins.alarmTemps">
+                                        {{'aws.extension.detail.'+temp.name|translate}} {{'aws.extension.detail.'+temp.statistic|translate}} {{'aws.extension.detail.'+temp.operator|translate}}
+                                        {{temp.threshold}} {{temp.unit}} {{ins.scalePolicies[0].step>0? ('aws.scalePolicy.ui.scaleTypeIncrease'|translate)+ins.scalePolicies[0].step:
+                                        ('aws.scalePolicy.ui.scaleTypeDecrease'|translate)+(-ins.scalePolicies[0].step)}} {{'aws.instances.instance'|translate}}
+                                        {{'aws.scalePolicy.ui.intervalTime'|translate}} {{ins.scalePolicies[0].periods}}(s)
+                                        <br/>
+                                    </p>
+                                    <P ng-if="alarmScalePolicy.length == 0">暂无数据</P>
+                                </div>
+                           </div>
+                           <div class="tab-content table-content table-small" ng-if="tab.tabShow==3">
+                                <table ng-table="alarmEventForm" class="table " show-filter="false">
+                                    <tr ng-repeat="ins in $data">
+                                        <td data-title="'aws.extension.detail.ScaleRecordAlarmEventID'|translate" sortable="'alarmeventId'">
+                                            <a ng-href="#/monitor/alarmevent">{{ins.alarmeventId}}</a>
+                                        </td>
+                                        <td data-title="'aws.instances.cloudInstanceName'|translate" sortable="'scaleServerName'">
+                                            <span title="{{ins.scaleServerName}}">{{ins.scaleServerName}}</span>
+                                        </td>
+                                        <td data-title="'aws.extension.ui.clusterStatus'|translate" sortable="'status_TR'">
+                                            <span ng-class="{'bg-green':(ins.status=='success'),'bg-red':(ins.status=='failed')}">{{ins.status_TR}}</span>
+                                        </td>
+                                        <td data-title="'aws.extension.ui.description'|translate" sortable="'description'">
+                                            <span>{{ins.description}}</span>
+                                        </td>
+                                        <td data-title="'aws.instances.createtime'|translate" sortable="'createTime'">
+                                            <span>{{ins.createTime| date:'yyyy-MM-dd HH:mm:ss'}}</span>
+                                        </td>
+                                        <td data-title="'aws.extension.detail.updateTime'|translate" sortable="'processTime'">
+                                            <span>{{ins.processTime| date:'yyyy-MM-dd HH:mm:ss'}}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                           </div>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </pane>
+    </div>
+</div>
+<script type="text/ng-template" id="newExtension.html">
+    <div class="modal-common newExtension-modal">           
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{'aws.extension.ui.newScaleCluster'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+            <!-- <div class="alert alert-info" role="alert"> -->
+                <!-- <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button> -->
+                <!-- <div class="alert-content">
+                    <div class="alert-text">
+                        {{'aws.extension.tipMsg.instancelimit'|translate}}
+                    </div>
+                </div> -->
+            <!-- </div> -->
+            <div class="tab-offset-right">
+                <ul class="nav nav-tabs nav-justified">
+                  <li ng-class="{active:scaleTab.isShow==0}" class="uib-tab nav-item " ng-click="chooseTab(0)">
+                    <a href="">{{'aws.extension.ui.basicInformation'|translate}}</a>
+                  </li>
+                  <li ng-class="{active:scaleTab.isShow==1}" class="uib-tab nav-item" ng-click="chooseTab(1)" licence-type="btn" id="system-dataCenter-containerNode">
+                    <a href="">{{'aws.extension.ui.serverInformation'|translate}}</a>
+                  </li>
+                  <li ng-class="{active:scaleTab.isShow==2}" class="uib-tab nav-item" ng-click="chooseTab(2)" licence-type="btn" id="system-dataCenter-containerNode">
+                    <a href="">{{'aws.extension.ui.loadBalanceInformation'|translate}}</a>
+                  </li>
+                  <li ng-class="{active:scaleTab.isShow==3}" class="uib-tab nav-item" ng-click="chooseTab(3)" licence-type="btn" id="system-dataCenter-containerNode">
+                    <a href="">{{'aws.extension.ui.scaleRuleInformation'|translate}}</a>
+                  </li>
+                </ul>
+            </div>
+            <div class="tab-content" ng-show="scaleTab.isShow==0">
+               <form name="baseMsgForm">
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.extension.detail.scaleClusterName'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="name" ng-model="postdata.name" placeholder="{{'aws.extension.ui.scaleClusterNameInput'|translate}}" ng-pattern="/^(\w|\-)*$/" ng-maxlength="32" required />
+                            <div class="error" ng-if="interactedBase(baseMsgForm.name)" ng-messages="baseMsgForm.name.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                <div ng-message="pattern">{{'aws.errors.noZhSpecial'|translate}}</div>
+                                <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.extension.detail.initialSize'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.initialSize"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <input type="text" class="form-controls" name="initsize" ng-model="postdata.initsize" placeholder="{{'aws.extension.ui.currentSizeInput'|translate}}" min="1" max="100" limitnumrange ng-pattern="/^[1-9][0-9]*$/" required id="initsize" />
+                            <div class="error" ng-if="interactedBase(baseMsgForm.initsize)" ng-messages="baseMsgForm.initsize.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                <div ng-message="pattern">{{'aws.errors.integer'|translate}}</div>
+                                <div ng-message="limitnumrange">{{'aws.extension.ui.currentSizeInput'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.extension.detail.maxSize'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.maxSize"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <input type="text" class="form-controls" name="maxsize" ng-model="postdata.maxsize" placeholder="{{'aws.extension.ui.maxSizeInput'|translate}}" ng-pattern="/^[1-9][0-9]*$/" min="postdata.initsize" max="100" limitnumrange required />
+                            <div class="error" ng-if="interactedBase(baseMsgForm.maxsize)" ng-messages="baseMsgForm.maxsize.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                <div ng-message="pattern">{{'aws.errors.integer'|translate}}</div>
+                                <div ng-message="limitnumrange">{{'aws.extension.ui.maxSizeInput'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.extension.detail.minSize'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.minSize"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <input type="text" class="form-controls" name="minsize" ng-model="postdata.minsize" placeholder="{{'aws.extension.ui.minSizeInput'|translate}}" ng-pattern="/^[1-9][0-9]*$/" min="" max="postdata.initsize" minmax="initsize" required />
+                            <div class="error" ng-if="interactedBase(baseMsgForm.minsize)" ng-messages="baseMsgForm.minsize.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                <div ng-message="pattern">{{'aws.errors.integer'|translate}}</div>
+                                <div ng-message="minmax">{{'aws.extension.ui.minSizeInput'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </form> 
+            </div>
+            <div class="tab-content" ng-show="scaleTab.isShow==1">
+                <form name="insForm">
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.instances.addinstances.instanceName'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.instanceName"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <input type="text" class="form-controls" name="hostname" ng-model="postdata.lbservertemp.hostname" placeholder="{{'aws.instances.addinstances.instanceNameInput'|translate}}" ng-pattern="/^[a-zA-Z][a-zA-Z0-9-]*$/" ng-maxlength="32" required />
+                            <div class="error" ng-if="interactedIns(insForm.hostname)" ng-messages="insForm.hostname.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                <div ng-message="pattern">{{"aws.extension.tipMsg.insNamePattern"|translate}}</div>
+                                <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.instances.addinstances.passwd'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.passwd"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <input type="password" class="form-controls" name="adminpass" ng-model="postdata.lbservertemp.admin_pass" placeholder="{{'aws.instances.addinstances.password'|translate}}"   ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,\/\-\^\%])[0-9a-zA-Z!@._:,\/\-\^\%]{8,16}$/" required />
+                            <div class="error" ng-if="interactedIns(insForm.adminpass)" ng-messages="insForm.adminpass.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                <div ng-message="pattern">{{'aws.system.modifyPassword.special_8_16'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.instances.imgName'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.imgName"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <ui-select ng-model="image" name="image" ng-change="changeImage(image)" title="镜像" required>
+                                <ui-select-match placeholder="{{'aws.instances.addinstances.imgChoice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="image in imageList | propsFilter: {name: $select.search}">
+                                    <div ng-bind-html="image.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-if="interactedIns(insForm.image)" ng-messages="insForm.image.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.img.network'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.network"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <ui-select ng-model="network" name="network" ng-change="changeNet(network)" title="{{'aws.img.network'|translate}}">
+                                <ui-select-match placeholder="{{'aws.img.netChoice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="network in networkList | propsFilter: {name: $select.search}">
+                                    <div ng-bind-html="network.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-if="interactedIns(insForm.network)" ng-messages="insForm.network.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.img.conf_option'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.conf_option"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <ui-select ng-model="config" name="config" ng-change="changeConfig(config)" title="{{'aws.img.conf_option'|translate}}">
+                                <ui-select-match placeholder="{{'aws.img.choiceConfig'|translate}}">{{$select.selected._name}}</ui-select-match>
+                                <ui-select-choices repeat="config in configList | propsFilter: {_name: $select.search}">
+                                    <div ng-bind-html="config._name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-if="interactedIns(insForm.config)" ng-messages="insForm.config.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-show="scaleTab.selectedImage.os_type!='windows'">
+                        <label class="control-label">{{'aws.instances.addinstances.keypair'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.keypair"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <ui-select ng-model="keypair" name="keypair" ng-change="changeKeypair(keypair)" title="{{'aws.img.conf_option'|translate}}">
+                                <ui-select-match placeholder="{{'aws.instances.addinstances.keypairChoice'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="keypair in keypairList | propsFilter: {name: $select.search}">
+                                    <div ng-bind-html="keypair.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-if="interactedIns(insForm.keypair)" ng-messages="insForm.keypair.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="tab-content" ng-show="scaleTab.isShow==2">
+                <form name="balanceForm">
+                   <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.loadbalancers.lb.Vlan'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.Vlan"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <ui-select ng-model="subnet" name="subnetName" ng-change="changeSub(subnet)" title="网络">
+                                <ui-select-match placeholder="{{'aws.loadbalancers.lb.Vlan_placeholder'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="subnet in subnetList | propsFilter: {name: $select.search}">
+                                    <div ng-bind-html="subnet.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-if="interactedBalance(balanceForm.subnetName)" ng-messages="balanceForm.subnetName.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.loadbalancers.ls.protocol'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.protocol"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <ui-select ng-model="protocol" name="protocol" ng-change="changePro(protocol)" title="协议">
+                                <ui-select-match placeholder="{{'aws.loadbalancers.ls.protocol_placeholder'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="protocol in protocolList | propsFilter: {name: $select.search}">
+                                    <div ng-bind-html="protocol.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-if="interactedBalance(balanceForm.protocol)" ng-messages="balanceForm.protocol.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.loadbalancers.ls.protocol_port'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.protocol_port"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <input type="text" class="form-controls" name="port" ng-model="postdata.lbtemp.port" placeholder="{{'aws.loadbalancers.ls.port_placeholder'|translate}}" ng-pattern="/^(\w|\-)*$/" min="1" max="65535" limitnumrange required />
+                            <div class="error" ng-if="interactedBalance(balanceForm.port)" ng-messages="balanceForm.port.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                <div ng-message="limitnumrange">端口号应该在1-65535之间</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.loadbalancers.pl.lbAlgorithm'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.lbAlgorithm"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                            <ui-select ng-model="balance" name="lbAlgorithm" ng-change="changeBal(balance)" title="协议">
+                                <ui-select-match placeholder="{{'aws.loadbalancers.pl.lbAlgorithm_placeholder'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="balance in balanceList | propsFilter: {name: $select.search}">
+                                    <div ng-bind-html="balance.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-if="interactedBalance(balanceForm.lbAlgorithm)" ng-messages="balanceForm.lbAlgorithm.$error">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                    </div> 
+                </form>
+            </div>
+            <div class="tab-content" ng-show="scaleTab.isShow==3">
+                <form name="scaleForm">
+                    <div ng-repeat="rule in extensionRuleForm.rules" class="clearfix">
+                        <div class="control-group control-items2">
+                            <label class="control-label">{{'aws.menu.Monitoring_Alarm_AlarmTemplate'|translate}}：</label>
+                            <div class="controls">
+                                <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.Monitoring_Alarm_AlarmTemplate"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                                <ui-select ng-model="rule.alarmtemp" name="alarmtemp_{{$index}}" required >
+                                    <ui-select-match placeholder="{{'aws.extension.ui.AlarmTemplate_placeholder'|translate}}" title='{{$select.selected.name}}'>{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="alarmtemp in alarmtempList | propsFilter: {name: $select.search}">
+                                        <div ng-bind-html="alarmtemp.name | highlight: $select.search" class="extension-uiselect" title='{{alarmtemp.name}}'></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <div class="error" ng-messages="scaleForm['alarmtemp_'+$index].$error" ng-if="scaleForm['alarmtemp_'+$index].$dirty || interactedScaleValid">
+                                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group control-items2">
+                            <label class="control-label">{{'aws.menu.Cvm_Scalpolicy'|translate}}：</label>
+                            <div class="controls">
+                                <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.Cvm_Scalpolicy"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                                <ui-select ng-model="rule.policy" name="policy_{{$index}}" required >
+                                    <ui-select-match placeholder="{{'aws.extension.ui.Scalpolicy_placeholder'|translate}}" title='{{$select.selected.name}}'>{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="policy in policyList | propsFilter: {name: $select.search}">
+                                        <div ng-bind-html="policy.name | highlight: $select.search" class="extension-uiselect" title='{{policy.name}}'></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <div class="error" ng-messages="scaleForm['policy_'+$index].$error" ng-if="scaleForm['policy_'+$index].$dirty || interactedScaleValid">
+                                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="action del">
+                            <a ng-click="delRule($index)" ng-if="$index>0"><i class="icon-aw-wrong"></i></a>
+                        </div>
+                        <div class="action add" ng-if="$index==(extensionRuleForm.rules.length-1)">
+                            <a ng-click="addRule($index)"><i class="icon-aw-add-to2"></i></a>
+                        </div>
+                    </div>
+                </form>
+                <div class="errormsg">
+                    <div ng-if="unfinished.stepOne">基础设置信息尚未填写完毕，请完成</div>
+                    <div ng-if="unfinished.stepTwo">云主机设置信息尚未填写完毕，请完成</div>
+                    <div ng-if="unfinished.stepThree">负载均衡信息尚未填写完毕，请完成</div>
+                    <div ng-if="unfinished.stepOneTwo">基础设置和云主机设置信息尚未填写完毕，请完成</div>
+                    <div ng-if="unfinished.stepOneThree">基础设置信息和负载均衡信息尚未填写完毕，请完成</div>
+                    <div ng-if="unfinished.stepTwoThree">云主机设置信息和负载均衡信息尚未填写完毕，请完成</div>
+                    <div ng-if="unfinished.stepOneTwoThree">基础设置，云主机设置以及负载均衡信息尚未填写完毕，请完成</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div ng-if="scaleTab.isShow==0">
+               <button class="btn btn-info" type="button" ng-click="stepToTwo(baseMsgForm)">
+                {{'aws.action.ok' | translate}}
+                </button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                    {{'aws.action.cancel'|translate}}
+                </button>   
+            </div>
+            <div ng-if="scaleTab.isShow==1">
+                <!-- <button class="btn btn-default" type="button" ng-click="chooseTab(0)">
+                    {{'aws.action.lastStep'|translate}}
+                </button> -->
+                <button class="btn btn-info" type="button" ng-disabled="beyondQuota_dep.subnet || beyondQuota_pro.subnet" ng-click="stepToThree(insForm)">
+                    {{'aws.action.ok' | translate}}
+                </button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                    {{'aws.action.cancel'|translate}}
+                </button>   
+            </div>
+            <div ng-if="scaleTab.isShow==2"> 
+                <!-- <button class="btn btn-default" type="button" ng-click="chooseTab(1)">
+                    {{'aws.action.lastStep'|translate}}
+                </button> -->
+                <button class="btn btn-info" type="button" ng-disabled="beyondQuota_dep.subnet || beyondQuota_pro.subnet" ng-click="stepToFour(balanceForm)">
+                    {{'aws.action.ok' | translate}}
+                </button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                    {{'aws.action.cancel'|translate}}
+                </button>  
+            </div>
+            <div ng-if="scaleTab.isShow==3">
+                <!-- <button class="btn btn-default" type="button" ng-click="chooseTab(2)">
+                    {{'aws.action.lastStep'|translate}}
+                </button> -->
+                <button class="btn btn-info" type="button" ng-disabled="isDisabled" ng-click="createExtension(scaleForm)">{{'aws.action.ok' | translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>  
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="addInstances.html">
+    <div class="modal-common addInstances-modal">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{"aws.extension.tipMsg.addInstances"|translate}}</h3>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-info" role="alert">
+                <div class="alert-content">
+                    <div class="alert-text">           
+                        {{"aws.extension.tipMsg.alertInfo"|translate}}
+                    </div>
+                </div>
+            </div>
+            <form name="addInstancesForm" novalidate>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.extension.ui.extensionName"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="extensionName" ng-model="addInsData.extensionName" placeholder='{{"aws.extension.placeholder.extensionName"|translate}}' ng-maxlength="32" ng-pattern="/^(\w|\-)*$/" ng-disabled="true" required />
+                        <div class="error" ng-messages='addInstancesForm.extensionName.$error' ng-if="interacted(addInstancesForm.extensionName)">
+                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                            <div ng-message="pattern">{{"aws.extension.tipMsg.extensionNamePattern"|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.extension.ui.instancesName"|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.instancesName"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <input type="text" class="form-controls" name="insName" ng-model="addInsData.insName" placeholder='{{"aws.extension.placeholder.insName"|translate}}' ng-maxlength="32" ng-pattern="/^[a-zA-Z][a-zA-Z0-9-]*$/" required />
+                        <div class="error" ng-messages='addInstancesForm.insName.$error' ng-if="interacted(addInstancesForm.insName)">
+                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                            <div ng-message="pattern">{{"aws.extension.tipMsg.insNamePattern"|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.extension.ui.password"|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.password"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <input type="password" class="form-controls" name="password" ng-model="addInsData.password" placeholder='{{"aws.extension.placeholder.password"|translate}}' ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,\/\-\^\%])[0-9a-zA-Z!@._:,\/\-\^\%]{8,16}$/" required />
+                        <div class="error" ng-messages='addInstancesForm.password.$error' ng-if="interacted(addInstancesForm.password)">
+                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            <div ng-message="pattern">{{'aws.system.modifyPassword.special_8_16'|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.extension.ui.imageName"|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.imageName"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <ui-select ng-model="addInsData.imageName" name="imageName" ng-disabled="true" required>
+                            <ui-select-match placeholder='{{"aws.extension.placeholder.imageName"|translate}}'>{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="image in imageList">
+                                <div>{{image.name}}</div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages='addInstancesForm.imageName.$error' ng-if="interacted(addInstancesForm.imageName)">
+                            <form-validate></form-validate>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.extension.ui.networks"|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.networks"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <ui-select ng-model="addInsData.networks" name="networks" ng-disabled="true" required>
+                            <ui-select-match placeholder='{{"aws.extension.placeholder.networks"|translate}}'>{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="flavor in flavorList">
+                                <div>{{flavor.name}}</div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages='addInstancesForm.networks.$error' ng-if="interacted(addInstancesForm.networks)">
+                            <form-validate></form-validate>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.extension.ui.configureType"|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.configureType"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <ui-select ng-model="addInsData.configureType" name="configureType" ng-disabled="true" required>
+                            <ui-select-match placeholder='{{"aws.extension.placeholder.configureType"|translate}}'>{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="network in networkList">
+                                <div>{{network.name}}</div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages='addInstancesForm.configureType.$error' ng-if="interacted(addInstancesForm.configureType)">
+                            <form-validate></form-validate>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group" ng-show="addInsData.imageName.os_type!='windows'">
+                    <label class="control-label">{{"aws.extension.ui.keypaireName"|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.extension.info.keypaireName"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <ui-select ng-model="addInsData.keypaireName" name="keypaireName" required>
+                            <ui-select-match placeholder='{{keypairList.length==0?("aws.extension.placeholder.noKeypaire"|translate):("aws.extension.placeholder.keypaireName"|translate)}}'>{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="kepair in keypairList">
+                                <div>{{kepair.name}}</div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages='addInstancesForm.keypaireName.$error' ng-if="interacted(addInstancesForm.keypaireName)">
+                            <form-validate></form-validate>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">{{"aws.extension.ui.timingStart"|translate}}：</label>
+                    <div class="controls">
+                        <label class="checkbox">
+                            <input type="checkbox" class="form-controls chk" name="timingStart" ng-model="addInsData.timingStart" ng-click="init_dateTimepicker()"/>
+                            <i class="iconfont"></i>
+                        </label>
+                    </div>
+                </div>
+                <div ng-if="addInsData.timingStart">
+                    <div class="control-group date-group">
+                        <label class="control-label">开始时间：</label>
+                        <div class="controls date-controls">
+                            <div class="form-group time-picker start" >
+                              <div class="input-group date form_date">
+                                <input class="form-control fromTime" name="date" type="text" size="16" ng-model="addInsData.start.date" placeholder="{{'aws.extension.placeholder.date'|translate}}" ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])$/" required>
+                                <span class="input-group-addon calendar-cont">
+                                  <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="error" ng-messages="addInstancesForm.date.$error" ng-if="interacted(addInstancesForm.date)">
+                              <div ng-message="pattern">{{"aws.errors.timePattern"|translate}}</div>
+                              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                        <div class="controls hour-controls">
+                            <input type="text" class="form-controls" name="hour" ng-model="addInsData.start.hour" placeholder='{{"aws.extension.placeholder.hour"|translate}}' ng-pattern="/^(([0-1]?[0-9]{1})|([2][0-3]))$/" required />
+                            <div class="error" ng-messages="addInstancesForm.hour.$error" ng-if="interacted(addInstancesForm.hour)">
+                              <div ng-message="pattern">{{"aws.extension.tipMsg.hourMsg"|translate}}</div>
+                              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                        <div class="controls colon-controls">
+                          <span>:</span>
+                        </div>
+                        <div class="controls hour-controls">
+                            <input type="text" class="form-controls" name="minute" ng-model="addInsData.start.minute" placeholder='{{"aws.extension.placeholder.minute"|translate}}' ng-pattern="/^[0-5]?[0-9]{1}$/" required />
+                            <div class="error" ng-messages="addInstancesForm.minute.$error" ng-if="interacted(addInstancesForm.minute)">
+                              <div ng-message="pattern">{{"aws.extension.tipMsg.minuteMsg"|translate}}</div>
+                              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 提示信息 -->
+                    <div class="error-msg" ng-if="!timeCorrect">
+                        为保证定时启动的正确性，定时启动的时间要大于或者等于点击确定按钮时间的后一分钟
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">执行频率：</label>
+                        <div class="controls">
+                           <div class="btn-item-group">
+                              <div class="btn-small">
+                                  <button class="type-btn" ng-class="{'active':(frequency.selected=='times')}" ng-click="selectFrequency('times')">一次</button>
+                                  <button class="type-btn" ng-class="{'active':(frequency.selected=='days')}" ng-click="selectFrequency('days')">按天</button>
+                                  <button class="type-btn" ng-class="{'active':(frequency.selected=='week')}" ng-click="selectFrequency('week')">按周</button>
+                              </div>
+                           </div>
+                        </div>
+                    </div>
+                    <div class="control-group date-group" ng-if="frequency.selected=='days'">
+                       <label class="control-label">时间间隔：</label>
+                       <div class="controls date-controls">
+                            <input type="text" class="form-controls" name="dayInterval" ng-model="addInsData.frequency.day" placeholder='请输入时间间隔' min="1" max="7" limitnumrange required />
+                            <div class="error" ng-messages="addInstancesForm.dayInterval.$error" ng-if="interacted(addInstancesForm.dayInterval)">
+                              <div ng-message="limitnumrange">请输入1~7之间的整数</div>
+                              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                       </div>
+                       <div class="controls hour-controls">
+                          <span class="frequency">天</span>
+                       </div>
+                    </div>
+                    <div class="control-group" ng-if="frequency.selected=='week'">
+                       <label class="control-label">时间间隔：</label>
+                       <div class="controls week-controls">
+                           <div class="interval-description">周</div>
+                           <button class="interval-btn" ng-class="{'active':addInsData.frequency.week1}" ng-click="addInsData.frequency.week1=!addInsData.frequency.week1">一</button>
+                           <button class="interval-btn" ng-class="{'active':addInsData.frequency.week2}" ng-click="addInsData.frequency.week2=!addInsData.frequency.week2">二</button>
+                           <button class="interval-btn" ng-class="{'active':addInsData.frequency.week3}" ng-click="addInsData.frequency.week3=!addInsData.frequency.week3">三</button>
+                           <button class="interval-btn" ng-class="{'active':addInsData.frequency.week4}" ng-click="addInsData.frequency.week4=!addInsData.frequency.week4">四</button>
+                           <button class="interval-btn" ng-class="{'active':addInsData.frequency.week5}" ng-click="addInsData.frequency.week5=!addInsData.frequency.week5">五</button>
+                           <button class="interval-btn" ng-class="{'active':addInsData.frequency.week6}" ng-click="addInsData.frequency.week6=!addInsData.frequency.week6">六</button>
+                           <button class="interval-btn" ng-class="{'active':addInsData.frequency.week7}" ng-click="addInsData.frequency.week7=!addInsData.frequency.week7">日</button>
+                       </div>
+                    </div>
+                    <div class="control-group date-group">
+                        <label class="control-label">结束时间：</label>
+                        <div class="controls date-controls">
+                            <div class="form-group time-picker start" >
+                              <div class="input-group date form_date">
+                                <input class="form-control fromTime" name="endDate" type="text" size="16" ng-model="addInsData.end.date" placeholder="请选择日期" ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])$/" required>
+                                <span class="input-group-addon calendar-cont">
+                                  <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="error" ng-messages="addInstancesForm.endDate.$error" ng-if="interacted(addInstancesForm.endDate)">
+                              <div ng-message="pattern">{{"aws.errors.timePattern"|translate}}</div>
+                              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                        <div class="controls hour-controls">
+                            <input type="text" class="form-controls" name="endHour" ng-model="addInsData.end.hour" placeholder='{{"aws.extension.placeholder.hour"|translate}}' ng-pattern="/^(([0-1]?[0-9]{1})|([2][0-3]))$/" required />
+                            <div class="error" ng-messages="addInstancesForm.endHour.$error" ng-if="interacted(addInstancesForm.endHour)">
+                              <div ng-message="pattern">{{"aws.extension.tipMsg.hourMsg"|translate}}</div>
+                              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                        <div class="controls colon-controls">
+                          <span>:</span>
+                        </div>
+                        <div class="controls hour-controls">
+                            <input type="text" class="form-controls" name="endMinute" ng-model="addInsData.end.minute" placeholder='{{"aws.extension.placeholder.minute"|translate}}' ng-pattern="/^[0-5]?[0-9]{1}$/" required />
+                            <div class="error" ng-messages="addInstancesForm.endMinute.$error" ng-if="interacted(addInstancesForm.endMinute)">
+                              <div ng-message="pattern">{{"aws.extension.tipMsg.minuteMsg"|translate}}</div>
+                              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="error-msg" ng-if="!endTimeBiggerStartTime">
+                        结束时间不能小于起始时间
+                    </div> 
+                </div>
+                
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-info" type="button" ng-disabled="isDisabled" ng-click="addInsConfirm(addInstancesForm)">{{'aws.action.ok' | translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+        </div>
+    </div>
+</script>

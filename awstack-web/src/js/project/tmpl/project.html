@@ -1,0 +1,355 @@
+<div class="page-inner" ng-class="{'open':detailIn}">
+	<div class="table-action">
+		<button class="btn btn-new" ng-click="updateProject('new')" licence-type="btn" id="identity-project-create"><i class="icon-aw-add-to2"></i>{{'aws.project.newproject' | translate}}</button>
+		<button ng-click="updateProject('edit',editData)" ng-disabled="isDisabled" class="btn btn-normal" licence-type="btn" id="identity-project-edit"><i class="icon-aw-modify"></i>{{'aws.action.edit' | translate}}</button>
+		<button type="button" data-toggle="modal" ng-click="del(checkedItems)" ng-disabled="delisDisabled" class="btn  btn-normal" licence-type="btn" id="identity-project-del"> <i class="icon-aw-delete"></i>{{'aws.action.del' | translate}}</button>
+		<button type="button" ng-disabled="isDisabled" data-toggle="modal" ng-click="allocateUser('allocateUser',editData)" class="btn btn-normal" licence-type="btn" id="identity-project-allow"><i class="icon-aw-adjust"></i>{{'aws.depart.allocateUser'|translate}}</button>
+		<!-- <div class="search-box">
+			<form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+				<button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+				<input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search' | translate}}" />
+			</form>
+		</div> -->
+		<div class="pull-right">
+			<into-information modular="'project'"></into-information>
+			<!-- <setting title-data="titleData" site-title="titleName" table-data="networksTableData" search-tearm="networkSearchTearm(obj)"></setting> -->
+			<button class="btn btn-renovat right-ports" ng-click="refresh()"><i class="icon-aw-refresh"></i></button>
+			<div class="search-box right-ports">	
+				<form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+					<button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+					<input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search' | translate}}" />
+				</form>
+			</div>
+		</div> 
+	</div>
+	<div class="table-content">
+		<empty-tip empty-type="loadData"></empty-tip>
+		<table ng-table="tableParams" class="table" show-filter="false">
+			<colgroup>
+				<col width="10%" />
+				<col width="20%" />
+				<col width="20%" />
+				<col width="20%" />
+				<col width="30%" />
+			</colgroup>
+			<tr ng-repeat="item in $data">
+				<td header="'headerCheckbox.html'">
+					<label class="checkbox">
+						<input type="checkbox" name="r" ng-model="checkboxes.items[item.projectUid]" value="{{item.projectUid}}" />
+						<i class="iconfont"></i>
+					</label>
+				</td>
+				<td data-title="'aws.project.table.pro_name' | translate" sortable="'nameNe'"><a ng-href="#/permit/project?id={{item.projectUid}}_{{item.domainUid}}_{{item.enceodeProject}}">{{item.nameNe}}</a></td>
+				<td data-title="'aws.project.newProject.dep_name' | translate" sortable="'domainNameNe'">{{item.domainNameNe}}</td>
+				<td data-title="'aws.project.table.createTime' | translate" sortable="'createTimeStr'"><span class="nowrap">{{item.createTimeStr}}</span></td>
+				<td data-title="'aws.project.table.pro_desc' | translate" sortable="'description'"><span title="{{item.description}}" class="des des-lg">{{item.description}}</span></td>	
+			</tr>
+		</table>
+	</div>
+	<div ng-controller="detailCtrl">
+	    <pane class="detail-body project-detail" animation="animation" >
+	        <div class="tab-content">
+	            <div class ="detail-row">
+	                <div class="detail-title">
+	                    <a class = "an-close" ng-href="/permit/project"><i class="icon-aw-mail-reply"></i></a>
+	                    <span class="detail-title-item">{{projectNames}} {{'aws.project.projectdetail'|translate}}</span>
+	                </div>                        
+	                <div class="detail-info">
+	                	<div class="tab-content-line"></div>
+	                    <div class="box">
+						    <div class="col-4 project-pie-item">
+						      <div class="title">{{'aws.cvmview.pro_ins'|translate}}</div>
+						      <div class="panels clearfix" ng-if="pieshow">
+						        <div class="pie-wrap" >
+						        <div class=" pie" chart-pie panel='cvmViewInsPieChart.panels'></div>
+						        </div>
+						        <div class="pie-legend">
+						          <dl class="dl-horizontal project-dl-horizontal">
+						            <dt>{{'aws.quota.totalQuota'|translate}}：</dt>
+						            <dd><span class="total">{{instancesquota.total}}</span></dd>
+						          </dl>
+						          <dl class="dl-horizontal  project-dl-horizontal" ng-repeat="legend in cvmViewInsPieChart.panels.data">
+						            <dt><i style="background-color:{{cvmViewInsPieChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+						            <dd><span ng-class="{'num':$index==0}">{{legend.value}}</span></dd>
+						          </dl>
+						        </div>
+						      </div>
+						    </div>
+						     <!-- <div class="col-6">
+						      <div class="title">
+						        <span>{{'aws.cvmview.alarm_event'|translate}}</span><a  href="#/monitor/alarmevent">{{'aws.cvmview.view_all'|translate}} >></a>
+						      </div>
+						      <div class="alarmInfo-wrap">
+						        <div class="cont">
+						         <table class="table">
+						          <tbody>
+						            <tr ng-repeat="alarm in newAlarms_data">
+						              <td>{{alarm.hostname}}</td>
+						              <td><span class="highlight" ng-class="{'bg-green':alarm.alarmType == 'healthcheck','bg-orange':alarm.alarmType == 'threshold','bg-blue':alarm.alarmType == 'computeha'}" >{{alarm._alarmType}}</span></td>
+						              <td>{{alarm.severity}}</td>
+						              <td>{{alarm.createtime |date:'yyyy-MM-dd HH:mm:ss'}}</td>
+						            </tr>
+						          </tbody>
+						        </table>
+						        <div ng-if="newAlarms_data.length===0">
+						          {{'aws.cvmview.event_no'|translate}}
+						        </div>
+						        </div>
+						      </div>
+						    </div> -->
+						  	<div class="col-8 ">
+						      <div class="quotaInfo" ng-class="{'seg3':!L3}">
+						      <div class="title">{{'aws.cvmview.pro_quota_info'|translate}}</div>
+						        <ul class="clearFix" ng-if="pieshow">
+						          <li>
+						            <progress-bar progress-value="coresquota" bar-type="'width'" ></progress-bar>
+						          </li>
+						          <li>
+						            <progress-bar progress-value="ramquota" bar-type="'width'" ></progress-bar>
+						          </li>
+						          <li>
+						            <progress-bar progress-value="snapshotsquota" bar-type="'width'" ></progress-bar>
+						          </li>
+						          <li ng-if="L3">
+						            <progress-bar progress-value="floatingipquota" bar-type="'width'" ></progress-bar>
+						          </li>
+						        </ul>
+						      </div>
+						    </div>
+
+						  </div>
+						  <div class="box">
+   						    <div class="col-12">
+						      <div class="resourcesInfo"  ng-class="{'seg3':!L3}" >
+						        <div class="title">{{'aws.cvmview.pro_res_info'|translate}}</div>
+						        <ul class="clearFix" ng-if ="projectserverscount&&projectNetworksCount&&routerscount&&volumescount">
+						          <li>
+						            <div class="panels clearfix">
+							            <div class="pie-wrap">
+							              <div class="pie" chart-pie panel='projectserverscount'></div>
+							              <div class="pie-center" ng-if="projectserverscount.data.length != 0">
+							                <div class="num">{{projectserverscount.total}}</div>
+							              </div>
+							              <div class="resource-name">云主机数量</div>
+							            </div>
+							            <div class="pie-legend">
+							              <dl class="dl-horizontal" ng-repeat="legend in projectserverscount.data">
+							                <dt>{{legend.name}}：</dt>
+							                <dd style="color:{{projectserverscount.colors[$index]}}">{{legend.value}}</dd>
+							              </dl>
+							            </div>
+							          </div>  
+						          </li>
+						          <li>
+						            <div class="panels clearfix">
+							            <div class="pie-wrap">
+							              <div class="pie" chart-pie panel='projectNetworksCount'></div>
+							              <div class="pie-center" ng-if="projectNetworksCount.data.length != 0">
+							                <div class="num">{{projectNetworksCount.total}}</div>
+							              </div>
+							              <div class="resource-name">网络数量</div>
+							            </div>
+							            <div class="pie-legend">
+							              <dl class="dl-horizontal" ng-repeat="legend in projectNetworksCount.data">
+							                <dt>{{legend.name}}：</dt>
+							                <dd style="color:{{projectNetworksCount.colors[$index]}}">{{legend.value}}</dd>
+							              </dl>
+							            </div>
+							          </div> 
+						          </li>
+						          <li  ng-if="L3" >
+						          	<div class="panels clearfix">
+							            <div class="pie-wrap">
+							              <div class="pie" chart-pie panel='routerscount'></div>
+							              <div class="pie-center" ng-if="routerscount.data.length != 0">
+							                <div class="num">{{routerscount.total}}</div>
+							              </div>
+							              <div class="resource-name">路由器数量</div>
+							            </div>
+							            <div class="pie-legend">
+							              <dl class="dl-horizontal" ng-repeat="legend in routerscount.data">
+							                <dt>{{legend.name}}：</dt>
+							                <dd style="color:{{routerscount.colors[$index]}}">{{legend.value}}</dd>
+							              </dl>
+							            </div>
+							          </div> 
+						          </li>
+						          <li>
+						          	<div class="panels clearfix">
+							            <div class="pie-wrap">
+							              <div class="pie" chart-pie panel='volumescount'></div>
+							              <div class="pie-center" ng-if="volumescount.data.length != 0">
+							                <div class="num">{{volumescount.total}}</div>
+							              </div>
+							              <div class="resource-name">云硬盘数量</div>
+							            </div>
+							            <div class="pie-legend">
+							              <dl class="dl-horizontal" ng-repeat="legend in volumescount.data">
+							                <dt>{{legend.name}}：</dt>
+							                <dd style="color:{{volumescount.colors[$index]}}">{{legend.value}}</dd>
+							              </dl>
+							            </div>
+						          	</div> 
+						          </li>
+						        </ul>
+						      </div>
+						    </div>
+						  </div>
+						  <div class="box" ng-show="showUerList">
+						    <div class="table-content">
+						      <table ng-table="userDetailTableParams" class="table " show-filter="false">
+						        <!-- <empty-tip empty-type="userDetailLoadData"></empty-tip> -->
+						        <colgroup>
+						          <col width="50%">
+						          <col width="50%">
+						        </colgroup>
+						        <tr ng-repeat="user in $data">
+						          <td data-title="headers.name" sortable="'name'">
+						              <span>{{user.name}}</span>
+						          </td>
+						          <td data-title="headers.role" sortable="'role'">
+						              <span>{{'aws.users.cu.roles.'+ user.roleidlist[0].name | translate}}</span>
+						          </td>
+						        </tr>
+						      </table>
+						    </div>
+						  </div>
+	                </div>
+	            </div>
+	        </div>
+	    </pane>
+  </div>
+</div>
+
+
+<script type="text/ng-template" id="headerCheckbox.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+		<i class="iconfont"></i>
+	</label>
+</script>
+<script type="text/ng-template" id="creatProject.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+			<h3 class="modal-title">{{projectTitle}}</h3>
+		</div>
+		<div class="modal-body">
+			<form name="projectName" novalidate>
+				<div class="control-group" ng-if="isEdit">
+	              <label class="control-label"><span class="red">*</span>{{'aws.project.newProject.dep_name'|translate}}：</label>
+	              <div class="controls">
+	                <input type="text" ng-model='curDep.selected' name="deparNameEdit" class="form-controls" disabled/>
+	              </div>
+	            </div>
+				<div class="control-group" ng-show="isNew">
+	              <label class="control-label"><span class="red">*</span>{{'aws.project.newProject.dep_name'|translate}}：</label>
+	              <div class="controls">
+	                <ui-select ng-model="curDep.selected" name="deparName" ng-change="changeDepart(curDep.selected)" required  ng-disabled="!depList.length||canCheckDer">
+	                  <ui-select-match placeholder="{{'aws.project.newProject.dep_name'|translate}}">{{$select.selected.neName}}</ui-select-match>
+	                  <ui-select-choices repeat="item in depList  | filter: {id: $select.search}">
+	                    <div ng-bind-html="item.neName | highlight: $select.search"></div>
+	                  </ui-select-choices>
+	                </ui-select>
+	                <div class="error" ng-if="interactedName(projectName.deparName)" ng-messages="projectName.deparName.$error">
+	                  <form-validate></form-validate>
+	                </div>
+	              </div>
+	            </div>
+				<div class="control-group">
+					<label class="control-label"><span class="red">*</span>{{'aws.project.newProject.pro_name' | translate}}：</label>
+					<div class="controls">
+						<input type="text" name="name" class="form-controls"  title="{{notEditTip}}" ng-disabled="notEditName" placeholder="{{'aws.project.proName' | translate}}" ng-model="project.nameNe" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" repeat-nums required />
+							<span class="error-messages error" ng-if="interactedName(projectName.name)" ng-messages="projectName.name.$error" >
+								<div ng-message="required" class="error">{{'aws.errors.required'|translate}}</div>
+								<div ng-message="pattern" class="error">{{'aws.errors.noSpecial'|translate}}</div>
+								<div ng-message="maxlength" >{{'aws.errors.maxlength'|translate}}</div>
+								<div ng-message="repeatNums" >{{'aws.errors.noRepeatProName'|translate}}</div>
+							</span> 
+
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">{{'aws.project.newProject.pro_desc' | translate}}：</label>
+					<div class="controls">
+						<textarea class="form-controls" name="desc" ng-maxlength="256" ng-model="project.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}"></textarea>
+						<span class="error-messages error" ng-if="interactedName(projectName.desc)" ng-messages="projectName.desc.$error" >
+							<div ng-message="maxlength" >{{'aws.errors.maxlength256'|translate}}</div>
+						</span> 
+					</div>
+				</div>
+				<!-- <div class="control-group">
+					<label class="control-label"><strong>{{'aws.project.quota' | translate}}</strong></label>
+					<div class="controls">
+					</div>
+				</div> -->
+				<span class="form-title">{{'aws.project.quota' | translate}}<i class="icon-aw-question-mark question-tip" uib-popover="以下配额信息仅供参考，可根据实际情况进行修改。注意：项目配额不能超过部门配额。"  popover-trigger="mouseenter" popover-placement = "bottom" ></i></span>
+				<div ng-if='!getDepConfig' class="marginLeft">{{'aws.project.quotafail'|translate}}<span class='redPointer' ng-click='getCanEditQuota()'>{{'aws.project.retry'|translate}}</span></div>
+				<div  ng-repeat="quota in canEditQuotas" class="control-row" ng-if="showQuota" ng-hide = "(quota.name == 'backups' || quota.name == 'backup_gigabytes' ) && services.backups != 'backups'">
+					<div class="control-group control-item-inner">
+						<label class="control-label" title="{{'aws.quota.'+quota.name | translate}}">{{'aws.quota.'+quota.name | translate}}： </label>
+						<div class="controls">
+							<input class="pro-quota-input form-control" type="text" name="{{quota.name}}" ng-model="quota.hardLimit" ng-pattern="/^([1-9][0-9]*)$/" availquota  inusedquota required/>
+							<!-- <span class="error-messages error" ng-if="interactedName(projectName[quota.name])" ng-messages="projectName[quota.name].$error" > -->
+							<span class="error-messages error" ng-messages="projectName[quota.name].$error" >
+								<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+								<div ng-message="pattern">{{'aws.errors.atleast'|translate}}</div>
+								<div ng-message="availquota">
+									<div ng-if="!narrowSwitch">{{'aws.quota.errorMessage.insufficient'|translate}}{{quota.availQuota}}</div>
+									<div ng-if="narrowSwitch">{{'aws.quota.errorMessage.largerThanLeftQuota'|translate}}{{quota.availQuota}}</div>
+								</div>
+								<!-- 编辑项目配额才生效 -->
+								<div ng-message="inusedquota">{{'aws.project.parametersTips'|translate}}{{quota.inUse}}</div>
+							</span>
+						</div>
+					</div>
+					<div class="clear" ng-if="$odd"></div>
+				</div>
+				<div class="clear"></div>
+			</form>
+		</div>
+		<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-disabled = "!getDepConfig" ng-click="confirmPro()">{{'aws.action.ok' | translate}}</button>
+			<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="allocateUser.html">
+	<div class="roleToUser-modal modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+			<h3 class="modal-title">{{'aws.depart.allocateUser'|translate}}</h3>
+		</div>
+		<div class="modal-body">
+			<div class="left-select-table">
+				<h5>{{'aws.depart.noAllocate'|translate}}</h5>
+				<div class="table-responsive">
+					<ul ng-repeat="user in users" align="center" border="0" cellpadding="0" cellspacing="0">
+						<li class="dropdown">
+							<button ng-click="selectUserToProject(user)"><i class="icon-aw-check-square"></i></button>
+							<span title="{{user.name}}">{{user.name}}</span>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="btnGroup">
+			</div>
+			<div class="right-select-table">
+				<h5>{{'aws.depart.allocatedUser'|translate}}</h5>
+				<div class="table-responsive">
+					<ul ng-repeat="havedUser in havedUsers" align="center" border="0" cellpadding="0" cellspacing="0">
+						<li class="dropdown">
+							<button ng-click="removeUserFromProject(havedUser)"><i class="icon-aw-indeterminate"></i></button>
+							<span title="{{havedUser.name}}">{{havedUser.name}}</span>													
+							<div class="select-role" ng-dropdown-multiselect=""  select-radio="'true'"  options="roles" selected-model="havedUser.roleidlist" extra-settings="example5settings" translation-texts="example5customTexts"></div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-click="$close()">{{"aws.action.ok"|translate}}</button>
+			<button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+		</div>
+	</div>
+</script>

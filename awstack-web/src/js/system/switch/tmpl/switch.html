@@ -1,0 +1,33 @@
+<div class="box operating-box">
+	<div class="limitBand">
+		<div class="page-inner">
+			<div class="settings-box">
+				<div class="control-group control-choose">
+					<label class="limit-label ">L3开关：</label>
+					<div class="controls">
+						<div class="checkbox switch-btn">
+							<label>
+								<input type="checkbox"  class="form-controls" ng-model="Switch.L3_Active">
+								<i class="iconfont"></i>
+							</label>
+						</div>
+						<span class="tips-checkbox"><i class='icon-aw-prompt2'></i>调整保存后请重新登录</span>
+					</div>
+				</div>
+				<div class="text-center">
+					<button class="btn btn-primary"  ng-click="updateLimit()" ng-disabled="buttonSubmit">{{'aws.action.save'|translate}}</button>
+				</div>
+			</div>
+			<div class="settings-box">
+				<div class="control-group">
+					<label class="limit-label ">镜像缓存：</label>
+					<div class="controls">
+						<button type="button" class="btn btn-primary" uib-popover="{{'aws.img.buffer_space2'|translate}}" 
+    popover-enable="true" popover-trigger="mouseenter" popover-placement = "bottom" ng-click="clearSpace()"  ng-if="ADMIN">{{'aws.img.clear_space'|translate}}</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>

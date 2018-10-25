@@ -1,0 +1,313 @@
+<div class="page-inner">
+  <div class="page-title">
+      <h2>安全组</h2>
+      <ui-select ng-model="options.proselected" ng-change="selectedProject(project.selected)" name="project" title="项目切换">
+        <ui-select-match placeholder="项目切换">{{$select.selected.projectName}}</ui-select-match>
+        <ui-select-choices repeat="item in projectList | filter:{projectName:$select.search}">
+          <div ng-bind-html="item.projectName | highlight: $select.search"></div>
+        </ui-select-choices>
+      </ui-select>
+      <div class="btn-item-group">
+        <button type="button" class="type-btn"  ng-class='{"active":item.region === options.region}' ng-click="changeRegion(item.region)" ng-repeat="item in regionList "><span>{{item.regionName}}</span></button>
+      </div>
+  </div>
+  <uib-alert type="warning" class="alert-tip">
+    在这里用户可以设定安全组策略，对绑定的云主机进行内、外网访问权限控制，提高公有云的安全性
+  </uib-alert>
+  <div class="table-action">
+    <button  class="btn btn-primary" ng-click="addSecGroup()" ><i class="icon-aw-add-to2"></i>创建</button>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'CN.action.search'|translate}}" />
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <table ng-table="tableParams" class="table">
+    <colgroup>
+      <col width="20%">
+      <col width="5%">
+      <col width="45%">
+      <col width="10%">
+      <col width="20%">
+    </colgroup>
+      <tbody>
+        <tr ng-repeat="item in $data">
+          <td data-title="'ID/名称'">
+            <div class="edit-name">
+              <a ng-href="#cvm/securitygroup/{{item.sgId}}">{{item.sgId}}</a>
+              <span ng-if = "item.sgName">{{item.sgName}}</span>
+              <span ng-if = "!item.sgName">未命名</span><i class="icon-aw-modify blue" ng-show = "item.sys == 0" ng-click="editName(item)"></i>
+            </div>
+          </td>
+          <td data-title="'主机'">{{item.deviceNum}}</td>
+          <td data-title="'备注'">{{item.sgRemark}}</td>
+          <td data-title="'创建时间'">{{item.createTime | date: 'yyyy-MM-dd:HH:mm:ss'}}</td>
+          <td data-title="'操作'">
+            <div class="btn-items">
+              <a ng-click="joinvm(item)">加入云主机</a>
+              <a ng-href="#/cvm/securitygroup/{{item.sgId}}">移出云主机</a>
+              <a uib-popover="推荐安全组不允许编辑" popover-enable="item.sys == 1" popover-trigger="mouseenter" popover-placement="bottom" ng-click="editRule(item,options.region)"  ng-class="{disabled:item.sys==1}">编辑规则</a>
+              <a uib-popover="推荐安全组不允许删除" popover-enable="item.sys == 1" popover-trigger="mouseenter" popover-placement="bottom" ng-click="deleteSecurityGroup(item)" ng-class="{disabled:item.sys==1}">删除</a>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="addSecGroup.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">新建安全组</h3>
+    </div>
+    <div class="modal-body">
+      <form name="addSecGroupForm" novalidate>
+        <div class="control-group" >
+            <label class="control-label">名称：</label>
+            <div class="controls">
+                <input type="text" class="form-controls" name="name" ng-model="sec.sgName"  ng-maxlength="60" required />
+                <div class="error" ng-messages="(submitform ||addSecGroupForm.name.$dirty) && addSecGroupForm.name.$error" >
+                    <form-validate max-num="60"></form-validate>
+                </div>
+                <span ng-show="sec.sgName && sec.sgName.length<61">您还可以输入{{60-sec.sgName.length}}个字符</span>
+            </div>
+        </div>
+        <div class="control-group" >
+            <label class="control-label">备注：</label>
+            <div class="controls">
+                <input type="text" class="form-controls" name="mark" ng-model="sec.sgRemark"  ng-maxlength="100" required />
+                <div class="error" ng-messages="(submitform ||addSecGroupForm.mark.$dirty) && addSecGroupForm.mark.$error" >
+                    <form-validate max-num="100"></form-validate>
+                </div>
+                <span ng-show="sec.sgRemark && sec.sgRemark.length<101">您还可以输入{{100-sec.sgRemark.length}}个字符</span>
+            </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirmAddSecGroup(addSecGroupForm)">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="joinvm.html">
+    <div class="privilegeTo-modal modal-common">
+      <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">加入云主机</h3>
+      </div>
+      
+      <div class="modal-body">
+        <uib-alert type="warning" class="alert-tip">
+          当主机绑定多个安全组时，新绑定的安全组将自动设为最高优先级。
+        </uib-alert>
+        <div class="clearfix">
+          <div class="left-select-table">
+              <h5>选择云服务器</h5>
+              <div class="table-responsive">
+                  <table class="table table-bordered">
+                      <tr ng-repeat="vm in vm.allVm ">
+                          <td>
+                              <label class="checkbox">
+                                  <input type="checkbox" ng-model="checkboxes.vms[vm.unInstanceId]"  ng-disabled="checkboxes.chk[vm.unInstanceId]"/>
+                                  <i class="iconfont" ng-class="{disabled:checkboxes.chk[vm.unInstanceId]}"></i>
+                              </label>
+                          </td>
+                          <td>
+                              <span class="name">{{vm.instanceName}}</span>
+                              <span ng-if="vm.vpcId">{{vm.vpcId}} | {{vm.lanIp}}</span>
+                              <span ng-if="!vm.vpcId">基础网络 | {{vm.lanIp}}</span>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+          </div>
+          <div class="btnGroup">
+            <button class="btn btn-primary">&gt;</button>
+            <button class="btn btn-primary">&lt;</button>
+          </div>
+          <div class="right-select-table">
+              <h5>已选择</h5>
+              <div class="table-responsive">
+                  <table class="table table-bordered">
+                      <tr ng-repeat="chkvm in vm.checkVms">
+                          <td>
+                            <span class="name">{{chkvm.instanceName}}</span>
+                            <span ng-if="item.vpcId">{{vm.vpcId}} | {{vm.lanIp}}</span>
+                            <span ng-if="!item.vpcId">基础网络 | {{vm.lanIp}}</span>
+                          </td>
+                          <td> <i class="icon-aw-wrong" ng-click="rmVm(chkvm)"></i></td>
+                      </tr>
+                  </table>
+              </div>
+          </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-primary" type="button" ng-click="confirmJoinvm()">确认</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </div>
+</script>
+<script type="text/ng-template" id="delSecGroup.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">删除该安全组</h3>
+    </div>
+    <div class="modal-body">
+      <form name="confirmDestoryForm" novalidate>
+        <div class="alert alert-warning">
+          确认要删除该安全组?
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="delSecGroup()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="cannotDelSecGroup.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">无法删除安全组</h3>
+    </div>
+    <div class="modal-body">
+      <form name="confirmDestoryForm" novalidate>
+        <div class="alert alert-warning">
+          注意：该安全组内有一个或多个云主机，请将这些云主机实例与其他安全组关联，与该安全组解除关联。<a class="blue" ng-href="#/cvm/securitygroup/{{sg.sgId}}">查看安全组内云主机</a>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">返回</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="editsec.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">编辑安全组</h3>
+    </div>
+    <div class="modal-body">
+      <form name="editnameForm" novalidate>
+        <div class="control-group">
+          <label class="control-label">名称:</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="name" ng-model="sec.sgName" placeholder="请输入新的安全组名称"  ng-maxlength="60" required />
+            <div class="error" ng-messages="(submitform ||editnameForm.name.$dirty) && editnameForm.name.$error">
+              <form-validate max-num="60" ></form-validate>
+            </div>
+            <span class="tips" ng-show ="sec.sgName.length<61">你还可以输入{{60-sec.sgName.length}}个字符</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">备注:</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="sgRemark" ng-model="sec.sgRemark"  ng-maxlength="100" placeholder="请输描述信息新的安全组名称"/>
+            <div class="error" ng-messages="(submitform ||editnameForm.sgRemark.$dirty) && editnameForm.sgRemark.$error">
+              <form-validate max-num="100" ></form-validate>
+            </div>
+            <span class="tips" ng-show ="sec.sgRemark.length<101">你还可以输入{{100-sec.sgRemark.length}}个字符</span>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirmEditSec(editnameForm)">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="clonesec.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">克隆安全组</h3>
+    </div>
+    <div class="modal-body">
+      <form name="editnameForm" novalidate>
+        <uib-alert type="warning" class="alert-tip">
+          克隆过程，只将原安全组出入口规则克隆，云主机需另行关联。
+        </uib-alert>
+        <div class="control-group">
+          <label class="control-label">目标地域</label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button type="button" class="type-btn"  ng-class='{"active":item.region === options.region}' ng-click="changeRegion(item)" ng-repeat="item in regionList "><span>{{item.regionName}}</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">目标项目</label>
+          <div class="controls">
+            <ui-select ng-model="options.proselected" ng-change="selectedProject(project.selected)" name="project" title="项目切换">
+              <ui-select-match placeholder="项目切换">{{$select.selected.projectName}}</ui-select-match>
+              <ui-select-choices repeat="item in projectList | filter:{projectName:$select.search}">
+                <div ng-bind-html="item.projectName | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">原安全组名称</label>
+          <div class="controls">
+            <span>{{sce.sgName}}</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">新安全组名称</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="sgRemark" ng-model="sec.sgRemark" placeholder="请输描述信息新的安全组名称"/>
+            <span>你还可以输入{{100-sec.sgRemark.length}}个字符</span>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirmEditSec(editnameForm)">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

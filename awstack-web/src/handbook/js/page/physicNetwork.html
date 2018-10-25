@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>网络</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <h3>
+	查看网络信息</h3>
+<ol>
+	<li>
+		在云管平台的Web控制台上，选择&ldquo;物理资源管理 &gt;网络&rdquo;，进入网络页面。</li>
+	<li>
+		在网络列表中，查看网络名称、是否为共享网络、绑定的子网和运行状态等。</li>
+	<li>
+		在&ldquo;网络名称&rdquo;列，单击网络名称，打开&ldquo;网络详情&rdquo;页面。可以查看基本信息、端口信息和子网信息。</li>
+</ol>
+<h3>
+	新建子网</h3>
+<ol>
+	<li>
+		在网络列表，选择要添加子网的物理网络。单击&ldquo;子网管理&rdquo;按钮并在下拉列表中选择&ldquo;新建子网&rdquo;。</li>
+	<li>
+		配置子网信息。</li>
+</ol>
+<table border="1" cellpadding="0" cellspacing="0" style="width:100.0%;" width="100%">
+	<thead>
+		<tr>
+			<th style="width:20.68%;height:8px;">
+				<p align="center">
+					参数名称</p>
+			</th>
+			<th style="width:79.32%;height:8px;">
+				<p align="center">
+					参数说明</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td style="width:20.68%;height:3px;">
+				<p>
+					子网名称</p>
+			</td>
+			<td style="width:79.32%;height:3px;">
+				<p>
+					子网的名称。</p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:20.68%;height:17px;">
+				<p>
+					子网CIDR</p>
+			</td>
+			<td style="width:79.32%;height:17px;">
+				<p>
+					子网的IP网段。</p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:20.68%;height:22px;">
+				<p>
+					网关IP地址</p>
+			</td>
+			<td style="width:79.32%;height:22px;">
+				<p>
+					填写子网网关的IP地址。如为空，则由系统自动分配。</p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:20.68%;height:32px;">
+				<p>
+					分配地址池</p>
+			</td>
+			<td style="width:79.32%;height:32px;">
+				<p>
+					勾选&ldquo;分配地址池&rdquo;，在子网的IP网段内设置子网的起始IP和结束IP。单击&ldquo;+&rdquo;按钮，可以填写多个IP地址段。如没有勾选&ldquo;分配地址池&rdquo;，则由系统自动分配IP地址范围。</p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:20.68%;height:32px;">
+				<p>
+					启动DHCP</p>
+			</td>
+			<td style="width:79.32%;height:32px;">
+				<p>
+					建议勾选&ldquo;启动DHCP&rdquo;。启动DHCP，网络中的物理机可以动态获取IP地址、网关地址、DNS服务器地址等信息，并能够提升地址的使用率。</p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:20.68%;height:20px;">
+				<p>
+					域名服务器</p>
+			</td>
+			<td style="width:79.32%;height:20px;">
+				<p>
+					该子网的DNS服务器列表。</p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:20.68%;height:24px;">
+				<p>
+					附加路由</p>
+			</td>
+			<td style="width:79.32%;height:24px;">
+				<p>
+					主机增加额外的路由。</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<ol start="3">
+	<li>
+		单击&ldquo;确定&rdquo;按钮，完成子网的创建。</li>
+</ol>
+<h3>
+	修改子网</h3>
+<ol>
+	<li>
+		在网络列表，选择要修改子网的网络。单击&ldquo;子网管理&rdquo;按钮并在下拉列表中选择&ldquo;编辑子网&rdquo;。</li>
+	<li>
+		在子网列表选择要编辑的子网，设置子网的名称、子网CIDR、以及设置IP地址段。</li>
+	<li>
+		单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+<p>
+	<strong>注意：</strong><br />
+	编辑可用地址范围时，在IP地址没有被分配出去时，可以进行范围内的缩小。</p>
+<h3>
+	删除子网</h3>
+<ol>
+	<li>
+		在网络列表，选择要删除子网的网络。单击&ldquo;子网管理&rdquo;按钮并在下拉列表中选择&ldquo;删除子网&rdquo;。</li>
+	<li>
+		在子网列表中勾选待删除的子网，单击&ldquo;删除&rdquo;按钮。</li>
+	<li>
+		在弹出的确认框中单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+<p>
+	<strong>注意：</strong><br />
+	如果子网有被占用的IP，则子网无法删除。</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<div class="tab-content" ng-controller="paramSetCtrl">
+    <div class="table-action">
+        <button type="button"  class="btn btn-new" ng-click="modifyValue()">{{btnValues}} </button>
+        <button type="button"  class="btn btn-new" ng-click="createAccount()">{{'aws.tdsql.templateImport'|translate}}</button>
+    </div>
+    <div class="table-content">
+        <empty-tip empty-type="paramData"></empty-tip>
+        <table ng-table="paramTable" class="table">
+            <tr ng-repeat="param in $data track by $index">
+                <td data-title="'aws.tdsql.paramName'|translate" sortable="'name'">
+                    {{param.name}}
+                </td>
+                <td data-title="'aws.tdsql.needRestart'|translate" sortable="'protocol'">
+                    {{param.restart}}
+                </td>
+                <td data-title="'aws.tdsql.paramDefault'|translate" sortable="'protocol_port'">
+                    {{param.default}}
+                </td>
+                <td data-title="'aws.tdsql.currentValue'|translate" sortable="'lb_algorithm'">
+                    <div ng-if="modifying">
+                         <input ng-model="param.currentValue">
+                    </div>
+                    <div ng-if="!modifying">{{param.currentValue}}</div>
+                </td>
+                <td data-title="'aws.tdsql.availableModifyValue'|translate" sortable="'connection_limit'">
+                    {{param.range}}
+                </td>  
+            </tr>  
+        </table>
+    </div>
+</div>

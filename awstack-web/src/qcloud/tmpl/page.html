@@ -1,0 +1,24 @@
+<div class="table-pager" ng-show="pages.length>0">
+    <ul class="pagination">
+        <li ng-class="{'disabled':prevDisabled}" class="prev">
+            <a ng-click="prevNext('prev')" href="">&lt;&lt;</a> 
+        </li>
+        <li ng-class="{'disabled': item.disabled, 'active': currentPage==item.number}" ng-repeat="item in pages" ng-switch="item.type"> 
+            <a ng-switch-when="first" ng-click="goPage(item)" href="">
+                <span ng-bind="item.number"></span>
+            </a>
+            <a ng-switch-when="page">
+                <span ng-bind="item.number"  ng-click="goPage(item)"></span>
+            </a>
+            <a ng-switch-when="last" ng-click="goPage(item)" href="">
+                <span ng-bind="item.number"></span>
+            </a>
+            <a ng-switch-when="more">&#8230;</a>
+        </li>
+        <li ng-class="{'disabled':nextDisabled}" class="next">
+            <a ng-click="prevNext('next')" href="">&gt;&gt;</a> 
+        </li>
+    </ul> 
+</div>
+
+

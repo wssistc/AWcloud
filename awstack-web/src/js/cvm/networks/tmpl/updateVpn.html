@@ -1,0 +1,518 @@
+<div class="modal-common modal-step vpn-modal">
+  <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title  clearfix">{{updateVpn_title}}</h3>
+      <!-- <ul class="steps-item clearfix">
+          <li class="clearfix step-start" ng-class="{'active':inStepOneBar<inStep}">
+              <div class=" clearfix">
+                  <span>{{'aws.vpn.basicConfig'|translate}}</span>
+                  <i ng-class="{'active':inStepOneBar<inStep}">1</i>
+              </div>
+          </li>
+          <li class="clearfix step-end"  ng-class="{'active':inStepTwoBar<inStep}">
+              <div class="clearfix">
+                  <span>{{'aws.vpn.configSiteConnect'|translate}}</span>
+                  <i ng-class="{'active':inStepTwoBar<inStep}">2</i>
+              </div>
+          </li>
+      </ul> -->
+      <ul class="steps-sytle-ver steps-sytle-ver-two clearfix">
+          <li class="clearfix step-start" ng-class="{'active':inStepOneBar<inStep}">
+              <div class="inner">
+                  <span>{{'aws.vpn.basicConfig'|translate}}</span>
+                  <i>1</i>
+              </div>
+          </li>
+          <li class="clearfix step-end"  ng-class="{'active':inStepTwoBar<inStep}">
+              <div class="inner">
+                  <span>{{'aws.vpn.configSiteConnect'|translate}}</span>
+                  <i>2</i>
+              </div>
+          </li>
+      </ul>
+  </div>
+  <div class="modal-body">
+      <uib-alert type="info" class="vpn-msg">
+          <div>{{'aws.vpn.bindFloatingIpVpnInfo'|translate}}</div>
+      </uib-alert>
+      <form name="updateVpnForm" ng-show="inStep=='1'" novalidate>
+          <domain-project-select domainproject='domainproject' ng-show="singlePassageway"></domain-project-select>
+         <div class="control-group" >
+            <label class="control-label"><i class="red">*</i>&nbsp;{{'aws.vpn.name'|translate}}：</label>
+            <div class="controls">
+              <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.name"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+              <input type="text" class="form-controls" name="name" ng-model="stepOneData.name" placeholder= '{{"aws.vpn.placeholder.name"|translate}}' ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required>
+              <div class="error" ng-messages="updateVpnForm.name.$error" ng-if="interactedVpn(updateVpnForm.name)">
+                 <form-validate></form-validate>
+              </div>
+            </div>
+         </div>
+         <div class="control-group">
+              <label class="control-label">{{"aws.vpn.description"|translate}}：</label>
+              <div class="controls">
+                  <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.description"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                  <textarea type="text" class="form-controls" ng-maxlength="255" name="description" ng-model="stepOneData.description" placeholder= '{{"aws.vpn.placeholder.description"|translate}}'/>
+                  <div class="error" ng-messages="updateVpnForm.description.$error" ng-if="interactedVpn(updateVpnForm.description)">
+                     <form-validate max-num="255"></form-validate>
+                  </div>
+              </div>
+         </div>
+         <div class="collapse-container" plugin-collapse>
+           <h5 class="title collapse-title" ng-click="IKEfold =!IKEfold">
+            <span>{{'aws.vpn.IKEAdvancedOptions'|translate}}<i class="conf-icon" ng-class="{'icon-aw-angle-up':IKEfold,'icon-aw-angle-down':!IKEfold}"></i></span>
+         </h5>
+         <div class="hide collapse-on">
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.authenAlgorithm'|translate}}：</label>
+              <div class="controls">
+                <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.authenAlgorithm"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                <ui-select ng-model="stepOneData.selectedAuthenAlg"  ng-change="changeExtNet(setGatewayForm.selectedExtNet)" name="authenAlgorithm" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.authenAlgorithm"|translate}}' >{{$select.selected}}</ui-select-match>
+                  <ui-select-choices repeat="authenAlg in IKEData.authenAlgorithm.options">
+                    <div ng-bind-html="authenAlg | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <div class="error" ng-messages="updateVpnForm.authenAlgorithm.$error" ng-if="interactedVpn(updateVpnForm.authenAlgorithm)">
+                  <form-validate></form-validate>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.encryptionAlgorithm'|translate}}：</label>
+              <div class="controls">
+                <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.encryptionAlgorithm"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                <ui-select ng-model="stepOneData.selectedEncryptionAlg"  ng-change="changeExtNet(setGatewayForm.selectedExtNet)" name="secretAlgorithm" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.secretAlgorithm"|translate}}' >{{$select.selected}}</ui-select-match>
+                  <ui-select-choices repeat="encryptionAlg in IKEData.encryptionAlgorithm.options">
+                    <div ng-bind-html="encryptionAlg | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <div class="error" ng-messages="updateVpnForm.secretAlgorithm.$error" ng-if="interactedVpn(updateVpnForm.secretAlgorithm)">
+                  <form-validate></form-validate>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.IKEversion'|translate}}：</label>
+              <div class="controls">
+                <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.IKEversion"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                <ui-select ng-model="stepOneData.selectedIKEversion"  ng-change="changeExtNet(setGatewayForm.selectedExtNet)" name="IKEversion" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.IKEversion"|translate}}' >{{$select.selected}}</ui-select-match>
+                  <ui-select-choices repeat="IKEversion in IKEData.IKEversion.options">
+                    <div ng-bind-html="IKEversion | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <div class="error" ng-messages="updateVpnForm.IKEversion.$error" ng-if="interactedVpn(updateVpnForm.IKEversion)">
+                  <form-validate></form-validate>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.IKEperiod'|translate}}：</label>
+              <div class="controls">
+                <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.IKEperiod"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                <input type="text" class="form-controls left-period" name="IKEperiod" ng-model="stepOneData.selectedIKEperiod" placeholder= '{{"aws.vpn.placeholder.IKEperiod"|translate}}' limitnumrange min="60" max="86400" required>
+                <ui-select ng-model="stepOneData.selectedIKEperiodUnit"  ng-change="changePeriod(stepOneData.selectedIKEperiodUnit,'IKE')" name="unit" class="rigth-unit" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.periodUnit"|translate}}' >{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="period in IKEData.periods.options">
+                    <div ng-bind-html="period.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <div class="error" ng-messages="updateVpnForm.IKEperiod.$error"
+                ng-if="interactedVpn(updateVpnForm.IKEperiod)">
+                  <form-validate></form-validate>
+                  <div ng-message="limitnumrange">
+                    {{'aws.vpn.limit_lifetime_60_86400'|translate}}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.oneNegotiationModel'|translate}}：</label>
+              <div class="controls">
+               <!--  <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.oneNegotiationModel"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                <ui-select ng-model="stepOneData.selectedNegotiationModel"  ng-change="changeExtNet(setGatewayForm.selectedExtNet)" name="model" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.oneNegotiationModel"|translate}}' >{{$select.selected}}</ui-select-match>
+                  <ui-select-choices repeat="negotiationModel in IKEData.oneNegotiationModel.options">
+                    <div ng-bind-html="negotiationModel | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.perfectSecrecy'|translate}}：</label>
+              <div class="controls">
+                <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.perfectSecrecy"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                <ui-select ng-model="stepOneData.selectedIKEPerfect"  ng-change="changeExtNet(setGatewayForm.selectedExtNet)" name="perfect" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.perfectSecrecy"|translate}}' >{{$select.selected}}</ui-select-match>
+                  <ui-select-choices repeat="perfect in IKEData.perfectSecrecy.options">
+                    <div ng-bind-html="perfect | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+         </div>
+         </div>
+         
+         <div class="collapse-container" plugin-collapse>
+           <h5 class="title collapse-title" ng-click="Ipsecfold =!Ipsecfold">
+            <span>{{'aws.vpn.IpsecAdvancedOptions'|translate}}<i class="conf-icon" ng-class="{'icon-aw-angle-up':Ipsecfold,'icon-aw-angle-down':!Ipsecfold}"></i></span>
+           </h5>
+         <div class="hide collapse-on">
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.transProtocol'|translate}}：</label>
+              <div class="controls">
+                <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.transProtocol"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                <ui-select ng-model="stepOneData.selectedTransPro"  ng-change="changeExtNet(setGatewayForm.selectedExtNet)" name="transProtocol" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.select"|translate}}{{"aws.vpn.transProtocol"|translate}}' >{{$select.selected}}</ui-select-match>
+                  <ui-select-choices repeat="transPro in IpseData.transProtocol.options">
+                    <div ng-bind-html="transPro | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.authenAlgorithm'|translate}}：</label>
+              <div class="controls">
+                <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.authenAlgorithm"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                <ui-select ng-model="stepOneData.selectedIpseAuthenAlg"  ng-change="changeExtNet(setGatewayForm.selectedExtNet)" name="authenAlgorithm" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.authenAlgorithm"|translate}}' >{{$select.selected}}</ui-select-match>
+                  <ui-select-choices repeat="authenAlg in IpseData.authenAlgorithm.options">
+                    <div ng-bind-html="authenAlg | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.encryptionAlgorithm'|translate}}：</label>
+              <div class="controls">
+                <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.encryptionAlgorithm"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                <ui-select ng-model="stepOneData.selectedIpseEncryptionAlg"  ng-change="changeExtNet(setGatewayForm.selectedExtNet)" name="secretAlgorithm" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.secretAlgorithm"|translate}}' >{{$select.selected}}</ui-select-match>
+                  <ui-select-choices repeat="encryptionAlg in IpseData.encryptionAlgorithm.options">
+                    <div ng-bind-html="encryptionAlg | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.EncapsulationMode'|translate}}：</label>
+              <div class="controls">
+                <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.EncapsulationMode"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                <ui-select ng-model="stepOneData.selectedEncapsulationMode"  ng-change="changeExtNet(setGatewayForm.selectedExtNet)" name="mode" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.EncapsulationMode"|translate}}' >{{$select.selected}}</ui-select-match>
+                  <ui-select-choices repeat="EncapsulationMode in IpseData.EncapsulationMode.options">
+                    <div ng-bind-html="EncapsulationMode | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.IPSecProtocolCycle'|translate}}：</label>
+              <div class="controls">
+                <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.IPSecProtocolCycle"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                <input type="text" class="form-controls left-period" name="protocolCycle" ng-model="stepOneData.selectedIPSecperiod" placeholder='{{"aws.vpn.placeholder.IPSecProtocolCycle"|translate}}' limitnumrange min="60" max="86400" required>
+                <ui-select ng-model="stepOneData.selectedIPSecperiodUnit"  ng-change="changePeriod(stepOneData.selectedIPSecperiodUnit,'IPSec')" name="unit" class="rigth-unit" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.periodUnit"|translate}}' >{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="period in IpseData.periods.options">
+                    <div ng-bind-html="period.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <div class="error" ng-messages="updateVpnForm.protocolCycle.$error" ng-if="interactedVpn(updateVpnForm.protocolCycle)">
+                   <form-validate></form-validate>
+                   <div ng-message="limitnumrange">{{'aws.vpn.limit_lifetime_60_86400'|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.perfectSecrecy'|translate}}：</label>
+              <div class="controls">
+                <!-- <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.perfectSecrecy"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+                <ui-select ng-model="stepOneData.selectedPerfect"  ng-change="changeExtNet(setGatewayForm.selectedExtNet)" name="perfectSecrecy" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.perfectSecrecy"|translate}}' >{{$select.selected}}</ui-select-match>
+                  <ui-select-choices repeat="perfect in IpseData.perfectSecrecy.options">
+                    <div ng-bind-html="perfect | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+         </div>
+         </div>
+         
+      </form>
+      <form name="modifySiteForm" ng-show="inStep=='2'" novalidate>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.vpn.localRouter"|translate}}：</label>
+          <div class="controls site-controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.localRouter"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+              <ui-select ng-model="stepTwoData.selectedRouter"  ng-change="changeLocalRouter(stepTwoData.selectedRouter)" ng-disabled="siteData.localRouter.options.length==0" name="localRouter" required>
+                <ui-select-match placeholder='{{siteData.localRouter.options.length==0?("aws.vpn.placeholder.noLocalRouter"|translate):"aws.vpn.placeholder.localRouter"|translate}}' >{{$select.selected.name}}-{{$select.selected.gatewayIp}}</ui-select-match>
+                <ui-select-choices repeat="router in siteData.localRouter.options">
+                  <!-- <div ng-bind-html="mode.name"></div> -->
+                  <div>{{router.name}}-{{router.gatewayIp}}</div>
+                </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-messages="modifySiteForm.localRouter.$error" ng-if="interactedSite(modifySiteForm.localRouter)">
+                 <form-validate></form-validate>
+              </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.localSubnet'|translate}}：</label>
+          <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.localSubnet"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+              <div class="localSub-box" ng-repeat="subnetShow in siteData.localSubnetsShow">
+                  <div class="localSub-controls">
+                    <ui-select ng-model="siteData.localSubnetsModel[$index]" name="subnet_{{$index}}" ng-disabled="siteData.localSubnets['options_'+$index].length==0" ng-click="localSubClick($index)" required>
+                      <ui-select-match placeholder='{{siteData.localSubnets["options_"+$index].length==0?("aws.vpn.placeholder.noLocalSubnet"|translate):("aws.vpn.placeholder.selLocalSubnet"|translate)}}' >{{$select.selected.cidr}}</ui-select-match>
+                      <ui-select-choices repeat="subnet as subnet in siteData.localSubnets['options_'+$index] track by $index">
+                        <div ng-bind-html="subnet.cidr | highlight: $select.search"></div>
+                      </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages="modifySiteForm['subnet_'+$index].$error" ng-if="interactedSite(modifySiteForm['subnet_'+$index])">
+                      <form-validate></form-validate>
+                    </div>
+                  </div>
+                  <div class="del">
+                    <button type="button" ng-click="delLocalSubnetFunc(siteData.localSubnetsShow,$index)" ng-if="siteData.localSubnetsShow.length!=1">
+                      <i class="icon-aw-wrong"></i>
+                    </button>
+                  </div>
+              </div> 
+          </div>       
+        </div>
+        <div class="addSub" ng-class="{'noSelect':siteData.localSubnets['options_'+siteData.localSubnetsShow.length].length==0}">
+          <a ng-click="addLocalSubnetFunc(siteData.localSubnetsShow)" title='{{siteData.localSubnets["options_"+siteData.localSubnetsShow.length].length==0?noLocalSubnet:""}}' data-toggle='modal'>
+            <i class="icon-aw-add-to2"></i>
+            <span>{{"aws.vpn.addLocalSubnet"|translate}}</span>
+          </a>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.targetGateway'|translate}}：</label>
+          <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.targetGateway"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+              <div class="clearfix ip-group">
+                <div class="ip-text">
+                  <input type="text" class="form-controls" name="gateway_1" ng-model="stepTwoData.targetGateway.gateway_1" min="1" max="255" placeholder="1~255" ng-keyup="assembleTargetGateway(stepTwoData.targetGateway)" required limitnumrange />
+                  <div class="error"  ng-if="interactedSite(modifySiteForm.gateway_1)" ng-messages="modifySiteForm.gateway_1.$error">
+                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                    <div ng-message="limitnumrange" >{{'aws.vpn.limit_1_255'|translate}}</div>
+                  </div>
+                </div>        
+                <div class="ip-spilt">.</div>
+                <div class="ip-text">
+                  <input type="text" class="form-controls" name="gateway_2" ng-model="stepTwoData.targetGateway.gateway_2" min="0" max="255" ng-keyup="assembleTargetGateway(stepTwoData.targetGateway)" placeholder="0~255" required limitnumrange />
+                  <div class="error" ng-messages="modifySiteForm.gateway_2.$error" ng-if="interactedSite(modifySiteForm.gateway_2)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="limitnumrange" >{{'aws.vpn.limit_0_255'|translate}}</div>
+                </div> 
+                </div>   
+                <div class="ip-spilt">.</div> 
+                <div class="ip-text">
+                  <input type="text" class="form-controls"  name="gateway_3" ng-model="stepTwoData.targetGateway.gateway_3" min="0" max="255" ng-keyup="assembleTargetGateway(stepTwoData.targetGateway)" placeholder="0~255" required limitnumrange />
+                  <div class="error" ng-messages="modifySiteForm.gateway_3.$error" ng-if="interactedSite(modifySiteForm.gateway_3)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="limitnumrange" >{{'aws.vpn.limit_0_255'|translate}}</div>
+                </div>
+                </div>  
+                <div class="ip-spilt">.</div> 
+                <div class="ip-text">
+                  <input type="text" class="form-controls" name="gateway_4" ng-model="stepTwoData.targetGateway.gateway_4" ng-keyup="assembleTargetGateway(stepTwoData.targetGateway)" min="0" max="255" ng-keyup="assembleTargetGateway(stepTwoData.targetGateway)" placeholder="0~255" required limitnumrange />
+                  <div class="error" ng-messages="modifySiteForm.gateway_4.$error" ng-if="interactedSite(modifySiteForm.gateway_4)">
+                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                    <div ng-message="limitnumrange" >{{'aws.vpn.limit_0_255'|translate}}</div>
+                  </div>
+                </div>
+              </div>     
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.targetNetwork'|translate}}：</label>
+          <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.targetNetwork"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+              <div class="clearfix ip-group" ng-repeat="targetNet in stepTwoData.targetNetworks">
+                  <div class="ip-text">
+                    <input type="text" class="form-controls" name="targetNetIp1_{{$index}}" ng-model="targetNet.ip_1" min="1" max="255" placeholder="1~255" ng-focus="resetSubIpOverlap()" required limitnumrange />
+                    <div class="error"  ng-if="interactedSite(modifySiteForm['targetNetIp1_'+$index])" ng-messages="modifySiteForm['targetNetIp1_'+$index].$error">
+                      <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                      <div ng-message="limitnumrange" >{{'aws.vpn.limit_1_255'|translate}}</div>
+                    </div>
+                  </div>        
+                  <div class="ip-spilt">.</div>
+                  <div class="ip-text">
+                    <input type="text" class="form-controls" name="targetNetIp2_{{$index}}" ng-model="targetNet.ip_2" min="0" max="255" placeholder="0~255" ng-focus="resetSubIpOverlap()" required limitnumrange />
+                    <div class="error"  ng-if="interactedSite(modifySiteForm['targetNetIp2_'+$index])" ng-messages="modifySiteForm['targetNetIp2_'+$index].$error">
+                      <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                      <div ng-message="limitnumrange" >{{'aws.vpn.limit_0_255'|translate}}</div>
+                    </div>
+                  </div>        
+                  <div class="ip-spilt">.</div>
+                  <div class="ip-text">
+                    <input type="text" class="form-controls" name="targetNetIp3_{{$index}}" ng-model="targetNet.ip_3" min="0" max="255" placeholder="0~255" ng-focus="resetSubIpOverlap()" required limitnumrange />
+                    <div class="error"  ng-if="interactedSite(modifySiteForm['targetNetIp3_'+$index])" ng-messages="modifySiteForm['targetNetIp3_'+$index].$error">
+                      <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                      <div ng-message="limitnumrange">{{'aws.vpn.limit_0_255'|translate}}</div>
+                    </div>
+                  </div>        
+                  <div class="ip-spilt">.</div>
+                  <div class="ip-text">
+                    <input type="text" class="form-controls" name="targetNetIp4_{{$index}}" ng-focus="resetSubIpOverlap()" ng-model="targetNet.ip_4" min="0" max="255" placeholder="0~255" required limitnumrange />
+                    <div class="error"  ng-if="interactedSite(modifySiteForm['targetNetIp4_'+$index])" ng-messages="modifySiteForm['targetNetIp4_'+$index].$error">
+                      <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                      <div ng-message="limitnumrange">{{'aws.vpn.limit_0_255'|translate}}</div>
+                    </div>
+                  </div>        
+                  <div class="ip-spilt">/</div>
+                  <div class="ip-text">
+                    <input type="text" class="form-controls" name="targetNetIp5_{{$index}}" ng-model="targetNet.ip_5" min="1" max="29" placeholder="1~29" ng-focus="resetSubIpOverlap()" autocomplete="off" required limitnumrange />
+                    <div class="error"  ng-if="interactedSite(modifySiteForm['targetNetIp5_'+$index])" ng-messages="modifySiteForm['targetNetIp5_'+$index].$error">
+                      <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                      <div ng-message="limitnumrange">{{'aws.vpn.limit_1_29'|translate}}</div>
+                    </div>
+                  </div>
+                  <div class="del">
+                    <button type="button" ng-click="delTargetNetFunc(stepTwoData.targetNetworks,$index)" ng-if="stepTwoData.targetNetworks.length!=1">
+                       <i class="icon-aw-wrong"></i>
+                    </button>
+                  </div>
+              </div>
+              <div class="error" ng-if="targetNetOverlap">{{'aws.vpn.targetNetOverlap'|translate}}</div>          
+          </div>
+        </div>
+        <div class="addSub">
+          <a ng-click="addTargetNetFunc(stepTwoData.targetNetworks)">
+            <i class="icon-aw-add-to2"></i>
+            <span>{{"aws.vpn.addTargetNetwork"|translate}}</span>
+          </a>
+        </div>
+        <div class="control-group" >
+          <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.targetRoute'|translate}}：</label>
+          <div class="controls text-controls">
+            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.targetRoute"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+            <input type="text" class="form-controls" name="targetRoute" ng-model="stepTwoData.targetRoute" placeholder='{{"aws.vpn.targetRoute"|translate}}' ng-disabled="true" required>
+            <div class="error" ng-messages="modifySiteForm.targetRoute.$error" ng-if="interactedSite(modifySiteForm.targetRoute)">
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" >
+          <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.sharedPassword'|translate}}：</label>
+          <div class="controls text-controls" ng-if="!isHidePassword">
+            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.sharedPassword"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+            <button class="btn" type="button" ng-click="hidePassword()"><i class="icon-aw-display"></i></button>
+            <input type="text" class="form-controls" name="password" ng-model="stepTwoData.sharedPassword" placeholder='{{"aws.vpn.placeholder.enter"|translate}}{{"aws.vpn.sharedPassword"|translate}}' autocomplete="off" ng-maxlength="255" required>
+            <div class="error" ng-messages="modifySiteForm.password.$error" ng-if="interactedSite(modifySiteForm.password)">
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="maxlength">{{'aws.vpn.maxlengthPwd'|translate}}</div>
+            </div>
+          </div>
+          <div class="controls text-controls" ng-if="isHidePassword">
+            <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.sharedPassword"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+            <button class="btn" type="button" ng-click="hidePassword()"><i class="icon-aw-no-display"></i></button>
+            <input type="password" class="form-controls" name="password" ng-model="stepTwoData.sharedPassword" placeholder='{{"aws.vpn.placeholder.enter"|translate}}{{"aws.vpn.sharedPassword"|translate}}' ng-maxlength="255" required>
+            <div class="error" ng-messages="modifySiteForm.password.$error" ng-if="interactedSite(modifySiteForm.password)">
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="maxlength">{{'aws.vpn.maxlengthPwd'|translate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="collapse-container" plugin-collapse>
+          <h5 class="title site-title collapse-title" ng-click="fold =!fold">
+          <span>{{'aws.vpn.advancedOptions'|translate}}<i class="conf-icon" ng-class="{'icon-aw-angle-up':fold,'icon-aw-angle-down':!fold}"></i></span>
+        </h5>
+        <div class="collapse-on hide">
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.connectionMode'|translate}}：</label>
+              <div class="controls site-controls">
+                <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.connectionMode"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                <ui-select ng-model="stepTwoData.selectedConnectMode"  ng-change="changeExtNet(setGatewayForm.selectedExtNet)" name="mode" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.select"|translate}}{{"aws.vpn.connectionMode"|translate}}' >{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="mode in siteData.connectionMode.options">
+                    <div ng-bind-html="mode.name"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <div class="error" ng-messages="addGatewayForm.extnet.$error" ng-if="interactedSite(addGatewayForm)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <!-- 最小值为68 -->
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.maxTransUnit'|translate}}：</label>
+              <div class="controls text-controls">
+                <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.maxTransUnit"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                <input type="text" class="form-controls" name="transUnit" ng-model="stepTwoData.maxTransUnit" placeholder= '{{"aws.vpn.placeholder.enter"|translate}}{{"aws.vpn.maxTransUnit"|translate}}' limitnumrange min="68" max="1500" required>
+                <div class="error" ng-messages="modifySiteForm.transUnit.$error" ng-if="interactedSite(modifySiteForm.transUnit)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="limitnumrange">{{'aws.vpn.limit_lifetime_68_1500'|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <h5 class="title target-title">
+              <span>{{'aws.vpn.anomalyDetection'|translate}}</span>
+            </h5>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.DPDaction'|translate}}：</label>
+              <div class="controls site-controls">
+                <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.DPDaction"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                <ui-select ng-model="stepTwoData.selectedDPDaction"  ng-change="changeExtNet(setGatewayForm.selectedExtNet)" name="dpdaction" required>
+                  <ui-select-match placeholder='{{"aws.vpn.placeholder.DPDaction"|translate}}' >{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="dpd in siteData.DPDaction.options">
+                    <div ng-bind-html="dpd.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.heartInterval'|translate}}：</label>
+              <div class="controls text-controls">
+                <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.heartInterval"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                <input type="text" id="heartInterval" class="form-controls" name="heartInterval" ng-model="stepTwoData.heartInterval" placeholder='{{"aws.vpn.placeholder.enter"|translate}}{{"aws.vpn.heartInterval"|translate}}' limitnumrange min="10" max="3600" required>
+                <div class="error" ng-messages="modifySiteForm.heartInterval.$error" ng-if="interactedSite(modifySiteForm.heartInterval)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="limitnumrange">{{'aws.vpn.limit_lifetime_10_3600'|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.vpn.overtimeInterval'|translate}}：</label>
+              <div class="controls text-controls">
+                <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.vpn.info.overtimeInterval"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                <input type="text" class="form-controls" name="overtimeInterval" ng-model="stepTwoData.overtimeInterval" placeholder= '{{"aws.vpn.placeholder.enter"|translate}}{{"aws.vpn.overtimeInterval"|translate}}'
+                 heartmin="stepTwoData.heartInterval" heart-interval interval="heartInterval" min="10" max="3600" required>
+                <div class="error" ng-messages="modifySiteForm.overtimeInterval.$error" ng-if="interactedSite(modifySiteForm.overtimeInterval)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="heartinterval">{{'aws.vpn.overtimeBiggerInterval'|translate}}</div>
+                  <div ng-message="timerange">{{'aws.vpn.limit_lifetime_10_3600'|translate}}</div>
+                </div>
+              </div>
+            </div>
+        </div>
+        </div>
+        
+      </form>
+  </div>
+  <div class="modal-footer">
+      <div ng-show = "inStep=='1'"> 
+          <button class="btn btn-info" type="button" ng-click="stepToTwo(updateVpnForm)">
+              {{'aws.action.nextStep'|translate}}
+          </button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">
+              {{'aws.action.cancel'|translate}}
+          </button>
+      </div>
+      <div ng-show = "inStep=='2'"> 
+          <div>
+              <button class="btn btn-default" type="button" ng-click="stepToOne()">
+                  {{'aws.action.lastStep'|translate}}
+              </button>
+              <button class="btn btn-info" type="button" ng-click="updateVpnConfirm(modifySiteForm)">
+                  {{'aws.action.create'|translate}}
+              </button>
+              <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                  {{'aws.action.cancel'|translate}}
+              </button>
+          </div>
+      </div>
+  </div>
+</div>

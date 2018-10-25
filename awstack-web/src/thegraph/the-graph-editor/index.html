@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Graph Editor</title>
+    <meta charset="utf-8">
+    <!-- Bower Libraries -->
+    <script src="../../js/config.js"></script>
+    <script src="../bower_components/webcomponentsjs/webcomponents.js"></script>
+    <script src="../bower_components/webcomponentsjs/webcomponents.js"></script>
+    <script src="../bower_components/react/react-with-addons.js"></script>
+    <script src="../bower_components/react/react-dom.js"></script>
+    <script src="../bower_components/klayjs-noflo/klay-noflo.js"></script>
+    <script src="../bower_components/hammerjs/hammer.min.js"></script>
+    <script src="../bower_components/ease-djdeath/index.js"></script>
+    <script src="../bower_components/react.animate-djdeath/react.animate.js"></script>
+    
+    <script src="jquery.js"></script><!-- add by haoning-->
+    <!-- Browserify Libraries -->
+    <script src="../build/noflo.js"></script>
+    <script src="topu_func_code.js"></script>
+    <!-- Custom elements -->
+
+    <link rel="import" href="../bower_components/polymer/polymer.html">
+    <link rel="import" href="./the-graph-editor.html">
+    <link rel="import" href="../the-graph-nav/the-graph-nav.html">
+    <!-- Fonts -->
+    <!--link rel="stylesheet" href="../bower_components/font-awesome/css/font-awesome.min.css"-->
+    <!--link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400' rel='stylesheet' type='text/css'-->
+    <link rel="stylesheet" href="../bower_components/font-awesome/css/fontello.css">
+    <style>
+      @font-face {
+        /* we want the svg version */
+        font-family: 'FontAwesomeSVG';
+        src: url('../bower_components/font-awesome/font/fontello.svg') format('svg'),
+          url('../bower_components/font-awesome/font/fontello.eot') format('embedded-opentype'), 
+          url('../bower_components/font-awesome/font/fontello.woff') format('woff'), 
+          url('../bower_components/font-awesome/font/fontello.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+    <style>
+      html, body {
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        background-color: transparent;
+        font-family: "SourceCodePro",Helvetica,Arial,sans-serif;
+        overflow: hidden;
+      }
+      #editor {
+        background-color: transparent;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      #nav {
+        position: absolute; 
+        right: 0px; 
+        bottom: 0px;
+      }
+      #testing {
+        position: absolute;
+        top: 0;
+        left: 0;
+      };
+      #svgcontainer .arrow{display:none;}
+      .no-data{display:none;}
+    </style>
+  </head>
+  <body>
+    <the-graph-editor id="editor" 
+      width="800" height="600" 
+      grid="72" 
+      snap="36" 
+      theme="light">
+    </the-graph-editor>
+    <the-graph-nav id="nav" width="216" height="162" style="top: 0px"></the-graph-nav> 
+    <div id="testing" style="display:none">
+      <!--button id="autolayout">autolayout</button-->
+      <button id="theme">theme</button>
+      <button id="focus">focus</button>
+      <button id="refresh">refresh</button>
+      <button id="show_graph">show_graph</button>
+      <button id="create_node">createNode</button>
+    </div>
+    <div id="loading" style="position:absolute; top:50%;text-align:center; left:50%;margin-left:-65px;margin-top:-85px; background-color:#e6eef0; padding:10px; border-radius:5px;">
+      <img src="ajax-loading.gif"/>
+      <div id="loading-message">数据加载中....</div>
+    </div>
+    <div id="no-data" class="no-data" style="position:absolute; top:50%;text-align:center; left:50%;margin-left:-65px;margin-top:-85px; padding:10px; border-radius:5px;">
+      <div>暂无数据</div>
+    </div>
+    <script type="text/javascript">
+      Polymer.veiledElements = ["the-graph-editor"];
+      window.addEventListener('polymer-ready', function() {
+        "use strict";
+        var loadingMessage = document.getElementById("loading-message");
+        loadingMessage.innerHTML = "数据加载中....";
+        window.loadGraph = function (json) {
+          var loading = document.getElementById("loading");
+          loading.parentNode.removeChild(loading);
+          var editor = document.getElementById('editor');
+          /*
+            add by ajc
+            添加自定义事件listener
+          */
+          editor.addEventListener('nodes-select', function(e){
+            console.log('选中的node >>>', e.detail)
+          })
+          editor.addEventListener('the-graph-edge-start', function(e){
+            console.log('edges >>>', e.type, e.detail)
+          })
+          /*	var library = {
+			  vm: {
+			    name: 'vm',
+			    description: 'virtual mechine',
+			    icon: 'vm',
+			    outports: [
+			      {'name': 'out', 'type': 'all'}
+			    ]
+			  },
+			  vswitch: {
+			    name: 'switch',
+			    description: 'ths switch',
+			    icon: 'switch',
+			    inports: [
+			      {'name': 'in', 'type': 'all'}
+			    ],
+			    outports: [
+			      {'name': 'out', 'type': 'all'}
+			    ]
+			  }
+			};
+		  editor.$.graph.library = library;
+          var addnode = function () {
+	          var id = Math.round(Math.random()*100000).toString(36);
+	          var component = Math.random() > 0.5 ? 'vm' : 'vswitch';
+	          var metadata = {
+	            label: component,
+	            x: Math.round(Math.random()*800),
+	            y: Math.round(Math.random()*600)
+	          };
+	          var newNode = editor.nofloGraph.addNode(id, component, metadata);
+	          return newNode;
+	        };
+	        document.getElementById("create_node").addEventListener("click", addnode);
+	        */
+          
+          var graph = json.data ? JSON.parse(json.data.files['noflo.json'].content) : json;
+          var graphString = JSON.stringify(graph);
+          editor.graph = graph;
+          
+          // Component library
+          // Attach editor to nav
+          var nav = document.getElementById('nav');
+          nav.editor = editor;
+          var errorNodeId = null;
+          var makeRandomError = function () {// modified  by haoning 告警
+            if (!editor.nofloGraph) { return; }
+            if (errorNodeId) {
+              editor.removeErrorNode(errorNodeId);
+            }
+            var nodes = editor.nofloGraph.nodes;
+            nodes.forEach(function (node) {//add by hao
+            	if(node.metadata.vm_status=="error"){
+            		errorNodeId = node.id;
+	                editor.addErrorNode(errorNodeId);
+	                editor.updateErrorNodes();
+            	}
+            });
+           
+          };
+          window.setInterval(makeRandomError, 3551);
+          makeRandomError();
+          // Autolayout button ####################################
+          /*document.getElementById("autolayout").addEventListener("click", function () {
+            editor.triggerAutolayout();
+          });*/
+          // Toggle theme
+          //var theme = "dark";
+          var theme = "light";
+          document.getElementById("theme").addEventListener("click", function () {
+            theme = (theme==="dark" ? "light" : "dark");
+            editor.theme = theme;
+          });
+
+          // Focus a node
+          document.getElementById("focus").addEventListener("click", function () {
+            var nodes = editor.nofloGraph.nodes;
+            var randomNode = nodes[Math.floor(Math.random()*nodes.length)];
+            editor.focusNode(randomNode);
+          });
+
+          // Refresh graph
+          document.getElementById("refresh").addEventListener("click", function () {
+            if (!editor.nofloGraph) { return; }
+            editor.graph = JSON.parse(graphString);
+           // editor.triggerAutolayout();
+          });
+         /* document.getElementById('create_node').addEventListener('click', function(){
+            var id = Math.random().toString(36).substr(2)
+            editor.nofloGraph.nodes.push({
+              id: id,
+              component: 'vm',
+              metadata: {
+                vm_id: id,
+                vm_status: 'SHUTOFF',
+                label: id,
+                x: 300,
+                y: 100
+              }
+            })
+            editor.rerender()
+          })*/
+		  //add by hao
+		  
+		  
+		  document.getElementById("show_graph").addEventListener("click", function () {
+            console.log(editor.graph);
+          });
+          // Log some stuff
+          window.editor = editor;
+          console.log(editor);
+        };
+		/*###########数据获取第一种方法################### begin*/
+       /* 
+        var body = document.querySelector('body');
+        var script = document.createElement('script');
+        script.type = 'application/javascript';
+        //script.src = 'photobooth.json.js';
+        script.src = 'openstack.js';
+        //script.src = 'clock.json.js';
+        // Clock
+        // script.src = 'https://api.github.com/gists/7135158?callback=loadGraph';
+       // script.src = 'clock.json.js';
+        // 
+        // script.src = 'photobooth.json.js';
+        // Gesture object building (lots of ports!)
+        // script.src = 'https://api.github.com/gists/7022120?callback=loadGraph';
+        // Gesture data gathering (big graph)
+        // script.src = 'https://api.github.com/gists/7022262?callback=loadGraph';
+        // Edge algo test
+        //script.src = 'https://api.github.com/gists/6890344?callback=loadGraph';
+        body.appendChild(script);*/
+    	/*########################################## end*/
+
+
+/*###########数据获取第二种方法############################### begin*/
+    var ipAddr=window.GLOBALCONFIG.APIHOST.RESOURCE;
+    console.log(ipAddr)
+		var auth_token = localStorage.$AUTH_TOKEN;
+    var user_info={"project_id":localStorage.projectUid,"domain_id":localStorage.domainUid};
+    $.ajax({  
+			type: 'POST',  
+      url:ipAddr+"/v1/topo/",
+      data: JSON.stringify(user_info),
+      contentType: 'application/json; charset=utf-8',
+			beforeSend: function(request) {
+        request.setRequestHeader("X-Auth-Token", auth_token);
+        request.setRequestHeader("domain_id",localStorage.domainUid);
+        request.setRequestHeader("domain_name" ,encodeURI(localStorage.domainName));
+        request.setRequestHeader("project_id" ,localStorage.projectUid);
+        request.setRequestHeader("project_name" ,encodeURI(localStorage.projectName));
+      },
+			success: function(data){ 
+         var noData = JSON.parse(data).code;
+         if(noData=="02059401" || noData=="02059402" || noData=="02059403"){
+            $("#no-data").removeClass("no-data");
+            $("#loading").addClass("no-data");
+            return;
+         }
+				var loadjson=JSON.parse(data).data.data;
+        //console.log(loadjson)
+        //loadjson.processes["vm"+"/"+"8c29c80c\-b464\-4d08\-a58e\-0e879ca95ec1"].metadata.vm_status="error"
+				loadGraph(loadjson);
+			},
+			error:function(e){  
+				console.log("error:"+e);
+			},  
+			dataType: "string"  
+		});  
+/*###########数据获取第二种方法############################### end*/		
+		
+		
+		
+		
+        // Resize to fill window and also have explicit w/h attributes
+        var editor = document.getElementById("editor");
+        var re_point_timer = null;
+        var resize = function () {
+          if(editor.$.graph.appView && editor.$.graph.appView.state){
+            clearTimeout(re_point_timer)
+            re_point_timer = setTimeout(function(){
+              console.log(editor.$.graph.appView.state.width, window.innerWidth)
+              var width = editor.$.graph.appView.state.width
+              editor.setAttribute("width", window.innerWidth);
+              editor.setAttribute("height", window.innerHeight);
+              //if(width > window.innerWidth){
+                editor.$.graph.appView.setState({
+                  x: editor.$.graph.appView.state.x + (window.innerWidth - width) / 2
+                });
+              //}
+            }, 500)
+          }
+        };
+        window.addEventListener("resize", resize);
+
+        editor.setAttribute("width", window.innerWidth);
+        editor.setAttribute("height", window.innerHeight);
+        //resize();
+      });
+      
+    </script>
+  </body>
+</html>

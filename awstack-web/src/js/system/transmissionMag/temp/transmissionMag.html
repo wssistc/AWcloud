@@ -1,0 +1,183 @@
+<div class="page-inner transmission-maga"> 
+    <div class="table-action">
+    <button type="button" class="btn btn-new" ng-click="loadTransMaga()" ng-disabled="!canAdd"  licence-type="btn" id="system-transparent-load"><i class="icon-aw-load"></i> {{'aws.action.load'|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="uninstallTransMaga()" ng-disabled="!canUnload"  licence-type="btn" id="system-transparent-uninstall"><i class="icon-aw-xz"></i> {{'aws.action.uninstall'|translate}}</button>
+    <into-information modular="'transmissionMag'"></into-information>
+    <div type="button" class="btn btn-renovat right-ports" ng-click="refreshTransMaga()">
+        <i class="icon-aw-refresh"></i>
+    </div>
+    <div class="search-box right-ports">
+        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(TransMaga_search.globalSearchTerm)">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="TransMaga_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+        </form>
+    </div> 
+    </div>
+    <div class="table-content">
+    <empty-tip empty-type="TransMagaData"></empty-tip>
+    <table ng-table="TransMagaTable" class="table"> 
+        <colgroup>
+            <col width="10%">
+            <col width="10%">
+            <col width="10%">
+            <col width="10%">
+            <col width="10%">            
+            <col width="10%">
+            <col width="40%">
+        </colgroup>
+        <tr ng-repeat="item in $data">
+            <td header="'headerCheckbox.html'" class="check-td">
+                <label class="checkbox">
+                    <input type="checkbox" name="" ng-model="checkFirst.items[item.id]" value="{{item.id}}" />
+                    <i class="iconfont"></i>
+                </label>
+            </td>
+            <td data-title="'aws.transmissionMag.instanceName'|translate" sortable="'serverName'">
+                <a ng-href="/system/transmissionMag?id={{item.id}}" title="{{item.name}}">{{item.serverName}}</a>
+            </td>
+            <td data-title="'aws.transmissionMag.mainName'|translate" sortable="'hostName'">
+                {{item.hostName}}
+            </td>
+            <td data-title="'aws.transmissionMag.equipmentType'|translate" sortable="'deviceType'">
+                {{item.deviceType}}
+            </td>
+            <td data-title="'aws.transmissionMag.status'|translate" sortable="'status_load'">
+                <span ng-class="{
+                    'bg-green':(item.status==true),
+                    'bg-orange':(item.status==false)
+                }">{{item.status_load}}
+                </span>
+            </td>  
+            <td data-title="'aws.instances.compatible'|translate" sortable="'busPort'">
+                <span>{{item.usbBus=="0"?"USB2.0":"USB3.0"}}</span>
+            </td>
+            <td data-title="'aws.transmissionMag.equipmentLog'|translate" sortable="'description'"> 
+                {{item.description}}
+            </td>
+        </tr>
+    </table>  
+    </div>
+    <div ng-controller="detailCtrl">
+        <pane class="detail-body" animation="animation" >
+            <div class="tab-content">
+                <div class ="detail-row ins-info">
+                    <div class="detail-header"></div>
+                    <div class="detail-title">
+                        <a class="an-close" ng-href="system/transmissionMag"><i class="icon-aw-mail-reply"></i></a>
+                        <span>{{}}{{'aws.transmissionMag.datails'|translate}}</span>
+                    </div>
+                    <div class="detail-info">
+                        <div class="tab-content-line"></div>
+                        <div>
+                            <table class="table table-info column">
+                                <tr>
+                                    <td>{{'aws.transmissionMag.name'|translate}}</td>
+                                    <td>{{InstancesDetails.serverName}}</td>
+                                    <td>{{'aws.transmissionMag.equipmentType'|translate}}</td>
+                                    <td>{{InstancesDetails.deviceType}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{'aws.transmissionMag.equipmentLog'|translate}}</td>
+                                    <td>{{InstancesDetails.description}}</td>
+                                    <td>{{'aws.transmissionMag.hostName'|translate}}</td>
+                                    <td>{{InstancesDetails.hostName}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{'aws.transmissionMag.loadTime'|translate}}</td>
+                                    <td>{{InstancesDetails.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                                    <td>{{'aws.transmissionMag.belong_user'|translate}}</td>
+                                    <td>{{InstancesDetails.userName}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{'aws.transmissionMag.belong_project'|translate}}</td>
+                                    <td>{{InstancesDetails.projectName}}</td>
+                                    <td>{{'aws.transmissionMag.belong_department'|translate}}</td>
+                                    <td>{{InstancesDetails.domainName}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </pane>
+    </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+        <input type="checkbox" ng-model="checkFirst.checked" class="select-all" value="" />
+        <i class="iconfont"></i>
+    </label>
+</script>
+<!-- 加载 -->
+<script type="text/ng-template" id="createTransMaga.html">
+    <div class="modal-common add-tt-equipment-popup ">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{"aws.transmissionMag.tMloadMsg"|translate}}</h3>
+        </div>
+        <div class="modal-body">
+            <form name="createVomulesQoSForm">
+                <div class="control-group" >
+                    <label class="control-label"><span class="red">*</span>{{"aws.transmissionMag.instanceName"|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="TransMagaMsg.instanceName" name="instanceName" ng-change="choiceInstances(TransMagaMsg.instanceName)" ng-disabled="!TransMagaList.length">
+                        <ui-select-match  placeholder= "{{TransMagaList.length>0?('aws.routers.placeholder.choiceVm' | translate):('aws.routers.placeholder.noVm' | translate)}}">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="instanceName in TransMagaList | filter: {name : $select.search}">
+                                <div ng-bind-html="instanceName.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">{{'aws.instances.deviceType'|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="deviceType.name" name="Equipment" required  ng-change="choiceDeviceType(deviceType.name)" ng-disabled="!loadData">
+                            <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices group-by="groupFind" repeat="hasAddEquipment in hasAddEquipmentList | filter: {name : $select.search}">
+                                <div ng-bind-html="hasAddEquipment.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages="(submitInValid ||EquipmentForm.Equipment.$dirty) && EquipmentForm.Equipment.$error">
+                            <form-validate></form-validate>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">{{'aws.instances.cdDescribe'|translate}}：</label>
+                    <div class="controls" ng-if="!noCanLoadEquipment">
+                        <div class="radio-item clearFix port-left" ng-repeat="equipment in equipmentList">
+                            <label class="radio">
+                                <input type="radio" name="equipmentDesc" ng-click="getChoiceOne(equipment)" ng-checked="$index==0"/>
+                                <i class="iconfont"></i>
+                                <span>{{equipment.description?equipment.description:equipment.desc}}</span>                                        
+                            </label>
+                        </div>
+                    </div>
+                    <p ng-if="noCanLoadusbEquipment" class="no_canLoad_equipment">{{'aws.instances.placeholder.no_canLoad_drvice'|translate}}</p> 
+                    <p ng-if="noCanLoadgpuEquipment" class="no_canLoad_equipment">{{'aws.instances.placeholder.no_canLoad_drvice'|translate}}</p>   
+                </div> 
+                <div class="control-group" ng-if="showCompatibilitySelect">
+                    <label class="control-label">{{'aws.instances.compatibility'|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="compatibility.name" name="Equipment" required ng-change="kkkkk(compatibility.name)">
+                            <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="compatibility in compatibilityList | filter: {name : $select.search}">
+                                <div ng-bind-html="compatibility.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>       
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="addTtEquipmentConFirm()">{{"aws.action.ok"|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+    </div>
+</script>
+
+
+
+

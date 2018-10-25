@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>容器服务</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <h3>
+	集群内部访问容器内服务&nbsp; &nbsp;</h3>
+<p>
+	同一个租户下的其他容器内部可以直接使用服务名称和服务端口进行访问服务，也可以使用服务的VIP和端口来访问。</p>
+<p>
+	在容器服务详情页面，查看集群内部访问服务的示例信息。</p>
+<p>
+	<strong>说明</strong>：<br />
+	如果一个集群内的容器服务不希望在外部被访问到，比如mysql这种只为web等其它服务提供基本功能支持的service，可以只为它们创建&ldquo;ClusterIP&rdquo;类型的service，并与web容器约定好服务的名称，然后在web容器内只使用&ldquo;serviceName&rdquo;作为服务的地址，因为kube-dns组件会提供域名解析功能，而且service内部会维护一组&ldquo;endpoint&rdquo;用来实时地与真正的Pod进行绑定。这样就避免了动态修改其它容器内的配置文件了。</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

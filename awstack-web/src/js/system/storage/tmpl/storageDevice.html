@@ -1,0 +1,212 @@
+<div class="page-inner">
+  <div class="table-action">
+    <!-- <button type="button" class="btn btn-primary"  ng-click="add()"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+    <button type="button" class="btn btn-info" ng-disabled="isDisabled" ng-click="edit()"><i class="icon-aw-modify"></i>{{'aws.action.edit'|translate}}</button>
+    <button type="button" data-toggle="modal" ng-disabled="delisDisabled" ng-click="delete()" class="btn btn-info"> <i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+    <button class="btn btn-refresh" ng-click="getStDevice()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button> -->
+    <div class="search-box ">
+      <form name="searchForm" novalidate="" ng-keyup="applyGlobalSearch()" class="ng-pristine ng-valid ng-valid-maxlength">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"> <i class="icon-aw-search"></i>
+        </button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder={{"aws.action.search"|translate}} >
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <table ng-table="tableParams" class="table instanceTable" > 
+      <colgroup>
+        <col width="5%" >
+        <col width="11.8%">
+        <col width="11.8%">
+        <col width="11.8%">
+        <col width="11.8%">
+        <col width="11.8%">
+        <col width="11.8%">
+        <col width="11.8%">
+        <col width="11.8%">
+      </colgroup>
+      <tr ng-repeat="item in $data">
+        <!-- <td header="'headerCheckbox.html'" class="check-td">
+          <label class="checkbox">
+            <input type="checkbox" name="r" ng-model="checkboxes.items[item.id]" value="{{item.id}}" />
+            <i class="iconfont"></i>
+          </label>
+        </td> -->
+        <td data-title="'aws.storage.device.stName'|translate">
+          <div class="edit-name edit-lg">
+            <a ng-href="/system/storagedevice?id={{item[0]}}&Storage_name={{item[1]}}" title="{{item[1]}}">{{item[1]}}</a>
+          </div>
+        </td>
+        <td data-title="'aws.storage.device.pool'|translate">{{item[2]}}</td>
+        <!-- <td data-title="'aws.storage.device.stIp'|translate" >{{item.ip}}</td>
+        <td data-title="'aws.storage.device.stPort'|translate" >{{item.port}}</td>
+        <td data-title="'aws.storage.device.userName'|translate">{{item.username}}</td>
+        <td data-title="'aws.storage.device.password'|translate" >{{item.password}}</td> -->
+        <td data-title="'aws.storage.device.createtime'|translate">{{item[5]}}</td>
+        <td data-title="'aws.storage.device.operation'|translate">
+          <a ng-href="/system/storagedevice/{{item[0]}}/pool?Storage_name={{item[1]}}&Pool_name={{item[2]}}" ng-show="item[0]">{{'aws.storage.device.topool'|translate}}</a>
+        </td>  
+      </tr>
+    </table>
+    <loading-data  data="deviceData"></loading-data>  
+  </div>
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation" >
+      <div class="tab-content">
+      <div class ="detail-row">
+        <div class="detail-header">
+        </div>
+        <div class="detail-title">
+          <a class = "an-close" ng-href="#/system/storagedevice"><i class="icon-aw-mail-reply"></i></a>
+          <span>{{'aws.storage.device.deviceDetail'|translate}}</span>
+        </div>
+        <div class="detail-info">
+          <table class="table table-info column">
+            <tbody>
+            <tr>
+              <td>{{'aws.storage.device.ava_st_feature'| translate}}：</td>
+              <td><span ng-repeat="item in detailData">{{item}} </span></td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+          
+      </div>
+    </pane>
+  </div>
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="add.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{'aws.storage.device.newTitle'|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="addform" novalidate>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.device.stName' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="name" class="form-controls"  placeholder="{{'aws.storage.device.stName_ph' | translate}}" ng-model="device.name" ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||addform.name.$dirty) && addform.name.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.device.stIp' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="stIp" class="form-controls"  placeholder="{{'aws.storage.device.stIp_ph' | translate}}" ng-model="device.ip"  ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||addform.stIp.$dirty) && addform.stIp.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.device.stPort' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="stPort" class="form-controls"  placeholder="{{'aws.storage.device.stPort_ph' | translate}}" ng-model="device.port" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||addform.stPort.$dirty) && addform.stPort.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.device.userName' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="userName" class="form-controls"  placeholder="{{'aws.storage.device.userName_ph' | translate}}" ng-model="device.username" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||addform.userName.$dirty) && addform.userName.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.device.password' | translate}}：</label>
+          <div class="controls">
+            <input type="password" name="password" class="form-controls"  placeholder="{{'aws.storage.device.password_ph' | translate}}" ng-model="device.password" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||addform.password.$dirty) && addform.password.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmadd(addform)">{{'aws.action.ok' | translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="edit.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{'aws.storage.device.editTitle'|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="editform" novalidate>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.device.stName' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="name" class="form-controls"  placeholder="{{'aws.storage.device.stName_ph' | translate}}" ng-model="device.name" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||editform.name.$dirty) && editform.name.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.device.stIp' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="stIp" class="form-controls"  placeholder="{{'aws.storage.device.stIp_ph' | translate}}" ng-model="device.ip"  ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||editform.stIp.$dirty) && editform.stIp.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.device.stPort' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="stPort" class="form-controls"  placeholder="{{'aws.storage.device.stPort_ph' | translate}}" ng-model="device.port"  ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||editform.stPort.$dirty) && editform.stPort.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.device.userName' | translate}}：</label>
+          <div class="controls">
+            <input type="text" name="userName" class="form-controls"  placeholder="{{'aws.storage.device.userName_ph' | translate}}" ng-model="device.username" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||editform.userName.$dirty) && editform.userName.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{'aws.storage.device.password' | translate}}：</label>
+          <div class="controls">
+            <input type="password" name="password" class="form-controls"  placeholder="{{'aws.storage.device.password_ph' | translate}}" ng-model="device.password" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+            <div class="error" ng-messages="(submitInValid ||editform.password.$dirty) && editform.password.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmadd(editform)">{{'aws.action.ok' | translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+    </div>
+  </div>
+</script>
+

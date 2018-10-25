@@ -1,0 +1,207 @@
+<div class="modal-common lg-modal modal-step">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title  clearfix">{{"aws.users.adduser"|translate}}</h3>
+        <!-- <ul class="steps-item clearfix">
+            <li class="clearfix step-start" ng-class="{'active':inStepOneBar<inStep}">
+                <div class=" clearfix">
+                    <span >选择角色</span>
+                    <i ng-class="{'active':inStepOneBar<inStep}">1</i>
+                </div>
+            </li>
+            <li class="clearfix step-middle"  ng-class="{'active':inStepTwoBar<inStep}">
+                <div class="clearfix">
+                    <span>选择部门/选择项目</span>
+                    <i ng-class="{'active':inStepTwoBar<inStep}">2</i>
+                </div>
+            </li>
+            <li class="clearfix step-end"  ng-class="{'active':inStepThreeBar<inStep}">
+                <div class="clearfix">
+                    <span>基本信息</span>
+                    <i ng-class="{'active':inStepThreeBar<inStep}">3</i>
+                </div>
+            </li>
+        </ul> -->
+        <ul class="steps-sytle-ver clearfix">
+            <li class="clearfix step-start" ng-class="{'active':inStepOneBar<inStep}">
+                <div class="inner">
+                    <span>{{"aws.users.addUserItem.slectRole"|translate}}</span>
+                    <i>1</i>
+                </div>
+            </li>
+            <li class="clearfix step-middle"  ng-class="{'active':inStepTwoBar<inStep}">
+                <div class="inner">
+                    <span>{{"aws.users.addUserItem.selectdp"|translate}}</span>
+                    <i>2</i>
+                </div>
+            </li>
+            <li class="clearfix step-end"  ng-class="{'active':inStepThreeBar<inStep}">
+                <div class="inner">
+                    <span>{{"aws.users.addUserItem.eInformation"|translate}}</span>
+                    <i>3</i>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="modal-body ">
+        <form name="createUserForm" novalidate>
+            <div class="control-group  one-group" ng-show="inStep=='1'">
+                <label class="control-label">{{"aws.users.addUserItem.slectRole"|translate}}：</label>
+                <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="普通用户为层组织成员，云计算资源真正使用者，不具备管理账户的能力。项目管理员具备管理项目资源配额权限。部门管理员具备创建项目和管理部门普通用户权限"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                    <div class="add-item-group">
+                      <ui-select ng-model="userForm.selectedRole" name="role" ng-disabled="!roles.options.length" ng-change="changeRoleFun(userForm.selectedRole)" ng-required="!editUser">
+                          <ui-select-match placeholder={{"aws.users.placeholder.role"|translate}}>{{$select.selected.name}}</ui-select-match>
+                          <ui-select-choices repeat="role in roles.options| propsFilter:{name:$select.search}">
+                              <div ng-bind-html="role.name | highlight: $select.search"></div>
+                          </ui-select-choices>
+                      </ui-select>
+                      <div class="error" ng-messages="(submitValid ||createUserForm.role.$dirty) && createUserForm.role.$error">
+                        <form-validate></form-validate>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group one-group" ng-show="inStep=='2'">
+                <label class="control-label">{{"aws.users.addUserItem.selectdomain"|translate}}：</label>
+                <div class="controls">
+                    <div class="add-item">
+                      <ui-select ng-model="userForm.selectedDepartment" name="domain" ng-change="changeDpm(userForm.selectedDepartment)" ng-disabled="!dpms.options.length" ng-required="!editUser">
+                          <ui-select-match placeholder={{"aws.users.placeholder.department"|translate}}>{{$select.selected.name}}</ui-select-match>
+                          <ui-select-choices repeat="dpm in dpms.options | propsFilter:{name:$select.search}">
+                              <div ng-bind-html="dpm.name | highlight: $select.search"></div>
+                          </ui-select-choices>
+                      </ui-select>
+                      <div class="error" ng-messages="(submitValid ||createUserForm.domain.$dirty) && createUserForm.domain.$error">
+                        <form-validate></form-validate>
+                      </div>
+                    </div>
+                    <div class="add-group" ng-if="!DOMAIN_ADMIN" ng-controller="easyCtrl">
+                       <i class="icon-aw-add-to2"></i><span ng-click="easyDepartment()">{{"aws.users.addUserItem.addDomain"|translate}}</span>
+                    </div>  
+                </div>
+            </div>
+            <div class="control-group two-group" ng-show="inStep=='2'">
+                <label class="control-label">{{"aws.users.addUserItem.selectProject"|translate}}：</label>
+                <div class="controls">
+                    <div class="add-item">
+                        <ui-select ng-model="userForm.selectedProject" name="project" ng-disabled="!projects.options.length" ng-required="!editUser">
+                            <ui-select-match placeholder={{"aws.users.placeholder.project"|translate}}>{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="project in projects.options | propsFilter:{name:$select.search}">
+                            <div ng-bind-html="project.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="error" ng-messages="(submitValid ||createUserForm.project.$dirty) && createUserForm.project.$error">
+                            <form-validate></form-validate>
+                        </div>
+                        <div class="error" ng-if="projectCheck">
+                            {{"aws.users.addUserItem.noProject"|translate}}
+                        </div>
+                    </div>
+                    <div class="add-group"  ng-controller="easyCtrl">
+                       <i class="icon-aw-add-to2"></i><span  ng-click="rememberDomainFun();easyProject()">{{"aws.users.addUserItem.addProject"|translate}}</span>
+                    </div>  
+                </div>
+            </div>
+            <div Class="three-group" ng-show="inStep=='3'">
+                <div class="control-group">
+                <div class="add-item-group">
+                    <label class="control-label"><span class="red">*</span>{{"aws.users.cu.username"|translate}}：</label>
+                    <div class="controls">
+                        <input type="text" class="form-controls" name="userName" ng-model="userForm.name"  ng-disabled="editUser" placeholder={{"aws.users.placeholder.username"|translate}} ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required/>
+                        <div class="error" ng-messages="(submitValid ||createUserForm.userName.$dirty) && createUserForm.userName.$error">
+                            <form-validate></form-validate>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <div class="control-group">
+                <div class="add-item-group">
+                <label class="control-label"><span class="red">*</span>{{"aws.users.cu.password"|translate}}：</label>
+                <div class="controls">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="长度为8-16个字符且至少包含一个大写字母，一个小写字母，一个数字和一个特殊字符。特殊字符包括! - @ . ^ _ % , : /"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                    <input type="password" class="form-controls" name="password" ng-model="userForm.password"  id="user_pass" ng-init="userForm.password=''"  placeholder={{"aws.users.placeholder.password"|translate}}  
+                  ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,/\-\^\%])[0-9a-zA-Z!@._:,/\-\^\%]{8,16}$/" ng-required="!editUser"/>
+                    <div class="error" ng-messages="(submitValid ||createUserForm.password.$dirty) && createUserForm.password.$error">
+                      <form-validate pattern-msg="patternMsg"></form-validate>
+                  </div>
+               </div>
+               </div>
+            </div>
+            <div class="control-group">
+                <div class="add-item-group">
+                    <label class="control-label"><span class="red">*</span>{{"aws.users.cu.confirmPwd"|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="再次输入密码"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                        <input type="password" class="form-controls" name="confirmPassWord" ng-model="userForm.cfmPassword" placeholder={{"aws.users.placeholder.confirmPwd"|translate}} 
+                        ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,/\-\^\%])[0-9a-zA-Z!@._:,/\-\^\%]{8,16}$/"  pw-check="user_pass" ng-required="!editUser"/>
+                        <div class="error" ng-messages="(submitValid ||createUserForm.confirmPassWord.$dirty) && createUserForm.confirmPassWord.$error" >
+                          <form-validate  pattern-msg="patternMsg"></form-validate>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="add-item-group">
+                    <label class="control-label">{{"aws.users.phone"|translate}}：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="手机号码为11位"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                        <input type="text" class="form-controls" name="phone" ng-model="userForm.phone" placeholder={{"aws.users.placeholder.phone"|translate}} ng-pattern="/(^(13\d|15[^4,\D]|17[13678]|18\d)\d{8}|170[^346,\D]\d{7})$/" />
+                        <div class="error" ng-messages="(submitValid ||createUserForm.phone.$dirty) && createUserForm.phone.$error">
+                            <span class="error" ng-message="pattern">{{'aws.errors.phone'|translate}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="add-item-group">
+                    <label class="control-label">Email：</label>
+                    <div class="controls">
+                        <i class="icon-aw-question-mark question-tip" uib-popover="示例：admin@example.com"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                        <input  class="form-controls" name="email" ng-model="userForm.email" placeholder={{"aws.users.placeholder.email"|translate}} ng-pattern="/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/" ng-maxlength="50"/>
+                    <div class="error" ng-messages="(submitValid ||createUserForm.email.$dirty) && createUserForm.email.$error" >
+                        <span class="error" ng-message="pattern" >{{'aws.errors.email'|translate}}</span>
+                        <span class="error" ng-message="maxlength">{{'aws.errors.emailmaxlength'|translate}}</span>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <div ng-show = "inStep=='1'"> 
+            <button class="btn btn-info" type="button" ng-click="stepTo(2)">
+                {{'aws.action.nextStep'|translate}}
+            </button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                {{'aws.action.cancel'|translate}}
+            </button>
+        </div>
+        <div ng-show = "inStep=='2'"> 
+            <div>
+                <button class="btn btn-default" type="button" ng-click="stepTo(1)">
+                    {{'aws.action.lastStep'|translate}}
+                </button>
+                <button class="btn btn-info" type="button" ng-click="stepTo(3,true)">
+                    {{'aws.action.nextStep'|translate}}
+                </button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                    {{'aws.action.cancel'|translate}}
+                </button>
+            </div>
+        </div>
+        <div ng-show = "inStep=='3'"> 
+            <div>
+                <button class="btn btn-default" type="button" ng-click="stepTo(2)">
+                    {{'aws.action.lastStep'|translate}}
+                </button>
+                <button class="btn btn-info" type="button" ng-click="userConfirm(userForm,createUserForm)">
+                    {{'aws.action.create'|translate}}
+                </button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                    {{'aws.action.cancel'|translate}}
+                </button>
+            </div>
+        </div>
+  </div>

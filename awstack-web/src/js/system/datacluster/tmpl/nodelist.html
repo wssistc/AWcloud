@@ -1,0 +1,155 @@
+<div ng-controller="RegionNodeCtrl">
+    <div class="table-action">
+        <button type="button" ng-if="enterpriseVersion" ng-click="joinCluster(checkedItems)" ng-disabled="(!canAdd)||(!canAddTwo)" class="btn btn-new" licence-type="btn" id="system-dataCenter-fictitiousNode-add"></i>加入集群</button>
+        <button type="button" ng-if="!enterpriseVersion" ng-click="joinCluster(checkedItems)" ng-disabled="!canAddTwo" class="btn btn-normal" licence-type="btn" id="system-dataCenter-fictitiousNode-add"></button>
+        <!-- 初始化配置，必须是灌装的一个空的节点，此配置在两节点初始化配置之前和之后都可以 -->
+        <button type="button" ng-click="initConfig(checkedItems)" class="btn btn-normal" ng-disabled="!canInitConfig">{{'aws.node.initializationConfiguration'| translate}}</button>
+        <!-- 两节点晋升 -->
+        <button type="button" ng-disabled="!canTwoNodePromote" ng-click="twoNodePromote(checkedItems)" ng-if="isShowTwoProBtn" class="btn btn-normal">两节点晋升</button>
+        <!-- 晋升重试 -->
+        <button type="button" ng-disabled="isDisabled" ng-if="false" ng-click="twoNodePromote(checkedItems)" class="btn btn-normal">晋升重试</button>
+        <!-- 选择空节点进行第三节点晋升 -->
+        <button type="button" ng-disabled="!canThreeNodePromote" ng-if="isShowThreeProBtn" ng-click="threeNodePromote(checkedItems)" class="btn btn-normal">第三节点晋升</button>
+        <button type="button" ng-disabled="isDisabled" ng-click="importHardware(checkedItems)" class="btn btn-normal">{{'aws.node.import'| translate}}</button>
+        <div class="dropdown" licence-type="btn-group">
+          <button type="button" class="btn btn-normal dropdown-toggle" data-toggle="dropdown" ng-disabled="delisDisabled">{{'aws.action.moreAction'|translate}}<i class=" icon-aw-angle-down"></i></button>
+          <ul class="dropdown-menu">
+            <li licence-type="btn">
+              <button ng-click="activation(checkedItems)" ng-disabled="true">{{'aws.node.activation'| translate}}</button>
+            <li licence-type = "btn">
+              <button ng-click="maintenance(checkedItems)" ng-disabled="(!canMaintenance)||(!canMaintenanceTwo)">{{'aws.node.repair'| translate}}</button>
+            </li>
+            <li licence-type = "btn">
+              <button ng-click="deleteNode(checkedItems)" ng-disabled="(!canDel)||(!canDelTwo)">{{'aws.action.del'|translate}}</button>
+            </li>
+          </ul>
+        </div>
+        <div class="pull-right">
+          <setting title-data="nodeTitleData" site-title="nodeTitleName" table-data="nodeListData" search-tearm="nodesSearchTerm(obj)"></setting>
+          <button class="btn btn-renovat right-ports" ng-click="refreshNodes()">
+            <i class="icon-aw-refresh"></i>
+          </button>
+          <div class="search-box right-ports">
+            <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+              <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+              <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search' | translate}}" />
+            </form>
+          </div>
+        </div>
+    </div>
+    <div class="table-content">
+        <table ng-table="tableNodes" class="table" show-filter="false">
+            <colgroup>
+                <col width="4%">
+                <!-- <col width="15%" />
+                <col width="15%" />
+                <col width="15%" />
+                <col width="12%" />
+                <col width="12%" />
+                <col width="12%" />
+                <col width="15%" /> -->
+            </colgroup>
+            <tr ng-repeat="item in $data" ng-class="{true:'deleteNode',false:'none'}[item.status==21]">
+                <td header="'headerCheckboxtableNodes.html'">
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="checkboxestableNodes.items[item.nodeUid]" />
+                        <i class="iconfont"></i>
+                    </label>
+                </td>
+                <td data-title="'aws.node.hypervisorHostname'|translate" sortable="'hostName'" ng-if="nodeTitleData[0].value">
+                    <div class="edit-name">
+                        <!-- <a ng-href="configure/node?id={{item.nodeUid}}&name={{item.hostName}}" title="{{item.hostName}}">{{item.hostName}}</a> -->
+                        <a title="{{item.hostName}}" ng-click="nodeDetailFun(item.nodeUid,item.hostName)">{{item.hostName}}</a>
+                    </div>
+                </td>
+                <td data-title="'aws.node.regionName'|translate" sortable="'regionName'" ng-if="nodeTitleData[1].value">
+                    {{item.regionName}}
+                </td>
+                <td data-title="'aws.node.management_IP'|translate" sortable="'hostInfoMap.ip'" ng-if="nodeTitleData[2].value">
+                    {{item.hostInfoMap.ip}}
+                </td>
+                <td data-title="'aws.node.lastTime'|translate" sortable="'lastTime'" ng-if="nodeTitleData[3].value">
+                    <span class="date">{{item.lastTime| date:'yyyy-MM-dd HH:mm:ss'}}</span>
+                </td>
+                <td data-title="'aws.node.useStatus'|translate" sortable="'useStatus'" ng-if="nodeTitleData[4].value">
+                    {{'aws.node.useStatusValues.'+item.useStatus| translate}}
+                </td>
+                <td data-title="'aws.node.healthStaus.status'|translate" sortable="'healthStatus'" ng-if="nodeTitleData[5].value">
+                    <span ng-class="{'bg-green':(item.healthStatus=='status' || item.healthStatus==true),'bg-orange':(item.healthStatus=='repair')}" class="orange">{{'aws.node.healthStaus.'+item.healthStatus| translate}}
+              </span>
+                </td>
+                <td data-title="'aws.node.Status'|translate" sortable="'status'" ng-if="nodeTitleData[6].value">
+                    <span>{{'aws.node.status.'+item.status| translate}}</span>
+                    <span><button type="button"  ng-show="item.canActivation" ng-click="activation(item)" class="btn btn-info" ng-disabled="actionCan">{{'aws.node.activation'| translate}}</button></span>
+                    <span><button type="button"  ng-show="item.canRetry" ng-click="retry(item)" ng-disabled="retryCan" class="btn btn-info">{{'aws.node.retry'| translate}}</button></span>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script type="text/ng-template" id="headerCheckboxtableNodes.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxestableNodes.checked" class="select-all-tableNodes" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="deleteNode.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <!--<h3 class="modal-title">{{'aws.instances.osedit.editInsName'|translate}}</h3>-->
+    </div>
+    <div class="modal-body ">
+      <uib-alert  type="danger" >
+        <div>
+          <span class='configure'>{{"aws.node.confirmDel" | translate}}</span></br>
+          <span class='configure'>{{"aws.node.confirmDel2" | translate}}</span></br>
+          <span class='configure'>{{"aws.node.confirmDel3" | translate}}</span></br>
+          <span class='configure'>{{"aws.node.confirmDel4" | translate}}</span></br>
+          <span class='configure'>{{"aws.node.confirmDel5" | translate}}</span></br>
+        </div>
+      </uib-alert>
+      <uib-alert  type="danger" >
+        <div>
+          <span class='configure'>{{"aws.node.confirmDel6" | translate}}</span></br>
+        </div>
+      </uib-alert>
+      <form name="nodeForm" novalidate>
+        <div class="control-group">
+          <label class="control-label">{{'aws.auth.user'|translate}}：</label>
+          <div class="controls">
+            <input class="form-controls" 
+                 autocomplete="off"
+                       type="text"
+                       name="username"
+                       ng-model="node.username"
+                       required 
+                       />
+            <div  class="error" ng-messages="(submitInValid ||nodeForm.username.$dirty) && nodeForm.username.$error">
+              <form-validate ></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-class="{'focus':passwordfocus}">
+          <label class="control-label">{{'aws.auth.passwd'|translate}}：</label>
+          <div class="controls">
+            <input class="form-controls"
+                        type="password"
+                        name="password"
+                        ng-model="node.password"
+                        required
+                        />
+            <div  class="error" ng-messages="(submitInValid ||nodeForm.password.$dirty) && nodeForm.secName.$error">
+              <form-validate ></form-validate>
+            </div>
+          </div> 
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirm(nodeForm)">{{'aws.instances.addinstances.ok'|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+    </div>
+  </div>
+</script>
+

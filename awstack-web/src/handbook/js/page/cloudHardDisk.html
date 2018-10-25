@@ -1,0 +1,154 @@
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>云硬盘</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <h3>
+	创建云主机</h3>
+<p>
+	<strong>前提条件</strong></p>
+<p>
+	用于创建云主机的云硬盘必须为&ldquo;可启动&rdquo;，且状态为&ldquo;可用&rdquo;。</p>
+<p>
+	<strong>操作步骤</strong></p>
+<ol>
+	<li>
+		在云硬盘列表页，勾选用于创建云主机的数据盘，单击&ldquo;新建云主机&rdquo;按钮。</li>
+	<li>
+		选择&ldquo;自定义配置&rdquo;页签或&ldquo;快捷配置&rdquo;页签，配置云主机信息。在选择源存储时，系统盘使用当前的云硬盘，仅需配置数据盘的信息。</li>
+	<li>
+		配置完成后，单击&ldquo;新建云主机&rdquo;或&ldquo;创建&rdquo;按钮。</li>
+</ol>
+<h3>
+	卸载云硬盘</h3>
+<p>
+	只有&ldquo;已使用&rdquo;状态的数据盘才能从云主机卸载。</p>
+<p>
+	<strong>注意：&nbsp;</strong><br />
+	卸载数据盘之前，请确认数据盘已在云主机操作系统中卸载/弹出，否则可能造成数据丢失。</p>
+<ol>
+	<li>
+		在云硬盘列表页，勾选待卸载的数据盘，在&ldquo;更多操作&rdquo;下拉列表中选择&ldquo;卸载云硬盘&rdquo;按钮。</li>
+	<li>
+		在弹出的确认框单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+<h3>
+	卷迁移</h3>
+<p>
+	当云硬盘不能满足云主机存储需求或性能要求时，用户可以将存储卷从当前存储迁移到其他存储设备。</p>
+<p>
+	<strong>前提条件</strong></p>
+<ul>
+	<li>
+		云管平台已对接其他外部存储设备且存储容量满足卷迁移需求。<br />
+		后端存储设备在&ldquo;系统管理&gt;运维管理 &gt;存储管理&rdquo;中进行配置。</li>
+	<li>
+		云硬盘上无快照。</li>
+	<li>
+		如云硬盘为共享卷，则目标存储设备需支持共享卷。</li>
+</ul>
+<p>
+	<strong>操作步骤</strong></p>
+<ol>
+	<li>
+		在云硬盘列表中，勾选待操作的数据盘，单击&ldquo;更多操作&rdquo;按钮并在下拉列表中选择&ldquo;卷迁移&rdquo;。</li>
+	<li>
+		在下拉列表中选择迁移后的存储设备。</li>
+	<li>
+		单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+<p>
+	<strong>注意：</strong><br />
+	卷迁移过程中云主机不能进行其他操作。</p>
+<h3>
+	备份</h3>
+<p>
+	云硬盘备份对磁盘文件进行全量或增量备份，存储到非云硬盘所在的存储设备中。当云硬盘所在的物理机出现严重故障时，可通过存储设备上的备份文件恢复数据。</p>
+<p>
+	<strong>前提条件</strong></p>
+<ul>
+	<li>
+		备份存储设备信息已配置完成，存储设备剩余容量必须满足备份需求。备份存储设备在&ldquo;系统管理&gt;运维管理 &gt;存储管理&rdquo;中进行配置。</li>
+	<li>
+		云硬盘状态为&ldquo;可用&rdquo;或&ldquo;使用中&rdquo;时才能进行备份创建。</li>
+</ul>
+<p>
+	<strong>操作步骤</strong></p>
+<ol>
+	<li>
+		在云硬盘列表中，勾选待操作的数据盘，单击&ldquo;更多操作&rdquo;按钮并在下拉列表中选择&ldquo;备份&rdquo;。</li>
+	<li>
+		设置备份名称和备份类型。</li>
+	<li>
+		单击&ldquo;确定&rdquo;按钮。执行备份的结果请参见&ldquo;存储 &gt;备份&rdquo;。</li>
+</ol>
+<h3>
+	删除数据盘</h3>
+<p>
+	对于数据盘，存在以下限制：</p>
+<ul>
+	<li>
+		只有&ldquo;可用&rdquo;状态的数据盘才支持此操作。</li>
+	<li>
+		如果用数据盘创建过快照，必须先删除快照才能删除数据盘。</li>
+	<li>
+		数据盘在非挂载状态下可以删除，可启动硬盘在对应的云主机已经删除后自动删除。</li>
+</ul>
+<ol>
+	<li>
+		在数据盘列表页，勾选要删除的数据盘，单击&ldquo;删除&rdquo;按钮。</li>
+	<li>
+		在弹出的确认框，单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+<h3>
+	删除系统盘</h3>
+<p>
+	对于系统盘，存在以下限制：</p>
+<ul>
+	<li>
+		只有&ldquo;可用&rdquo;状态的系统盘才支持此操作。</li>
+	<li>
+		系统盘在非挂载状态下可以删除，可启动硬盘在对应的云主机已经删除后自动删除。</li>
+</ul>
+<ol>
+	<li>
+		在系统盘列表页，勾选要删除的系统盘，单击&ldquo;删除&rdquo;按钮。</li>
+	<li>
+		在弹出的确认框，单击&ldquo;确定&rdquo;按钮。</li>
+</ol>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<div class="page-inner"> 
+  <div class="table-action">
+    <button type="button" class="btn btn-new" ng-click="createPorts()" licence-type = "btn" id="resource-vmgports-create"><i class="icon-aw-add-to2"></i> {{'aws.action.create'|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="editPorts(editData)" ng-disabled="!canEdit" licence-type = "btn" id="resource-vmgports-edit"><i class="icon-aw-modify"></i> {{'aws.action.edit'|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="delPorts(checkedItems)" ng-disabled="!delEnable||portDeleting" licence-type = "btn" id="resource-vmgports-del"><i class="icon-aw-delete"></i> {{'aws.action.del'|translate}}</button>
+    <div class="dropdown" licence-type="btn-group">
+      <button type="button" class="btn btn-normal dropdown-toggle" data-toggle="dropdown" ng-disabled="delisDisabled">{{'aws.action.moreAction'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+      <ul class="dropdown-menu">
+        <li licence-type="btn" id="resource-vmgports-load">
+          <button ng-click="load(editData)" ng-disabled="!loadEnable||canLoad">{{'aws.ports.load'|translate}}</button>
+        <li licence-type = "btn" id="resource-vmgports-unload">
+          <button ng-click="unload(editData)" ng-disabled="!unloadEnable||canUnload||gettingIns" >{{'aws.ports.unload'|translate}}</button>
+        </li>
+      </ul>
+    </div>
+    <div class="pull-right">
+        <into-information modular="'ports'"></into-information>
+       <div class="search-box">
+          <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(ports_search.globalSearchTerm)">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="ports_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+          </form>
+        </div>
+        <div type="button" class="btn btn-renovat" ng-click="refreshPorts()">
+          <i class="icon-aw-refresh"></i>
+        </div>
+        <setting title-data="titleData" site-title="titleName" table-data="portsData" search-tearm="portSearchTerm(obj)"></setting>
+    </div>  
+  </div>
+  <div class="table-content">
+    <empty-tip empty-type="loadPortsData"></empty-tip>
+    <table ng-table="portsTable" class="table"> 
+    <!-- <colgroup>
+      <col width="9%">
+      <col width="13%">
+      <col width="13%">
+      <col width="13%">
+      <col width="13%">
+      <col width="13%">
+      <col width="13%">
+      <col width="13%">
+    </colgroup> -->
+    <tr ng-repeat="item in $data">
+      <td header="'headerCheckbox.html'" class="check-td">
+        <label class="checkbox">
+          <input type="checkbox" name="r" ng-model="checkboxes.items[item.id]" value="{{item.id}}" />
+          <i class="iconfont"></i>
+        </label>
+      </td>
+      <td data-title="'aws.ports.MACadress'|translate" sortable="'mac_address'" ng-if="titleData[0].value">
+          {{item.mac_address}}
+      </td>
+      <td data-title="'aws.ports.name'|translate" sortable="'name'" ng-if="titleData[1].value">
+          {{item.name}}
+      </td>
+      <td data-title="'aws.ports.network'|translate" sortable="'network_name'" ng-if="titleData[2].value">{{item.network_name}}</td>
+      <td data-title="'aws.ports.subnet'|translate" ng-if="titleData[3].value"><span ng-repeat="ip in item.fixed_ips">{{ip.subnet_name}}</br></span></td>
+      <td data-title="'aws.ports.ipAdress'|translate" ng-if="titleData[4].value">
+        <span ng-repeat="ip in item.fixed_ips">{{ip.ip_address}}</br></span></td>
+      <td data-title="'aws.ports.associatedHost'|translate" sortable="'device_name'" ng-if="titleData[5].value">
+          {{item.device_name}}
+      </td>
+      <td data-title="'aws.ports.createtime'|translate" sortable="'createTime'" ng-if="titleData[6].value">{{item.createTime}}</td>
+    </tr>
+    </table>  
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="createPorts.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.ports.newPorts"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="createPortsForm" novalidate>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.ports.name'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="name"  ng-model="portsForm.name" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.ports.placeholder.name"|translate}}'/>
+              <div class="error" ng-messages='(submitted||createPortsForm.name.$dirty)&&createPortsForm.name.$error'>
+                <form-validate></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{"aws.ports.network"|translate}}：</label>
+            <div class="controls">
+              <ui-select ng-model="portsForm.selectedExtNet"  ng-change="changeExtNet(portsForm.selectedExtNet)" name="network" title='{{"aws.ports.placeholder.network"|translate}}' ng-disabled="!extNets.options.length" required>
+                <ui-select-match placeholder='{{extNets.options.length==0?("aws.ports.placeholder.noNetwork"|translate):("aws.ports.placeholder.network"|translate)}}' >{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="extNet in extNets.options | propsFilter:{name:$select.search}">
+                  <div ng-bind-html="extNet.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-messages='(submitted||createPortsForm.network.$dirty)&&createPortsForm.network.$error'>
+                <form-validate></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-show="isSuperAdmin">
+            <label class="control-label">{{"aws.ports.specifySubnet"|translate}}：</label>
+            <div class="controls">
+              <label class="checkbox">
+                <input type="checkbox" class="form-controls chk" name="assignSub" ng-model="portsForm.assignSub" ng-disabled="extNets.options.length==0" ng-change="isAssignSub()"/>
+                <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>
+          <div ng-show="portsForm.assignSub && isSuperAdmin" >
+            <div class="control-group" >
+              <label class="control-label">{{"aws.ports.selectSubnet"|translate}}：</label>
+              <div class="controls">
+                <ui-select ng-model="portsForm.selectedSubnet" class="ui-select-tips"  ng-change="changeSubnet(portsForm.selectedSubnet)"  title='{{"aws.ports.placeholder.subnet"|translate}}' ng-disabled="!subnets.length">
+                  <ui-select-match placeholder='{{subnets.length==0?("aws.ports.placeholder.noSubnet"|translate):("aws.ports.placeholder.subnet"|translate)}}' >{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="subnet in subnets track by $index">
+                    <div ng-mouseover="mouseSub(subnet,'over')" ng-mouseleave="mouseSub(subnet,'out')">
+                     <div ng-bind-html="subnet.name | highlight: $select.search"></div>
+                      <div class="ui-select-tips-detail" ng-show="selectedSubPoolList.length">
+                        <div class="arrow-up"></div>
+                        <ul>
+                          <li ng-repeat="sub in subPool_detail track by $index" ng-if="sub.showSubSegDetail">{{sub.sub_pool}}</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{"aws.ports.specifyIPAdress"|translate}}：</label>
+              <div class="controls">
+                <label class="checkbox">
+                  <input type="checkbox" class="form-controls chk" name="assignIP" ng-model="portsForm.assignIP" ng-disabled="subnets.length==0"/>
+                  <i class="iconfont"></i>
+                </label>
+              </div>
+            </div>
+            <div class="control-group"  ng-show="portsForm.assignIP">
+              <label class="control-label">{{"aws.ports.subnetSegment"|translate}}：</label>
+              <div class="controls">
+                <ui-select ng-model="portsForm.selectedSubPool" ng-change="changeSubPool(portsForm.selectedSubPool)"  title='{{"aws.ports.placeholder.subnetSegment"|translate}}' ng-disabled="!selectedSubPoolList.length" >
+                  <ui-select-match placeholder='{{selectedSubPoolList.length==0?("aws.ports.placeholder.noSubnetSegment"|translate):("aws.ports.placeholder.subnetSegment"|translate)}}' >{{$select.selected.sub_pool}}</ui-select-match>
+                  <ui-select-choices repeat="subnet in selectedSubPoolList track by $index">
+                    <div ng-bind-html="subnet.sub_pool | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group ip_cidr" ng-show="portsForm.assignIP">
+              <label class="control-label">{{"aws.ports.ipAdress"|translate}}：</label>
+              <div class="controls clearfix">
+                <div class="flex">
+                  <div class="ip_text">
+                    <input type="text" class="form-controls" name="ip_0" id="ip_0" ng-model="portsForm.init_cidr.ip_0" ng-keyup="setCheckvalueFunc()" placeholder="{{portsForm.placeholder.ip_0}}" ng-readonly="portsForm.readonly.ip_0" ng-focus="portsForm.repeatIp=false;" />
+                    <div class="error ip_0" ng-if="interacted(createPortsForm)">
+                      <div ng-show="required.ip_0">{{'aws.errors.required'|translate}}</div>
+                      <div ng-show="invalid.ip_0">请输入{{portsForm.min_num.ip_0}}~{{portsForm.max_num.ip_0}}的整数</div>
+                    </div> 
+                  </div>
+                  <div class="ip-spilt">.</div>
+                  <div class="ip_text">
+                    <input type="text" class="form-controls" name="ip_1" id="ip_1" ng-model="portsForm.init_cidr.ip_1" ng-keyup="setCheckvalueFunc()" placeholder="{{portsForm.placeholder.ip_1}}" ng-readonly="portsForm.readonly.ip_1" ng-focus="portsForm.repeatIp=false;"/>
+                    <div class="error ip_1" ng-if="interacted(createPortsForm)">
+                        <div ng-show="required.ip_1">{{'aws.errors.required'|translate}}</div>
+                        <div ng-show="invalid.ip_1">请输入{{portsForm.min_num.ip_1}}~{{portsForm.max_num.ip_1}}的整数</div>
+                    </div>
+                  </div>
+                  <div class="ip-spilt">.</div>
+                  <div class="ip_text">
+                    <input type="text" class="form-controls" name="ip_2" id="ip_2" ng-model="portsForm.init_cidr.ip_2" ng-keyup="setCheckvalueFunc()" placeholder="{{portsForm.placeholder.ip_2}}" ng-readonly="portsForm.readonly.ip_2" ng-focus="portsForm.repeatIp=false;"/>
+                    <div class="error ip_2"  ng-if="interacted(createPortsForm)">
+                      <div ng-show="required.ip_2">{{'aws.errors.required'|translate}}</div>
+                      <div ng-show="invalid.ip_2">请输入{{portsForm.min_num.ip_2}}~{{portsForm.max_num.ip_2}}的整数</div>
+                    </div>
+                  </div>
+                  <div class="ip-spilt">.</div>
+                  <div class="ip_text">
+                    <input type="text" class="form-controls" name="ip_3" id="ip_3" ng-model="portsForm.init_cidr.ip_3" ng-keyup="setCheckvalueFunc()" placeholder="{{portsForm.placeholder.ip_3}}" ng-readonly="portsForm.readonly.ip_3" ng-focus="portsForm.repeatIp=false;"/>
+                    <div class="error ip_3" ng-if="interacted(createPortsForm)">
+                      <div ng-show="required.ip_3">{{'aws.errors.required'|translate}}</div>
+                      <div ng-show="invalid.ip_3">请输入{{portsForm.min_num.ip_3}}~{{portsForm.max_num.ip_3}}的整数</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="error" ng-show="portsForm.repeatIp">
+                   <span>{{'aws.img.repeatIP'|translate}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="control-group">
+              <label class="control-label">{{"aws.ports.description"|translate}}：</label>
+              <div class="controls">
+                  <textarea type="text" class="form-controls" ng-maxlength="80" name="description" ng-model="portsForm.description " />
+                  <div class="error" ng-messages='createPortsForm.description.$error' ng-if="interacted(createPortsForm)">
+                     <form-validate max-num="80"></form-validate>
+                  </div>
+              </div>
+          </div> -->
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="portsForm.repeatIp" ng-click="portsConfirm(createPortsForm)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="editPorts.html">
+  <div class="modal-common  modal-smallest">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.ports.updatePorts"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="editPortsForm" novalidate>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.ports.name'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="name"  ng-model="editFormData.name" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.ports.placeholder.name"|translate}}'/>
+              <div class="error" ng-messages='(submitted||editPortsForm.name.$dirty)&&editPortsForm.name.$error'>
+                <form-validate></form-validate>
+              </div>
+            </div>
+          </div>
+          <!-- 目前不要编辑 -->
+          <!-- <div class="control-group">
+              <label class="control-label">{{"aws.ports.description"|translate}}：</label>
+              <div class="controls">
+                  <textarea type="text" class="form-controls" ng-maxlength="80" name="description" ng-model="editFormData.description " />
+                  <div class="error" ng-messages='(submitted||editPortsForm.description.$dirty)&&editPortsForm.description.$error'>
+                     <form-validate max-num="80"></form-validate>
+                  </div>
+              </div>
+          </div> -->
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="editConfirm(editPortsForm)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="load.html">
+  <div class="modal-common port-modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.ports.load"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-info">
+        <strong>{{'aws.instances.addNICAlertInfo'|translate}}</strong>
+      </div>
+      <div class="table-content">
+          <div class="search-box">
+            <form name="searchForm" novalidate ng-keyup="insSearch(loadData.insSearch)">
+              <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+              <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="loadData.insSearch" placeholder="{{'aws.action.search'|translate}}" />
+            </form>
+          </div>
+          <empty-tip empty-type="loadInsData" tip-id="'flavor-tip-msg'"></empty-tip>
+          <table ng-table="insTable" class="table" show-filter="false">
+              <colgroup>
+                  <col width="10%">
+                  <col width="30%">
+                  <col width="30%">
+                  <col width="30%">
+              </colgroup>
+              <tr ng-repeat="item in $data track by $index ">
+                  <td data-title="">
+                      <label class="radiobox">
+                          <input name="flavor" type="radio" ng-model="loadData.flavor" ng-change="changeIns(item)" value={{item.uid}} ng-disabled="!(item.status=='active'||item.status=='stopped'||item.status=='shutoff')" required>
+                          <i class="iconfont"></i>
+                      </label>
+                  </td>
+                  <td data-title="'aws.ports.insName'|translate" sortable="'name'">
+                      <div class="edit-name">
+                          <span title="{{item.name}}">{{item.name}}</span>
+                      </div>
+                  </td>
+                  <td data-title="'aws.instances.status'|translate" sortable="'status'">
+                    <span ng-class="{
+                    'bg-green':(item.status=='active'||item.status=='up'),
+                    'bg-blue':(item.status=='building'||item.status=='build'||item.status=='powering-off'||item.status=='powering-on'||item.status=='deleting'||item.status=='deleted'||item.status=='soft-deleting'||item.status=='soft-delete'||item.status=='reboot_pending'||item.status=='reboot'||item.status=='pausing'||item.status=='unpausing'||item.status=='suspending'||item.status=='resuming'||item.status=='resize'||item.status=='resize_prep'||item.status=='resize_finish'||item.status=='resize_migrating'||item.status=='image_backup'||item.status=='image_snapshot'||item.status=='spawning'||item.status=='migrating'||item.status=='rebuilding'||item.status=='rebuild'),
+                    'bg-orange':(item.status=='stopped'||item.status=='shutoff'||item.status=='paused'||item.status=='suspended'||item.status=='resized'||item.status=='verify_resize'||item.status=='revert_resize'||item.status=='down'||item.status=='unknow'||item.status=='unrecognized'),'bg-red':(item.status=='error')
+                    }">{{'aws.instances.table.status.'+item.status| translate}}<i ng-class="{'icon-aw-refresh':(item.status=='build'||item.status=='building' || item.status=='soft-deleting'|| item.status=='powering-off' ||item.status=='powering-on' ||item.status=='deleting' ||item.status=='reboot'||item.status=='reboot_pending' || item.status=='resuming' || item.status=='suspending' || item.status=='unpausing' || item.status=='pausing'  || item.status =='resize_migrating' || item.status =='resized'  || item.status =='resize_prep' || item.status =='resize_finish'  || item.status =='image_backup' || item.status =='image_snapshot' || item.status =='spawning' || item.status == 'verify_resize' || item.status =='resize' || item.status =='rebuilding' || item.status =='rebuild' || item.status =='migrating')}" class="aw-spin"></i>
+                    </span>
+                  </td>
+                  <td data-title="'aws.instances.privateIP'|translate" sortable="'fixedIps'">
+                      <span ng-repeat="fixedIp in item.fixedIps track by $index">{{fixedIp}}<br></span>
+                  </td>
+              </tr>
+          </table>
+      </div>
+    </div>
+    <div class="error text-center" ng-if="noSelectedIns">{{'aws.ports.selectIns'| translate}}</div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="loadConfirm()" ng-disabled="!loadData.selectedIns">{{"aws.ports.load"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="loadMsg.html">
+  <div class="modal-common loadMsg-modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">提示信息</h3>
+    </div>
+    <div class="modal-body">
+       <div class="msg-box" ng-if="hasGateway">
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当前选择子网含有默认网关，添加后可能会影响该云主机其他网卡的连通性，请确认是否添加该子网的虚拟网卡？</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;针对于linux云主机，请再添加网卡后，在云主机系统中添加新网卡的配置文件，并启动网卡，才能真正使用所添加的虚拟网卡。</div>
+       </div>
+       <div class="msg-box" ng-if="!hasGateway">
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 针对于linux云主机，请在添加网卡后，在云主机系统中添加新网卡的配置文件，并启动网卡，才能真正使用所添加的虚拟网卡。</div>
+       </div>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="loadMsgConfirm()">{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+
+
+

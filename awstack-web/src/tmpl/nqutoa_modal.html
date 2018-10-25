@@ -1,0 +1,30 @@
+<!-- <div>
+	<div class="total clearfix" ng-if='progressValue.icon'>
+		<i class="{{progressValue.icon}}"></i>
+		<div class="quotaNum">
+		</div>
+	</div>
+	<div style="margin-left: 10%;">
+		<div style="margin-top: 5%;">
+		</div>
+		<div>
+			{{progressValue.total}}
+		</div>
+		<div class='progress {{barType}}' style="width: 50%;margin-left: 20%;margin-top: -13px;">
+			<div class='progress-bar {{progressValue.bar_style}}'>
+			</div>
+		</div>
+		<div class="used" style="width: 30%;margin-left: 80%;margin-top: -13px;">{{progressValue.used*100/progressValue.total+"%"}}</div>
+	</div>
+</div> -->
+
+
+<ul class="line-list clearfix">
+	<li>{{progressValue.total}}</li>
+	<li class="line">
+		<div class='progress {{barType}}'>
+		<div class='progress-bar {{progressValue.bar_style}}'>
+		</div>
+	</li>
+	<li>{{progressValue.used*100/progressValue.total+"%"}}</li>
+</ul>

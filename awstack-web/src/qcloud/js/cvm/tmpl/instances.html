@@ -1,0 +1,1074 @@
+
+
+
+<div class="page-inner">
+  <div class="page-title">
+      <h2>云主机</h2>
+      <ui-select ng-model="options.proselected" ng-change="selectedProject(project.selected)" name="project">
+      <ui-select-match>{{$select.selected.projectName}}</ui-select-match>
+        <ui-select-choices repeat="item in projectList | filter:{projectName:$select.search}">
+          <div ng-bind-html="item.projectName | highlight: $select.search"></div>
+        </ui-select-choices>
+      </ui-select>
+      <div class="btn-item-group">
+        <button type="button" class="type-btn"  ng-class='{"active":item.region === options.region}' ng-click="changeRegion(item.region)" ng-repeat="item in regionList ">{{item.regionName}}</button>
+      </div>
+  </div>
+  <div class="table-action">
+    <button type="button" class="btn btn-primary" ng-click="addVm()" ><i class="icon-aw-add-to2"></i>{{'CN.action.create'|translate}}</button>
+    <button ng-class="{'btn-default':boot_btn,'btn-info':!delisDisabled && !boot_btn}" class="btn" uib-popover="{{delisDisabled?'请选择云主机':'关机状态才可以开机'}}" popover-enable="boot_btn" popover-trigger="mouseenter" popover-placement = "bottom"  ng-click="bootVms()"><i class="icon-aw-start-up"></i>{{'CN.action.boot'|translate}}</button>
+    <button ng-class="{'btn-default':shutoff_btn,'btn-info':!delisDisabled && !shutoff_btn}" class="btn" uib-popover="{{delisDisabled?'请选择云主机':'运行状态才可以关机'}}" popover-enable="shutoff_btn" popover-trigger="mouseenter" popover-placement = "bottom"  ng-click="shutoffVms()"><i class="icon-aw-shut-down"></i>{{'CN.action.shutdown'|translate}}</button>
+    <button ng-class="{'btn-default':reboot_btn,'btn-info':!delisDisabled && !reboot_btn}" class="btn" uib-popover="{{delisDisabled?'请选择云主机':'运行状态才可以重启'}}" popover-enable="reboot_btn" popover-trigger="mouseenter" popover-placement = "bottom"  ng-click="rebootVms()"><i class="icon-aw-shut-down"></i>{{'CN.action.reboot'|translate}}</button>
+    <button ng-class="{'btn-default':repass_btn,'btn-info':!delisDisabled && !repass_btn}" class="btn" uib-popover="{{delisDisabled?'请选择云主机':repasstip}}" popover-enable="repass_btn" popover-trigger="mouseenter" popover-placement = "bottom"  ng-click="repassword()" ><i class=" icon-aw-safety"></i>{{'CN.action.repass'|translate}}</button>
+    <div class="dropdown">
+      <button type="button" class="btn btn-info dropdown-toggle" ng-disabled="delisDisabled" data-toggle="dropdown">{{'CN.action.moreOps'|translate}}<i class=" icon-aw-angle-down"></i></button>
+      <ul class="dropdown-menu">
+        <li>
+          <button uib-popover="加载密钥需要在关机状态下进行" popover-enable="keypair_btn" popover-trigger="mouseenter" popover-placement = "bottom" ng-click="loadKeypair()" >{{'CN.action.addKeypair'|translate}}</button>
+          <button uib-popover="改名不允许批量操作" popover-enable="rename_btn" popover-trigger="mouseenter" popover-placement = "bottom" ng-click="rename(editData)" >{{'CN.action.rename'|translate}}</button>
+          <button uib-popover="调整网络无法批量操作" popover-enable="net_btn" popover-trigger="mouseenter" popover-placement = "bottom" ng-click="changeNet()">{{'CN.action.changeNet'|translate}}</button>
+          <button uib-popover="销毁不允许批量操作" popover-enable="destory_btn" popover-trigger="mouseenter" popover-placement = "bottom" ng-click="destory()" >{{'CN.action.destory'|translate}}</button>
+          <button uib-popover="{{resizetip}}" popover-enable="resize_btn" popover-trigger="mouseenter" popover-placement = "bottom" ng-click="resize()">调整配置</button>
+          <button uib-popover="配置安全组不允许批量操作" popover-enable="loadsg_btn" popover-trigger="mouseenter" popover-placement = "bottom" ng-click="loadsg([editData])">配置安全组</button>
+          <button uib-popover="{{isDisabled?'制作镜像不允许批量操作':'制作镜像必须在关机状态下进行'}}" popover-enable="mkImg_btn" popover-trigger="mouseenter" popover-placement = "bottom" ng-click="mkImg()">制作镜像</button>
+          <button uib-popover="{{isDisabled?'重装系统不允许批量操作':'Windows主机不允许重装系统'}}" popover-enable="resystem_btn" popover-trigger="mouseenter" popover-placement = "bottom" ng-click ="resystem()">重装系统</button>
+          <!-- <button>{{'CN.action.expChk'|translate}}</button>
+          <button>{{'CN.action.expAll'|translate}}</button> -->
+        </li>
+      </ul>
+    </div>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'CN.action.search'|translate}}" />
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <uib-alert type="alert-info" ng-show="showtip" class="alert-info"><a ng-click="returnList()">返回列表</a></uib-alert>
+    <table ng-table="tableParams" class="table table-check" >
+      <tr ng-repeat="item in $data">
+        <td header="'headerCheckbox.html'" class="check-td">
+          <label class="checkbox" ng-class="{'noclick aw-spin':( item.status !='1'&&item.status !='2'&&item.status !='4' &&item.status !='5')}">
+            <input type="checkbox" name="r" ng-model="checkboxes.items[item.unInstanceId]" value="{{item.unInstanceId}}" ng-disabled="item.status !='1'&&item.status !='2'&&item.status !='4' &&item.status !='5'" />
+            <i class="iconfont"></i>
+          </label>
+        </td>
+        <td data-title="'ID/主机名'" sortable="'instanceName'">
+          <div class="edit-name">
+            <a ng-if="!item.isbuilding" ng-href="#cvm/instances?id={{item.unInstanceId}}">{{item.unInstanceId}}</a>
+            <span ng-if = "item.instanceName">{{item.instanceName}}</span>
+            <span ng-if = "!item.instanceName">未命名</span><i class="icon-aw-modify blue" ng-click="rename(item,true)"></i>
+          </div>
+        </td>
+        <td data-title="'状态'" sortable="'status'">
+          <span class="{{item.status}}" ng-class="{'green':item.status==2,'red':item.status==4}">{{'CN.instances.table.status.'+item.status| translate}}</span>
+        </td>
+        <td data-title="'可用区'">{{item.zoneName}}</td>
+        <td data-title="'主机类型'">{{item.cvmType}}</td>
+        <td data-title="'配置'">
+          <span class="ycx">{{item.cpu}}核 {{item.mem}}GB {{item.bandwidth}}Mbps</span>
+          <span class="ycx">系统盘：{{'CN.instances.table.rootType.'+item.diskInfo.rootType | translate}}</span>
+          <span class="ycx" ng-if="item.vpcId">网络：私有网络</span>
+          <span class="ycx" ng-if="!item.vpcId">网络：基础网络</span>
+        </td>
+        <td data-title="'主IP地址'" sortable="'lanIp'">
+          <span class="ycx" ng-repeat="wanIp in item.wanIpSet " ng-if="wanIp">{{wanIp}}(公)</span>
+          <span class="ycx" ng-if="item.lanIp">{{item.lanIp}}(内)</span>
+        </td>
+        <td data-title="'主机计费模式'" sortable="'cvmPayMode'">
+          <span class="ycx">{{'CN.instances.table.cvmPayMode.'+item.cvmPayMode| translate}}</span>
+          <span class="ycx" ng-if = "item.cvmPayMode == 1">{{item.deadlineTime | date: 'yyyy-MM-dd:HH:mm:ss'}}到期</span>
+          <span class="ycx" ng-if = "item.cvmPayMode == 2">{{item.createTime | date: 'yyyy-MM-dd:HH:mm:ss'}}创建</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+      <div class="detail-tab">
+        <div class="dt-title">
+          <a ng-href="#/cvm/instances">返回<i class="icon-aw-angle-left"></i></a><span>{{detailInfo.unInstanceId}}</span>
+        </div>
+        <div class="dt-box">
+          <ul class="nav nav-tabs clearfix">
+            <li ng-class="{'active': param_tab}" ng-click="detail_param(detailInfo.unInstanceId,true)" ><a>参数</a></li>
+            <li ng-class="{'active': sg_tab}" ng-click="detail_sg(detailInfo)" ><a>安全组</a></li>
+          </ul>
+          <div class="dt-content">
+            <div class="tab-pane" ng-show="param_tab">
+              <strong>主机信息</strong>
+              <dl class="dl-horizontal">
+                <dt>名称</dt>
+                <dd>{{detailInfo.instanceName}}</dd>
+                <dt>服务器ID</dt>
+                <dd>{{detailInfo.unInstanceId}}</dd> 
+                <dt>状态</dt>
+                <dd ng-class="{'green':detailInfo.status==2}">{{'CN.instances.table.status.'+detailInfo.status| translate}}</dd>
+                <dt>公网IP</dt>
+                <dd><span ng-repeat="wanIp in detailInfo.wanIpSet">{{wanIp}}</span></dd>
+                <dt>内网IP</dt>
+                <dd>{{detailInfo.lanIp}}</dd>
+                <dt>创建时间</dt>
+                <dd>{{detailInfo.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</dd>
+                <dt>到期时间</dt>
+                <dd ng-show="detailInfo.cvmPayMode != 1">-</dd>
+                <dd ng-show="detailInfo.cvmPayMode == 1">{{detailInfo.deadlineTime | date:'yyyy-MM-dd HH:mm:ss'}}</dd>
+                <dt>地域</dt>
+                <dd>{{'CN.instances.table.region.'+detailInfo.Region| translate}}</dd>
+                <dt>可用区</dt>
+                <dd>{{detailInfo.zoneName}}</dd>
+                <dt>主机计费模式</dt>
+                <dd>{{'CN.instances.table.cvmPayMode.'+detailInfo.cvmPayMode| translate}}</dd>
+                <dt>网络计费模式</dt>
+                <dd>{{'CN.instances.table.networkPayMode.'+detailInfo.networkPayMode| translate}}</dd>
+                <dt>所属网络</dt>
+                <dd>
+                  <span ng-if="detailInfo.vpcId">{{detailInfo.vpcId}}({{detailInfo.lanName}} | {{detailInfo.subnetInfo.cidrBlock}})</span>
+                  <span ng-if="!detailInfo.vpcId">基础网络</span>
+                </dd>
+                <dt>用作公网网关</dt>
+                <dd>{{'CN.instances.table.isVpcGateway.'+detailInfo.isVpcGateway| translate}}</dd>
+                <dt>所在子网</dt>
+                <dd>{{detailInfo.subnetInfo.subnetName}}</dd>
+              </dl>
+              <strong>机器配置</strong>
+              <dl class="dl-horizontal">
+                <dt>操作系统</dt>
+                <dd>{{detailInfo.os}}</dd>
+                <dt>CPU</dt>
+                <dd>{{detailInfo.cpu}}核</dd>
+                <dt>内存</dt>
+                <dd>{{detailInfo.mem}}GB</dd>
+                <dt>系统盘</dt>
+                <dd>{{detailInfo.diskInfo.rootSize}}GB({{'CN.instances.table.rootType.'+detailInfo.diskInfo.rootType | translate}})</dd>
+                <dt ng-show="detailInfo.diskInfo.storageSize">数据盘</dt>
+                <dd ng-show="detailInfo.diskInfo.storageSize">{{detailInfo.diskInfo.storageSize}}GB({{'CN.instances.table.rootType.'+detailInfo.diskInfo.rootType | translate}})</dd>
+                <dt ng-show="detailInfo.diskInfo.expandStorage"></dt>
+                <dd ng-show="detailInfo.diskInfo.expandStorage" ><span ng-repeat="item in detailInfo.diskInfo.expandStorage">{{item.storageSize}}(云硬盘)</span></dd>
+                <dt>公网宽带</dt>
+                <dd>{{detailInfo.bandwidth}}</dd>
+              </dl>
+              <strong>系统镜像</strong>
+              <dl class="dl-horizontal">
+                <dt>镜像名称</dt>
+                <dd>{{detailInfo.imageInfo.imageName}} </dd>
+                <dt>类型</dt>
+                <dd>{{detailInfo.imageType}}</dd>
+                <dt>镜像ID</dt>
+                <dd>{{detailInfo.imageInfo.unImgId}}</dd>
+              </dl>
+              <strong>SSH密钥</strong>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>密钥ID</th>
+                    <th>密钥名称</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="item in detailInfo.sshKeyInfo">
+                    <td>{{item.keyId}}</td>
+                    <td>{{item.keyName}}</td>
+                    <td> <a  uib-popover="关机状态才可以解绑密钥" popover-enable="detailInfo.status != 4" popover-trigger="mouseenter" popover-placement="bottom" ng-class="{'disabled':detailInfo.status != 4}" ng-click="unbindsshkey(item)" >解绑</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="tab-pane" ng-show="sg_tab">
+              <uib-alert type="warning" class="alert-tip">
+                建议根据云主机操作系统，和云主机业务特性，来使用Linux安全组放通22端口或Windows安全组放通3389端口安全组，专业用户可以自行配置安全组提高云主机的安全性。</br>
+                注意：推荐安全组仅开放了远程登录接口，请根据您的业务来配置合适的安全组规则。
+              </uib-alert> 
+              <span class="tab-subtitle">
+                <strong>已加入安全组</strong>
+                <a class="blue" ng-click="modifysg_btn = true" ng-show ="!modifysg_btn && detailInfo.status !=28" >编辑</a>
+                <a class="blue" ng-click="loadsg([detailInfo],'info')" ng-show ="detailInfo.status !=28">配置安全组</a>
+              </span>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>优先级</th>
+                    <th>安全组ID/名称</th>
+                    <th ng-show="modifysg_btn">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat = "item in detailsgs ">
+                    <td>{{$index+1}}</td>
+                    <td>
+                      <span class="ycx"><a href="#cvm/securitygroup/{{item.sgId}}">{{item.sgId}}</a></span>
+                      <span>{{item.sgName}}</span>
+                    </td>
+                    <td ng-show="modifysg_btn">
+                      <i class="icon-aw-angle-up" ng-click = "upRecord(detailsgs,$index)"></i>
+                      <i class="icon-aw-angle-down" ng-click = "downRecord(detailsgs,$index)"></i>
+                      <i class="icon-aw-wrong" ng-click="rmsg(detailsgs,$index)"></i>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="btn-item-group" ng-show="modifysg_btn">
+                  <button class="btn btn-primary" type="button" ng-click="confirmInfoSg([detailInfo],detailsgs);modifysg_btn=false">确认</button>
+                  <button class="btn btn-default" type="button" ng-click="cancelInfoSg();modifysg_btn = false">取消</button>
+              </div>
+              <strong>规则预览</strong>
+              <div class="btn-item-group">
+                <button type="button" class="type-btn" ng-class="{'active':gress_tab=='ingress'}" ng-click="changegress('ingress')">入站规则</button>
+                <button type="button" class="type-btn" ng-class="{'active':gress_tab=='egress'}"  ng-click="changegress('egress')">出站规则</button>
+              </div>
+              <div ng-repeat ="item in detailsgs">
+                <span class="tab-subtitle" >
+                  <strong class="sub-subtitle">{{$index+1}}</strong>
+                  <strong class="sub-subtitle">{{item.sgName}}</strong>
+                </span>
+                <table class="table" ng-show="gress_tab=='ingress'">
+                  <colgroup>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                  </colgroup>   
+                  <thead>
+                    <tr>
+                      <th>协议类型</th>
+                      <th>端口</th>
+                      <th>来源</th>
+                      <th>策略</th>
+                      <th>备注</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat = "sg in detail_ingress[item.sgId]">
+                      <td>{{sg.ipProtocol}}</td>
+                      <td>{{sg.portRange}}</td>
+                      <td ng-if="sg.cidrIp">{{sg.cidrIp}}</td>
+                      <td ng-if="sg.sgId">{{sg.sgId}}</td>
+                      <td>{{'CN.securitygroup.table.action.' + sg.action | translate}}</td>
+                      <td>{{sg.desc}}</td>
+                    </tr>
+                    <tr>
+                      <td>All traffic</td>
+                      <td>ALL</td>
+                      <td>0.0.0.0/0</td>
+                      <td>拒绝</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table class="table" ng-show="gress_tab=='egress'">
+                  <colgroup>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                  </colgroup>   
+                  <thead>
+                    <tr>
+                      <th>协议类型</th>
+                      <th>端口</th>
+                      <th>目标</th>
+                      <th>策略</th>
+                      <th>备注</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat = "sg in detail_egress[item.sgId]">
+                      <td>{{sg.ipProtocol}}</td>
+                      <td>{{sg.portRange}}</td>
+                      <td ng-if="sg.cidrIp">{{sg.cidrIp}}</td>
+                      <td ng-if="sg.sgId">{{sg.sgId}}</td>
+                      <td>{{'CN.securitygroup.table.action.' + sg.action | translate}}</td>
+                      <td>{{sg.desc}}</td>
+                    </tr>
+                    <tr>
+                      <td>All traffic</td>
+                      <td>ALL</td>
+                      <td>0.0.0.0/0</td>
+                      <td>拒绝</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>  
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </pane>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="bootVm.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">开机</h3>
+    </div>
+    <div class="modal-body">
+      <form name="createVolumeForm" novalidate>
+        <div class="control-group">
+          <span class="control-span-volume">您已选<strong>{{checkedItems.length}}台云主机，</strong></span>
+          <a class="blue" ng-click="showVm()">查看详情
+          <i ng-show="show_vm" class=" icon-aw-angle-down"></i>
+          <i ng-show="!show_vm" class="icon-aw-angle-up"></i>
+          </a>
+          <table class="table table-info column table-volum-mount" ng-if="show_vm">
+            <tbody> 
+              <tr ng-repeat="item in checkedItems">
+                <td>{{$index+1}}</td>
+                <td>{{item.unInstanceId}}</td>
+                <td>可开机</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="alert alert-warning">
+          确定选中主机进行开机
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirmBoot()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="shutoffVm.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">关机</h3>
+    </div>
+    <div class="modal-body">
+      <form name="createVolumeForm" novalidate>
+        <div class="control-group">
+          <span class="control-span-volume">您已选<strong>{{checkedItems.length}}台云主机，</strong></span>
+          <a class="blue" ng-click="showVm()">查看详情
+          <i ng-show="show_vm" class=" icon-aw-angle-down"></i>
+          <i ng-show="!show_vm" class="icon-aw-angle-up"></i>
+          </a>
+          <table class="table table-info column table-volum-mount" ng-if="show_vm">
+            <tbody> 
+              <tr ng-repeat="item in checkedItems">
+                <td>{{$index+1}}</td>
+                <td>{{item.unInstanceId}}</td>
+                <td>可关机</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="alert alert-warning">
+          确定选中主机进行关机
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirmShutoff()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="rebootVm.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">重启</h3>
+    </div>
+    <div class="modal-body">
+      <form name="rebootForm" novalidate>
+        <div class="control-group">
+          <span class="control-span-volume">您已选<strong>{{checkedItems.length}}台云主机，</strong></span>
+          <a class="blue" ng-click="showVm()">查看详情
+          <i ng-show="show_vm" class=" icon-aw-angle-down"></i>
+          <i ng-show="!show_vm" class="icon-aw-angle-up"></i>
+          </a>
+          <table class="table table-info column table-volum-mount" ng-if="show_vm">
+            <tbody> 
+              <tr ng-repeat="item in checkedItems">
+                <td>{{$index+1}}</td>
+                <td>{{item.unInstanceId}}</td>
+                <td>可重启</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="alert alert-warning">
+          确定选中主机进行重启
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirmReboot()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="destoryVm.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">销毁</h3>
+    </div>
+    <div class="modal-body">
+      <form name="confirmDestoryForm" novalidate>
+        <div class="control-group">
+          <span class="control-span-volume">您已选<strong>{{checkedItems.length}}台云主机，</strong></span>
+          <a class="blue" ng-click="showVm()">查看详情
+          <i ng-show="show_vm" class=" icon-aw-angle-down"></i>
+          <i ng-show="!show_vm" class="icon-aw-angle-up"></i>
+          </a>
+          <table class="table table-info column table-volum-mount" ng-if="show_vm">
+            <tbody> 
+              <tr ng-repeat="item in checkedItems">
+                <td>{{$index+1}}</td>
+                <td>{{item.unInstanceId}}</td>
+                <td>可销毁</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="alert alert-warning">
+          确定选中主机进行销毁
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirmDestory()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="rename.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">改名</h3>
+    </div>
+    <div class="modal-body">
+      <form name="instanceNameForm">
+        <div class="control-group">
+            <label class="control-label">新云主机名称：</label>
+            <div class="controls">
+              <input type="text"  name="instanceName" ng-model="editData.instanceName" ng-maxlength="60"/>
+              <div class="error" ng-messages="(submitInValid ||instanceNameForm.instanceName.$dirty) && instanceNameForm.instanceName.$error">
+                <form-validate max-num="60"></form-validate>
+              </div>
+              <span ng-show ="editData.instanceName.length<61">你还可以输入{{60-editData.instanceName.length}}个字符</span>
+            </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmRename(instanceNameForm)">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="repassword.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">重置密码</h3>
+    </div>
+    <div class="modal-body">
+      <form name="repasswprdForm">
+        <div class="control-group">
+          <label class="control-label">&nbsp</label>
+          <div class="controls">
+            <span class="control-span-volume">您已选<strong>{{checkedItems.length}}台云主机，</strong></span>
+            <a class="blue" ng-click="showVm()">查看详情
+            <i ng-show="show_vm" class=" icon-aw-angle-down"></i>
+            <i ng-show="!show_vm" class="icon-aw-angle-up"></i>
+            </a>
+            <table class="table table-info column table-volum-mount" ng-if="show_vm">
+              <tbody> 
+                <tr ng-repeat="item in checkedItems">
+                  <td>{{$index+1}}</td>
+                  <td>{{item.unInstanceId}}</td>
+                  <td>可重置密码</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">&nbsp</label>
+          <div class="controls">
+              <ui-select ng-model="pass.userNameStyle" >
+                <ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="user in userNameStyles | propsFilter: {name: $select.search}">
+                  <div ng-bind-html="user.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"> 用户名：</label>
+          <div class="controls">
+              <input class="form-control" ng-model="pass.userNameStyle.value" ></input>
+              <span ng-if="pass.userNameStyle.value!='root'">仅可对系统中已存在的用户进行重置密码操作</span>
+          </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"><i class="red">*</i> 密码</label>
+            <div class="controls">
+                <input type="password" class="form-controls input-sm" name="password" ng-model="pass.password"  id="user_pass"   required 
+                ng-pattern="passpattern" ng-minlength="passminnum" ng-maxlength="16" placeholder="请输入主机密码"  />
+                <div class="error" ng-messages="(submitform ||repasswprdForm.password.$dirty) && repasswprdForm.password.$error">
+                  <div ng-message="minlength">请最少输入{{passminnum}}个字符</div>
+                  <div ng-message="maxlength">请最多输入16个字符</div>
+                  <div ng-message="pattern">{{passtip}}</div>
+                  <div ng-message="required">必填项</div>
+                </div>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"><i class="red">*</i> 确认密码</label>
+            <div class="controls">
+                <input type="password" class="form-controls input-sm" name="confirmPassWord" ng-model="pass.cfmPassword"  required
+                ng-pattern="passpattern" ng-minlength="passminnum" ng-maxlength="16" placeholder="请再次输入主机密码"  pw-check="user_pass" />
+                  <div class="error" ng-messages="(submitform ||repasswprdForm.confirmPassWord.$dirty) && repasswprdForm.confirmPassWord.$error" >
+                    <div ng-message="minlength">请最少输入{{passminnum}}个字符</div>
+                    <div ng-message="maxlength">请最多输入16个字符</div>
+                    <div ng-message="pattern">{{passtip}}</div>
+                    <div ng-message="required">必填项</div>
+                  </div>
+            </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmRepassword(repasswprdForm)">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="keypair.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">加载密钥</h3>
+    </div>
+    <div class="modal-body">
+      <form name="keypairForm">
+        <div class="control-group">
+          <span class="control-span-volume">您已选<strong>{{checkedItems.length}}台云主机，</strong></span>
+          <a class="blue" ng-click="showVm()">查看详情
+          <i ng-show="show_vm" class=" icon-aw-angle-down"></i>
+          <i ng-show="!show_vm" class="icon-aw-angle-up"></i>
+          </a>
+          <table class="table table-check" ng-if="show_vm">
+            <tbody> 
+              <tr ng-repeat="item in checkedItems">
+                <td>{{$index+1}}</td>
+                <td>{{item.unInstanceId}}</td>
+                <td>可加载密钥</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="control-group">
+          <span><strong>对选中云主机加载以下密钥：</strong></span>
+          <table class="table table-check">
+              <tr ng-repeat="item in keypair.keypairsList ">
+                <td>
+                  <label class="radio">
+                    <input type="radio" name="r" ng-model="keypair.sshkeypair" value="{{item.keyId}}" />
+                    <i class="iconfont"></i>
+                  </label>
+                </td>
+                <td>{{item.keyName}}</td>
+                <td>{{item.keyId}}</td>
+              </tr>
+            </table>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmLoadkeypair(keypairForm)">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="net.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">调整网络</h3>
+    </div>
+    <div class="modal-body">
+      <form name="keypairForm">
+        <div class="control-group">
+          <div class="controls">
+            <span class="control-span-volume">您已选<strong>{{checkedItems.length}}台云主机，</strong></span>
+            <a class="blue" ng-click="showVm()">查看详情
+            <i ng-show="show_vm" class=" icon-aw-angle-down"></i>
+            <i ng-show="!show_vm" class="icon-aw-angle-up"></i>
+            </a>
+            <table class="table table-info column table-volum-mount" ng-if="show_vm">
+              <tbody> 
+                <tr ng-repeat="item in checkedItems">
+                  <td>{{$index+1}}</td>
+                  <td>{{item.unInstanceId}}</td>
+                  <td>主机计费模式：{{'CN.instances.table.networkPayMode.'+item.cvmPayMode| translate}}</td>
+                  <td>宽带计费模式：{{'CN.instances.table.networkPayMode.'+item.networkPayMode| translate}}</td>
+                  <td>可调整宽带</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">网络计费模式</label>
+            <div class="controls">
+                <span>{{'CN.instances.table.networkPayMode.'+net.networkPayMode| translate}}</span>
+            </div>
+        </div>
+        <div class="control-group" ng-show="net.networkPayMode == 2">
+            <label class="control-label">原宽带上限</label>
+            <div class="controls">
+                <span>{{net.bandwidth}} Mbps</span>
+            </div>
+        </div>
+        <div class="control-group" ng-show="net.networkPayMode == 3">
+            <label class="control-label">原配置</label>
+            <div class="controls">
+                <span>{{net.bandwidth}} Mbps {{net.adjustbeforePrice}} 元/小时</span>
+            </div>
+        </div>
+        <div class="control-group" ng-show="net.networkPayMode == 1">
+            <label class="control-label">当前带宽</label>
+            <div class="controls">
+                <span>{{net.bandwidth}} Mbps </span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" ng-show="net.networkPayMode == 2">目标宽带上限</label>
+            <label class="control-label" ng-show="net.networkPayMode != 2">目标宽带</label>
+            <div class="controls">
+              <div class="rzslider-box">
+                <rzslider rz-slider-model="slider.bandwidthValue" rz-slider-options="slider.options" ></rzslider>
+                <input type="text" ng-model="slider.bandwidthValue" max="slider.options.ceil" num-range min="slider.options.floor" ></input>
+                <span class="unit">Mbps</span>
+              </div>
+              <span>带宽调整实时设定，实时生效</span>
+              <span ng-show="net.networkPayMode == 2">
+                注意：流量费用每小时结算一次，当账户余额不足时，两小时内将被停止流量服务。
+              </span>
+            </div>
+        </div>
+        <div class="control-group" ng-show="net.cvmPayMode == 1 && net.networkPayMode == 1">
+            <label class="control-label">生效起始时间</label>
+            <div class="controls" >
+              <input class="form-control form_date" name="startTime"  type="text" size="16" ng-model="net.startTimespan" ng-blur="rePrice()" intime="net.startTime"  range-time />
+            </div>
+        </div>
+        <div class="control-group" ng-show="net.cvmPayMode == 1 && net.networkPayMode == 1">
+            <label class="control-label">生效截至时间</label>
+            <div class="controls" >
+              <input class="form-control form_date" name="startTime"  type="text" size="16" ng-model="net.deadlineTimespan" ng-blur="rePrice()" intime="net.startTime"  range-time />
+            </div>
+        </div>
+        <div class="control-group" ng-show="net.networkPayMode == 1 || net.networkPayMode == 3">
+            <label class="control-label"ng-show="net.networkPayMode == 3">调整后单价</label>
+            <label class="control-label" ng-show="net.networkPayMode == 1">需支付费用</label>
+            <div class="controls">
+              <span ng-if="priceIng" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+              <div class="price-tips" ng-class="{'in':!priceIng}">
+                <span class="unit-box">{{net.adjustbandwidthPrice}}
+                  <span ng-show="net.networkPayMode == 3" class="unit-txt">元/小时</span>
+                  <span ng-show="net.networkPayMode == 1" class="unit-txt">元</span>
+                </span>
+              </div>
+            </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmChnagenet()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="mkImg.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">制作自定义镜像</h3>
+    </div>
+    <div class="modal-body">
+      <form name="mkImgForm">
+        <div class="control-group">
+          <span class="control-span-volume">您已选<strong>{{checkedItems.length}}台云主机，</strong></span>
+          <a class="blue" ng-click="showVm()">查看详情
+          <i ng-show="show_vm" class=" icon-aw-angle-down"></i>
+          <i ng-show="!show_vm" class="icon-aw-angle-up"></i>
+          </a>
+          <table class="table table-info column table-volum-mount" ng-if="show_vm">
+            <tbody> 
+              <tr ng-repeat="item in checkedItems">
+                <td>{{$index+1}}</td>
+                <td>{{item.unInstanceId}}</td>
+                <td>可制作镜像</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <uib-alert type="warning" class="alert-tip">
+          镜像制作过程约需10分钟。
+        </uib-alert>
+        <div class="control-group" >
+          <label class="control-label">镜像名称</label>
+          <div class="controls"> 
+            <input type="text" class="form-control" name="name" ng-model="image.name" required></input>
+            <div class="error" ng-messages="(submitform ||mkImgForm.name.$dirty) && repasswprdForm.name.$error" >
+                <form-validate></form-validate>
+            </div>
+            <span class="tips">只支持字母、数字或连接符号</span>
+          </div>
+        </div>
+        <div class="control-group" >
+          <label class="control-label">镜像描述</label>
+          <div class="controls"> 
+            <textarea type="text" class="form-control" ng-model="image.desc"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmMkImg(mkImgForm)">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="resize.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">调整配置</h3>
+    </div>
+    <div class="modal-body">
+      <form name="mkImgForm">
+        <div class="control-group">
+          <div class="controls">
+            <span class="control-span-volume">您已选<strong>{{checkedItems.length}}台云主机，</strong></span>
+            <a class="blue" ng-click="showVm()">查看详情
+            <i ng-show="show_vm" class=" icon-aw-angle-down"></i>
+            <i ng-show="!show_vm" class="icon-aw-angle-up"></i>
+            </a>
+            <table class="table table-info column table-volum-mount" ng-if="show_vm">
+              <tbody> 
+                <tr ng-repeat="item in checkedItems">
+                  <td>{{$index+1}}</td>
+                  <td>{{item.unInstanceId}}</td>
+                  <td>调整配置</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="control-group" >
+          <label class="control-label">原配置</label>
+          <div class="controls"> 
+            <span>{{conf.cpu}}核  {{conf.mem}}GB  <span ng-show="conf.cvmPayMode == 2" >{{conf.adjustbeforeCvmPrice}}元/小时</span></span>
+          </div>
+        </div>
+        <div class="control-group" >
+          <label class="control-label">目标CPU核数</label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button type="button" ng-click="chooseCpu(item.value)" ng-class='{"active":item.value === options.cpu}' ng-repeat="item in cpuModel" ng-show="cpuFlag(item.value)" style="margin-bottom:10px"><span>{{item.text}}</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" >
+          <label class="control-label">目标内存容量</label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button type="button" ng-click="chooseMem(item)" ng-class='{"active":item === options.mem}' ng-repeat="item in memModel"><span>{{item}}GB</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" ng-show="conf.cvmPayMode == 2">调整后单价</label>
+            <label class="control-label" ng-show="conf.cvmPayMode == 1">需支付费用</label>
+            <div class="controls">
+                <span ng-if="priceIng" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+                <div class="price-tips" ng-class="{'in':!priceIng}">
+                  <span class="unit-box">
+                    {{conf.adjustCvmPrice}}
+                    <span class="unit-txt" ng-show="conf.cvmPayMode == 2">元/小时</span>
+                    <span class="unit-txt" ng-show="conf.cvmPayMode == 1">元</span>
+                  </span>
+                </div>
+            </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmResize()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="resystem.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">重装系统</h3>
+    </div>
+    <div class="modal-body">
+      <form name="resystemForm">
+        <uib-alert type="warning" class="alert-tip" ng-show="system.diskInfo.rootType == 1">
+          检测到当前CVM系统盘为本地盘，暂不允许重装为Windows
+        </uib-alert>
+        <uib-alert type="danger" class="alert-tip" ng-show="system.diskInfo.rootType == 2 && options.os.osName.indexOf('Xserver')>-1">
+          检测到您将Linux系统盘更换为Windows，该CVM系统盘ID将发生变化，系统盘关联快照将无法回滚、恢复数据，请慎重选择！
+        </uib-alert>
+        <div class="control-group" >
+          <label class="control-label">镜像来源</label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button type="button" ng-click="chooseImgType(item.value)" ng-class='{"active":item.value === options.imageType}' ng-repeat="item in imageType"><span>{{item.name}}</span></button>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="control-group" ng-show="options.imageType == 1">
+          <label class="control-label">系统版本</label>
+          <div class="controls">
+            <ui-select ng-model="options.os" name="imageName1" ng-required="options.imageType == 1">
+              <ui-select-match placeholder="请选择系统版本">{{$select.selected.imageName}}</ui-select-match>
+              <ui-select-choices repeat="os in osList | filter:{imageName:$select.search}">
+                <div ng-bind-html="os.imageName | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div  class="error" ng-messages="(submitform ||resystemForm.imageName1.$dirty) && resystemForm.imageName1.$error">
+              <form-validate ></form-validate>
+            </div>
+          </div>
+        </div> -->
+        <div class="control-group"  ng-if="options.imageType == 2">
+          <label class="control-label">操作系统</label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button type="button" ng-click="chooseosType(item)" ng-class='{"active":item === options.osType}' ng-repeat="item in osType"><span>{{item}}</span></button>
+            </div>
+          </div>
+        </div> 
+        <div class="control-group"  ng-show="options.imageType == 3">
+          <label class="control-label">镜像
+          </label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button type="button" ng-click="chooseMosType(item.value)" ng-class='{"active":item.value === options.osType}' ng-repeat="item in category"><span>{{item.name}}</span></button>
+            </div>
+          </div>
+        </div> 
+        <div class="control-group" ng-show="options.imageType!=0">
+          <label class="control-label">系统版本</label>
+          <div class="controls">
+            <ui-select ng-model="options.os" name="imageName" ng-required="options.imageType !=0">
+              <ui-select-match placeholder="请选择系统版本">{{$select.selected.imageName}}</ui-select-match>
+              <ui-select-choices repeat="os in osList | filter:{imageName:$select.search}">
+                <div ng-bind-html="os.imageName | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div  class="error" ng-messages="(submitform ||resystemForm.imageName.$dirty) && resystemForm.imageName.$error">
+              <form-validate ></form-validate>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="control-group" ng-show="system.diskInfo.rootType == 2">
+            <label class="control-label">系统盘</label>
+            <div class="controls">
+              <div class="rzslider-box">
+                <rzslider rz-slider-model="slider.rootSizeValue" rz-slider-options="slider.options" ng-mouseleave="pricesize()"></rzslider>
+                <input type="text" ng-model="slider.rootSizeValue"></input>
+                <span class="unit">GB</span>
+              </div>
+            </div>
+        </div> -->
+        <div class="control-group">
+            <label class="control-label">系统盘</label>
+            <div class="controls">
+              <span>{{system.diskInfo.rootType == 2 && options.os.osName.indexOf('Xserver')>-1 ? 50:system.diskInfo.rootSize}}GB</span>
+            </div>
+        </div>
+        <div class="control-group" >
+          <label class="control-label">登陆设置</label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button type="button" class="type-btn" ng-class='{"active":item.value=== options.loginStyle}' ng-click="chooseLoginStyle(item.value)"  ng-repeat="item in loginStyle">
+                  <span>{{item.name}}</span>
+                </button>
+            </div>
+          </div>
+        </div> 
+        <div class="control-group" ng-if="options.loginStyle == 1">
+          <label class="control-label">用户名</label>
+          <div class="controls"> 
+          {{options.os.osName.indexOf('Xserver')>-1 ? "Administrator":"root"}}
+          </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"><i class="red">*</i> 密码</label>
+            <div class="controls">
+                <input type="password" class="form-controls input-sm" name="password" ng-model="options.password"  id="user_pass"   required 
+                ng-pattern="passpattern" ng-minlength="passminnum" ng-maxlength="16" placeholder="请输入主机密码"  />
+                <div class="error" ng-messages="(submitform ||resystemForm.password.$dirty) && resystemForm.password.$error">
+                  <div ng-message="minlength">请最少输入{{passminnum}}个字符</div>
+                  <div ng-message="maxlength">请最多输入16个字符</div>
+                  <div ng-message="pattern">{{passtip}}</div>
+                  <div ng-message="required">必填项</div>
+                </div>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"><i class="red">*</i> 确认密码</label>
+            <div class="controls">
+                <input type="password" class="form-controls input-sm" name="confirmPassWord" ng-model="options.cfmPassword"  required
+                ng-pattern="passpattern" ng-minlength="passminnum" ng-maxlength="16" placeholder="请再次输入主机密码"  pw-check="user_pass" />
+                <div class="error" ng-messages="(submitform ||resystemForm.confirmPassWord.$dirty) && resystemForm.confirmPassWord.$error" >
+                  <div ng-message="minlength">请最少输入{{passminnum}}个字符</div>
+                  <div ng-message="maxlength">请最多输入16个字符</div>
+                  <div ng-message="pattern">{{passtip}}</div>
+                  <div ng-message="required">必填项</div>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="control-group" ng-if="options.loginStyle == 2">
+            <label class="control-label">SSH密钥</label>
+            <div class="controls">
+              <ui-select ng-model="options.ssh" >
+                <ui-select-match placeholder="SSH密钥">{{$select.selected.keyName}}</ui-select-match>
+                <ui-select-choices repeat="ssh in shhKeypaire | filter: {keyName: $select.search}">
+                  <div ng-bind-html="ssh.keyName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+        </div> -->
+       <!--  <div class="control-group">
+         <label class="control-label">原配置费用</label>
+         <div class="controls"> 
+          
+         </div>
+       </div>
+       <div class="control-group">
+         <label class="control-label">新配置费用</label>
+         <div class="controls"> 
+          
+         </div>
+       </div> -->
+        <uib-alert type="danger" class="alert-tip">
+          注意：重装后，服务器系统盘内的所有数据将被清除，恢复到初始状态；服务器数据盘的数据不会丢失，但需要手动挂载才能使用
+        </uib-alert>
+    
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmResystem(resystemForm)">开始重装</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="loadsg.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">配置安全组</h3>
+    </div>
+    <div class="modal-body">
+      <form name="keypairForm">
+        <div class="control-group">
+          <span class="control-span-volume">您已选<strong>{{checkedItems.length}}台云主机，</strong></span>
+          <a class="blue" ng-click="showVm()">查看详情
+          <i ng-show="show_vm" class=" icon-aw-angle-down"></i>
+          <i ng-show="!show_vm" class="icon-aw-angle-up"></i>
+          </a>
+          <table class="table table-info column table-volum-mount" ng-if="show_vm">
+            <tbody> 
+              <tr ng-repeat="item in checkedItems">
+                <td>{{$index+1}}</td>
+                <td>{{item.unInstanceId}}</td>
+                <td>可配置安全组</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="control-group">
+          <span>选择您需要配置的安全组</span>
+        </div>
+        <div class ="check-table">
+          <div class="field" ng-repeat = "item in secGroups">
+            <label class="checkbox">
+              <input type="checkbox" name="r" ng-model="checkboxes[item.sgId]" value="{{item.sgId}}" ng-disabled="checkboxesDis[item.sgId]" />
+              <i class="iconfont"></i>
+            </label>
+            <span class="blue">ID：{{item.sgId}} </span>
+            <span > {{item.sgName}}</span>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmLoadsg()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="unbindsshkey.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">解绑密钥</h3>
+    </div>
+    <div class="modal-body">
+      <form name="keypairForm">
+        <div class="alert alert-warning">
+          确定选中主机进行解绑密钥
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmunbindsshkey()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

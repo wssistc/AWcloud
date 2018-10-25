@@ -1,0 +1,116 @@
+<div class="page-inner">
+  <div class="netManage-box">
+     <form name="networksManageForm" autocomplete="off">
+        <div class="physicalNet-box" ng-if="vlanType=='vlan'">
+            <h4>{{"aws.system.networksManage.insTenantPhyNet"|translate}}</h4>
+            <!-- <loading-data  data="tenantData" class="nodata-msg"></loading-data> -->
+            <div class="control-group" ng-repeat="assignTenantNet in manageData.assignTenantNetList track by $index">
+                  <label class="control-label">{{"aws.system.networksManage.interfaceName"|translate}}：</label>
+                  <div class="controls" ng-if="!assignTenantNet.add">
+                    <div class="netName">{{assignTenantNet.showName}}</div>
+                  </div>
+                  <div class="add" ng-class="{'inuse':assignTenantNet.usable==1}" data-toggle="modal" title={{assignTenantNet.usable==1?netInUse:""}}>
+                    <a ng-click="delAssignNet(manageData.assignTenantNetList,$index,assignTenantNet)">
+                      <i class="icon-aw-minus2"></i>
+                    </a>
+                  </div>
+            </div>
+            <div class="control-group" ng-repeat="addNet in manageData.addTenantNetList track by $index">
+                  <label class="control-label">{{"aws.system.networksManage.interfaceName"|translate}}：</label>
+                  <div class="controls">
+                      <ui-select name="addTenantNet_{{$index}}" ng-model="manageData.tenantNetsModel[$index]" ng-disabled="manageData.availableTenantNets['options_'+$index].length==0&&!manageData.tenantNetsModel[$index]" title='{{"aws.networks.choseNetType"|translate}}' ng-click="tanentClick($index,manageData.tenantNetsModel[$index],'tenant')" required>
+                          <ui-select-match placeholder='{{manageData.availableTenantNets["options_"+$index].length==0?("aws.system.networksManage.placeholder.noInsExternalPhyNet"|translate):("aws.system.networksManage.placeholder.interface"|translate)}}'>{{$select.selected.showName}}</ui-select-match>
+                          <ui-select-choices repeat="network in manageData.availableTenantNets['options_'+$index] track by $index">
+                             <div ng-bind-html="network.showName | highlight: $select.search"></div>
+                          </ui-select-choices>
+                      </ui-select>
+                      <div class="error" ng-messages="(submitInValid ||networksManageForm['addTenantNet_'+$index].$dirty) && networksManageForm['addTenantNet_'+$index].$error">
+                        <form-validate></form-validate>
+                      </div>
+                  </div>
+                  <div class="add" ng-class="{'inuse':assignNet.usable==1}">
+                    <a ng-click="delAddNet(manageData.addTenantNetList,manageData.addExternalNetList,$index,'tenant')">
+                      <i class="icon-aw-minus2"></i>
+                    </a>
+                  </div>
+            </div>
+            <div class="addExternal" ng-class="{'inuse':manageData.availableTenantNets['options_'+manageData.addTenantNetList.length].length==0}"  title='{{manageData.availableTenantNets["options_"+manageData.addTenantNetList.length].length==0?noAvailableNet:""}}' data-toggle='modal'>
+               <a ng-click="addTenantNet(manageData.addExternalNetList,manageData.addTenantNetList)">
+                <i class="icon-aw-add-to2"></i>{{"aws.system.networksManage.add"|translate}}
+               </a>
+            </div>
+        </div>
+        <div class="physicalNet-box">
+          <h4>{{"aws.system.networksManage.insExternalPhyNet"|translate}}</h4>
+          <!-- <loading-data  data="externaldata" class="nodata-msg" ></loading-data> -->
+          <div class="control-group" ng-repeat="assignExternalNet in manageData.assignExternalNets track by $index">
+                <label class="control-label">{{"aws.system.networksManage.interfaceName"|translate}}：</label>
+                <div class="controls" ng-if="!assignExternalNet.add">
+                  <div class="netName">{{assignExternalNet.showName}}</div>
+                </div>
+                <div class="add" ng-class="{'inuse':assignExternalNet.usable==1}" data-toggle="modal" title={{assignExternalNet.usable==1?netInUse:""}}>
+                  <a ng-click="delAssignNet(manageData.assignExternalNets,$index,assignExternalNet)">
+                    <i class="icon-aw-minus2"></i>
+                  </a>
+                </div>
+          </div>
+          <div class="control-group" ng-repeat="addNet in manageData.addExternalNetList track by $index">
+                <label class="control-label">{{"aws.system.networksManage.interfaceName"|translate}}：</label>
+                <div class="controls">
+                    <ui-select name="addExternalNet_{{$index}}" ng-model="manageData.externalNetsModel[$index]" ng-disabled="manageData.availableExternalNets['options_'+$index].length==0&&!manageData.externalNetsModel[$index]" title='{{"aws.networks.choseNetType"|translate}}' ng-click="click($index,manageData.externalNetsModel[$index],'external')" required>
+                        <ui-select-match placeholder='{{manageData.availableExternalNets["options_"+$index].length==0?("aws.system.networksManage.placeholder.noInsExternalPhyNet"|translate):("aws.system.networksManage.placeholder.interface"|translate)}}'>{{$select.selected.showName}}</ui-select-match>
+                        <ui-select-choices repeat="network in manageData.availableExternalNets['options_'+$index] track by $index">
+                           <div ng-bind-html="network.showName | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <div class="error" ng-messages="(submitInValid ||networksManageForm['addExternalNet_'+$index].$dirty) && networksManageForm['addExternalNet_'+$index].$error">
+                      <form-validate></form-validate>
+                    </div>
+                </div>
+                <div class="add" ng-class="{'inuse':assignNet.usable==1}">
+                  <a ng-click="delAddNet(manageData.addTenantNetList,manageData.addExternalNetList,$index,'external')">
+                    <i class="icon-aw-minus2"></i>
+                  </a>
+                </div>
+          </div>
+          <div class="addExternal" ng-class="{'inuse':manageData.availableExternalNets['options_'+manageData.addExternalNetList.length].length==0}" title='{{manageData.availableExternalNets["options_"+manageData.addExternalNetList.length].length==0?noAvailableNet:""}}' data-toggle='modal'>
+             <a ng-click="addExternalNet(manageData.addExternalNetList,manageData.addTenantNetList)">
+              <i class="icon-aw-add-to2"></i>{{"aws.system.networksManage.add"|translate}}
+             </a>
+          </div>
+        </div>
+        <div class="physicalNet-box">
+            <h4>{{"aws.system.networksManage.phyHostPhyNet"|translate}}</h4>
+            <div class="control-group" ng-repeat="tenantNet in manageDta.tenantNetList">
+                  <label class="control-label">{{"aws.system.networksManage.interfaceName"|translate}}：</label>
+                  <div class="controls">
+                      <ui-select ng-model="networkForm.selectedNetType" ng-change="changeNetType(networkForm.selectedNetType)" ng-disabled="options.disabled" title='{{"aws.networks.choseNetType"|translate}}' >
+                          <ui-select-match placeholder='{{"aws.system.networksManage.placeholder.interface"|translate}}' >{{$select.selected}}</ui-select-match>
+                          <ui-select-choices repeat="network as network in netTypes.options">
+                          <div ng-bind-html="network | highlight: $select.search"></div>
+                          </ui-select-choices>
+                      </ui-select>
+                  </div>
+                  <div class="add" ng-if="$index==0">
+                    <a ng-click="addTenantNet()">
+                      <i class="icon-aw-add-to2"></i>{{"aws.system.networksManage.add"|translate}}
+                    </a>
+                  </div>
+                  <div class="add" ng-if="$index!=0">
+                    <a ng-click="delTenantNet()">
+                      <i class="icon-aw-wrong"></i>{{"aws.system.networksManage.delete"|translate}}
+                    </a>
+                  </div>
+            </div>
+        </div>
+     </form>
+  </div>
+  <div class="text-center">
+      <div ng-if="vlanType=='vlan'">
+          <button class="btn btn-info ng-binding" ng-click="saveNetworksManage(networksManage)" ng-disabled="!externaldata||!tenantData">保存</button>
+      </div>
+      <div ng-if="vlanType=='vxlan'">
+          <button class="btn btn-info ng-binding" ng-click="saveNetworksManage(networksManage)" ng-disabled="!externaldata">保存</button>
+      </div>
+  </div>
+</div>

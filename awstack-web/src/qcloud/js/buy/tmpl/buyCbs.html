@@ -1,0 +1,172 @@
+<div class="page-inner">
+  <div class="shop-title">
+    <a ng-href="#/cvm/cbs">返回<i class="icon-aw-angle-left"></i></a><span>创建云硬盘 CVM</span>
+  </div>
+	<div class="shop-body">
+  	<form name="createVolumeForm" novalidate autocomplete="off">
+  		<uib-alert type="warning" class="alert-tip">
+  			<strong>重要提示：</strong></br>
+  			弹性云盘可以单独购买，按包年包月计费，独立存在。数据可靠性达 99.999999%。</br>
+  			弹性云盘可以在同一可用区内的虚拟机之间自由挂载和卸载。</br>
+  		</uib-alert>
+  		<div class="control-group">
+  			<label class="control-label">命名</label>
+  			<div class="controls">
+  				<input type="text" class="form-control input-lg" name="name" ng-model="postData.storageName" placeholder="请输入云硬盘名称" ng-pattern="/^[^`<>]*$/"  ng-maxlength="20" />
+  				<div class="error" ng-if="interacted(createVolumeForm.name)" ng-messages="createVolumeForm.name.$error" >
+  					<div ng-message="maxlength">请最多输入20个字符</div>
+  					<div ng-message="pattern">不允许输入非法字符串</div>
+  				</div>
+  			</div>
+  		</div>
+  		<!-- <div class="control-group">
+  			<label class="control-label">所属项目</label>
+  			<div class="controls">
+  				<ui-select ng-model="project" ng-change="changePro()" title="">
+  					<ui-select-match placeholder="">{{$select.selected.projectName}}</ui-select-match>
+  					<ui-select-choices repeat="project in projectList | propsFilter: {projectName: $select.search}">
+  						<div ng-bind-html="project.projectName | highlight: $select.search"></div>
+  					</ui-select-choices>
+  				</ui-select>
+  			</div>
+  		</div> -->
+  		<div class="control-group">
+              <label class="control-label"><i class="red">*</i> 地域</label>
+              <div class="controls">
+                <div class="btn-item-group">
+                  <button type="button" class="type-btn" ng-class='{"active":item.value === postData.Region}' ng-click="changeRegion(item)" ng-repeat="item in regionList">
+                    <span>{{item.text}}</span>
+                  </button>
+                </div>
+              </div>
+          </div>
+          <div class="control-group">
+              <label class="control-label"><i class="red">*</i> 可用区</label>
+              <div class="controls">
+                <div class="btn-item-group">
+                  <button type="button" class="type-btn" ng-class='{"active":item.zoneId === postData.zoneId}' ng-click="changeZone(item)"  ng-repeat="item in zoneList">
+                    <span>{{item.zoneName}}</span>
+                  </button>
+                </div>
+              </div>
+          </div>
+          <div class="control-group">
+              <label class="control-label"><i class="red">*</i> 计费模式</label>
+              <div class="controls">
+                <div class="btn-item-group">
+                  <button type="button" class="type-btn" ng-class='{"active":item.value === postData.payMode}' ng-click="changePayMode(item)" ng-repeat="item in payModeList">
+                    <span>{{item.text}}</span>
+                  </button>
+                </div>
+              </div>
+          </div>
+          <div class="control-group">
+              <label class="control-label"><i class="red">*</i> 云硬盘类型</label>
+              <div class="controls">
+                <div class="btn-item-group">
+                  <button type="button" class="type-btn" ng-class='{"active":item.value === postData.storageType}' ng-click="choosenStorageType(item)"  ng-repeat="item in storageTypeList">
+                    <span>{{item.text}}</span>
+                  </button>
+                </div>
+              </div>
+          </div>
+          <div class="control-group">
+              <label class="control-label"><i class="red">*</i> 容量</label>
+              <div class="controls rzslider-box">
+                <!-- <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+                <input type="text" ng-model="slider.value" max="slider.options.ceil" step="slider.options.step" num-range min="slider.options.floor"/> -->
+                <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options" ng-mouseleave="pricesize()"></rzslider>
+                <input type="text" ng-model="showValue" ng-blur="validataValue()"></input> 
+                <span class="unit">GB</span>
+              </div>
+          </div>
+          <div class="control-group" ng-show="showAnnotation">
+          	<label class="control-label">&nbsp</label>
+          	<div class="controls annotation-color">峰值性能: 随机IO 6000 IOPS 吞吐量 150.0 MB/s</div>
+          </div>
+  		<div class="control-group">
+  			<label class="control-label">快照创建云硬盘</label>
+  			<div class="controls" >
+  				<div class="checkbox switch-btn">
+  					<label>
+  						<input type="checkbox"  class="form-controls" ng-model="useSnapshot">
+  						<i class="iconfont"></i>
+  					</label>
+  				</div>
+  			</div>
+  		</div>
+  		<div class="control-group" ng-if="useSnapshot">
+  			<label class="control-label">快照创建云硬盘</label>
+  			<div class="controls">
+  				<div class="search-box">
+  					<!-- <form> -->
+  						<button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+  						<input type="text" class="form-control" placeholder="根据快照名称/ID进行搜索" ng-model="searchConcent" ng-keyup="searchSnap(searchConcent)" />
+  					<!-- </form> -->
+  				</div>
+          <div style="width:800px;">
+  				<table class="table table-check" ng-table="snapshotsTable" show-filter="false">
+  					<tbody>
+  						<tr ng-repeat="snapshot in $data">
+  							<td>
+  								<label class="radio">
+  									<input name="snap" type="radio"  ng-click="selectSnap(snapshot)"  />
+  								    <i class="iconfont"></i>
+  								</label>
+  							</td>
+  							<td data-title="'ID/名称'" sortable="'snapshotId'">{{snapshot.snapshotId}}</br>{{snapshot.snapshotName}}</td>
+  							<td data-title="'创建时间'" sortable="'createTime'">{{snapshot.createTime}}</td>
+  							<td data-title="'大小'" sortable="'storageSize'">{{snapshot.storageSize}}</td>
+  						</tr>
+  					</tbody>
+  				</table>
+          </div>
+  			</div>
+  		</div>
+  		<div class="control-group">
+  		</div>
+  		<div class="control-group">
+  			<label class="control-label"><i class="red">*</i> 购买数量</label>
+  			<div class="controls">
+  				<div class="count-box">
+  					<input type="button" ng-disabled="!canReduce()" class="minus" value="-" ng-click="reducenum()"></input>
+  					<input type="text" name="goodsNum" ng-pattern="/^[1-9]+[0-9]*$/" ng-model="postData.goodsNum" class="button-num" min="1" max="10" required limitnumrange></input>
+  					<input type="button" ng-disabled="!canAdd()" class="add"  value="+" ng-click="addnum()"></input>
+  				</div>
+          <span class="tips">单次最多可创建10块弹性云硬盘</span>
+  				<div class="error" ng-if="interacted(createVolumeForm.goodsNum)" ng-messages="createVolumeForm.goodsNum.$error" >
+  					<div ng-message="required" >必填项</div>
+  					<div ng-message="pattern">必须输入正整数</div>
+  					<div ng-message="limitnumrange">请输入1~10之间的正整数</div>
+  				</div>
+  				
+  			</div>
+  		</div>
+  		<div class="control-group">
+              <label class="control-label"><i class="red">*</i> 购买时长</label>
+              <div class="controls">
+                <div class="btn-item-group btn-item-xs">
+                  <button type="button" class="type-btn" ng-click="changePeriod(item)" ng-class='{"active":item.value === postData.period}' ng-click="choosen(item)"  ng-repeat="item in periodList">
+                    <span>{{item.text}}</span>
+                  </button>
+                </div>
+              </div>
+      	</div>
+  		<div class="control-group">
+    			<label class="control-label">费用</label>
+    			<div class="controls">
+            <span class="unit-box">{{postData.price}}
+              <span class="unit-txt">元</span>
+            </span>
+    			</div>
+  			</div>
+  		<div class="control-group">
+  	        <label class="control-label">&nbsp;</label>
+  	        <div class="controls">
+  	        	<span ng-if="creating" class="price-loading"><i class="min-loading aw-spin"></i>创建中.....&nbsp</span>
+  	          <button class="btn btn-info" type="button" ng-disabled="subDisabled" ng-click="volumeConfirm()">确定</button>
+  	        </div>
+        	</div>
+  	</form>
+  </div>
+</div>

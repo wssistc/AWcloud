@@ -1,0 +1,18 @@
+<div>
+    <span>已选{{selectItems}}项，共{{totalCount}}项</span>
+    <span>每页显示</span>
+    <div style="width: 20px;">
+        <ui-select ng-model="pageNum" ng-change="changePageNum(pageNum)" title="">
+        <ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+        <ui-select-choices repeat="pageNum in pageNumList | propsFilter: {name: $select.search}">
+            <div ng-bind-html="pageNum.name | highlight: $select.search"></div>
+        </ui-select-choices>
+    </ui-select>
+    </div>
+    
+    <button type="button" ng-click="firstPage()" ng-disabled="!fristButton">第一页</button>
+    <button type="button" ng-click="forward()" ng-disabled="!forwardButton">上一页</button>
+    <span>{{currentPage}}/{{pageCount}}</span>
+    <button type="button" ng-click="back()" ng-disabled="!backButton">下一页</button>
+    <button type="button" ng-click="lastPage()" ng-disabled="!lastButton">最后一页</button>
+</div>

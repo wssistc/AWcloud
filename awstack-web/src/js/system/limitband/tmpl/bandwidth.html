@@ -1,0 +1,114 @@
+<div class="box operating-box">
+	<div class="limitBand">
+		<div class="page-inner">
+				<div class="settings-box">
+					<div class="control-group control-choose">
+						<label class="limit-label ">{{'aws.bandlimit.SpeedLimited'|translate}}：</label>
+						<div class="controls">
+							<div class="checkbox switch-btn">
+								<label>
+									<input type="checkbox"  class="form-controls" ng-model="limitBandWidth.limitActive" ng-change="limitFun(limitBandWidth.limitActive)">
+									<i class="iconfont"></i>
+								</label>
+							</div>
+							<span class="tips-checkbox" ng-if="limitBandWidth.limitActive"><i class='icon-aw-prompt2'></i>{{'aws.bandlimit.tips'|translate}}</span>
+						</div>
+					</div>
+					<div class="limit-srv">
+						<div class="control-group">
+							<label class="control-label">{{'aws.bandlimit.limitType'|translate}}：</label>
+							<div class="controls">
+								<div class="radio-item clearFix">
+									<label>
+										<input type="radio" name="radio" value="1" ng-model="limitBandWidth.typeActive"/>
+										<i class="iconfont"></i>
+										{{'aws.bandlimit.fixBand'|translate}}
+									</label>
+									<!-- <label>
+										<input type="radio" name="radio" value="2" ng-model="limitBandWidth.typeActive" ng-disabled="true" />
+										<i class="iconfont"></i>
+										{{'aws.bandlimit.customBand'|translate}}
+									</label> -->
+								</div>
+							</div>
+						</div>
+						<form name="LimitForm">
+							<div class="fixed-item" ng-if="limitBandWidth.typeActive =='1'">
+								<div class="control-group custom-item">
+									<label class="control-label">{{'aws.bandlimit.Switchboard'|translate}}：</label>					
+									<div class="controls">
+										<div class="input-group">
+											<input type="text" name="netband" ng-model="limitType.fixType.networkBandwidth" min="1" max="10000" limitnumrange limittype="'bandwidth'" class="form-control" required ng-focus="fixTips=true" ng-blur="fixTips=false" ng-readonly="!limitBandWidth.limitActive"/>
+											<div class="unit" ng-if="limitBandWidth.limitActive">Mbps</div>
+										</div>
+										<div class="tips-btn" ng-if="fixTips && limitBandWidth.limitActive">{{'aws.bandlimit.tipsBtn'|translate}}</div>
+									</div>
+									<div class="error" ng-messages="(submitValid || LimitForm.netband.$dirty) && LimitForm.netband.$error">
+										<span ng-if="LimitForm.netband.$error.limitnumrange">{{'aws.errors.limit_1_10000
+										'|translate}}</span>
+										<span ng-if="LimitForm.netband.$error.required&&LimitForm.netband.$dirty">{{'aws.errors.required'|translate}}</span>
+									</div>
+								</div>
+							</div>
+							<!-- <div class="custom-item" ng-if="limitBandWidth.typeActive =='2'">
+								<div class="control-group">
+									<label class="control-label">{{'aws.bandlimit.IP_bandwidth'|translate}}：</label>
+									<div class="controls">
+										<div class="control-child">
+											<div class="input-group">
+												<input type="text" name="Ipbandstart" ng-model="limitType.cusotmType.ipBandwidthstart" min="1" max="10000" limitnumrange class="form-control" required/>
+												<span class="btn link-item">~</span>
+											</div>
+											<div class="error" ng-messages="(submitValid || LimitForm.Ipbandstart.$dirty) && LimitForm.Ipbandstart.$error">
+												<span ng-if="LimitForm.Ipbandstart.$error.limitnumrange">{{'aws.errors.limit_1_10000
+												'|translate}}</span>
+												<span ng-if="LimitForm.Ipbandstart.$error.required&&LimitForm.Ipbandstart.$dirty">{{'aws.errors.required'|translate}}</span>
+											</div>
+										</div>
+										<div class="control-child">
+											<div class="input-group">
+												<input type="text" name="Ipbandend" ng-model="limitType.cusotmType.ipBandwidthend" min="1" max="10000" limitnumrange class="form-control" required/>
+												<span class="btn">Mbps</span>
+											</div>
+											<div class="error" ng-messages="(submitValid || LimitForm.Ipbandend.$dirty) && LimitForm.Ipbandend.$error">
+												<span ng-if="LimitForm.Ipbandend.$error.limitnumrange">{{'aws.errors.limit_1_10000
+												'|translate}}</span>
+												<span ng-if="LimitForm.Ipbandend.$error.required&&LimitForm.Ipbandend.$dirty">{{'aws.errors.required'|translate}}</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="control-group">
+									<label class="control-label">{{'aws.bandlimit.Router_bandwidth'|translate}}：</label>
+									<div class="controls">
+										<div class="input-group">
+											<input type="text" name="routerstart" ng-model="limitType.cusotmType.routerBandwidthstart" min="1" max="10000" limitnumrange class="form-control" required />
+											<span class="btn link-item">~</span>
+										</div>
+										<div class="error" ng-messages="(submitValid || LimitForm.routerstart.$dirty) && LimitForm.routerstart.$error">
+											<span ng-if="LimitForm.routerstart.$error.limitnumrange">{{'aws.errors.limit_1_10000
+											'|translate}}</span>
+											<span ng-if="LimitForm.routerstart.$error.required&&LimitForm.routerstart.$dirty">{{'aws.errors.required'|translate}}</span>
+										</div>
+										<div class="input-group">
+											<input type="text" name="routerend" ng-model="limitType.cusotmType.routerBandwidthend" min="1" max="10000" limitnumrange class="form-control" required />
+											<span class="btn link-item">Mbps</span>
+										</div>
+										<div class="error" ng-messages="(submitValid || LimitForm.routerend.$dirty) && LimitForm.routerend.$error">
+											<span ng-if="LimitForm.routerend.$error.limitnumrange">{{'aws.errors.limit_1_10000
+											'|translate}}</span>
+											<span ng-if="LimitForm.routerend.$error.required&&LimitForm.routerend.$dirty">{{'aws.errors.required'|translate}}</span>
+										</div>
+									</div>
+								</div>
+							</div> -->
+						</form>
+					</div>
+				</div>
+			
+			<div class="text-center">
+				<button class="btn btn-info"  ng-click="updateLimit(LimitForm)" ng-disabled="LimitForm.$invalid||buttonSubmit">{{'aws.action.save'|translate}}</button>
+			</div>
+		</div>
+	</div>
+</div>

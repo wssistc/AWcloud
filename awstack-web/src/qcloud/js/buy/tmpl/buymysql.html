@@ -1,0 +1,157 @@
+<div class="page-inner">
+  <div class="shop-title">
+    <a ng-href="#/cdb/cdblist">返回<i class="icon-aw-angle-left"></i></a><span>创建云数据库MySQL</span>
+  </div>
+  <div class="shop-body">
+    <form name="newMysql">
+          <div class="control-group">
+            <label class="control-label">计费模式</label>
+            <div class="controls">
+              <div class="btn-item-group btn-item-lg">
+                <button ng-class="{'active':curPay==item.value}" ng-click="selPayType(item)" ng-repeat="item in payType">{{item.text}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">地域</label>
+            <div class="controls">
+              <div class="btn-item-group btn-item-lg">
+                <button ng-class="{'active':item.region==regionCur}" ng-click="selReg(item)" ng-repeat="item in regionList">{{"CN.region."+item.region|translate}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">可用区</label>
+            <div class="controls">
+              <div class="btn-item-group btn-item-lg">
+                <button ng-class="{'active':key==curZoneId}" ng-click="selZone(key,val)" ng-show="val.types.length>0" ng-repeat="(key,val) in shopconfigs.goodsDescription">{{"CN.mysql.zoneId."+key|translate}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">网络</label>
+            <div class="controls">
+              <div class="btn-item-group btn-item-lg">
+                <button ng-class="{'active':curNetC=='base'}" ng-click="curNetC='base'">基础网络</button>
+                <button ng-if="isSupportVpc" ng-class="{'active':curNetC=='perNet'}" ng-click="chooseNetwork()">私有网络</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-if="curNetC=='perNet'">
+            <label class="control-label">&nbsp;</label>
+            <div class="controls">
+              <div>
+                <ui-select class="uisel-sm" ng-class="{'error':required.network}" ng-model="network.select" ng-change="selNetwork(network.select)" name="network" required ng-disabled="!networkList.length>0">
+                  <ui-select-match>{{$select.selected.vpcName}}</ui-select-match>
+                  <ui-select-choices  repeat="item in networkList | filter: {vpcName : $select.search} ">
+                    <div ng-bind-html="item.vpcName | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+
+                <ui-select class="uisel-sm" ng-class="{'error':required.subnet}" ng-model="subnet.select" name="subnet" ng-change="selsubNet(subnet.select)" required ng-disabled="!subNetList.length>0">
+                  <ui-select-match>{{$select.selected.subnetName}}</ui-select-match>
+                  <ui-select-choices  repeat="item in subNetList | filter: {subnetName : $select.search} ">
+                    <div ng-bind-html="item.subnetName | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <button class="btn btn-refresh" ng-click="refreshNet()"><i class="icon-aw-repeat green"></i></button>
+                <span class="orange" ng-if="hasSubNet">可用区内无有效子网，请更换可用区或新建子网</span>
+                <span class="tips" ng-if="netNum.show">共<span ng-bind="netNum.totalIPNum" class=""></span>个子网IP，剩<span ng-bind="netNum.availableIPNum" class=""></span>个可用</span>
+              </div>
+              <span class="tips">如现有的网络不合适，您还可以去控制台 <a target="_blank" ng-href="#/vpc/vpc">新建私有网络</a> 或者 <a target="_blank"  ng-href="#/vpc/subnet">新建子网</a></span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">配置类型</label>
+            <div class="controls">
+              <div class="btn-item-group  btn-item-lg">
+                <button class="active">{{curTypes.typeName}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">数据库版本</label>
+            <div class="controls">
+              <div class="btn-item-group btn-item-lg">
+                <button ng-class="{'active':curMysql==item}" ng-click="selMysql(item)" ng-repeat="item in curTypes.mysqlversion">MySQL{{item}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">实例规格</label>
+            <div class="controls">
+              <ui-select class="uisel-md" ng-model="memory.selected" ng-change="selMem(memory.selected)" name="memory">
+                <ui-select-match>{{$select.selected.memory+"MB"}}</ui-select-match>
+                <ui-select-choices  repeat="item in Types | filter: {memory : $select.search} ">
+                  <div ng-bind-html="item.memory | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">硬盘</label>
+            <div class="controls rzslider-box">
+              <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+              <input type="text" ng-model="slider.value" max="slider.options.ceil" step="slider.options.step" num-range min="slider.options.floor"/>
+              <span class="unit">GB</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">数据复制方式</label>
+            <div class="controls">
+              <div class="btn-item-group btn-item-lg">
+                <button class="active" title="仅MySQL5.6支持半同步和强同步复制.">异步复制</button>
+              </div>
+              <span class="tips">一主一备组成集群，数据采用异步复制模式。</span>
+            </div>
+          </div>
+          <!-- <div class="control-group">
+            <label class="control-label">指定项目</label>
+            <div class="controls">
+              <ui-select ng-model="project.selected" ng-change="selectedProject(project.selected)" name="project" title="项目切换">
+                <ui-select-match placeholder="项目切换">{{$select.selected.projectName}}</ui-select-match>
+                <ui-select-choices repeat="item in projectList | filter:{projectName:$select.search}">
+                  <div ng-bind-html="item.projectName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div> -->
+          <div class="control-group">
+            <label class="control-label">购买数量</label>
+            <div class="controls">
+              <div class="count-box" count-box count="goodsNum" count-min="1" count-max="10" max="aaa">
+                <span class="minus">-</span>
+                <input type="text" name="" ng-model="goodsNum" ng-model-options="{ updateOn: 'blur' }" class="button-num"/>
+                <span class="add">+</span>
+              </div>
+              <span ng-show="curPay=='hourPay'">(您在<span ng-bind="'CN.region.'+regionCur|translate"></span>地域可购买的按量计费的云数据库配额为 10 台，已购买<span ng-bind="instanNum"></span>台)</span>
+            </div>
+          </div>
+          <div class="control-group" ng-show="curPay=='prePay'">
+            <label class="control-label">购买时长</label>
+            <div class="controls">
+              <div class="btn-item-group btn-item-xs">
+                <button ng-class="{'active':item.value==curPeri}" ng-click="selPeri(item)" ng-repeat="item in periodList">{{item.text}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">总计费用</label>
+            <div class="controls">
+              <span ng-if="priceIng" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+              <div class="price-tips" ng-class="{'in':!priceIng}">
+                <span class="unit-box">{{price}}<span class="unit-txt">元<span ng-if="curPay!='prePay'">/时</span></span></span><span>提示：只读实例会随主实例释放而释放</span>
+              </div>
+              <!-- <span class="unit-box">{{price}}<span class="unit-txt">元</span></span> -->
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">&nbsp;</label>
+            <div class="controls">
+              <button class="btn btn-info" type="button" ng-disabled="priceIng||subDisabled||newMysql.$invalid" ng-click="confirm()">确定</button>
+            </div>
+          </div>
+          
+        </form>
+  </div>
+</div>

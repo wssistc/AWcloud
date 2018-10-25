@@ -1,0 +1,519 @@
+<div class="page-inner">
+	<div class="page-title">
+		<!-- 云硬盘title -->
+		<h2>云硬盘</h2>
+		<!-- <ui-select ng-model="config" >
+			<ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+			<ui-select-choices repeat="config in configList | propsFilter: {name: $select.search}">
+				<div ng-bind-html="config.name | highlight: $select.search"></div>
+			</ui-select-choices>
+		</ui-select> -->
+		<div class="btn-item-group">
+			<button ng-class='{"active":"gz" === regionid}' ng-click="changeRegion('gz')">广州</button>
+			<button ng-class='{"active":"sh" === regionid}' ng-click="changeRegion('sh')">上海</button>
+			<button ng-class='{"active":"bj" === regionid}' ng-click="changeRegion('bj')">北京</button>
+			<!-- <button ng-class='{"active":"hk" === regionid}' ng-click="changeRegion('hk')">香港</button>
+			<button ng-class='{"active":"sg" === regionid}' ng-click="changeRegion('sg')">新加坡</button>
+			<button ng-class='{"active":"ca" === regionid}' ng-click="changeRegion('ca')">北美</button> -->
+		</div>
+	</div>
+	<div class="table-action">
+		<!-- 增删改查操作 -->
+		<button type="button" data-toggle="modal" ng-click="createVolume()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新建</button>
+		<button type="button" data-toggle="modal" ng-disabled="!canMount" ng-click="mountVolume('edit',checkedItems)" class="btn btn-info">挂载</button> 
+		<button type="button" data-toggle="modal" ng-disabled="!canUnMount" ng-click="unmountVolume('edit',checkedItems)" class="btn btn-info">卸载</button>
+		<button type="button" data-toggle="modal" ng-disabled="!canRenewal" ng-click="renewal(editData)" class="btn btn-info">续费</button>
+		<button type="button" data-toggle="modal" ng-disabled="!canCSnap" ng-click="createSnap('edit',editData)" class="btn btn-info">创建快照</button>
+		<button type="button" class="btn btn-info" ng-csv="downloadFunc()"
+            charset="utf-8" add-bom="true"
+            csv-header="['ID', '名称', '状态', '容量', '可用区', '可挂载/卸载', '已挂载云主机', '磁盘属性','磁盘类型','计费模式','到期时间']"
+            filename="storage.{{regionid}}.csv">导出信息</button>
+		<div class="dropdown">
+			<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" >更多操作<i class=" icon-aw-angle-down"></i></button>
+			<ul class="dropdown-menu">
+				<li>
+					<button ng-disabled="!canExtend" ng-click="extendSize('edit',editData)">扩容</button>
+				</li>
+				<li>
+					<button ng-disabled="!canEdit" ng-click="editName('edit',editData)">改名</button>
+				</li>
+				<!-- <li>
+					<button ng-disabled="!canAllocate" ng-click="allocateVolume(editData)">分配到项目</button>
+				</li> -->
+			</ul>
+		</div>
+		<div class="search-box">
+			<form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+				<button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+				<input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="搜索" />
+			</form>
+		</div>
+		<!-- <div class="search-box">
+			<button class="btn btn-search" type="submit"><i class="icon-aw-search"></i></button>
+				<input type="text" class="form-control" placeholder="根据云硬盘名称/ID进行搜索" ng-model="searchConcent" ng-keyup="searchVolume(searchConcent)"></input>
+		</div> -->
+	</div>
+	<div class="table-content">
+	<!-- table的内容列表 -->
+		<table class="table table-check" ng-table="storageListTable" show-filter="false" id="table2">
+			<tr ng-repeat="storageSet in $data">
+				<td class="check-td" header="'headerCheckbox.html'">
+					<label class="checkbox">
+						<input type="checkbox" ng-model="checkboxes.items[storageSet.storageId]" />
+						<i class="iconfont"></i>
+					</label>
+				</td>
+				<td data-title="'ID/名称'" sortable="'storageId'">
+					<div class="edit-name">
+						<a ng-href="#/cvm/cbs?id={{storageSet.storageId}}">{{storageSet.storageId}}</a>
+						<span ng-click="editName('edit',storageSet)">{{storageSet.storageName}}</span>
+						<!-- <i class="icon-aw-modify blue"></i> -->
+					</div>
+				</td>
+				<td data-title="'状态'" sortable="'storageStatus'">
+					<span>{{"CN.cbs.table.storageStatus."+storageSet.storageStatus | translate}}</span>
+				</td>
+				<td data-title="'容量'" sortable="'storageSize'">
+					<span>{{storageSet.storageSize}}G</span>
+				</td>
+				<td data-title="'可用区'" sortable="'zoneId'">
+					<span>{{"CN.cbs.table.zone."+storageSet.zoneId | translate}}</span>
+				</td>
+				<!-- <td data-title="'可挂载/卸载'" sortable="'attachedAbility'">
+					<span>{{storageSet.attachedAbility}}</span>
+				</td> -->
+				<td data-title="'可挂载/卸载'" sortable="'portable'">
+					<span>{{"CN.cbs.table.portable."+storageSet.portable | translate}}</span>
+				</td>
+				<td data-title="'已挂载云主机'" sortable="'uInstanceId'">
+					<span><a class="blue" ng-href="#/cvm/instances?id={{storageSet.uInstanceId}}">{{storageSet.uInstanceId}}</a></span>
+				</td>
+				<!-- <td>
+					<span>{{storageSet.snapshotAbility}}</span>
+				</td> -->
+				<td data-title="'磁盘属性'" sortable="'diskType'">
+					<span>{{"CN.cbs.table.diskType."+storageSet.diskType | translate}}</span>
+				</td>
+				<td data-title="'磁盘类型'" sortable="'storageType'">
+					<span>{{"CN.cbs.table.storageType."+storageSet.storageType | translate}}</span>
+				</td>
+				<!-- <td data-title="'已挂载云主机'" sortable="'instanceName'">
+					<span class="ycx">{{storageSet.instanceName}}</span>
+				</td> -->
+				<td data-title="'计费模式'" sortable="'payMode'">
+					<span>{{"CN.cbs.table.payMode."+storageSet.payMode | translate}}</span>
+				</td>
+				<td data-title="'创建时间'" sortable="'createTime'">
+					<span>{{storageSet.createTime}}</span>
+				</td>
+				<td data-title="'到期时间'" sortable="'deadlineTimeCopy'">
+					<span>{{storageSet.deadlineTimeCopy}}</span>
+				</td>
+			</tr>
+		</table>
+    	<!-- <page-component total="totalCount" change-page="initVolumesTable(obj)" step="pageStep"></page-component>  --> 
+
+		<!-- <div paging on-data="initVolumesTable(a,b)" select-items="{{checkedItems.length}}" total-count="{{totalCount}}" page-count="{{pageCount}}"> </div> -->
+	</div>
+	<div ng-controller="detailCtrl">
+		<pane class="detail-body" animation="animation">
+			<div class="tab-content">
+				<div class="detail-tab">
+					<div class="dt-title">
+						<a ng-href="#/cvm/cbs">返回<i class="icon-aw-angle-left"></i></a><span>{{detailData.storageId}}详情</span>
+					</div>
+					<div class="dt-box">
+						<ul class="nav nav-tabs clearfix">
+							<li class="active"><a>参数</a></li>
+							<!-- <li class=""><a>弹性网卡</a></li>
+							<li><a>安全组</a></li>
+							<li><a>操作日志</a></li> -->
+						</ul>
+						<div class="dt-content">
+							<div class="tab-pane active">
+								<strong>云硬盘信息</strong>
+								
+								<dl class="dl-horizontal">
+									<dt>名称</dt>
+									<dd>{{detailData.storageName}} <a class="blue" ng-click="editName('detail',detailData)" type="button">改名</a></dd>
+									<dt>资源ID</dt>
+									<dd>
+										<span id="storageId">{{detailData.storageId}}</span>
+										<div class="copy-box">
+											<a copy="#storageId" id='copy-text' data-original-title="dddddd" class="blue">复制</a>
+										</div>
+									</dd>
+									<dt>状态</dt>
+									<dd><span class="green">{{"CN.cbs.table.storageStatus."+detailData.storageStatus | translate}}</span></dd>
+									<dt>所属项目</dt>
+									<dd>{{detailData.projectName}}</dd>
+									<dt>地域</dt>
+									<dd>{{"CN.cbs.region."+regionid | translate}}</dd>
+									<dt>可用区</dt>
+									<dd>{{"CN.cbs.table.zone."+detailData.zoneId | translate}}</dd>
+									<dt>磁盘类型</dt>
+									<dd>{{"CN.cbs.table.storageType."+detailData.storageType | translate}}</dd>
+									<dt>磁盘属性</dt>
+									<dd>{{"CN.cbs.table.diskType."+detailData.diskType | translate}}</dd>
+									<dt>云硬盘容量</dt>
+									<dd>{{detailData.storageSize}}G <a class="blue" ng-if="canMountDetail" ng-click="extendSize('detail',detailData)">扩容</a></dd>
+									<dt>已挂载云主机</dt>
+									<dd><a class="blue" ng-href="#/cvm/instances?id={{detailData.uInstanceId}}">{{detailData.uInstanceId}}</a><span ng-if="canMountDetail">未挂载</span> <a class="blue" ng-click="mountVolume('detail',[detailData])" type="button" ng-if="canMountDetail&&isShowAttach">挂载</a> <a class="blue" ng-click="unmountVolume('detail',[detailData])" type="button" ng-if="!canMountDetail&&isShowAttach">卸载</a></dd>
+									<dt>云主机名称</dt>
+									<dd><a class="blue" ng-href="#/cvm/instances?id={{detailData.uInstanceId}}">{{detailData.instanceName}}</a> <!-- <a class="blue" ng-click="unmountVolume([detailData])" type="button" ng-if="!canMountDetail&&isShowAttach">卸载</a> --></dd>
+									<dt>可卸载</dt>
+									<dd>{{"CN.cbs.table.portable."+detailData.portable | translate}}</dd>
+									<dt>计费模式</dt>
+									<dd>{{"CN.cbs.table.payMode."+detailData.payMode | translate}}</dd>
+									<dt>定期快照策略</dt>
+									<dd>未关联</dd>
+									<dt>创建时间</dt>
+									<dd>{{detailData.createTime}}</dd>
+									<dt>到期时间</dt>
+									<dd>{{detailData.deadlineTimeCopy}}</dd>
+									<dt>本磁盘快照</dt>
+									<dd><span ng-if="!haveSnap">无快照</span><span ng-repeat="snap in detailData.snapshotIds">
+										<a class="blue" ng-href="#/cvm/snapshot?id={{snap}}">{{snap}}</a>
+									</span> <a class="blue" ng-click="createSnap('detail',detailData)" type="button">创建快照</a></dd>
+								</dl>
+							</div>
+							<div class="tab-pane">2</div>
+							<div class="tab-pane">3</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</pane>
+	</div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+		<i class="iconfont"></i>
+	</label>
+</script>
+<script type="text/ng-template" id="loadingVolumeModel.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+			<h3 class="modal-title">挂载到云主机</h3>
+		</div>
+		<div class="modal-body">
+			<form name="createVolumeForm" novalidate>
+				<div class="control-group detail-info">
+					<span class="control-span-volume">你已选<strong>1台云硬盘，</strong></span>
+					<a class="blue" ng-click="showVolume()">查看详情
+					<i ng-show="isShowVolume" class=" icon-aw-angle-down"></i>
+					<i ng-show="!isShowVolume" class="icon-aw-angle-up"></i>
+					</a>
+					
+				</div>
+				<table class="table table-check" ng-if="!isShowVolume">
+						<tbdoy>
+						<tr ng-repeat="volume in selectVolumeList">
+							<td>{{$index+1}}</td>
+							<td>{{volume.storageName}}</td>
+							<td>{{"CN.cbs.table.portable."+volume.portable | translate}}</td>
+						</tr>
+						</tbdoy>
+					</table>
+				<div class="control-group">
+					<label class="control-label" ><i class="red">*</i> 选择云主机</label>
+					<div class="controls">
+						<div class="search-box">
+							<button class="btn btn-search" type="submit"><i class="icon-aw-search"></i></button>
+							 <input type="text" class="form-control" placeholder="根据云主机名称/ID进行搜索" ng-model="searchConcent" ng-keyup="searchIns(searchConcent)"></input>
+						</div>
+					</div>
+				</div>
+				<table class="table table-check">
+					<thead>
+						<tr>
+							<th></th>
+							<th>ID</th>
+							<th>名称</th>
+							<th>可挂载数量</th>
+						</tr>
+					</thead>
+					<tbdoy>
+						<tr ng-repeat="ins in instanceList">
+							<td>
+								<label class="radio">
+									<input name="instance" type="radio"  ng-click="selectVm(ins.unInstanceId)"/>
+								    <i class="iconfont"></i>
+								</label>
+							</td>
+							<td>{{ins.unInstanceId}}</td>
+							<td><span class="ycx">{{ins.instanceName}}</span></td>
+							<td>{{ins.volumesNum}}</td>
+						</tr>
+					</tbdoy>
+				</table>
+				<page-component total="totalCount" change-page="initInsTable(obj)" step="pageStep"></page-component>
+				<div class="control-group">
+					<label class="control-label">自动续费</label>
+					<div class="controls">
+						<label class="checkbox">
+              <input type="checkbox" class="form-controls" name="">
+              <i class="iconfont"></i>
+              <span class="tips">若选择该项，每次实例到期会自动续费一个月，使用之前请确保账户余额充足。</span>
+            </label>
+					</div> 
+					
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" ng-disabled="!canConfirm" ng-click="volumeConfirm()">确认</button>
+			<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="unmountVolumeModel.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+			<h3 class="modal-title">卸载云硬盘</h3>
+		</div>
+		<div class="modal-body">
+			<form name="createVolumeForm" novalidate>
+				<div class="control-group">
+					<span class="control-span-volume">您已选<strong>1台云硬盘，</strong></span>
+					<a class="blue" ng-click="showVolum()">查看详情
+					<i ng-show="isShowVolum" class=" icon-aw-angle-down"></i>
+					<i ng-show="!isShowVolum" class="icon-aw-angle-up"></i>
+					</a>
+					<table class="table table-check" ng-if="!isShowVolum">
+						<tbdoy>	
+						<tr ng-repeat="volume in selectVolumeList">
+							<td>{{$index+1}}</td>
+							<td>{{volume.storageName}}</td>
+							<td>{{"CN.cbs.table.portable."+volume.portable | translate}}</td>
+						</tr>
+						</tbdoy>
+					</table>
+				</div>
+				<div class="alert alert-warning" ng-if="showAlert">
+					卸载云主机({{selectVolumeList[0].uInstanceId}})的云硬盘({{selectVolumeList[0].storageId}}) <br>
+					win服务器：强烈建议您在卸载之前，对该磁盘执行脱机操作，<a href="https://www.qcloud.com/document/product/362/2922#3.-.E5.8D.B8.E8.BD.BD.E5.BC.B9.E6.80.A7.E4.BA.91.E7.A1.AC.E7.9B.98">详情请点击</a>。</br>linux服务器：建议您在卸载之前，确保该硬盘的所有分区处于非加载状态 (umounted)。部分linux操作系统可能不支持磁盘热拔插，<a href="https://www.qcloud.com/document/product/362/2926">详情请点击</a>。
+				</div>
+				<div class="alert alert-warning" ng-if="!showAlert">
+					批量卸载云硬盘 <br>
+					win服务器：强烈建议您在卸载之前，对该磁盘执行脱机操作，<a href="https://www.qcloud.com/document/product/362/2922#3.-.E5.8D.B8.E8.BD.BD.E5.BC.B9.E6.80.A7.E4.BA.91.E7.A1.AC.E7.9B.98">详情请点击</a>。</br>linux服务器：建议您在卸载之前，确保该硬盘的所有分区处于非加载状态 (umounted)。部分linux操作系统可能不支持磁盘热拔插，<a href="https://www.qcloud.com/document/product/362/2926">详情请点击</a>。
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmUnmount()">确认</button>
+			<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="renewal.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+			<h3 class="modal-title">云硬盘续费</h3>
+		</div>
+		<div class="modal-body">
+			<div class="control-group">
+				<label class="control-label"><i class="red">*</i> 续费时长</label>
+				<div class="controls">
+          <div class="btn-item-group">
+            <button type="button" class="type-btn" ng-click="changePeriod(item)" ng-class='{"active":item.value === postDataPeriod.period}' ng-click="choosen(item)"  ng-repeat="item in periodList">
+              <span>{{item.text}}</span>
+            </button>
+          </div>
+        </div>
+			</div>
+			<div class="control-group">
+					<label class="control-label">新到期时间</label>
+					<div class="controls">{{deadlineTime}}</div>
+			</div>
+			<div class="control-group">
+					<label class="control-label">费用</label>
+					<div class="controls">
+						<span class="unit-box">{{price}}<span class="unit-txt">元</span></span>
+					</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmPeriod()">确认</button>
+			<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="snapshots.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+			<h3 class="modal-title">创建快照</h3>
+		</div>
+		<div class="modal-body">
+			<form name="createSnapForm" novalidate>
+				<div class="control-group">
+					<label class="control-label">云硬盘ID</label>
+					<div class="controls">{{selectVolume.storageId}}</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">云硬盘名称</label>
+					<div class="controls">{{selectVolume.storageName}}</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">磁盘容量</label>
+					<div class="controls">{{selectVolume.storageSize}}</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">磁盘类型</label>
+					<div class="controls">{{selectVolume.storageType}}</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">快照名称</label>
+					<div class="controls">
+						<input type="text" class="form-controls" name="name" placeholder="请输入快照名称" ng-model="createSnapData.snapshotName"  ng-maxlength="60"/>
+						<div class="error" ng-if="interacted(createSnapForm.name)" ng-messages="createSnapForm.name.$error" >
+							<div ng-message="maxlength">请最多输入60个字符</div>
+						</div>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">参考快照费用</label>
+					<div class="controls">
+						<span class="unit-box">0<span class="unit-txt">元/月</span></span>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" ng-click="confirmCreateSnap()">确定</button>
+			<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="extendSize.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+			<h3 class="modal-title">云硬盘扩容</h3>
+		</div>
+		<div class="modal-body">
+			<div class="alert alert-warning">
+				<strong>重要提示：</strong></br>
+				为了防止数据丢失，磁盘只可扩容不可缩</br>
+				磁盘扩容后需要您手动去修改文件系统配置，把新增部分容量使用起来
+			</div>
+			<div class="control-group">
+				<label class="control-label">当前容量</label>
+				<div class="controls">
+          <span>{{selectVolume.storageSize}}</span>
+        </div>
+			</div>
+			<div class="control-group">
+				<label class="control-label"><i class="red">*</i> 目标容量</label>
+				<div class="controls rzslider-box">
+          
+          <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options" ng-mouseleave="pricesize()"></rzslider>
+          <input type="text" ng-model="showValue" ng-blur="validataValue()"></input> 
+          <!--<rzslider rz-slider-model="slider.value" rz-slider-options="slider.options" ></rzslider>
+           <input type="text" ng-model="slider.value" max="slider.options.ceil" step="slider.options.step" num-range min="slider.options.floor"/> -->
+          <span class="unit">GB</span>
+        </div>
+      </div>
+			<div class="control-group">
+					<label class="control-label">需支付费用</label>
+					<div class="controls">
+						<span class="unit-box">{{price}}<span class="unit-txt">元</span></span>
+					</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmExtend()">确认</button>
+			<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="editName.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+			<h3 class="modal-title">修改云硬盘名称</h3>
+		</div>
+		<div class="modal-body">
+			<form name="editNameForm" novalidate>
+				<div class="control-group">
+					<label class="control-label">新云硬盘名称</label>
+					<div class="controls">
+						<input type="text" class="form-controls" name="name" ng-model="postEditData.storageName" placeholder="请输入新的云硬盘名称" ng-pattern="/^[^`<>]*$/" ng-maxlength="20"/>
+						<div class="error" ng-if="interacted(editNameForm.name)" ng-messages="editNameForm.name.$error" >
+							<div ng-message="maxlength">请最多输入20个字符</div>
+							<div ng-message="pattern">不允许输入非法字符串</div>
+						</div>
+					</div>
+			</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" ng-click="confirmEdit()">确认</button>
+			<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="allocateVolume.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+			<h3 class="modal-title">分配至项目</h3>
+		</div>
+		<div class="modal-body">
+			<div class="control-group">
+				<span class="control-span-volume">您已选<strong>1台云硬盘，</strong></span>
+				<a class="blue" ng-click="showVolume()">查看详情
+				<i ng-show="isShowVolume" class=" icon-aw-angle-down"></i>
+				<i ng-show="!isShowVolume" class="icon-aw-angle-up"></i>
+				</a>
+				<table class="table table-check" ng-if="!isShowVolume">
+					<tbdoy>
+					<tr>
+						<td>1</td>
+						<td>{{selectVolume.storageName}}</td>
+						<td>可分配至项目</td>
+					</tr>
+					</tbdoy>
+				</table>
+				
+			</div>
+			<div class="control-group">
+				<label class="control-label">选择项目</label>
+				<div class="controls">
+					<div class="search-box">
+						<button class="btn btn-search" type="submit"><i class="icon-aw-search"></i></button>
+						 <input type="text" class="form-control" placeholder="根据项目名称/ID进行搜索" ng-model="searchConcent" ng-keyup="searchPro(searchConcent)"></input>
+					</div>
+					<table class="table table-check">
+						<tbody>
+							<tr>
+								<th></th>
+								<th>名称</th>
+								<th>项目说明</th>
+							</tr>
+							<tr ng-repeat="pro in projectList">
+								<td>
+									<label class="radio">
+										<input name="project" type="radio"  ng-click="selectPro(pro.projectId)" />
+									    <i class="iconfont"></i>
+									</label>
+								</td>
+								<td>{{pro.projectName}}</td>
+								<td>{{pro.projectId}}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" ng-click="confirmAllo()">确认</button>
+			<button class="btn btn-default" type="button" ng-click="cancel()">取消</button>
+		</div>
+	</div>
+</script>

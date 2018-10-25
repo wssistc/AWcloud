@@ -1,0 +1,72 @@
+<div class="page-inner">
+	<h3 class="page-title">自动触发任务</h3>
+	<div class="table-action">
+		<button type="button" data-toggle="modal" ng-click="newAlarm('new')" class="btn btn-primary"><i class="icon-aw-add-to2"></i>创建告警触发任务</button>
+		<button type="button" data-toggle="modal" ng-disabled="!can_edit" ng-click="newAlarm('edit',editData)" class="btn btn-info"><i class="icon-aw-modify"></i>修改</button>
+		<button type="button" data-toggle="modal" ng-disabled="!can_del" ng-click="del_cluster(checkedItems)" class="btn btn-warning"><i class="icon-aw-delete"></i>删除</button>
+		<button class="btn btn-refresh" ng-click="refresh()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button> 
+	</div>
+	
+	<div class="table-content">
+		<table ng-table="tableParams" class="table" show-filter="false">
+			<!--<loading-data data="table_data"></loading-data>-->
+			<tr ng-repeat="item in $data">
+				<td header="'headerCheckbox.html'">
+					<label class="checkbox">
+						<input type="checkbox" ng-model="checkboxes.items[item.id]" />
+						<i class="iconfont"></i>
+					</label>
+				</td>
+				<td data-title="'任务'" sortable="'name'"><!-- {{item.name}} -->
+					<div class="edit-name edit-lg">
+						<a ng-click="look_detail(item)">{{item.name}}</a>
+					</div>
+				</td> 
+				<td data-title="'统计周期'" sortable="'statusName'">
+					
+				</td>
+				<td data-title="'触发规则数量'" sortable="'configName'">{{item.configName}}
+
+				</td>
+				<td data-title="'状态'" sortable="'current_host_num'">
+                    <span ng-class="{'bg-green':item.statusName=='启用','bg-red':item.statusName=='停用'}">{{item.statusName}}</span>
+                </td>
+			</tr>
+		</table>
+	</div>
+	<div class="detail-info-two" ng-if="showDetail">
+		<uib-tabset active=detailActive justified="true">
+			<uib-tab index="0" heading="基本信息"select="selectIndex(0)">
+				<div class="detail-info">
+					<div class="detail-title-ex">{{select_alarm_baseinfo_show.name}} 的详情</div>
+					<table class="table table-info column">
+						<tr>
+							<td>任务名称</td>
+							<td>{{select_alarm_baseinfo_show.id}}</td>
+							<td>统计周期</td>
+							<td>{{select_alarm_baseinfo_show.creationTime}}</td>
+						</tr>
+						<tr>
+							<td>任务状态</td>
+							<td>{{select_alarm_baseinfo_show.name}}</td>
+							<td>告警触发条件</td>
+							<td>{{select_alarm_baseinfo_show.defaultCoolingTime}}</td>
+						</tr>
+						<tr>
+							<td>备注</td>
+							<td>{{select_alarm_baseinfo_show.minHostSize}}</td>
+							<td>&nbsp</td>
+							<td>&nbsp</td>
+						</tr>
+					</table>
+				</div>
+			</uib-tab>
+		</uib-tabset>
+	</div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+		<i class="iconfont"></i>
+	</label>
+</script>

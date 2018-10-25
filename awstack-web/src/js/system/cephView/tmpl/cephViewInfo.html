@@ -1,0 +1,86 @@
+<div class="page-inner ceppView-info" ng-controller="cephViewInfoCtrl">
+	<div class="table-action">
+        <div class="btn-box clearfix">
+            <span>{{'aws.action.edit' | translate}} {{nodeName}}  {{nodeIp}}</span>
+            <a type="button" ng-href="#/system/cephView"class="btn btn-default">{{'aws.action.return' | translate}}</a>
+        </div>
+    </div>
+    <div class="disk-groups avail-groups">
+        <div class="title"><strong>{{'aws.cephView.avaliableDisk' | translate}}</strong></div>
+        <div class="avail-boxs clearfix" >
+            <div ceph-ssd ng-repeat="item in cephAvaiList"  bardata="item"  draggable="true" aws-dragstart="dragstart(event,item)"></div>
+            <!-- <div ceph-ssd ng-repeat="item in cephDataList" draggable="true" aws-dragstart="dragstart(event,item)" aws-dragover="dragover(event)"></div> -->
+            <!-- <div class="disk-box add"><a ng-click="addDisk()"><i class="icon-aw-add-to2 "></i></a></div> -->
+        </div>
+    </div>
+    <div class="disk-groups">
+        <div class="title"><strong>{{'aws.cephView.journalDisk' | translate}}</strong></div>
+        <div class="field-box clearfix">
+            <div class="border-box clearfix" aws-drop="data_journalDrop(event,'journal')" aws-dragover="dragover(event)">
+                <div ceph-ssd ng-repeat="item in cephJournalList" delfn="delUsedfunc(item)" bardata="item"></div>
+            </div>
+        </div>
+    </div>
+    <div class="disk-groups">
+        <div class="title"><strong>{{'aws.cephView.dataDisk' | translate}}</strong></div>
+        <div class="field-box clearfix">
+            <div class="border-box clearfix" aws-drop="data_journalDrop(event,'data')" aws-dragover="dragover(event)">
+                <div ceph-hdd ng-repeat="item in cephDataList" delfn="delUsedfunc(item)" bardata="item"></div>
+            </div>
+        </div>
+    </div>
+    <div class="disk-groups">
+        <div class="title"><strong>{{'aws.cephView.missDisk' | translate}}</strong></div>
+        <div class="field-box clearfix">
+            <div class="border-box clearfix">
+                <div ceph-hdd ng-repeat="item in cephMissList" delfn="delMissfunc(item)" bardata="item"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/ng-template" id="add-tip.html">
+    <div class=" modal-common modal-del">
+        <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        </div>
+        <div class="modal-body ">
+        <div class="box">
+            <span class = "blue">{{'aws.cephView.tips.tip9' | translate}}</span>
+        </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="$dismiss()">{{'aws.action.ok'|translate}}</button>
+        </div> 
+    </div>
+</script>
+<script type="text/ng-template" id="journal-tip.html">
+    <div class=" modal-common modal-del">
+        <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        </div>
+        <div class="modal-body ">
+        <div class="box">
+            <span class = "blue">{{'aws.cephView.tips.tip10' | translate}}</span>
+        </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="$dismiss()">{{'aws.action.ok'|translate}}</button>
+        </div> 
+    </div>
+</script>
+<script type="text/ng-template" id="delete-miss.html">
+    <div class=" modal-common modal-del">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$close()">×</button>
+        </div>
+        <div class="modal-body ">
+            <div class="box">
+                <span class = "del"> {{'aws.cephView.tips.tip11' | translate}} </span>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info del-btn" type="button" ng-disabled="doubleClick" ng-click="confirmDelMiss()">{{'aws.action.ok'|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$close()">{{'aws.action.cancel'|translate}}</button>
+        </div>
+    </div>
+</script>

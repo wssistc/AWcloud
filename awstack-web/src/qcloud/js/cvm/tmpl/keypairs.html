@@ -1,0 +1,350 @@
+<div class="page-inner">
+  <div class="page-title">
+      <h2>SSH密钥</h2>
+      <ui-select ng-model="options.proselected" ng-change="selectedProject(project.selected)" name="project" title="项目切换">
+        <ui-select-match placeholder="项目切换">{{$select.selected.projectName}}</ui-select-match>
+        <ui-select-choices repeat="item in projectList | filter:{projectName:$select.search}">
+          <div ng-bind-html="item.projectName | highlight: $select.search"></div>
+        </ui-select-choices>
+      </ui-select>
+      <!-- <div class="btn-item-group">
+        <button type="button" class="type-btn"  ng-class='{"active":item.region === options.region}' ng-click="changeRegion(item.region)" ng-repeat="item in regionList "><span>{{item.regionName}}</span></button>
+      </div> -->
+  </div>
+  <div class="table-action">
+    <button type="button" class="btn btn-primary" ng-click="addKeypair()" ><i class="icon-aw-add-to2"></i>创建密钥</button>
+    <button ng-class="{'btn-default':sig_btn,'btn-info':!isDisabled && !sig_btn}" class="btn" uib-popover="{{delisDisabled?'请选择密钥':'绑定/解绑云主机不允许批量操作'}}" popover-enable="sig_btn" popover-trigger="mouseenter" popover-placement = "bottom"  ng-click="bindVm()" >绑定/解绑云主机</button>
+    <button ng-class="{'btn-default':sig_btn,'btn-info':!isDisabled && !sig_btn}" class="btn" uib-popover="{{delisDisabled?'请选择密钥':'修改不允许批量操作'}}" popover-enable="sig_btn" popover-trigger="mouseenter" popover-placement = "bottom" ng-click="modifyKeypair()">修改</button>
+    <button ng-class="{'btn-default':delkp_btn,'btn-info':!delisDisabled&&!delkp_btn}" class="btn" uib-popover="{{delisDisabled?'请选择密钥':'以绑定云服务器或自定义镜像的密钥不可删除'}}" popover-enable="delkp_btn" popover-trigger="mouseenter" popover-placement = "bottom" ng-click="deleteKeypair()">删除</button>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'CN.action.search'|translate}}" />
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <table ng-table="tableParams" class="table table-check" >
+<!--       <thead>
+       <tr>
+         <th class="check-th">
+           <label class="checkbox">
+             <input type="checkbox" name="r" ng-model="checkboxes.checked"  />
+             <i class="iconfont"></i>
+           </label>
+         </th>
+         <th class="sortable">ID/名称</th>
+         <th class="sortable">服务器绑定情况</th>
+         <th class="sortable">状态</th>
+         <th class="sortable">创建时间</th>
+       </tr>
+     </thead> -->
+      <colgroup>
+        <col width="2.6%">
+        <col width="24.35%">
+        <col width="24.35%">
+        <col width="24.35%">
+        <col width="24.35%">
+      </colgroup>
+      <tbody>
+        <tr ng-repeat="item in $data ">
+          <td header="'headerCheckbox.html'" class="check-td" >
+            <label class="checkbox">
+              <input type="checkbox" name="r" ng-model="checkboxes.items[item.keyId]" value="{{item.keyId}}" />
+              <i class="iconfont"></i>
+            </label>
+          </td>
+          <td data-title="'ID/名称'" sortable="'keyName'">
+            <div class="edit-name">
+              <a ng-href="#cvm/sshkey?id={{item.keyId}}">{{item.keyId}}</a>
+              <span>{{item.keyName}}</span>
+            </div>
+          </td>
+          <td data-title="'服务器绑定情况'" sortable="'bindIps_s'">{{item.bindIps.length}}</td>
+          <td data-title="'状态'" sortable="'status_s'"><span class="green">{{'CN.sshkey.table.status.'+item.status| translate}}</span></td>
+          <td data-title="'创建时间'" sortable="'createTime_t'">{{item.createTime | date: 'yyyy-MM-dd:HH:mm:ss'}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+      <div class="tab-content">
+        <div class="detail-tab">
+          <div class="dt-title">
+            <a ng-href="#/cvm/sshkey">SSH密钥<i class="icon-aw-angle-left"></i></a><span>{{detailInfo.keyId}}</span>
+          </div>
+          <div class="dt-box">
+            <div class="dt-content">
+              <div class="tab-pane active">
+                <strong>SSH密钥信息</strong>
+                <dl class="dl-horizontal">
+                  <dt>名称</dt>
+                  <dd>{{detailInfo.keyName}}</dd>
+                  <dt>密钥ID</dt>
+                  <dd>{{detailInfo.keyId}}</dd>
+                  <dt>公钥内容</dt>
+                  <dd>{{detailInfo.pubkey}}</dd>  
+                  <dt>创建时间</dt>
+                  <dd>{{detailInfo.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</dd>
+                </dl>
+                <strong>已绑定云主机</strong>
+                <ul class="nav nav-tabs">
+                  <li  ng-class='{"active":item === detail.region}' ng-click="changeDetailRegion(item)" ng-repeat="item in regionList "><a>{{item.distribute}}({{item.regionName}})</a></li>
+                </ul>
+                <div class="table-content">
+                  <table class="table" >
+                    <thead>
+                      <tr>
+                        <!-- <th class="check-td">
+                          <label class="checkbox">
+                            <input type="checkbox" name="r" ng-model="checkboxes.checked"  />
+                            <i class="iconfont"></i>
+                          </label>
+                        </th> -->
+                        <th class="sortable">云主机ID</th>
+                        <th class="sortable">云主机名称</th>
+                        <th class="sortable">状态</th>
+                        <th class="sortable">所属网络</th>
+                        <th class="sortable">内网Ip</th>
+                        <th class="sortable">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      
+                      <tr ng-repeat="item in detailTableData">
+                        <!-- <td class="check-td" >
+                          <label class="checkbox">
+                            <input type="checkbox" name="r" ng-model="checkboxes.items[item.instanceId]" value="{{item.instanceId}}" />
+                            <i class="iconfont"></i>
+                          </label>
+                        </td> -->
+                        <td>
+                          <span><a ng-href="#cvm/instances?id={{item.instanceId}}">{{item.unInstanceId}}</a></span>
+                          <span class="ycx" ng-if = "item.instanceName">{{item.instanceName}}</span>
+                          <span class="ycx" ng-if = "!item.instanceName">未命名</span>
+                        </td>
+                        <td>{{item.instanceName}}</td>
+                        <td><span class="{{item.status}}">{{'CN.instances.table.status.'+item.status| translate}}</span></td>
+                        <td>
+                          <span class="ycx" ng-if="item.vpcId">{{item.lanName}}</span>
+                          <span class="ycx" ng-if="!item.vpcId">基础网络</span>
+                        </td>
+                        <td>{{item.lanIp}}</td>
+                        <td><a uib-popover="关机状态才可以解绑密钥" popover-enable="item.status != 4" popover-trigger="mouseenter" popover-placement="bottom" ng-class="{'disabled':item.status != 4}" ng-click="unbindvm(item)">解绑</a> </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </pane>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="addKeypair.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">创建SSH密钥{{!keypair.secretkey}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="keypairForm">
+        <div class="control-group">
+          <label class="control-label">创建方式：</label>
+          <div class="controls">
+              <div class="radio-item clearFix">
+                  <label class="radio"><input type="radio" ng-model="keypair.ssh"  value="false" /><i class="iconfont"></i>创建新SSH密钥</label>
+                  <label class="radio"><input type="radio" ng-model="keypair.ssh"  value="true" /><i class="iconfont"></i>使用已有公钥</label>
+              </div>
+          </div>
+        </div>
+        <div class="control-group" >
+            <label class="control-label">密钥名称：</label>
+            <div class="controls">
+                <input type="text" class="form-controls" name="name" ng-model="keypair.name"  ng-maxlength="25" ng-pattern="/^([a-zA-Z0-9]|_)*$/" required />
+                <div class="error" ng-messages="(submitform ||keypairForm.name.$dirty) && keypairForm.name.$error" >
+                    <form-validate  pattern-msg="'CN.errors.noZhLineSpecial' | translate " max-num="25"></form-validate>
+                </div>
+                <span ng-if="!keypair.name.length">只支持英文大小写、数字和下划线</span>
+                <span ng-show ="keypair.name.length && keypair.name.length<26">你还可以输入{{25-keypair.name.length}}个字符</span>
+            </div>
+        </div>
+        <div class="control-group" ng-if="keypair.ssh == 'true'">
+            <label class="control-label">输入公钥：</label>
+            <div class="controls">
+                <textarea class="form-controls" name="pub" ng-model="keypair.pubKey" placeholder="格式：ssh-rsa AAAKedvs" required></textarea>
+                <div class="error" ng-messages="(submitform ||keypairForm.pub.$dirty) && keypairForm.pub.$error" >
+                    <form-validate ></form-validate>
+                </div>
+            </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer" ng-if="keypair.ssh == 'true'">
+      <button class="btn btn-primary" type="button" ng-click="confirmAddkey(keypairForm)">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+    <div class="modal-footer" ng-if="keypair.ssh == 'false' ">
+      <button class="btn btn-primary" type="button" ng-click="confirmAddkey(keypairForm)" >下载</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="modifyKeypair.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">修改SSH密钥</h3>
+    </div>
+    <div class="modal-body">
+      <form name="modifyForm">
+        <div class="control-group" >
+            <label class="control-label">密钥名称：</label>
+            <div class="controls">
+                <input type="text" class="form-controls" name="name" ng-model="keypair.keyName"  ng-maxlength="25" ng-pattern="/^([a-zA-Z0-9]|_)*$/" required />
+                <div class="error" ng-messages="(submitform ||modifyForm.name.$dirty) && modifyForm.name.$error" >
+                    <form-validate  pattern-msg="'CN.errors.noZhLineSpecial' | translate " max-num="25"></form-validate>
+                </div>
+                <!-- <span ng-if="!keypair.keyName.length">只支持英文大小写、数字和下划线</span> -->
+                <span ng-show ="keypair.keyName.length && keypair.keyName.length<26">你还可以输入{{25-keypair.keyName.length}}个字符</span>
+            </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-disabled="" ng-click="confirmAddkey(modifyForm)">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="deleteKeypair.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">删除密钥</h3>
+    </div>
+    <div class="modal-body">
+      <form name="rebootForm" novalidate>
+        <div class="control-group">
+          <span class="control-span-volume">您已选<strong>{{checkedItems.length}}个密钥，</strong></span>
+          <a class="blue" ng-click="showVm()">查看详情
+          <i ng-show="isShowVolum" class=" icon-aw-angle-down"></i>
+          <i ng-show="!isShowVolum" class="icon-aw-angle-up"></i>
+          </a>
+          <table class="table table-info column table-volum-mount" ng-if="show_vm">
+            <tbody> 
+              <tr ng-repeat="item in checkedItems">
+                <td>{{$index+1}}</td>
+                <td>{{item.keyId}}</td>
+                <td>可删除</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="alert alert-warning">
+          确定对选中密钥进行删除
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirmDelete()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="bindvm.html">
+    <div class="privilegeTo-modal modal-common">
+      <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">绑定/解绑云主机</h3>
+      </div>
+      <div class="modal-body">
+          <div class="control-group">
+            <ui-select class="uisel-sm" ng-model="vm.regionSelect" ng-change="changeRegion(vm.regionSelect)" name="info" placeholder="选择地域">
+                <ui-select-match>{{$select.selected.info}}</ui-select-match>
+                <ui-select-choices  repeat="region in vm.regionList">
+                    <div>{{region.info | highlight: $select.search}}</div>
+                </ui-select-choices>
+            </ui-select>
+          </div>
+          <div class="clearfix">
+            <div class="left-select-table">
+                <h5>选择云主机</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr ng-repeat="vm in vm.allVm ">
+                            <td>
+                                <label class="checkbox">
+                                    <input type="checkbox" ng-model="checkboxes.vms[vm.unInstanceId]" ng-disabled="checkboxes.chk[vm.unInstanceId]" />
+                                    <i class="iconfont" ng-class="{disabled:checkboxes.chk[vm.unInstanceId]}"></i>
+                                </label>
+                            </td>
+                            <td>
+                                <span class="name">{{vm.instanceName}}</span>
+                                <span ng-if="vm.vpcId">{{vm.vpcId}} | {{vm.lanIp}}</span>
+                                <span ng-if="!vm.vpcId">基础网络 | {{vm.lanIp}}</span>
+                            </td>
+                            <td>
+                              <span ng-if="vm.status != 4">关机才可加载</span>
+                              <span ng-if="vm.os.indexOf('Xserver')>-1 && vm.status == 4">暂不支持Windows</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="btnGroup">
+              <button class="btn btn-primary">&gt;</button>
+              <button class="btn btn-primary">&lt;</button>
+            </div>
+            <div class="right-select-table">
+                <h5>已选择</h5>
+                <div class="table-responsive">
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="table table-bordered">
+                        <tr ng-repeat="chkvm in vm.checkVms">
+                            <td>
+                              <span class="name" >{{chkvm.instanceName}}</span>
+                              <span ng-if="chkvm.vpcId">{{chkvm.vpcId}} | {{chkvm.lanIp}}</span>
+                              <span ng-if="!chkvm.vpcId">基础网络 | {{chkvm.lanIp}}</span>
+                            </td>
+                            <td><i class="icon-aw-wrong" ng-show="chkvm.status==4" ng-click="rmVm(chkvm)"></i></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-primary" type="button" ng-click="confirmInsKey()">确认</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </div>
+</script>
+<script type="text/ng-template" id="unbindvm.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">解绑密钥</h3>
+    </div>
+    <div class="modal-body">
+      <form name="rebootForm" novalidate>
+        <div class="alert alert-warning">
+          确定解绑该密钥
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirmUnbind()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>

@@ -1,0 +1,251 @@
+<div class="page-inner">
+    <h3 class="page-title">{{"aws.floatingIps.floatIp"|translate}}</h3>
+    <div class="table-action">
+      <button type="button" data-toggle="modal" ng-click="addFloatIp()" class="btn btn-new" licence-type = "btn" id="resource-publicNet-apply"><i class="icon-aw-add-to2" ></i>{{"aws.floatingIps.addFloatIp"|translate}}</button>
+      <!-- <button type="button" class="btn btn-info" ng-disabled="isDisabled" ng-click="editFloatingIp(editData)"><i class="icon-aw-modify"></i>{{'aws.img.modify'|translate}}</button> -->
+      <button type="button" data-toggle="modal" ng-click="bindFloatingIp(editData)" ng-disabled="!canBind" class="btn btn-normal" licence-type = "btn" id="resource-publicNet-bind"><i class="icon-aw-gl"></i>{{"aws.floatingIps.bind"|translate}}</button>
+      <button type="button" data-toggle="modal" ng-click="unBindFloatip(editData)" ng-disabled="!canUnbundling" class="btn btn-normal" licence-type = "btn" id="resource-publicNet-unbind"><i class="icon-aw-jcgl"></i>{{"aws.floatingIps.unbind"|translate}}</button>
+      <button type="button" data-toggle="modal" ng-click="deleteFloatip(checkedItems)" ng-disabled="delisDisabled" class="btn btn-normal" licence-type = "btn" id="resource-publicNet-del"> <i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+      <div class="pull-right">
+        <into-information modular="'floating_ips'"></into-information>
+        <!-- <setting title-data="titleData" site-title="titleName" table-data="networksTableData" search-tearm="networkSearchTearm(obj)"></setting> -->
+        <button type="button" class="btn btn-renovat right-ports" ng-click="refreshFloatIp()"><i class="icon-aw-refresh"></i></button>
+        <div class="search-box right-ports">
+          <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <script type="text/ng-template" id="headerCheckbox.html">
+      <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+        <i class="iconfont"></i>
+      </label>
+    </script>
+    <div class="table-content">
+      <empty-tip empty-type="loadData"></empty-tip>
+      <table ng-table="tableParams" class="table" show-filter="false">
+        <tr ng-repeat="floatip in $data">
+          <td header="'headerCheckbox.html'">
+            <label class="checkbox">
+              <input type="checkbox" ng-model="checkboxes.items[floatip.id]" />
+              <i class="iconfont"></i>
+            </label>
+          </td>
+          <!-- <td data-title="'ID'" sortable="'id'">
+            <span>{{floatip.id}}</span>
+          </td> -->
+          <td data-title="headers.ipAddr" sortable="'ip'">{{floatip.ip}}</td>
+          <td data-title="headers.instanceName" sortable="'instanceName'">
+            <div class="edit-name">
+              <span title="{{floatip.instanceName}}" id="td-floatingIp-res">{{floatip.instanceName}}</span>
+            </div>
+          </td>
+          <td data-title="headers.fixedIP" id="floatingIp-table-fixedIp" sortable="'fixedIP'" >{{floatip.fixedIP}}</td>
+          <td data-title="headers.status" sortable="'status'">
+            <span ng-class="{'bg-green':(floatip.statu=='active'),'bg-orange':(floatip.statu=='down')}">{{'aws.common.'+floatip.statu | translate}}</span>
+          </td>
+          <!-- <td data-title="headers.projectName" sortable="'projectName'">{{floatip.projectName}}</td> -->
+          <!-- <td data-title="headers.routerId" sortable="'routerId'">{{floatip.routerId}}</td>
+          <td data-title="headers.portId" sortable="'portId'">{{floatip.portId}}</td> -->
+          <td data-title="headers.resourcePool" sortable="'poolName'">{{floatip.poolName}}</td>
+        </tr>
+      </table>
+    </div>
+    <script type="text/ng-template" id="addFloatipModal.html">
+      <div class="floatip-modal modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">{{"aws.floatingIps.addFloatIp"|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <uib-alert ng-if="beyondQuota_pro.floatingip" type="danger">{{"aws.floatingIps.beyondQuota_pro"|translate}}</uib-alert>
+          <uib-alert ng-if="beyondQuota_dep.floatingip" type="danger">{{"aws.floatingIps.beyondQuota_dep"|translate}}</uib-alert>
+          <form name="createfloatipForm">
+            <div class="control-group">
+              <label class="control-label">{{"aws.floatingIps.floatIpPool"|translate}}：</label>
+              <div class="controls">
+                <ui-select ng-model="floatipForm.selectedNet" ng-change="changeExtNet(floatipForm.selectedNet);"  title='{{"aws.floatingIps.placeholder.choseFloatIpPool"|translate}}' >
+                  <ui-select-match placeholder='{{"aws.floatingIps.placeholder.choseFloatIpPool"|translate}}' >{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="pool in extNets.options | propsFilter:{name:$select.search}">
+                    <div ng-bind-html="pool.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{"aws.floatingIps.assignSub"|translate}}：</label>
+              <div class="controls">
+                <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.floatingIps.info.assignSub"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                <label class="checkbox">
+                  <input type="checkbox" class="form-controls chk" name="assignSub" ng-model="floatipForm.assignSub"  />
+                  <i class="iconfont"></i>
+                </label>
+              </div>
+            </div>
+            <div ng-show="floatipForm.assignSub">
+              <div class="control-group" >
+                <label class="control-label">{{"aws.floatingIps.placeholder.choseSubnet"|translate}}：</label>
+                <div class="controls">
+                  <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.floatingIps.info.choseSubnet"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                  <ui-select ng-model="floatipForm.selectedSubnet" class="ui-select-tips" ng-change="changeSubnet(floatipForm.selectedSubnet)"  title='{{"aws.floatingIps.placeholder.choseSubnet"|translate}}' >
+                    <ui-select-match placeholder='{{"aws.floatingIps.placeholder.choseSubnet"|translate}}' >{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="subnet in subnets track by $index">
+                      <div ng-mouseover="mouseSub(subnet,'over')" ng-mouseleave="mouseSub(subnet,'out')">
+                        <div ng-bind-html="subnet.name | highlight: $select.search"></div>
+                        <div class="ui-select-tips-detail" ng-show="selectedSubPoolList.length">
+                          <div class="arrow-up"></div>
+                          <ul>
+                            <li ng-repeat="sub in subPool_detail track by $index" ng-if="sub.showSubSegDetail">{{sub.sub_pool}}</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label">{{"aws.floatingIps.inputIP"|translate}}：</label>
+                <div class="controls">
+                  <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.floatingIps.info.inputIP"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                  <label class="checkbox">
+                    <input type="checkbox" class="form-controls chk" name="assignIP" ng-model="floatipForm.assignIP"  />
+                    <i class="iconfont"></i>
+                  </label>
+                </div>
+              </div>
+              <div class="control-group" ng-show="floatipForm.assignIP" >
+                <label class="control-label">{{"aws.floatingIps.subSegment"|translate}}：</label>
+                <div class="controls">
+                  <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.floatingIps.info.subSegment"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                  <ui-select ng-model="floatipForm.selectedSubPool" ng-change="changeSubPool(floatipForm.selectedSubPool)"  title='{{"aws.floatingIps.choseSubSegment"|translate}}' >
+                    <ui-select-match placeholder='{{"aws.floatingIps.choseSubSegment"|translate}}' >{{$select.selected.sub_pool}}</ui-select-match>
+                    <ui-select-choices repeat="subnet in selectedSubPoolList track by $index">
+                      <div ng-bind-html="subnet.sub_pool | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+              <div class="control-group ip_cidr" ng-show="floatipForm.assignIP">
+                <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.floatingIps.ipAddr"|translate}}：</label>
+                <div class="controls clearfix">
+                  <div class="flex">
+                    <div class="ip_text">
+                      <input type="text" class="form-controls" name="ip_0" id="ip_0" ng-model="floatipForm.init_cidr.ip_0" ng-keyup="setCheckValueFunc()"  placeholder="{{floatipForm.placeholder.ip_0}}" ng-readonly="floatipForm.readonly.ip_0" />
+                      <div class="error ip_0" ng-if="interacted(createfloatipForm)">
+                        <div ng-show="required.ip_0">{{'aws.errors.required'|translate}}</div>
+                        <div ng-show="invalid.ip_0">{{"aws.floatingIps.enter"|translate}}{{floatipForm.min_num.ip_0}}~{{floatipForm.max_num.ip_0}} {{"aws.floatingIps.integer"|translate}}</div>
+                      </div> 
+                    </div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip_text">
+                      <input type="text" class="form-controls" name="ip_1" id="ip_1" ng-model="floatipForm.init_cidr.ip_1" ng-keyup="setCheckValueFunc()"  placeholder="{{floatipForm.placeholder.ip_1}}" ng-readonly="floatipForm.readonly.ip_1" />
+                      <div class="error ip_1" ng-if="interacted(createfloatipForm)">
+                          <div ng-show="required.ip_1">{{'aws.errors.required'|translate}}</div>
+                          <div ng-show="invalid.ip_1">{{"aws.floatingIps.enter"|translate}}{{floatipForm.min_num.ip_1}}~{{floatipForm.max_num.ip_1}} {{"aws.floatingIps.integer"|translate}}</div>
+                      </div>
+                    </div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip_text">
+                      <input type="text" class="form-controls" name="ip_2" id="ip_2" ng-model="floatipForm.init_cidr.ip_2" ng-keyup="setCheckValueFunc()"  placeholder="{{floatipForm.placeholder.ip_2}}" ng-readonly="floatipForm.readonly.ip_2" />
+                      <div class="error ip_2"  ng-if="interacted(createfloatipForm)">
+                        <div ng-show="required.ip_2">{{'aws.errors.required'|translate}}</div>
+                        <div ng-show="invalid.ip_2">{{"aws.floatingIps.enter"|translate}}{{floatipForm.min_num.ip_2}}~{{floatipForm.max_num.ip_2}} {{"aws.floatingIps.integer"|translate}}</div>
+                      </div>
+                    </div>
+                    <div class="ip-spilt">.</div>
+                    <div class="ip_text">
+                      <input type="text" class="form-controls" name="ip_3" id="ip_3" ng-model="floatipForm.init_cidr.ip_3" ng-keyup="setCheckValueFunc()"  placeholder="{{floatipForm.placeholder.ip_3}}" ng-readonly="floatipForm.readonly.ip_3" />
+                      <div class="error ip_3" ng-if="interacted(createfloatipForm)">
+                        <div ng-show="required.ip_3">{{'aws.errors.required'|translate}}</div>
+                        <div ng-show="invalid.ip_3">{{"aws.floatingIps.enter"|translate}}{{floatipForm.min_num.ip_3}}~{{floatipForm.max_num.ip_3}} {{"aws.floatingIps.integer"|translate}}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">{{"aws.floatingIps.floatingipQuota"|translate}}：</label>
+                <div class="controls">
+                  <div class="clearfix bar-group">
+                    <div quota-bar bardata="project_data.floatingip"></div>
+                    <div quota-bar bardata="domain_data.floatingip" ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                  </div>
+                </div>
+            </div>
+          </form>
+          <div class='price-box' ng-if="showPrice">
+              {{'aws.networks.price.totalPrice'|translate}}：<span>¥{{price}}</span> {{'aws.networks.price.perHour'|translate}} × 1 =  <span>¥{{priceFix}}</span> {{'aws.networks.price.perHour'|translate}} ({{'aws.networks.price.count'|translate}} ¥{{totalPrice}} {{'aws.networks.price.perMonth'|translate}})
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="floatipConfirm()" ng-disabled="beyondQuota_dep.floatingip || beyondQuota_pro.floatingip || formSubmitted">{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="bindIpModal.html">
+      <div class="bindIp-modal modal-common modal-smallest">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">{{"aws.floatingIps.bindFloatIp"|translate}}</h3>
+        </div>
+        <div class="modal-body" >
+          <form name="bindFloatipForm" >
+            <div class="control-group">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{"aws.floatingIps.resource"|translate}}:</label>
+              <div class="controls">
+                <ui-select ng-model="bindFloatIpForm.selectedInstance" name="bindIns" title='{{"aws.floatingIps.placeholder.choseResource"|translate}}' required>
+                  <ui-select-match placeholder='{{"aws.floatingIps.placeholder.choseResource"|translate}}' >{{$select.selected.instance_name}}</ui-select-match>
+                  <ui-select-choices repeat="instance in instances.options | propsFilter:{instance_name:$select.search}">
+                    <div ng-bind-html="instance.instance_name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <div class="error tips" ng-messages='bindFloatipForm.bindIns.$error' ng-if="interacted(bindFloatipForm.bindIns)">
+                  <div ng-message="required">{{"aws.floatingIps.noInsChose"|translate}}<a href="#/cvm/instances">{{"aws.floatingIps.createInstance"|translate}}</a></div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmBind(bindFloatIpForm,bindFloatipForm)" ng-disabled="formSubmitted" >{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="editIpModal.html">
+      <div class="bindIp-modal modal-common">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+          <h3 class="modal-title">{{"aws.floatingIps.editFloatingIps"|translate}}</h3>
+        </div>
+        <div class="modal-body" >
+          <form name="editFloatipForm" >
+            <div class="control-band">
+              <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.bandlimit.IP_bandwidth'|translate}}：</label>
+              <div class="controls">
+                <input type="text" name="Ipband" ng-model="fix.Ipband" min="1" max="10000" limitnumrange class="form-controls" required/>
+                <div class="error" ng-messages="(submitValid || editFloatipForm.Ipband.$dirty) && editFloatipForm.Ipband.$error">
+                  <span ng-if="editFloatipForm.Ipband.$error.limitnumrange">{{'aws.errors.limit_1_10000
+                  '|translate}}</span>
+                  <span ng-if="editFloatipForm.Ipband.$error.required">{{'aws.errors.required'|translate}}</span>
+                </div>
+              </div>
+              <label class="control-label2">Mbps</label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmedit(editFloatipForm)">{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+      </div>
+    </script>
+</div>

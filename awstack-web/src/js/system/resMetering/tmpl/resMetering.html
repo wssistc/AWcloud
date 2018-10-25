@@ -1,0 +1,614 @@
+<div class="res-metering page-inner monitor-view">
+    <div class="tab-offset-right">
+        <ul class="nav nav-tabs top-nav">
+        <li ng-class="{active: tab.index == 0}" ng-show="ADMIN || DOMAIN_ADMIN">
+            <a ng-click="tab.index = 0">{{'aws.bill.meteringView'|translate}}</a>
+        </li>
+        <li ng-class="{active: tab.index == 1}">
+            <a ng-click="tab.index =1;clickTab(tab.index)">{{'aws.bill.meteringStatistic'|translate}}</a>
+        </li>
+        <li ng-class="{active: tab.index == 2}">
+            <a ng-click="tab.index =2;clickTab(tab.index)">{{'aws.bill.resUsageStatistic'|translate}}</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane" ng-class="{active: tab.index == 0}" ng-controller="resMeteringViewCtrl">
+            <div class="control-groups clearfix">
+                <form class="form-inline date-box" name="viewQuery_form">
+                    <div class="control-group pull-left">
+                        <div class="control-label">{{'aws.bill.region'|translate}}：</div>
+                        <div class="controls">
+                            <ui-select ng-model="filterData.region" ng-disabled="!ADMIN" ng-change="changeRegion()">
+                                <ui-select-match placeholder="{{'aws.bill.choiceRegion'|translate}}" title='{{$select.selected.name}}'>{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.regionList | propsFilter:{name:$select.search}">
+                                    <div ng-bind-html="item.name | highlight: $select.search" title='{{item.name}}' class="count-uiselect"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group pull-left">
+                        <div class="control-label">{{'aws.bill.domain'|translate}}：</div>
+                        <div class="controls">
+                            <ui-select ng-model="filterData.domain" ng-disabled="DOMAIN_ADMIN" ng-change="changeDomain()">
+                                <ui-select-match placeholder="{{'aws.bill.choiceDomain'|translate}}" title='{{$select.selected.name}}'>{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.domainList | propsFilter:{name:$select.search}">
+                                    <div ng-bind-html="item.name | highlight: $select.search" title='{{item.name}}' class="count-uiselect"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group pull-left" ng-show = "false">
+                        <div class="control-label">{{'aws.bill.project'|translate}}：</div>
+                        <div class="controls">
+                            <ui-select ng-model="filterData.project" ng-disabled="PROJECT_ADMIN" ng-change="changeProject()">
+                                <ui-select-match placeholder="{{'aws.bill.choiceProject'|translate}}" title='{{$select.selected.name}}'>{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.projectList | propsFilter:{name:$select.search}">
+                                    <div ng-bind-html="item.name | highlight: $select.search" title='{{item.name}}' class="count-uiselect"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group pull-left">
+                        <div class="control-label">{{'aws.bill.statistic'|translate}}：</div>
+                        <div class="controls">
+                            <ui-select ng-model="filterData.dimension">
+                                <ui-select-match placeholder="{{'aws.bill.pleaseSelect'|translate}}" title="{{$select.selected.name}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.statisticTypeList | propsFilter:{name:$select.search}">
+                                    <div ng-bind-html="item.name | highlight: $select.search" title='{{item.name}}' class="count-uiselect"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group pull-left min">
+                        <div class="control-label">TOP{{'aws.bill.type'|translate}}：</div>
+                        <div class="controls">
+                            <ui-select ng-model="filterData.topType">
+                                <ui-select-match placeholder="{{'aws.bill.pleaseSelect'|translate}}" title='{{$select.selected.name}}'>{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.topTypeList | propsFilter:{name:$select.search}">
+                                    <div ng-bind-html="item.name | highlight: $select.search" title="{{item.name}}" class="count-uiselect"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <ui-select ng-model="filterData.topLength">
+                                <ui-select-match placeholder="{{'aws.bill.pleaseSelect'|translate}}" title='{{$select.selected.name}}'>{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.topLengthList | propsFilter:{name:$select.search}">
+                                    <div ng-bind-html="item.name | highlight: $select.search" title='{{item.name}}' class="count-uiselect"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="btn-group pull-left titlt-option">
+                        <button class="btn btn-info" type="button" ng-click="query()"><i class="icon-aw-search"></i> {{'aws.bill.query'|translate}}</button>
+                        <button class="btn btn-default" type="button " ng-click="downloadData()" licence-type="btn" id="system-resBilling-view-leadout"><i class="icon-aw-dc"></i> {{'aws.bill.export'|translate}}</button>
+                    </div>
+                </form>
+            </div>
+            <div class="box">
+                <div class="col-4" ng-repeat="key in colList_1">
+                    <div class="title">
+                        {{"aws.bill.topRes."+key | translate}}
+                        <span ng-show="filterDataDimension=='0' && (key =='vmRankList')">（{{'aws.bill.one'|translate}}）</span>
+                        <span ng-show="filterDataDimension=='1' && (key =='vmRankList')">（{{'aws.bill.one'|translate}}-{{'aws.bill.hour'|translate}}）</span>
+                        <span ng-show="filterDataDimension=='0' && (key=='cpuRankList')">（{{'aws.bill.core'|translate}}）</span>
+                        <span ng-show="filterDataDimension=='1' && (key=='cpuRankList')">（{{'aws.bill.core'|translate}}-{{'aws.bill.hour'|translate}}）</span>
+                        <span ng-show="filterDataDimension=='0' && (key =='memoryRankList')">（GB）</span>
+                        <span ng-show="filterDataDimension=='1' && (key =='memoryRankList')">（GB-{{'aws.bill.hour'|translate}}）</span>
+                    </div>
+                    <div class="panels clearfix">
+                        <div class="pie-wrap">
+                            <div class="pie" chart-pie panel='resViewPieChart[key].panels'></div>
+                            <div class="pie-center" ng-if = "resViewPieChart[key].panels.total > 0">
+                                <span>{{resViewPieChart[key].panels.total}}</span>
+                            </div>
+                        </div>
+                        <div class="pie-legend">
+                            <dl class="dl-horizontal" ng-repeat="legend in resViewPieChart[key].panels.data">
+                                <dt title="{{legend.name}}"><i style="background-color:{{resViewPieChart[key].panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+                                <dd>{{legend.value}}
+                                    <span class="unitText">（{{legend.unit}}）</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="col-4" ng-repeat="key in colList_2">
+                    <div class="title">
+                        {{"aws.bill.topRes."+key | translate}}
+                        <span ng-show="filterDataDimension=='0' && (key =='snapshotRankList'|| key=='routerRankList')">（{{'aws.bill.one'|translate}}）</span>
+                        <span ng-show="filterDataDimension=='1' && (key =='snapshotRankList'|| key=='routerRankList')">（{{'aws.bill.one'|translate}}-{{'aws.bill.hour'|translate}}）</span>
+                        <span ng-show="filterDataDimension=='0' && (key =='chdRankList')">（GB）</span>
+                        <span ng-show="filterDataDimension=='1' && (key =='chdRankList')">（GB-{{'aws.bill.hour'|translate}}）</span>
+                    </div>
+                    <div class="panels clearfix">
+                        <div class="pie-wrap">
+                            <div class="pie" chart-pie panel='resViewPieChart[key].panels'></div>
+                            <div class="pie-center" ng-if = "resViewPieChart[key].panels.total > 0">
+                                <span>{{resViewPieChart[key].panels.total}}</span>
+                            </div>
+                        </div>
+                        <div class="pie-legend">
+                            <dl class="dl-horizontal" ng-repeat="legend in resViewPieChart[key].panels.data">
+                                <dt title="{{legend.name}}"><i style="background-color:{{resViewPieChart[key].panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+                                <dd>{{legend.value}}
+                                    <span class="unitText">（{{legend.unit}}）</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="col-4" ng-repeat="key in colList_3">
+                    <div class="title">
+                        {{"aws.bill.topRes."+key | translate}}
+                        <span ng-show="filterDataDimension=='0'">（{{'aws.bill.one'|translate}}）</span>
+                        <span ng-show="filterDataDimension=='1'">（{{'aws.bill.one'|translate}}-{{'aws.bill.hour'|translate}}）</span>
+                    </div>
+                    <div class="panels clearfix">
+                        <div class="pie-wrap">
+                            <div class="pie" chart-pie panel='resViewPieChart[key].panels'></div>
+                            <div class="pie-center" ng-if = "resViewPieChart[key].panels.total > 0">
+                                <span>{{resViewPieChart[key].panels.total}}</span>
+                            </div>
+                        </div>
+                        <div class="pie-legend">
+                            <dl class="dl-horizontal" ng-repeat="legend in resViewPieChart[key].panels.data">
+                                <dt title="{{legend.name}}"><i style="background-color:{{resViewPieChart[key].panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+                                <dd>{{legend.value}}
+                                    <span class="unitText">（{{legend.unit}}）</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="col-4" ng-repeat="key in colList_4">
+                    <div class="title">
+                        {{"aws.bill.topRes."+key | translate}}
+                        <span ng-show="filterDataDimension=='0' && (key =='pmMemoryRankList'|| key=='pmChdRankList')">（{{'aws.bill.one'|translate}}）</span>
+                        <span ng-show="filterDataDimension=='1' && (key =='pmMemoryRankList'|| key=='pmChdRankList')">（{{'aws.bill.one'|translate}}-{{'aws.bill.hour'|translate}}）</span>
+                        <span ng-show="filterDataDimension=='0' && (key =='pmCpuRankList')">（{{'aws.bill.core'|translate}}）</span>
+                        <span ng-show="filterDataDimension=='1' && (key =='pmCpuRankList')">（{{'aws.bill.core'|translate}}-{{'aws.bill.hour'|translate}}）</span>
+                    </div>
+                    <div class="panels clearfix">
+                        <div class="pie-wrap">
+                            <div class="pie" chart-pie panel='resViewPieChart[key].panels'></div>
+                            <div class="pie-center" ng-if = "resViewPieChart[key].panels.total > 0">
+                                <span>{{resViewPieChart[key].panels.total}}</span>
+                            </div>
+                        </div>
+                        <div class="pie-legend">
+                            <dl class="dl-horizontal" ng-repeat="legend in resViewPieChart[key].panels.data">
+                                <dt title="{{legend.name}}"><i style="background-color:{{resViewPieChart[key].panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+                                <dd>{{legend.value}}
+                                    <span class="unitText">（{{legend.unit}}）</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="col-4">
+                    <div class="title">
+                        {{'aws.bill.backupvolume'|translate}}
+                        <span ng-show="filterDataDimension=='0'">（GB）</span>
+                        <span ng-show="filterDataDimension=='1'">（GB-{{'aws.bill.hour'|translate}}）</span>
+                    </div>
+                    <div class="panels clearfix">
+                        <div class="pie-wrap">
+                            <div class="pie" chart-pie panel='resViewPieChart[key].panels'></div>
+                            <div class="pie-center" ng-if = "resViewPieChart[key].panels.total > 0">
+                                <span>{{resViewPieChart[key].panels.total}}</span>
+                            </div>
+                        </div>
+                        <div class="pie-legend">
+                            <dl class="dl-horizontal" ng-repeat="legend in resViewPieChart[key].panels.data">
+                                <dt title="{{legend.name}}"><i style="background-color:{{resViewPieChart[key].panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+                                <dd>{{legend.value}}
+                                    <span class="unitText">（{{legend.unit}}）</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane  overview" ng-class="{active: tab.index == 1}" ng-controller="resMeteringStatisticCtrl">
+            <div class="box cluster-box" ng-show="ADMIN || DOMAIN_ADMIN " ng-class="{'items4':ADMIN,'items3':DOMAIN_ADMIN,'items2':PROJECT_ADMIN}">
+                <!-- <ul>
+                    <li>
+                        <div class="icon"><i class="icon-aw-position"></i></div>
+                        <div class="text">
+                            <div class="num">{{itemsCount.regionCount}}</div>
+                            <p>{{'aws.bill.region'|translate}}</p>
+                        </div>
+                    </li>
+                    <li ng-hide="DOMAIN_ADMIN || PROJECT_ADMIN">
+                        <div class="icon"><i class="icon-aw-data-center1"></i></div>
+                        <div class="text">
+                            <div class="num">{{itemsCount.deptCount}}</div>
+                            <p>{{'aws.bill.domain'|translate}}</p>
+                        </div>
+                    </li>
+                    <li ng-hide="PROJECT_ADMIN">
+                        <div class="icon"><i class="icon-aw-label"></i></div>
+                        <div class="text">
+                            <div class="num">{{itemsCount.projectCount}}</div>
+                            <p>{{'aws.bill.project'|translate}}</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="icon"><i class="icon-aw-user-group"></i></div>
+                        <div class="text">
+                            <div class="num">{{itemsCount.userCount}}</div>
+                            <p>{{'aws.bill.userAmount'|translate}}</p>
+                        </div>
+                    </li>
+                </ul> -->
+                <div class="col-3">
+                  <div class="user-box">
+                    <a  ng-href="/single" >
+                      <div class="cluster-item">
+                        <div class="cluster-left">
+                          <div class="circle-blue">
+                            <i class="icon-aw-data-center"></i>
+                          </div>
+                        </div>
+                        <div class="cluster-right">
+                          <span>{{itemsCount.regionCount}}</span>
+                          <div>{{"aws.overview.datacluster"|translate}}</div>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+                <div class="col-3">
+                
+                  <div class="user-box">
+                    <a ng-href="/permit/department">
+                      <div class="cluster-item">
+                        <div class="cluster-left">
+                        <div class="circle-green">
+                          <i class="icon-aw-bm"></i>
+                        </div>
+                        </div>
+                        <div class="cluster-right">
+                          <span>{{itemsCount.deptCount}}</span>
+                          <div>{{"aws.overview.domain"|translate}}</div>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="user-box">
+                    <a ng-href="/permit/project">
+                      <div class="cluster-item">
+                        <div class="cluster-left">
+                          <div class="circle-waterblue">
+                            <i class="icon-aw-project"></i>
+                          </div>
+                        </div>
+                        <div class="cluster-right">
+                          <span>{{itemsCount.projectCount}}</span>
+                          <div>{{"aws.overview.project"|translate}}</div>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="user-box">
+                    <a ng-href="/permit/user" class="cluster-left">
+                      <div class="cluster-item">
+                        <div class="cluster-left">
+                        <div class="circle-orange">
+                          <i class="icon-aw-user-group"></i>
+                        </div>
+                        </div>
+                        <div class="cluster-right">
+                          <span>{{itemsCount.userCount}}</span>
+                          <div>{{'aws.bill.userAmount'|translate}}</div>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+            </div>
+            <div class="">
+                <div my-daterangepicker filter-data="filterData" query="query()" download-data="downloadData()" search="applyGlobalSearch()" refresh="refresh()" csv-header="csvHeader" file-name="fileName" cols-config="colsConfigList" select-col="selectCol()" ></div>
+                <!-- <div table-action filter-data="filterData" query="query()" download-data="downloadData()" search="applyGlobalSearch()" refresh="refresh()" csv-header="csvHeader" file-name="fileName" cols-config="colsConfigList" select-col="selectCol()" ></div> -->
+                <div class="table-content" id="meteringStatisticTable">
+                    <script type="text/ng-template" id="headerDropMenu.html">
+                        <div>
+                            {{col_title}}
+                            <div class="dropdown">
+                                <i class="icon-aw-angle-down dropdown-toggle" data-toggle="dropdown"></i>
+                                <ul class="dropdown-menu ">
+                                    <li ng-repeat="col in colsList track by $index">
+                                        <a ng-click="selectCol(col.value)">{{col.title}}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </script>
+                </div>
+            </div>
+            <div ng-controller="resUsageOfItemsDetailCtrl">
+                <div class='animateContent {{itemAnimation}} '>
+                    <div class='detailInner'>
+                        <div class="tab-content">
+                            <div class="detail-row">
+                                <div class="detail-title">
+                                    <a class="an-close" ng-href="/system/resMetering"><i class="icon-aw-mail-reply"></i></a>
+                                    <span>
+                                        <span class="blue">{{itemName}} </span>
+                                    <strong ng-if="itemType=='region'">{{'aws.bill.region'|translate}}</strong>
+                                    <strong ng-if="itemType=='domain'">{{'aws.bill.domain'|translate}}</strong>
+                                    <strong ng-if="itemType=='project'">{{'aws.bill.project'|translate}}</strong>
+                                    <strong ng-if="itemType=='user'">{{'aws.bill.user'|translate}}</strong>
+                                    </span>
+                                </div>
+                                <div class="detail-info">
+                                    <div class="tab-content-line"></div>                                        
+                                    <div my-daterangepicker filter-data="filterData" time-type="timeType" query="query()" download-data="downloadData()" search="applyGlobalSearch()" refresh="refreshTable()" csv-header="csvHeader" file-name="fileName"></div>
+                                    <div class="table-content">
+                                       <!--  <empty-tip empty-type="itemResUsageTableData" tip-id="'item-resusage-tip-msg'"></empty-tip> -->
+                                        <table class="table" ng-table="itemResUsageTable">
+                                            <tr ng-repeat="item in $data track by $index">
+                                                <td data-title="'aws.bill.name'|translate" sortable="'resourceName'">{{item.resourceName}}</td>
+                                                <td data-title="'aws.bill.currentUsingAmonut'|translate" sortable="'currentUsingAmount'">{{item.currentUsingAmount}}</td>
+                                                <td data-title="'aws.bill.unit'|translate" sortable="'currentUsingAmountUnit'">{{item.currentUsingAmountUnit}}</td>
+                                                <td data-title="'aws.bill.alreadyUsedAmount'|translate" sortable="'alreadyUsedAmount'">{{item.alreadyUsedAmount}}</td>
+                                                <td data-title="'aws.bill.unit'|translate" sortable="'alreadyUsedAmountUnit'">{{item.alreadyUsedAmountUnit}}</td>
+                                            </tr>
+                                        </table>
+                                        <div ng-show="itemResUsageTableData">{{'aws.common.loading'|translate}}</div>
+                                        <div ng-show="!itemResUsageTableData && itemResUsageTable.data.length == 0">{{'aws.common.empty'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class='animate-backup'></div>
+            </div>
+        </div>
+        <div class="tab-pane" ng-class="{active: tab.index == 2}" ng-controller="resUsageRateCtrl">
+            <div class="control-groups clearfix" ng-class="{'time-error':filterData.timeStep == 'defined'&&(resQuery_form.startTime.$error.pattern || resQuery_form.startTime.$error.required || resQuery_form.endTime.$error.pattern || resQuery_form.endTime.$error.gtTime || resQuery_form.endTime.$error.required)}">
+                <form class="form-inline date-box" name="resQuery_form" ng-if="ADMIN">
+                    <div class="control-group pull-left">
+                        <div class="control-label">{{'aws.bill.resObj'|translate}}：</div>
+                        <div class="controls">
+                            <ui-select ng-model="filterData.resType">
+                                <ui-select-match placeholder="{{'aws.bill.pleaseSelect'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.resTypeList | propsFilter:{name:$select.search}">
+                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group pull-left">
+                        <div class="control-label">{{'aws.bill.statisticDimension'|translate}}：</div>
+                        <div class="controls">
+                            <ui-select ng-model="filterData.depOrPro">
+                                <ui-select-match placeholder="{{'aws.bill.pleaseSelect'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.statisticDimensionList | propsFilter:{name:$select.search}">
+                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="control-group pull-left">
+                        <div class="control-label">TOP{{'aws.bill.type'|translate}}：</div>
+                        <div class="controls">
+                            <ui-select ng-model="filterData.topType">
+                                <ui-select-match placeholder="{{'aws.bill.pleaseSelect'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.topTypeList | propsFilter:{name:$select.search}">
+                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <ui-select ng-model="filterData.topLength">
+                                <ui-select-match placeholder="{{'aws.bill.pleaseSelect'|translate}}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.topLengthList | propsFilter:{name:$select.search}">
+                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <!-- <div class="control-group pull-left">
+                        <label class="control-label">{{'aws.bill.timeFilter'|translate}}：</label>
+                        <div class="controls">
+                            <ui-select ng-model="filterData.timeStep" ng-change="timeSelectTab(filterData.timeStep)">
+                                <ui-select-match placeholder="请选择时间">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item.value as item in options.timeTypeList">
+                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="form-group time-picker start pull-left" ng-show="filterData.timeStep == 'defined'">
+                        <div class="input-group date form_date col-md-5">
+                            <input class="form-control fromTime" name="startTime" type="text" size="16" ng-model="filterData.from" placeholder="{{'aws.log.start_at'|translate}}" ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1]) ([0-1][1-9]|[1][0]|[2][0-4]):([0-6][0-9]):([0-6][0-9])$/" gt-time required >
+                            <span class="input-group-addon calendar-cont">
+                                <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                            </span>
+                            <div class="error" ng-messages="resQuery_form.startTime.$dirty&&resQuery_form.startTime.$error">
+                                <div ng-message="pattern">请输入正确的时间格式</div>
+                                <div ng-message="required">*必填项</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group time-picker end pull-left" ng-show="filterData.timeStep == 'defined'">
+                        <div class="input-group date form_date col-md-5">
+                            <input class="form-control endTime" name="endTime" type="text" size="16" ng-model="filterData.to" placeholder="{{'aws.log.end_at'|translate}}" ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1]) ([0-1][1-9]|[1][0]|[2][0-4]):([0-6][0-9]):([0-6][0-9])$/" gt-time required>
+                            <span class="input-group-addon calendar-cont">
+                                <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                            </span>
+                            <div class="error" ng-messages="resQuery_form.endTime.$dirty&&resQuery_form.endTime.$error">
+                                <div ng-message="pattern">请输入正确的时间格式</div>
+                                <div ng-message="gtTime">{{"aws.errors.gtTime"|translate}}</div>
+                                <div ng-message="required">*必填项</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-group pull-left titlt-option">
+                        <button class="btn btn-info" type="button" ng-click="query()" ng-disabled="(filterData.timeStep == 'defined' && (resQuery_form.startTime.$error.pattern || resQuery_form.startTime.$error.required || resQuery_form.startTime.$error.pattern || resQuery_form.endTime.$error.required || resQuery_form.endTime.$error.gtTime)) || loadTopData" ><i class="icon-aw-search"></i> {{'aws.bill.query'|translate}}</button>
+                        <button class="btn btn-default" type="button " ng-click="downloadData()"><i class="icon-aw-dc"></i> {{'aws.bill.export'|translate}}</button>
+                    </div> -->
+                    <div class="form-group pull-left">
+                        <div my-daterangepicker filter-data="filterData" time-precision="'sec'" query="query()" download-data="downloadResUsageTableData()" csv-header="csvHeader" file-name="fileName"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="box"  ng-show="ADMIN">
+                <div class="col-4 bar-chart">
+                    <div class="title">{{cpu_bar_title}}</div>
+                    <div class="panels clearfix">
+                        <div class="bar-wrap">
+                            <ul>
+                                <li ng-repeat="item in panels.cpu" class="clearfix">
+                                    <div chart-bar bardata="item"></div>
+                                </li>
+                            </ul>
+                            <div class="text-center" ng-show="panels.cpu.length == 0 && !loadTopData"> {{'aws.common.empty'|translate}}</div>
+                            <div class="text-center" ng-show="loadTopData"> {{'aws.common.loading'|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4 bar-chart">
+                    <div class="title">{{mem_bar_title}}</div>
+                    <div class="panels clearfix">
+                        <div class="bar-wrap">
+                            <ul>
+                                <li ng-repeat="item in panels.mem" class="clearfix">
+                                    <div chart-bar bardata="item"></div>
+                                </li>
+                            </ul>
+                            <div class="text-center" ng-show="panels.mem.length == 0 && !loadTopData"> {{'aws.common.empty'|translate}}</div>
+                            <div class="text-center" ng-show="loadTopData"> {{'aws.common.loading'|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4 bar-chart">
+                    <div class="title">{{disk_bar_title}}</div>
+                    <div class="panels clearfix">
+                        <div class="bar-wrap">
+                            <ul>
+                                <li ng-repeat="item in panels.disk" class="clearfix">
+                                    <div chart-bar bardata="item"></div>
+                                </li>
+                            </ul>
+                            <div class="text-center" ng-show="panels.disk.length == 0 && !loadTopData"> {{'aws.common.empty'|translate}}</div>
+                            <div class="text-center" ng-show="loadTopData"> {{'aws.common.loading'|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="">
+                <!-- <div table-action filter-data="resUsagefilterData" query="resUsageTableQuery()" download-data="downloadResUsageTableData()" search="applyGlobalSearch()" refresh="refreshResUsageTable()" csv-header="csvHeader" file-name="fileName" time-precision="'sec'" cols-config="colsConfigList" select-col="selectCol()"></div> -->
+                <form name="resQuery_form" ng-if="!ADMIN">
+                    <div class="form-group pull-left">
+                        <div my-daterangepicker filter-data="filterData" time-precision="'sec'" query="query()" download-data="downloadResUsageTableData()" csv-header="csvHeader" file-name="fileName"></div>
+                    </div>
+                </form>
+                <div my-daterangepicker filter-data="resUsagefilterData" search="applyGlobalSearch()" refresh="refreshResUsageTable()" cols-config="colsConfigList" select-col="selectCol()" time-precision="'sec'"></div>
+                
+                <div class="table-content" id="resUsageRateTable">
+                    <script type="text/ng-template" id="headerDropMenu.html">
+                        <div>
+                            {{col_title}}
+                            <div class="dropdown">
+                                <i class="icon-aw-angle-down dropdown-toggle" data-toggle="dropdown"></i>
+                                <ul class="dropdown-menu ">
+                                    <li ng-repeat="col in colsList track by $index">
+                                        <a ng-click="selectCol(col.value)">{{col.title}}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </script>
+                </div>
+            </div>
+            <div ng-controller="depResUsageRateDetailCtrl">
+                <div class='animateContent {{depAnimation}} '>
+                    <div class='detailInner'>
+                        <div class="tab-content">
+                            <div class="detail-row">
+                                <div class="detail-title">
+                                    <a class="an-close" ng-href="/system/resMetering"><i class="icon-aw-mail-reply"></i></a>
+                                    <span><span class="blue">{{domainName}} </span> <strong> {{'aws.bill.domain'|translate}}</strong></span>
+                                </div>
+                                <div class="detail-info">
+                                    <div class="tab-content-line"></div>
+                                    <div my-daterangepicker filter-data="filterData" query="query()" time-precision="'sec'" download-data="downloadData()" search="applyGlobalSearch()" refresh="refreshTable()" csv-header="csvHeader" file-name="fileName" cols-config="colsConfigList" select-col="selectCol()"></div>
+                                    <div class="table-content">
+                                        <empty-tip empty-type="loadDepResUsageRateTableData" tip-id="'depRes-usageRate-tip-msg'"></empty-tip>
+                                        <table class="table" ng-table="depResUsageRateTable">
+                                            <tr ng-repeat="item in $data track by $index">
+                                                <td data-title="'aws.bill.project'|translate" sortable="''"  ng-if="colsConfigList[0].show"><a href="/#/system/resMetering?projectId={{item.projectId}}&&projectName={{item.projectName}}&&domainId={{item.domainId}}&&domainName={{item.domainName}}&&type=depDetail">{{item.projectName}}</a></td>
+                                                <td data-title="'aws.bill.cpu'|translate" sortable="'vCpu'" ng-if="colsConfigList[1].show">{{item.vCpu}}</td>
+                                                <td data-title="'aws.bill.memory'|translate" sortable="'vMemory'" ng-if="colsConfigList[2].show">{{item.vMemory}}</td>
+                                                <td data-title="'aws.bill.vmVolume'|translate" sortable="'vDisks'" ng-if="colsConfigList[3].show">{{item.vDisks}}</td>
+                                                <td data-title="'aws.bill.pmcpu'|translate" sortable="'pCpu'" ng-if="colsConfigList[4].show">{{item.pCpu}}</td>
+                                                <td data-title="'aws.bill.pmmemory'|translate" sortable="'pMemory'" ng-if="colsConfigList[5].show">{{item.pMemory}}</td>
+                                                <td data-title="'aws.bill.pmhd'|translate" sortable="'pDisks'" ng-if="colsConfigList[6].show">{{item.pDisks}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class='animate-backup'></div>
+            </div>
+            <div ng-controller="proResUsageRateDetailCtrl">
+                <div class='animateContent {{proAnimation}} '>
+                    <div class='detailInner'>
+                        <div class="tab-content">
+                            <div class="detail-row">
+                                <div class="detail-title text-nav" ng-if="depDetail">
+                                    <a class="an-close" href="/#/system/resMetering?domainId={{domainId}}&&domainName={{domainName}}&&type=dep">{{domainName}}{{'aws.bill.domain'|translate}}</a>
+                                    <span> > {{projectName}}{{'aws.bill.project'|translate}}</span>
+                                </div>
+                                <div class="detail-title text" ng-if="!depDetail">
+                                    <a class="an-close" href="/#/system/resMetering"><i class="icon-aw-mail-reply"></i></a>
+                                    <span><span class="blue">{{projectName}} </span> <strong> {{'aws.bill.project'|translate}}</strong></span>
+                                </div>
+                                
+                                <div class="detail-info">
+                                    <div class="tab-content-line"></div>
+                                    <div class="box">
+                                        <div my-daterangepicker filter-data="filterData" query="query()" time-precision="'sec'" download-data="downloadData()" search="applyGlobalSearch()" refresh="refreshTable()" csv-header="csvHeader" file-name="fileName"></div>
+                                        <div class="table-content" id="proResUsageRateTable">
+                                            <script type="text/ng-template" id="headerDropMenu.html">
+                                                <div>
+                                                    {{col_title}}
+                                                    <div class="dropdown">
+                                                        <i class="icon-aw-angle-down dropdown-toggle" data-toggle="dropdown"></i>
+                                                        <ul class="dropdown-menu ">
+                                                            <li ng-repeat="col in colsList track by $index">
+                                                                <a ng-click="selectCol(col.value)">{{col.title}}</a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </script>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class='animate-backup'></div>
+            </div>
+        </div>
+    </div>
+    </div>
+    
+</div>

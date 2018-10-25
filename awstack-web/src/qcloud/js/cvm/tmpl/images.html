@@ -1,0 +1,148 @@
+<div class="page-inner image">
+  <div class="page-title">
+      <h2>镜像</h2>
+      <div class="btn-item-group">
+        <button type="button" class="type-btn"  ng-class='{"active":item.region === options.region}' ng-click="changeRegion(item.region)" ng-repeat="item in regionList "><span>{{item.regionName}}</span></button>
+      </div>
+  </div>
+  <ul class="nav nav-tabs">
+    <li ng-class="{'active':imgType == options.imgType}" ng-repeat="imgType in imgTypeList" ng-click="changeImgType(imgType)"><a>{{imgType.name}}</a></li>
+  </ul>
+  <div class="table-action" >
+    <button ng-show="options.imgType.value=='2'" ng-class="{'btn-default':isDisabled,'btn-info':!isDisabled&&editData.status==2}" class="btn" uib-popover="请选择处于正常状态的镜像" popover-enable="isDisabled || editData.status!=2" popover-trigger="mouseenter" popover-placement = "bottom" ng-click="toAddVm(editData)"   ><i class="icon-aw-add-to2"></i>创建云主机</button>
+    <button  ng-if = "options.imgType.value ==1" ng-class="{'btn-default':delisDisabled,'btn-info':!delisDisabled}" class="btn" uib-popover="请选择你需要删除的镜像" popover-enable="delisDisabled" popover-trigger="mouseenter" popover-placement = "bottom" ng-click="delImage()">删除</button>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'CN.action.search'|translate}}" />
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <table ng-table="tableParams" class="table table-check" >
+      <tbody>
+        <tr ng-repeat="item in $data">
+          <td header="'headerCheckbox.html'" class="check-td" >
+            <label class="checkbox">
+              <input type="checkbox" name="r" ng-model="checkboxes.items[item.unImgId]" value="{{item.unImgId}}" />
+              <i class="iconfont"></i>
+            </label>
+          </td>
+          <td data-title="'ID/名称'">
+            <div class="edit-name">
+              <a ng-href="#cvm/image?id={{item.unImgId}}&imageType={{item.imageType}}">{{item.unImgId}}</a>
+              <span ng-click="editImgName()" ng-if = "item.imageName" title="{{item.imageName}}">{{item.imageName}}</i></span>
+              <span  ng-click="editImgName()"  ng-if = "!item.imageName">未命名</span>
+            </div>
+          </td>
+          <td data-title="'状态'"><span class="{{item.status}}">{{'CN.images.table.status.'+item.status| translate}}</span></td>
+          <td data-title="'类型'">{{'CN.images.table.imageType.'+item.imageType| translate}}</td>
+          <td data-title="'容量'">{{item.size}}</td>
+          <td data-title="'操作系统'">{{item.osName}}</td>
+          <td data-title="'创建时间'">{{item.createTime | date: 'yyyy-MM-dd:HH:mm:ss'}}</td>
+          <td data-title="'操作'"  ng-if="options.imgType.value=='2'"><a ng-class="{disabled:item.status != 2}" uib-popover="非正常状态不能创建云主机" popover-enable="item.status != 2" popover-trigger="mouseenter" popover-placement="bottom" ng-click="toAddVm(item,'table')">创建云主机</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+      <div class="detail-tab">
+        <div class="dt-title">
+          <a ng-href="#/cvm/image">镜像<i class="icon-aw-angle-left"></i></a><span>{{detailInfo.unImgId}}</span>
+        </div>
+        <div class="dt-box">
+          <div class="dt-content">
+            <div class="tab-pane active">
+              <strong>镜像信息</strong>
+              <dl class="dl-horizontal">
+                <dt>名称</dt>
+                <dd>{{detailInfo.imageName}}</dd>
+                <dt>镜像ID</dt>
+                <dd>{{detailInfo.unImgId}}</dd> 
+                <dt>状态</dt>
+                <dd>{{'CN.images.table.status.'+detailInfo.status| translate}}</dd>
+                <dt>镜像类型</dt>
+                <dd>{{'CN.images.table.imageType.'+detailInfo.imageType| translate}}</span></dd>
+                <dt>操作系统</dt>
+                <dd>{{detailInfo.osName}}</dd>
+                <dt>创建者</dt>
+                <dd>{{detailInfo.creator}}</dd>
+                <dt>镜像描述</dt>
+                <dd>{{detailInfo.imageDescription}}</dd>
+              </dl>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </pane>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="delImage.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">删除镜像</h3>
+    </div>
+    <div class="modal-body">
+      <form name="rebootForm" novalidate>
+        <div class="control-group">
+          <span class="control-span-volume">您已选<strong>{{checkedItems.length}}台镜像，</strong></span>
+          <a class="blue" ng-click="showVm()">查看详情
+          <i ng-show="show_vm" class=" icon-aw-angle-down"></i>
+          <i ng-show="!show_vm" class="icon-aw-angle-up"></i>
+          </a>
+          <table class="table table-info column table-volum-mount" ng-if="show_vm">
+            <tbody> 
+              <tr ng-repeat="item in checkedItems">
+                <td>{{$index+1}}</td>
+                <td>{{item.unImgId}}</td>
+                <td>可删除</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="alert alert-warning">
+          确定选中镜像进行删除
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirmDelImage()">确认</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

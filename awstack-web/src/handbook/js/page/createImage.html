@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>制作镜像</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <p>
+	<strong>前提条件</strong></p>
+<ul>
+	<li>
+		制作镜像前，需要有可用的iso格式的镜像文件。</li>
+	<li>
+		本地盘不支持制作镜像，需要在&ldquo;系统管理 &gt; 运维管理 &gt; 存储管理&rdquo;完成共享存储设备对接。</li>
+</ul>
+<p>
+	<strong>制作流程</strong></p>
+<p>
+	制作镜像包括以下步骤：</p>
+<ol>
+	<li>
+		通过&ldquo;新建镜像&rdquo;创建一个镜像制作的任务，同时后台会创建一个对应的云主机。</li>
+	<li>
+		通过&ldquo;控制台&rdquo;访问云主机，通过界面提示，进行操作系统以及软件包的安装。<br />
+		登录控制台时浏览器建议使用Internet Explorer 14+、Mozilla Firefox 43+、Google Chrome 47+、Safari 9+。</li>
+	<li>
+		通过&ldquo;注册镜像&rdquo;，将此云主机制作成一个可以引导可以启动的云主机镜像，此镜像用于创建其他云主机。此步骤不要漏掉，只有镜像注册成功，才支持通过镜像新建云主机。</li>
+</ol>
+<p>
+	<strong>注意：</strong><br />
+	步骤2完成后，请及时执行&ldquo;注册镜像&rdquo;操作，否则会占用一个云主机和云硬盘的配额，不利于资源的有效利用。</p>
+<p>
+	<strong>操作步骤</strong></p>
+<ol>
+	<li>
+		在云管平台的Web控制台上，选择&ldquo;产品和服务&gt;虚拟资源管理 &gt;镜像&rdquo;，进入镜像导航菜单。</li>
+	<li>
+		在左侧导航菜单中单击&ldquo;镜像制作&rdquo;，进入镜像制作页面。</li>
+	<li>
+		单击&ldquo;新建镜像&rdquo;按钮，然后设置镜像的各项参数。硬盘大小为云主机的整个存储容量，至少不能小于前面上传镜像时设置的系统盘。</li>
+	<li>
+		单击&ldquo;确定&rdquo;按钮，&ldquo;新建镜像&rdquo;下面的列表区增加一条镜像的记录。此时，后台还会创建一个对应的云主机。</li>
+	<li>
+		在列表区勾选这一条镜像记录，然后单击&ldquo;控制台&rdquo;，登录到云主机。然后根据界面提示，进行云主机系统安装，可以根据实际需要安装操作系统以及所需要的其他软件。</li>
+	<li>
+		安装成功后，勾选镜像，然后单击&ldquo;注册镜像&rdquo;按钮。即可制作成一个可以引导可以启动的云主机镜像。此镜像可用来创建其他云主机，并在&ldquo;镜像管理&rdquo;的列表区显示。此步骤务必尽快执行，否则会占用一个云主机和云硬盘的配额，不利于资源的有效利用。</li>
+</ol>
+<p>
+	<strong>后续操作</strong></p>
+<p>
+	通过镜像创建云主机，并验证镜像的正确性。详细信息请参见《AWCloud云计算管理平台镜像制作手册》。</p>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>

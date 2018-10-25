@@ -1,0 +1,109 @@
+<div class="page-inner">
+  <!-- 项目 start -->
+  <div class="box">
+    <div class="col-4 ">
+      <div class="title">{{'aws.cvmview.pro_ins'|translate}}</div>
+      <div class="panels clearfix" ng-if="pieshow">
+        <div class="pie-wrap" >
+        <div class=" pie" chart-pie panel='cvmViewInsPieChart.panels'></div>
+        </div>
+        <div class="pie-legend">
+          <dl class="dl-horizontal">
+            <dt>{{'aws.quota.totalQuota'|translate}}：</dt>
+            <dd><span class="total">{{instancesquota.total}}</span></dd>
+          </dl>
+          <dl class="dl-horizontal" ng-repeat="legend in cvmViewInsPieChart.panels.data">
+            <dt><i style="background-color:{{cvmViewInsPieChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+            <dd><span ng-class="{'num':$index==0}">{{legend.value}}</span></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="col-8">
+      <div class="resourcesInfo">
+        <div class="title">{{'aws.cvmview.pro_res_info'|translate}}</div>
+        <ul class="clearFix" ng-if ="projectserverscount&&projectNetworksCount&&routerscount&&volumescount">
+          <li>
+            <progress-bar progress-value="projectserverscount" bar-type="'height'"></progress-bar>
+          </li>
+          <li>
+            <progress-bar progress-value="projectNetworksCount" bar-type="'height'"></progress-bar>
+          </li>
+          <li>
+            <progress-bar progress-value="routerscount" bar-type="'height'"></progress-bar>
+          </li>
+          <li>
+            <progress-bar progress-value="volumescount" bar-type="'height'"></progress-bar>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="box" ng-show="showUerList">
+    <div class="table-content">
+      <table ng-table="tableParams" class="table " show-filter="false">
+
+        <caption>
+          <span>{{'aws.cvmview.user_list'|translate}}</span>   
+          <button type="button" ng-disabled="isDisabled" data-toggle="modal" ng-click="allocateUser('allocateUser',editData)" class="btn btn-info"><i class="icon-aw-adjust"></i> {{'aws.depart.allocateUser'|translate}}</button>
+        </caption>
+        <empty-tip empty-type="loadData"></empty-tip>
+        <colgroup>
+          <col width="50%">
+          <col width="50%">
+        </colgroup>
+        <tr ng-repeat="user in $data">
+          <td data-title="headers.name" sortable="'name'">
+              <span>{{user.name}}</span>
+          </td>
+          <td data-title="headers.role" sortable="'role'">
+              <span>{{'aws.users.cu.roles.'+ user.roleidlist[0].name | translate}}</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script type="text/ng-template" id="proallocateUser.html">
+    <div class="roleToUser-modal modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{'aws.depart.allocateUser'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+          <div class="left-select-table">
+              <h5>{{'aws.depart.noAllocate'|translate}}</h5>
+              <div class="table-responsive">
+                  <ul ng-repeat="user in users" align="center" border="0" cellpadding="0" cellspacing="0">
+                      <li class="dropdown">
+                        <button ng-click="selectUserToProject(user)"><i class="icon-aw-check-square"></i></button>
+                        <span title="{{user.name}}">{{user.name}}</span>
+                      </li>
+                  </ul>
+              </div>
+          </div>
+          <div class="btnGroup">
+              <!--<button class="btn selectBtn">&gt;</button>
+              <button class="btn removeBtn">&lt;</button>-->
+          </div>
+          <div class="right-select-table">
+              <h5>{{'aws.depart.allocatedUser'|translate}}</h5>
+              <div class="table-responsive">
+                  <ul ng-repeat="havedUser in havedUsers" ng-hide="havedUser.hideProjectAdmin" align="center" border="0" cellpadding="0" cellspacing="0">
+                      <li class="dropdown">
+                        <button ng-click="removeUserFromProject(havedUser)"><i class="icon-aw-indeterminate"></i></button>
+                        <span title="{{havedUser.name}}">{{havedUser.name}}</span>                         
+                        <div class="select-role" ng-dropdown-multiselect="" select-radio="'true'"  options="roles" selected-model="havedUser.roleidlist" extra-settings="example5settings" translation-texts="example5customTexts"></div>
+                      </li>
+                  </ul>
+              </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="$close()">{{"aws.action.ok"|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+    </div>
+</script>

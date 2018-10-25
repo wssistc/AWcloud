@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title></title>
+    <base href="/vmware/">
+    <script src="/js/config.js" id="page-config" data-js="
+    lodash/lodash.min.js
+    jquery/jquery.min.js
+    moment/min/moment.min.js
+    d3/d3.min.js
+    bootstrap/dist/js/bootstrap.min.js
+    bootstrap-datetime-picker/js/bootstrap-datetimepicker.js
+    bootstrap-datetime-picker/js/bootstrap-datetimepicker.zh-CN.js
+    angular/angular.min.js
+    angular-animate/angular-animate.min.js
+    angular-route/angular-route.min.js
+    angular-resource/angular-resource.min.js
+    angular-sanitize/angular-sanitize.min.js
+    angular-messages/angular-messages.min.js
+    angular-translate/dist/angular-translate.min.js
+    angular-ivh-treeview/dist/ivh-treeview.min.js
+    angular-file-saver/dist/angular-file-saver.bundle.min.js
+    angular-ui-bootstrap/dist/ui-bootstrap-tpls.js
+    angular-ui-tree/dist/angular-ui-tree.min.js
+    angularjs-dropdown-multiselect/src/angularjs-dropdown-multiselect.js
+    ng-table/dist/ng-table.min.js
+    ui-select/dist/select.min.js
+    bootstrap-daterangepicker/moment.js
+    bootstrap-daterangepicker/daterangepicker.js
+    " data-css="
+    bootstrap/dist/css/bootstrap.min.css
+    bootstrap-datetime-picker/css/bootstrap-datetimepicker.min.css
+    angular/angular-csp.css
+    angular-ivh-treeview/dist/ivh-treeview.min.css
+    angular-ivh-treeview/dist/ivh-treeview-theme-basic.css
+    ui-select/dist/select.min.css
+    bootstrap-daterangepicker/daterangepicker.css
+    "></script>
+    <link rel="stylesheet" href="/css/vmware.css">
+    <link rel="shortcut icon" href="/favicon.ico"/>
+    <link rel="bookmark" href="/favicon.ico"/>
+</head>
+<body class="logined" ng-controller="mainCtrl">
+  <header>
+    <div ng-include="'tmpl/header.html'"></div>
+  </header>
+  <div class="main clearfix open">
+    <div class="page-alert-list" ng-class="{'show-dash-alert':dashAlerts.list}">
+      <div ng-repeat='alert in dashAlerts.list' ng-class="{'alert-building': alert.severity=='building','alert-success': alert.severity=='success','alert-warning': alert.severity=='warning','alert-error': alert.severity=='error'}" class="alert">
+          <button type="button" class="alert-close" ng-click="dashAlerts.clear(alert)"><i class="icon-aw-wrong"></i></button>
+          <div class="alert-content">
+              <div class="alert-text">
+                  <span ng-bind="alert.text"></span><i ng-show="alert.severity=='building'" class="icon-aw-refresh aw-spin"></i>
+              </div>
+          </div>
+      </div>
+    </div>
+    <div class="delete-wrap" ng-show="showDel">
+      <div class="delete-alert" ng-class="{'delete-show':showDel}">
+        <uib-alert type="{{ContType}}" close="close()">
+          <div class="del-cont" ng-bind-html="delCont |trust_html"></div>
+          <div class="btn-item">
+            <button type='button' class='btn {{btnType}}' ng-click='confirm()' ng-disabled="notDel">确认</button><button type='button' class='btn btn-default' ng-click="close({$event: $event})">取消</button>
+          </div>
+       </uib-alert>
+      </div>
+    </div> 
+    <div class="delete-wrap vm-loading" ng-show="vm_loadding">
+      <div class="delete-alert" ng-class="{'delete-show':true}">
+      <div class="loading">加载中</div>
+        <!-- <uib-alert type="{{ContType}}" close="close()">
+          <div class="del-cont" ng-bind-html="delCont |trust_html"></div>
+          <div class="btn-item">
+            <button type='button' class='btn {{btnType}}' ng-click='confirm()' ng-disabled="notDel">确认</button><button type='button' class='btn btn-default' ng-click="close({$event: $event})">取消</button>
+          </div>
+       </uib-alert> -->
+      </div>
+    </div>
+    <aside toggle-nav>
+      <!-- <span class="toggle-icon"><i class="icon-aw-angle-double-right"></i></span> -->
+      <h2>VMware vSphere</h2>
+      <ul>
+        <li><a ng-href="/#/view"><i class="icon-aw-home"></i><span>返回</span></a></li>
+        <li ng-repeat="item in sideMenu">
+          <a ng-href="{{item.url}}" ng-class="{'active':item.current==currentItem}">
+            <i class="{{item.icon}}"></i>
+            <span ng-bind="item.name"></span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+    <div class="main-content">
+      <div class="page-inner">
+        <div class="wraper">
+          <div class="page-title clearfix">
+            <h3 ng-bind="pageTitle" ng-if="subMenu.length == 0"></h3>
+            <div ng-if="subMenu.length > 0" class="menu-manage">
+              <div class="clearfix" >
+                <h3 ng-bind="TAG"></h3>
+                <div class="btn-item-group" role="group">
+                  <!-- <a ng-repeat="subItem in subMenu" ng-href="{{subItem.url}}" ng-class="{'active':subItem.current == subCurrentItem}" ng-bind="subItem.name"></a> -->
+                </div>
+              </div>
+              <nav class="nav top-menu" ng-if="L3Menu.length>0">
+                <ul class="clearfix">
+                  <li ng-repeat="L3Item in L3Menu" ng-class="{'active':L3Item.current == L3CurrentItem}">
+                    <a ng-href="{{L3Item.url}}" ng-bind="L3Item.name" ></a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+          <div class="" ng-view>
+
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  <ui-alert></ui-alert>
+  <ui-bubble></ui-bubble>
+  <script type="text/javascript" src="/js/vmware.js">
+  </script>
+</body>
+</html>

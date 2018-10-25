@@ -1,0 +1,400 @@
+<div class=" page-inner pengdingTicket-view ">
+    <div>
+        <div class="table-action">
+            <div class="control-group">
+                <label class="control-label">类型：</label>
+                <div class="controls ticket-con">
+                    <ui-select ng-model="tickets.type" ng-disabled="typesDisabled" required name="name" ng-change="changeType(tickets.type)">
+                        <ui-select-match placeholder="">{{$select.selected.name}}</ui-select-match>
+                        <ui-select-choices repeat="flow in tickets.flowList | filter:{name:$select.search}">
+                            <div ng-bind-html="flow.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <into-information modular="'allTickets'"></into-information>
+            <setting title-data="titleData" site-title="titleName" table-data="Tabledatas" search-tearm="allTicketsSearchTearm(obj)"></setting>
+            <div type="button" class="btn btn-renovat right-ports" ng-click="refresh()">
+                <i class="icon-aw-refresh"></i>
+            </div>
+            
+            <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+                        <i class="icon-aw-search"></i>
+                    </button>
+                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm"
+                        placeholder="{{'aws.action.search'|translate}}" />
+                </form>
+            </div>
+            <div class="table-content">
+                <table ng-table="alltTable" class="table">
+                    <colgroup>
+                        <col width="15%">
+                        <col width="15%">
+                        <col width="20%">
+                        <col width="15%">
+                        <col width="15%">
+                        <col width="10%">
+                        <col width="10%">
+                    </colgroup>
+                    <tr ng-repeat="item in $data | searchFilter:{name:SearchTerm,description:SearchTerm,version:SearchTerm,createTime:SearchTerm}" >
+                        <td data-title="'工单编号'" sortable="'ticketNumber'" ng-if="titleData[0].value">
+                            <span>
+                                <a ng-href="ticket/allTickets?id={{item.detailId}}_{{item.ticketType}}_{{item.id}}">{{item.ticketNumber}}</a>
+                            </span>
+                        </td>
+                        <td data-title="'服务名称'" sortable="'serverName'" ng-if="titleData[1].value">
+                            <span>{{item.serverName}}</span>
+                        </td>
+                        <td data-title="'标题'" sortable="'title'" ng-if="titleData[2].value">
+                                <span>
+                                    {{item.title}}
+                                </span>
+                        </td>
+                        <!-- <td data-title="headers.description" sortable="'description'">
+                            <span>{{item.description}}</span>
+                        </td> -->
+                        <td data-title="'申请人'" sortable="'createdbyName'" ng-if="titleData[3].value">
+                            <span>{{item.createdbyName}}</span>
+                        </td>
+                        <td data-title="'申请时间'" sortable="'createdtime'" ng-if="titleData[4].value">
+                            <span>{{item.createdtime | date:'yyyy-MM-dd HH:mm:ss'}}</span>
+                        </td>
+                        <td data-title="'工单状态'" sortable="'_status'" ng-if="titleData[5].value">
+                            <span class="{{item.class}} status-text">{{item._status}}
+                                <span></span>
+
+                                <!-- <span class="bg-blue" ng-if="!item.endtime">审批中</span>
+                                <span class="bg-blue" ng-if="item.ticketType != '11' && item.endtime" >
+                                    审批完成
+                                </span>
+                                <span ng-if="item.ticketType == '11' && item.endtime ">
+                                    已关闭
+                                </span> -->
+                        </td>
+                        <td data-title="'操作'" ng-if="titleData[6].value">
+                            <a ng-if="!item.endTime" ng-href="ticket/allTickets?id={{item.detailId}}_{{item.ticketType}}_{{item.id}}">{{item.action}}</a>
+                        </td>
+
+                    </tr>
+                </table>
+                <empty-tip empty-type="loadData"></empty-tip>
+            </div>
+        </div>
+    </div>
+    <div ng-controller="detailCtrl">
+        <pane class="detail-body ticket-detail" animation="animation" ng-class="{'info-detail-view':type =='11'}">
+             <div class="detail-title">
+                    <a class="an-close" ng-href="ticket/allTickets">
+                        <i class=" icon-aw-mail-reply"></i>
+                    </a>
+                    <span>{{detailTitle}}</span>
+                    <div class="tab-content-line"></div> 
+            </div>
+            <div class="detail-left-box">
+
+                <div class="workflowStatus">
+                   
+                    <div ng-class="{'ticket-border-box':type !='11'}">
+                            <div class="assiginTiltle">
+                                    <span>{{"aws.workflow.initialAssigneeName" | translate}} ：<span class="info">{{wfqa.proposer}}</span></span>
+                                    <span>{{"aws.workflow.applyTime" | translate}} ：<span class="info">{{wfqa.ticketApplyTime}}</span></span>
+                                    <span ng-if="type != '11'">审批结果 ：<span class="status" ng-class="{'bg-orange':( processVariable.isUndo),'bg-blue':( !processVariable.isUndo && processVariable.isComplete=='1'),'bg-green':(!processVariable.isUndo && processVariable.isComplete=='0'),'bg-red':(!processVariable.isUndo && processVariable.isComplete=='2')}">{{approveResult}}</span></span>
+                                    <p><span>工单编号：</span><span class="info">{{wfqa.ticketNumber}}</span></p>
+                                    <p>{{wfqa.description}}</p>
+                            </div>
+            
+            
+                                <h4 class="resInfo-title" ng-if="type != '11'">申请资源详情</h4>
+                                <div class="detail-info" ng-if=" type == '1' ">
+                                    <table class="table table-info column">
+                                        <colgroup>
+                                            <col width="25%">
+                                            <col width="25%">
+                                            <col width="25%">
+                                            <col width="25%">
+                                        </colgroup>
+                                        <tbody>
+                                                <tr>
+                                                    <td>部门名称</td>
+                                                    <td>{{processVariable.domainName}}</td>
+                                                    <td>项目名称</td>
+                                                    <td>{{processVariable. projectName}}</td>
+                                                   
+                                                    
+                                                </tr>
+                                                <tr>
+                                                    <td>云主机(个)</td>
+                                                    <td>{{processVariable.quota.instances}}</td>
+                                                    <td>CPU核(个)</td>
+                                                    <td>{{processVariable.quota.cores}}</td>
+            
+                                                </tr>
+                                                <tr>
+                                                    <td>内存(GB)</td>
+                                                    <td>{{processVariable.quota.ram}}</td>
+                                                    <td>公网IP(个)</td>
+                                                    <td>{{processVariable.quota.floatingip}}</td>
+                                                   
+                                                </tr>
+                                                <tr>
+                                                    <td>快照(个)</td>
+                                                    <td>{{processVariable.quota.snapshots}}</td>
+                                                    <td>网络(个)</td>
+                                                    <td>{{processVariable.quota.network}}</td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                    <td>云硬盘(个)</td>
+                                                    <td>{{processVariable.quota.volumes}}</td>
+                                                    <td>物理云主机(个)</td>
+                                                    <td>{{processVariable.quota.phy_instances}}</td>
+                                                    
+                                                </tr>
+                                                <tr ng-if="processVariable.quota.backups">
+                                                    <td>备份数量(个)</td>
+                                                    <td>{{processVariable.quota.backups}}</td>
+                                                    <td>备份容量(GB)</td>
+                                                    <td>{{processVariable.quota.backup_gigabytes}}</td>
+                                                 </tr>
+                                            </tbody>
+                                        </table>
+                                    </table>
+                                </div>
+                                <div class="detail-info" ng-if=" type == '2' ">
+                                        <table class="table table-info column">
+                                            <colgroup>
+                                                <col width="25%">
+                                                <col width="25%">
+                                                <col width="25%">
+                                                <col width="25%">
+                                            </colgroup>
+                                            <tbody>
+                                                    <tr>
+                                                        <td>部门名称</td>
+                                                        <td>{{processVariable.domainName}}</td>
+                                                        <td>项目名称</td>
+                                                        <td>{{processVariable.projectName}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>云主机名称</td>
+                                                        <td>{{processVariable.instance.name}}</td>
+                                                        <td>CPU（核数）</td>
+                                                        <td>{{processVariable.instance.cpu}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>内存（GB）</td>
+                                                        <td>{{processVariable.instance.ram}}</td>
+                                                        <td>镜像</td>
+                                                        <td>{{processVariable.instance.imageName}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>网络名称</td>
+                                                        <td>{{processVariable.instance.network_name}}</td>
+                                                        <td>子网名称</td>
+                                                        <td>{{processVariable.instance.subnet_name}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>存储设备</td>
+                                                        <td>{{processVariable.instance.disPlayName}}</td>
+                                                        <td>备注信息</td>
+                                                        <td>{{processVariable.instance.desc}}</td>
+                                                    </tr>
+                                                </tbody>
+                                        </table>
+                                    </div>
+                                <div class="detail-info" ng-if=" type == '3' ">
+                                    <table class="table table-info column">
+                                        <colgroup>
+                                            <col width="25%">
+                                            <col width="25%">
+                                            <col width="25%">
+                                            <col width="25%">
+                                        </colgroup>
+                                        <tbody>
+                                                <tr>
+                                                    <td>部门名称</td>
+                                                    <td>{{processVariable.domainName}}</td>
+                                                    <td>项目名称</td>
+                                                    <td>{{processVariable.projectName}}</td>
+                                                  
+                                                </tr>
+                                                <tr>
+                                                    <td>云硬盘名称</td>
+                                                    <td>{{processVariable.disk.diskName}}</td>
+                                                    <td>云硬盘容量(GB)</td>
+                                                    <td>{{processVariable.disk.diskCapacity}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>存储设备</td>
+                                                    <td>{{processVariable.disk.disPlayName}}</td>
+                                                    <td>备注信息</td>
+                                                    <td>{{processVariable.disk.des}}</td>  
+                                                </tr>
+                                               
+                                           
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="detail-info" ng-if=" type == '4' ">
+                                    <table class="table table-info column">
+                                        <colgroup>
+                                            <col width="25%">
+                                            <col width="25%">
+                                            <col width="25%">
+                                            <col width="25%">
+                                        </colgroup>
+                                        <tbody>
+                                                <tr>
+                                                    <td>部门名称</td>
+                                                    <td>{{processVariable.domainName}}</td>
+                                                    <td>项目名称</td>
+                                                    <td>{{processVariable.projectName}}</td>
+                                                   
+                                                </tr>
+                                                <tr>
+                                                    <td>名称</td>
+                                                    <td>{{processVariable.network.netName}}</td>
+                                                    <td>cidr</td>
+                                                    <td>{{processVariable.network.cidr}}</td>
+                                                   
+                                                </tr>
+                                                <tr>
+                                                    <td>备注信息</td>
+                                                    <td>{{processVariable.network.desc}}</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                            
+                                    </table>
+                                </div>
+                                <div class="detail-info" ng-if=" type == '5' ">
+                                    <table class="table table-info column">
+                                        <colgroup>
+                                            <col width="25%">
+                                            <col width="25%">
+                                            <col width="25%">
+                                            <col width="25%">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <td>部门名称</td>
+                                                <td>{{processVariable.domainName}}</td>
+                                                <td>项目名称</td>
+                                                <td>{{processVariable.projectName}}</td>
+                                                
+                                            </tr>
+                                            <tr>
+                                                <td>路由器名称</td>
+                                                <td>{{processVariable.router.name}}</td>
+                                                <td>路由器公网</td>
+                                                <td>{{processVariable.router.network_name}}</td>
+                                                
+                                            </tr>
+                                        <tr ng-if="processVariable.router.assSubnetName">
+                                                <td>路由器子网</td>
+                                                <td>{{processVariable.router.assSubnetName}}</td>
+                                                <td>关联子网</td>
+                                                <td>{{processVariable.router.subnet_name}}</td>
+                                            </tr>
+                                            <tr ng-if="processVariable.router.assSubnetName">
+                                                <td>备注信息</td>
+                                                <td>{{processVariable.router.desc}}</td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                            <tr ng-if="!processVariable.router.assSubnetName">
+                                                <td>关联子网</td>
+                                                <td>{{processVariable.router.subnet_name}}</td>
+                                                <td>备注信息</td>
+                                                <td>{{processVariable.router.desc}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                               
+                                <div class="discussBox">
+                                        <h4 ng-if="type == '11'">{{"aws.ticket.allReply" | translate}}</h4>
+                                        <h4 class="discussTitle" ng-if="type != '11'">评论</h4>
+                                </div>
+                                <div class="workflowStatus">
+                                    <dl ng-repeat="item in wfqareply">
+                                        <dt class="dt_ty">
+                                            <i class="icon-aw-user"></i>
+                                        </dt>
+                                        <dd class="dd_ty">
+                                            <div class="Handlename">
+                                                <span class="name">{{item.createdbyName}}</span>
+                                                <span class="time">{{item.createdtime | date:'yyyy-MM-dd HH:mm:ss'}}</span>
+                                            </div>
+                                            <div class='space-item' ng-bind-html="item.reply|trust_html"></div>
+                                        </dd>
+                                    </dl>
+                                    <div class="replyForm" ng-if="!endtime">
+                                        <form name="replyForm" novalidate>
+                                            <div class="control-group">
+                                                <div class="controls">
+                                                    <textarea type="text" ng-model="qa.description" name="description" class="form-controls" placeholder="{{'aws.ticket.replyPlaceholder'|translate}}"
+                                                    ng-focus="changeReplay()"  ng-maxlength="255"></textarea>
+                                                    <div class="error" ng-messages="(submitValid ||replyForm.description.$dirty) && replyForm.description.$error">
+                                                        <form-validate max-num="255"></form-validate>
+                                                    </div>
+                                                    <div class="error" ng-if='emptyReplay'>
+                                                            回复评论不能为空，请重新输入
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-warning" ng-if="type != '11'" ng-disabled="!approveId" ng-click="handleTaskConfim(replyForm,'3')">拒绝并关闭</button>
+                                            <button class="btn btn-info ticket-btn" ng-if="type != '11' && approveInfo.currentUser.isLast" ng-disabled="!approveId" ng-click="handleTaskConfim(replyForm,'2')">稍后手动创建</button>
+                                            <button class="btn btn-info ticket-btn" ng-if="type != '11' && !approveInfo.currentUser.isLast" ng-disabled="!approveId" ng-click="handleTaskConfim(replyForm,'2')">同意</button>
+                                            <button class="btn btn-info" ng-disabled="!approveId" ng-if="type != '11'&& approveInfo.currentUser.isLast " ng-click="handleTaskConfim(replyForm,'1')">同意并创建</button>
+                                            <button class="btn btn-info" ng-click="Replyconfirm(replyForm)">{{"aws.ticket.reply"| translate}}</button>
+
+                                        </form>
+                                    </div>
+                                </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="detail-right-box" ng-if="type != '11'">
+                <h5>处理进度</h5>
+                <ul>
+                    <li>
+                        <div class="circle">
+
+                        </div>
+                         <div class="img-box" ng-if="!approveInfo.currentUser.isUndo">
+                                
+                            </div>
+                        <div class="approve-info">
+                            <span>发起工单</span>
+                            <span class="approve-result" ng-if="approveInfo.currentUser.isUndo">
+                                    已撤销
+                            </span>
+                            <p>{{wfqa.ticketApplyTime}}</p>
+                        </div>
+                    </li>
+                    <li ng-repeat="data in approveInfo.allUsers"  ng-if="!approveInfo.currentUser.isUndo">
+                        <div class="circle">
+
+                        </div>
+                         <div class="img-box" ng-if="$index != approveInfo.allUsers.length-1">
+                             
+                        </div>
+                        <div class="approve-info">
+                            <span class="approver-name" title={{data.Assign.name}}>
+                            {{'aws.workflow.'+$index |translate}}:{{data.Assign.name}}</span>
+                            <span class="approve-result">
+                                {{data.approverResult}}
+                            </span>
+                            <p>{{data.dueTime| date:'yyyy-MM-dd HH:mm:ss'}}</p>
+                        </div>   
+                    </li>
+                </ul>
+            </div>
+        </pane>
+    </div>
+</div>

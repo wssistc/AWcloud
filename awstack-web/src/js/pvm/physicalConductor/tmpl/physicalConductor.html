@@ -1,0 +1,550 @@
+<div class="page-inner">
+    <div class="tab-offset-right">
+        <ul class="nav nav-tabs nav-justified">
+            <li ng-class="{active:showNewTitle}" class="uib-tab nav-item ng-scope ng-isolate-scope" ng-click="getLeftListData(1)">
+                <a href="">纳管物理机</a>
+            </li>
+            <li ng-class="{active:!showNewTitle}" class="uib-tab nav-item ng-scope ng-isolate-scope" ng-click="getLeftListData(2)">
+                <a href="">资源池物理机</a>
+            </li>
+        </ul>
+    </div>
+    <div ng-if="showNewTitle" ng-controller="NanotubePhysicsMachineCtrl">
+        <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='2'}">
+            <div class="table-action">
+                <button type="button" class="btn btn-new" disabled="disabled"><i class="icon-aw-zc"></i> 注册</button>
+                <button type="button" class="btn btn-new" disabled="disabled"><i class="icon-aw-plzc"></i> 批量注册</button>
+                <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-modify"></i> 编辑</button>
+                <!-- <button type="button" class="btn btn-default" disabled="disabled"><i class="icon-aw-delete"></i> 删除</button> -->
+                <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-pc"></i> 控制台</button>
+                <div class="dropdown">
+                    <button type="button" class="btn btn-normal dropdown-toggle" disabled="disabled">{{'aws.instances.moreOps'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+                </div>
+                <div class="pull-right">
+                    <into-information modular="'physicalConductor'"></into-information>
+                    <button class="btn btn-renovat right-ports" disabled="disabled"><i class="icon-aw-refresh"></i></button>
+                    <div class="search-box right-ports">
+                        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+                        </form>
+                    </div>
+                </div>
+                <div class="status-list">
+                    <ui-select ng-model="statusFrom.name" disabled="disabled">
+                        <ui-select-match placeholder='{{"aws.pvm.placeholder.choiceStatus"|translate}}'>
+                            {{$select.selected.name}}
+                        </ui-select-match>
+                        <ui-select-choices repeat="status in statusList | propsFilter:{name:$select.search}">
+                            <div ng-bind-html="status.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="table-content">
+                <table class="table">
+                    <colgroup>
+                        <col width="10%">
+                        <col width="22.25%">
+                        <col width="22.25%">
+                        <col width="22.25%">
+                        <col width="22.25%">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>
+                                <label class="checkbox">
+                                    <input type="checkbox" name="r" disabled="disabled" />
+                                    <i class="iconfont"></i>
+                                </label>
+                            </th>
+                            <th>名称</th>
+                            <th>IPMI地址</th>
+                            <th>电源状态</th>
+                            <th>注册时间</th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td colspan="5" class="text-center">
+                            如需使用物理资源管理块功能，请打开”系统管理 > 系统设置 > <a href="/#/system/plugin">功能管理</a> “界面添加”物理机管理”模块
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='1'}">
+           <div class="table-action">
+            <div class="btn-box">
+                <button type="button" ng-click="registerPvm()" class="btn btn-new" licence-type="btn" id="system-ipmi-register"><i class="icon-aw-zc"></i> 注册</button>
+                <button type="button" ng-click="batchRegister(limitPvm)" class="btn btn-new" licence-type="btn" id="system-ipmi-batchRegister"><i class="icon-aw-plzc"></i> 批量注册</button>
+                <button type="button" ng-click="editPvm()" ng-class="{'btn-default':isDisabled,'btn-normal':!isDisabled}" class="btn" uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):''}}" popover-enable="isDisabled" ng-disabled="isDisabled" popover-trigger="mouseenter" popover-placement="bottom" licence-type="btn" id="system-ipmi-edit"><i class="icon-aw-modify"></i> 编辑</button>
+                <!-- <button type="button" ng-disabled="del_btn" ng-click="deletePvm()" ng-class="{'btn-default':del_btn,'btn-warning':!del_btn}" class="btn" uib-popover="{{del_btn?('aws.pvm.placeholder.plsSelNode' | translate):''}}" popover-enable="del_btn" popover-trigger="mouseenter" popover-placement="bottom" licence-type="btn" id="system-ipmi-del"><i class="icon-aw-delete"></i> 删除</button> -->
+                <button type="button" ng-click="openConsole(editData)" ng-class="{'btn-default':isDisabled,'btn-normal':!isDisabled}" class="btn" ng-disabled="isDisabled" uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):''}}" popover-enable="isDisabled" popover-trigger="mouseenter" popover-placement="bottom" licence-type="btn" id="system-ipmi-control"><i class="icon-aw-pc"></i> 控制台</button>
+                <div class="dropdown" licence-type="btn-group">
+                    <button type="button" class="btn btn-normal dropdown-toggle" ng-disabled="delisDisabled" data-toggle="dropdown">{{'aws.instances.moreOps'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+                    <ul class="dropdown-menu">
+                        <li licence-type="btn" id="system-ipmi-boot">
+                            <button ng-click="bootPvm(editData.limitAttribute)" ng-class="{'disabled':boot_btn}" uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):('aws.pvm.tip.tip1'| translate)}}" popover-enable="boot_btn" popover-trigger="mouseenter" popover-placement="left">开机</button>
+                        </li>
+                        <li licence-type="btn" id="system-ipmi-shutdown">
+                            <button ng-click="shutdownPvm(editData.limitAttribute)" ng-class="{'disabled':shutoff_btn}" uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):('aws.pvm.tip.tip2'| translate)}}" popover-enable="shutoff_btn" popover-trigger="mouseenter" popover-placement="left">关机</button>
+                        </li>
+                        <li licence-type="btn" id="system-ipmi-restart">
+                            <button ng-click="rebootPvm(editData.limitAttribute)" ng-class="{'disabled':shutoff_btn}" uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):('aws.pvm.tip.tip3'| translate)}}" popover-enable="shutoff_btn" popover-trigger="mouseenter" popover-placement="left">重启</button>
+                        </li>
+                        <li licence-type="btn" id="system-ipmi-del">
+                           <button   ng-click="deletePvm()" ng-class="{'btn-default':del_btn,'btn-normal':!del_btn}" uib-popover="{{del_btn?('aws.pvm.placeholder.plsSelNode' | translate):''}}" popover-enable="del_btn" ng-disabled="del_btn" popover-trigger="mouseenter" popover-placement="bottom" > 删除</button>
+                        </li>
+                        <li licence-type="btn" id="system-ipmi-monitorclient">
+                            <button ng-click="getMonitorClient(editData)" >获取监控客户端</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <setting title-data="titleData" site-title="titleName"></setting>
+            <div type="button" class="btn btn-renovat right-ports" ng-click="getIpmiList()">
+                <i class="icon-aw-refresh"></i>
+            </div>
+            <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()" class="ng-pristine ng-valid ng-valid-maxlength">
+                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+                </form>
+            </div>
+            <div class="status-list">
+                <ui-select ng-model="statusFrom.name" ng-change="choiceStatus(statusFrom.name)" ng-disabled="canChoiceStatus">
+                    <ui-select-match placeholder='{{"aws.pvm.placeholder.choiceStatus"|translate}}'>
+                        {{$select.selected.name}}
+                    </ui-select-match>
+                    <ui-select-choices repeat="status in statusList | propsFilter:{name:$select.search}">
+                        <div ng-bind-html="status.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="table-content">
+            <table ng-table="tableParams" class="table ">
+                <colgroup>
+                    <col width="10%">
+                    <col width="22.25%">
+                    <col width="22.25%">
+                    <col width="22.25%">
+                    <col width="22.25%">
+                </colgroup>
+                <tr ng-repeat="item in $data">
+                    <td header="'headerCheckbox.html'" class="check-td">
+                        <label class="checkbox">
+                            <input type="checkbox" name="r" ng-model="checkboxes.items[item.uuid]" value="{{item.uuid}}" />
+                            <i class="iconfont"></i>
+                        </label>
+                    </td>
+                    <td data-title="'名称'" sortable="'name'" ng-if="titleData[0].value">
+                        <div class="edit-name">
+                            <a ng-href="/system/physicalConductor?id={{item.uuid}}&type={{item.limitAttribute}}" title="{{item.name}}">{{item.name}}</a>
+                        </div>
+                    </td>
+                    <td data-title="'IPMI地址'" sortable="'ipmi_address'" ng-if="titleData[1].value">{{item.ipmi_address}}</td>
+                    <td data-title="'电源状态'" sortable="'powerState'" ng-if="titleData[2].value">
+                        <span ng-class="{
+                    'bg-green':(item.powerState=='power on'),
+                    'bg-blue':(item.targetPowerState),
+                    'bg-orange':(item.powerState=='power off')
+                    }">{{"aws.pvm.table.status." + item.powerState |translate}}<i ng-class="{'icon-aw-refresh':item.targetPowerState}" class="aw-spin"></i>
+                    </span>
+                    </td>
+                    <td data-title="'注册时间'" sortable="'createdAt'" ng-if="titleData[3].value">{{item.createdAt | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                </tr>
+            </table>
+            <loading-data data="tabledata"></loading-data>
+        </div> 
+        </div>
+        
+    </div>
+    <div ng-if="!showNewTitle" ng-controller="resourcePoolPhysicalMachineCtrl">
+        <div class="alert alert-tips multi-mes" role="alert" ng-show="showalerttip">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="close()"><span aria-hidden="true">×</span></button>
+            <div class="alert-content">
+                <div class="alert-text">
+                  {{"aws.pvm.pvmGuide.1"|translate}}<a ng-href="/pvm/pvmimages">{{"aws.pvm.pvmGuide.2"|translate}}</a> >{{"aws.pvm.pvmGuide.3"|translate}}
+                </div>
+            </div>
+        </div>
+        <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='2'}">
+            <div class="table-action">
+                <button type="button" class="btn btn-new" disabled="disabled"><i class="icon-aw-zc"></i> 注册</button>
+                <button type="button" class="btn btn-new" disabled="disabled"><i class="icon-aw-plzc"></i> 批量注册</button>
+                <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-modify"></i> 编辑</button>
+                <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-csh"></i> 初始化</button>
+                <!-- <button type="button" class="btn btn-default" disabled="disabled"><i class="icon-aw-delete"></i> 删除</button> -->
+                <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-pc"></i> 控制台</button>
+                <div class="dropdown">
+                    <button type="button" class="btn btn-info dropdown-toggle" disabled="disabled">{{'aws.instances.moreOps'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+                </div>
+                <div class="pull-right">
+                    <into-information modular="'physicalConductor_res'"></into-information>
+                    <button class="btn btn-renovat right-ports" disabled="disabled"><i class="icon-aw-refresh"></i></button>
+                    <div class="search-box right-ports">
+                        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+                        </form>
+                    </div>
+                </div>
+                <div class="status-list">
+                    <ui-select ng-model="statusFrom.name" disabled="disabled">
+                        <ui-select-match placeholder='{{"aws.pvm.placeholder.choiceStatus"|translate}}'>
+                            {{$select.selected.name}}
+                        </ui-select-match>
+                        <ui-select-choices repeat="status in statusList | propsFilter:{name:$select.search}">
+                            <div ng-bind-html="status.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="table-content">
+                <table class="table">
+                    <colgroup>
+                        <col width="6%">
+                        <col width="12%">
+                        <col width="12%">
+                        <col width="12%">
+                        <col width="12%">
+                        <col width="12%">
+                        <col width="12%">
+                        <col width="12%">
+                        <col width="12%">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>
+                                <label class="checkbox">
+                                    <input type="checkbox" name="r" disabled="disabled" />
+                                    <i class="iconfont"></i>
+                                </label>
+                            </th>
+                            <th>名称</th>
+                            <th>IPMI地址</th>
+                            <th>初始化</th>
+                            <th>电源状态</th>
+                            <th>部署状态</th>
+                            <th>维护状态</th>
+                            <th>使用情况</th>
+                            <th>是否可用</th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td colspan="8" class="text-center">
+                            如需使用物理资源管理块功能，请打开”系统管理 > 系统设置 > <a href="/#/system/plugin">功能管理</a> “界面添加”物理机管理”模块
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='1'}">
+           <div class="table-action">
+            <div class='btn-box'>
+                <button type="button" ng-click="registerPvm()" class="btn btn-primary" licence-type="btn" id="system-ironic-register"><i class="icon-aw-zc"></i> 注册</button>
+                <button type="button" ng-click="batchRegister()" class="btn btn-primary" licence-type="btn" id="system-ironic-batchRegister"><i class="icon-aw-plzc"></i> 批量注册</button>
+                <button type="button" ng-click="editPvm()" ng-class="{'btn-default':isDisabled,'btn-info':!isDisabled}" class="btn" uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):''}}" popover-enable="isDisabled" ng-disabled="isDisabled" popover-trigger="mouseenter" popover-placement="bottom" licence-type="btn" id="system-ironic-edit"><i class="icon-aw-modify"></i> 编辑</button>
+                <button type="button" ng-click="initProvisionstates()" ng-class="{'btn-default':initPro_btn,'btn-info':!initPro_btn}" class="btn" uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):initProvisionstatesTip}}" popover-enable="initPro_btn" ng-disabled="initPro_btn" popover-trigger="mouseenter" popover-placement="bottom" licence-type="btn" id="system-ironic-init"><i class="icon-aw-csh"></i> 初始化</button>
+                <button type="button" ng-click="openConsole_Pool(editData)" ng-class="{'btn-default':isDisabled,'btn-info':!isDisabled}" class="btn" uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):''}}" popover-enable="isDisabled" ng-disabled="isDisabled" popover-trigger="mouseenter" popover-placement="bottom" licence-type="btn" id="system-ipmi-control"><i class="icon-aw-pc"></i> 控制台</button>
+                <!-- <button type="button" ng-click="deletePvm()" ng-class="{'btn-default':del_btn,'btn-warning':!del_btn}" class="btn" uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):deleteTip}}" popover-enable="del_btn" ng-disabled="del_btn" popover-trigger="mouseenter" popover-placement="bottom" licence-type="btn" id="system-ironic-del"><i class="icon-aw-delete"></i> 删除</button> -->
+                <div class="dropdown" licence-type="btn-group">
+                    <button type="button" class="btn btn-info dropdown-toggle" ng-disabled="delisDisabled" data-toggle="dropdown">{{'aws.instances.moreOps'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <button ng-click="bootPvm(editData.limitAttribute)" ng-show ="showBSR" ng-class="{'disabled':boot_btn}" uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):bootTip}}" popover-enable="boot_btn" popover-trigger="mouseenter" popover-placement="left" licence-type="btn" id="system-ironic-boot">启动物理机</button>
+                        </li>
+                        <li>
+                            <button ng-click="shutdownPvm(editData.limitAttribute)" ng-show ="showBSR" ng-class="{'disabled':shutoff_btn}" uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):shutoffTip}}" popover-enable="shutoff_btn" popover-trigger="mouseenter" popover-placement="left" licence-type="btn" id="system-ironic-shutdown">关闭物理机</button>
+                        </li>
+                        <li>
+                            <button ng-click="rebootPvm(editData.limitAttribute)" ng-show ="showBSR" ng-class="{'disabled':shutoff_btn}" uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):rebootTip}}" popover-enable="shutoff_btn" popover-trigger="mouseenter" popover-placement="left" licence-type="btn" id="system-ironic-Maintain">重启物理机</button>
+                        </li>
+                        <li>
+                             <button ng-click="deletePvm()" ng-class="{'btn-default':del_btn,'btn-warning':!del_btn}"  uib-popover="{{isDisabled?('aws.pvm.placeholder.plsSelNode' | translate):deleteTip}}" popover-enable="del_btn" ng-disabled="del_btn" popover-trigger="mouseenter" popover-placement="bottom" licence-type="btn" id="system-ironic-del"> 删除</button>
+                        </li>
+                        <li>
+                            <button ng-click="openMaintenance()" ng-class="{'disabled':openMain_btn}" uib-popover="{{!mixMain_btn?('aws.pvm.tip.tip7'| translate):openMaintenanceTip}}" popover-enable="openMain_btn" popover-trigger="mouseenter" popover-placement="left" licence-type="btn" id="system-ironic-Maintain">开启维护模式</button>
+                        </li>
+                        <li>
+                            <button ng-click="closeMaintenance()" ng-class="{'disabled':closeMain_btn}" uib-popover="{{!mixMain_btn?('aws.pvm.tip.tip7'| translate):closeMaintenanceTip}}" popover-enable="closeMain_btn" popover-trigger="mouseenter" popover-placement="left" licence-type="btn" id="system-ironic-unMaintain">关闭维护模式</button>
+                        </li>
+                        <li>
+                            <button ng-click="stopInit()" ng-class="{'disabled':initedPhyMacChk_btn}" uib-popover="{{isDisabled?('aws.pvm.tip.plsSelNode'| translate):initedPhyMacChkTip}}" popover-enable="initedPhyMacChk_btn" popover-trigger="mouseenter" popover-placement="left" licence-type="btn" id="system-ironic-stopInit">终止初始化</button>
+                        </li>
+                        <!-- <li>
+                            <button ng-click="registerStetus()" licence-type="btn" id="system-ironic-registerStetus">重置状态</button>
+                        </li> -->
+                        <!-- <li licence-type="btn" id="system-ironic-monitorclient">
+                            <button ng-click="getMonitorClient(editData)" >获取监控客户端</button>
+                        </li> -->
+                    </ul>
+                </div>
+            </div>
+            <setting title-data="titleData" site-title="titleName"></setting>
+            <div type="button" class="btn btn-renovat right-ports" ng-click="getIronicList()">
+                <i class="icon-aw-refresh"></i>
+            </div>
+            <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()" class="ng-pristine ng-valid ng-valid-maxlength">
+                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='{{"aws.action.search"|translate}}' />
+                </form>
+            </div>
+            <div class="status-list">
+                <ui-select ng-model="statusFrom.name" ng-change="choiceStatus(statusFrom.name)" ng-disabled="canChoiceStatus">
+                    <ui-select-match placeholder='{{"aws.pvm.placeholder.choiceStatus"|translate}}'>
+                        {{$select.selected.name}}
+                    </ui-select-match>
+                    <ui-select-choices repeat="status in statusList | propsFilter:{name:$select.search}">
+                        <div ng-bind-html="status.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="table-content">
+            <table ng-table="tableParams" class="table ">
+                <colgroup>
+                    <col width="6%">
+                    <col width="12%">
+                    <col width="12%">
+                    <col width="12%">
+                    <col width="12%">
+                    <col width="12%">
+                    <col width="12%">
+                    <col width="12%">
+                </colgroup>
+                <tr ng-repeat="item in $data">
+                    <td header="'headerCheckbox.html'" class="check-td">
+                        <label class="checkbox">
+                            <input type="checkbox" name="r" ng-model="checkboxes.items[item.uuid]" value="{{item.uuid}}" />
+                            <i class="iconfont"></i>
+                        </label>
+                    </td>
+                    <td data-title="'名称'" sortable="'name'" ng-if="titleData[0].value">
+                        <div class="edit-name">
+                            <a ng-href="/system/physicalConductor?id={{item.uuid}}&type={{item.limitAttribute}}" title="{{item.name}}">{{item.name}}</a>
+                        </div>
+                    </td>
+                    <td data-title="'IPMI地址'" sortable="'ipmi_address'" ng-if="titleData[1].value">{{item.ipmi_address}}</td>
+                    <td data-title="'初始化'" sortable="'init'" ng-if="titleData[2].value">{{item.init}}</td>
+                    <td data-title="'电源状态'" sortable="'powerState'" ng-if="titleData[3].value">
+                        <span ng-class="{
+                        'bg-green':(item.powerState=='power on'),
+                        'bg-blue':(item.targetPowerState),
+                        'bg-orange':(item.powerState=='power off')
+                        }" ng-show="item.powerState">{{"aws.pvm.table.status." + item.powerState |translate}}<i ng-class="{'icon-aw-refresh':(item.targetPowerState&&item.powerState)}" class="aw-spin"></i>
+                        </span>
+                    </td>
+                    <td data-title="'部署状态'" sortable="'provisionState'" ng-if="titleData[4].value">{{"aws.pvm.table.status.deploy." + item.provisionState | translate}}</td>
+                    <td data-title="'维护状态'" sortable="'maintenance'" ng-if="titleData[5].value">{{"aws.pvm.table.status.maintenance." + item.maintenance |translate}}</td>
+                    <td data-title="'使用情况'" sortable="'usedCopy'" ng-if="titleData[6].value">{{item.usedCopy}}</td>
+                    <td header="'canUse.html'" sortable="'canUse'" ng-if="titleData[7].value">{{item.canUse}}</td>
+                </tr>
+            </table>
+            <loading-data data="tabledata"></loading-data>
+        </div> 
+        </div>
+        
+    </div>
+</div>
+<div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+        <div class="tab-content">
+            <div class="detail-row ins-info">
+                <div class="detail-header">
+                </div>
+                <div class="detail-title">
+                    <a class="an-close" ng-href="/system/physicalConductor"><i class=" icon-aw-mail-reply"></i></a>
+                    <span>物理机详情</span>
+                </div>
+                <div class="clear"></div>
+                <div class="detail-info phy-mac">
+                    <div class="tab-content-line"></div>
+                    <table class="table table-info column" ng-if="detailType=='ipmi'">
+                        <tr>
+                            <td>物理机名称</td>
+                            <td>{{detailData.name}}</td>
+                            <td>IPMI地址</td>
+                            <td>{{detailData.ipmi_address}}</td>
+                        </tr>
+                        <tr>
+                            <td>电源状态</td>
+                            <td>{{detailData.powerStatusCopy}}</td>
+                            <td>注册时间</td>
+                            <td>{{detailData.createdAt | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                        </tr>
+                    </table>
+                    <span ng-if="detailType=='ironic'">基本信息</span>
+                    <table class="table table-info column" ng-if="detailType=='ironic'">
+                        <tr>
+                            <td>物理机名称</td>
+                            <td>{{detailData.name}}</td>
+                            <td>IPMI地址</td>
+                            <td>{{detailData.ipmi_address}}</td>
+                        </tr>
+                        <tr>
+                            <td>初始化</td>
+                            <td>{{detailData.init}}</td>
+                            <td>电源状态</td>
+                            <td>{{detailData.powerStatusCopy}}</td>
+                        </tr>
+                        <tr>
+                            <td>维护状态</td>
+                            <td>{{"aws.pvm.table.status.maintenance." + detailData.maintenance |translate}}</td>
+                            <td>所属用户</td>
+                            <td>{{detailData.owner?detailData.owner:"暂无"}}</td>
+                        </tr>
+                        <tr>
+                            <td>注册时间</td>
+                            <td>{{detailData.createdAt | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                            <td>部署状态</td>
+                            <td>{{"aws.pvm.table.status.deploy." + detailData.provisionState | translate}}</td>
+                        </tr>
+                    </table>
+                    <span ng-if="detailType=='ironic'">硬件配置</span>
+                    <table class="table table-info column" ng-if="detailType=='ironic'">
+                        <tr>
+                            <td>cpu线程</td>
+                            <td><span ng-if="detailData.properties.cpus">{{detailData.properties.cpus}}</span></td>
+                            <td>CPU架构</td>
+                            <td><span ng-if="detailData.properties.cpu_arch">{{detailData.properties.cpu_arch}}</span></td>
+                        </tr>
+                        <tr>
+                            <td>内存</td>
+                            <td><span ng-if="detailData.properties.memory_mb">{{detailData.properties.memory_mb/1024}} GB</span></td>
+                            <td>硬盘大小</td>
+                            <td><span ng-if="detailData.properties.local_gb">{{detailData.properties.local_gb}} GB</span></td>
+                        </tr>
+                        <tr>
+                            <td>其他属性</td>
+                            <td><span ng-if="detailData.properties.capabilities">{{detailData.properties.capabilities}}</span></td>
+                            <td>选择系统盘</td>
+                            <td>
+                                <div class="control-group" ng-if="showAddSysDesk">
+                                    <div class="controls">
+                                        <ui-select ng-model="sysDiskData.sysDisk"  name=""  title=""required >
+                                        <ui-select-match placeholder="选择系统盘">{{$select.selected.showText}}</ui-select-match>
+                                        <ui-select-choices repeat="disk in sysDiskList | filter:{showText:$select.search}">
+                                            <div ng-bind-html="disk.showText | highlight: $select.search"></div>
+                                        </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                    <button type="button" ng-click="changeSysDisk()" ng-disabled="canAddDis || nodeUse ||doubleClick" class="btn btn-info addDiskBtn"  ></i> {{btn_text}}</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </pane>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+        <i class="iconfont"></i>
+    </label>
+</script>
+<script type="text/ng-template" id="canUse.html">
+    <i class="icon-aw-question-mark question-tip" uib-popover="纳管物理机同步到了nova资源池里才可用"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+    <span>是否可用</span>
+</script>
+<script type="text/ng-template" id="monitorClientModal.html">
+    <div class="modal-common monitor-client-modal" ng-class="{'fold':!fold,'unfold':fold}">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">获取监控客户端</h3>
+        </div>
+        <div class="modal-body clearfix">
+            <div class="left-box clearfix" ng-class="{'fold':!fold,'unfold':fold}">
+                <div class="tab-offset-right phyinstances">
+                    <ul class="nav nav-tabs left" ng-init="tab.index=0">
+                        <li ng-class="{active: tab.index == 0}">
+                            <a ng-click="tab.index = 0">Windows</a>
+                        </li>
+                        <li ng-class="{active: tab.index == 1}">
+                            <a ng-click="tab.index =1">Linux</a>
+                        </li>
+                    </ul> 
+                </div>
+                <span class="fold-arrow" ng-click="fold =!fold" ng-class="{'blue':!fold,'unfold-arrow':fold}">
+                支持的操作系统版本
+                <i  class="conf-icon icon-aw-angle-right" ng-class="{'icon-aw-angle-left':fold,'icon-aw-angle-right':!fold}" ></i>
+            </span>
+                <fieldset>
+                    <h5>1. 安装包下载</h5>
+                    <div ng-show="tab.index == 0">
+                        <p>在被纳管物理机(请先配置网络，使得本机可以访问云管)，浏览器访问URL</p>
+                        <div class="frag">
+                            <p class="blue">http://{{hostIP}}/telegraf_window_1.0.1_x64.zip</p>
+                        </div>
+                    </div>
+                    <div ng-show="tab.index == 1">
+                        <p>在被纳管物理机(请先配置网络，使得本机可以访问云管)，执行命令：</p>
+                        <div class="frag">
+                            <p class="blue"># wget http://{{hostIP}}/telegraf-1.5.x86_64_centos6.5.tar.gz</p>
+                            <p class="blue"># wget http://{{hostIP}}/telegraf-1.5.x86_64_centos7.tar.gz</p>
+                            <p class="blue"># wget http://{{hostIP}}/telegraf-1.5.amd64_ubuntu14.tar.gz</p>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <h5>2. 安装包解压缩</h5>
+                    <p ng-show="tab.index == 0">将安装包解压缩至目录C:\telegraf\下</p>
+                    <div ng-show="tab.index == 1">
+                        <p>在存放安装包目录下,执行命令：</p>
+                        <div class="frag">
+                            <p class="blue"># tar zxvf telegraf-1.5.x86_64_centos6.5.tar.gz</p>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <h5>3. 自动安装与启动</h5>
+                    <div ng-show="tab.index == 0">
+                        <p>管理员身份运行cmd，执行以下命令：</p>
+                        <div class="frag">
+                            <p class="blue">
+                                C:/telegraf/telegraf_window_1.0.1_x64/telegraf_window.bat 
+                                <span>{{influxdbip}}</span></br>
+                                <span>{{uid}}</span>
+                                <span>{{regionKey}}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div ng-show="tab.index == 1">
+                        <p>在解压缩目录下，执行以下命令：</p>
+                        <div class="frag">
+                            <p class="blue">
+                              # ./telegraf_centos6.5.sh
+                              <span>{{influxdbip}}</span></br>
+                              <span>{{uid}}</span>
+                              <span>{{regionKey}}</span>
+                            </p>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="right-box clearfix" ng-show="fold">
+                <div ng-show="tab.index == 0">
+                    <h4>Windows</h4>
+                    <p>支持的操作系统版本：</p>
+                    <div class="v-wrap win">
+                        <li ng-repeat="item in winSysVersionList">{{item}}</li>
+                    </div>
+                </div>
+                <div ng-show="tab.index == 1">
+                    <h4>Linux</h4>
+                    <p>支持的操作系统版本：</p>
+                    <div class="v-wrap linux">
+                        <li ng-repeat="item in linuxSysVersionList">{{item}}</li>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+    </div>
+</script>

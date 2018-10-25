@@ -1,0 +1,266 @@
+<div id="main">
+  <div class="container">
+      <div class="storage-title">
+          <div class="col-1 font-h">
+            <strong>存储配置</strong>
+          </div>
+      </div>
+      <div class="account-box">
+      <form class="form-horizontal" name="storageForm" novalidate> 
+        <fieldset>
+          <div class="form-group">
+            <label class="control-label">存储名称:</label>
+            <div class="control-item">
+              <input type="text" placeholder="请输入存储名称" name="storageName" required class="form-control" ng-model="storageModule.storageName" ng-pattern="/^[a-zA-Z0-9_]*$/" ng-maxlength="50" />
+              <div ng-if="interacted(storageForm.storageName)" ng-messages="storageForm.storageName.$error">
+                <span class="help-block" ng-message="required">{{'aws.register.info.required'|translate}}</span>
+                <span class="help-block" ng-message="pattern">允许有英文字母、数字和下划线</span>
+                <span class="help-block" ng-message="maxlength">最大长度不超过50位</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label">块存储:</label>
+            <div class="control-item">
+              <ui-select ng-model="storageModule.storageTypeSelect" ng-change="storageModule.storageChange()">
+                <ui-select-match placeholder="请选择块存储">{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="data in storageModule.storageType | filter:{name:$select.search}">
+                  <div ng-bind-html="data.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <div  ng-if="storageModule.storageTypeSelect.type=='3'">
+            <div class="form-group">
+              <label class="control-label">NFS服务器地址:</label>
+              <div class="control-item">
+                <input type="text" placeholder="请输入NFS服务器地址" name="NFS_IP" required class="form-control"  ng-model="storageModule.nfsIP" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/"/>
+                <div ng-if="interacted(storageForm.NFS_IP)" ng-messages="storageForm.NFS_IP.$error">
+                  <span class="help-block" ng-message="pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                  <span class="help-block" ng-message="required">NFS服务器地址不能为空</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label">&nbsp;</label>
+              <div class="control-item">
+                <button class="btn btn-next" ng-click="storageModule.checkNFS()" type="button">验证NFS服务器</button>
+              </div>
+            </div>
+            <div class="form-group" ng-if="NFSdispaly">
+              <label class="control-label">路径:</label>
+              <div class="control-item">
+                <ui-select ng-model="storageModule.storageManufacturerSelect">
+                  <ui-select-match placeholder="请选择路径">{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="data in storageModule.manufacturer | filter:{name:$select.search}">
+                    <div ng-bind-html="data.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+          </div>
+          <div  ng-if="storageModule.storageTypeSelect.type=='2'">
+            <!-- <div class="form-group">
+              <label class="control-label">虚拟机系统盘副本数：</label>
+              <div class="control-item">
+                <input type="text" placeholder="请输入虚拟机系统盘副本数" name="ceph_nova_pool_size" required class="form-control"  ng-model="storageModule.ceph_nova_pool_size" ng-pattern="/^[1-9][0-9]*$/" max-check maxvalue="4"/>
+                <div ng-if="interacted(storageForm.ceph_nova_pool_size)" ng-messages="storageForm.ceph_nova_pool_size.$error">
+                  <span class="help-block" ng-message="pattern">请输入正整数</span>
+                  <span class="help-block" ng-message="required">虚拟机系统盘副本数不能为空</span>
+                  <span class="help-block" ng-if="storageForm.ceph_nova_pool_size.$error.maxCheck">虚拟机系统盘副本数最大为4</span>
+                </div>
+              </div>
+            </div> -->
+            <div class="form-group">
+              <label class="control-label">块存储副本数：</label>
+              <div class="control-item">
+                <input type="text" placeholder="请输入块存储副本数" name="ceph_cinder_pool_size" required class="form-control"  ng-model="storageModule.ceph_cinder_pool_size" ng-pattern="/^[1-9][0-9]*$/" max-check maxvalue="4"/>
+                <div ng-if="interacted(storageForm.ceph_cinder_pool_size)" ng-messages="storageForm.ceph_cinder_pool_size.$error">
+                  <span class="help-block" ng-message="pattern">请输入正整数</span>
+                  <span class="help-block" ng-message="required">块存储副本数不能为空</span>
+                  <span class="help-block" ng-if="storageForm.ceph_cinder_pool_size.$error.maxCheck">块存储副本数最大为4</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label">镜像副本数：</label>
+              <div class="control-item">
+                <input type="text" placeholder="请输入镜像副本数" name="ceph_glance_pool_size" required class="form-control"  ng-model="storageModule.ceph_glance_pool_size" ng-pattern="/^[1-9][0-9]*$/" max-check maxvalue="4"/>
+                <div ng-if="interacted(storageForm.ceph_glance_pool_size)" ng-messages="storageForm.ceph_glance_pool_size.$error">
+                  <span class="help-block" ng-message="pattern">请输入正整数</span>
+                  <span class="help-block" ng-message="required">镜像副本数不能为空</span>
+                  <span class="help-block" ng-if="storageForm.ceph_glance_pool_size.$error.maxCheck">镜像副本数最大为4</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div ng-if="storageModule.storageTypeSelect.type=='1'">
+            <div class="form-group">
+              <label class="control-label">存储厂商:</label>
+              <div class="control-item">
+                <ui-select ng-model="storageModule.storageManufacturerSelect" ng-change="storageModule.storageManufacturerChange(storageModule.storageManufacturerSelect.type)">
+                  <ui-select-match placeholder="请选择存储厂商">{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="data in storageModule.manufacturer | filter:{name:$select.search}">
+                    <div ng-bind-html="data.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div ng-if="storageModule.storageManufacturerSelect.type=='3'">
+              <div class="form-group">
+                <label class="control-label">NFS服务器地址:</label>
+                <div class="control-item">
+                  <input type="text" placeholder="请输入NFS服务器地址" name="NFS_IP" required class="form-control"  ng-model="storageModule.nfsIP" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/"/>
+                  <div ng-if="interacted(storageForm.NFS_IP)" ng-messages="storageForm.NFS_IP.$error">
+                    <span class="help-block" ng-message="pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span class="help-block" ng-message="required">NFS服务器地址不能为空</span>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label">&nbsp;</label>
+                <div class="control-item">
+                  <button class="btn btn-next" ng-click="storageModule.checkNFS()" type="button">验证NFS服务器</button>
+                </div>
+              </div>
+              <div class="form-group" ng-if="NFSdispaly">
+                <label class="control-label">路径:</label>
+                <div class="control-item">
+                  <ui-select ng-model="storageModule.storageManufacturerSelect">
+                    <ui-select-match placeholder="请选择路径">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="data in storageModule.manufacturer | filter:{name:$select.search}">
+                      <div ng-bind-html="data.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+            </div>
+
+            <div ng-if="storageModule.storageManufacturerSelect.type!='3'">
+              <div class="form-group">
+                <label class="control-label">存储设备:</label>
+                <div class="control-item">
+                  <ui-select ng-model="storageModule.storageEquipmentSelect" ng-change="storageModule.storageEquipmentChange()">
+                    <ui-select-match placeholder="请选择存储设备">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="data in storageModule.equipment | filter:{name:$select.search}">
+                      <div ng-bind-html="data.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label">存储协议:</label>
+                <div class="control-item">
+                  <ui-select ng-model="storageModule.storageAgreementSelect" >
+                    <ui-select-match placeholder="请选择存储协议">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="data in storageModule.agreement | filter:{name:$select.search}">
+                      <div ng-bind-html="data.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+              </div>
+              <div class="form-group" ng-if="storageModule.storageEquipmentSelect.type=='1'">
+                <label class="control-label">管理IP地址:</label>
+                <div class="control-item">
+                  <input type="text" placeholder="请输入管理IP" name="manageIP" required class="form-control"  ng-model="storageModule.manageIP" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/"/>
+                  <div ng-if="interacted(storageForm.manageIP)" ng-messages="storageForm.manageIP.$error">
+                    <span class="help-block" ng-message="pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span class="help-block" ng-message="required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+              <div ng-if="storageModule.storageEquipmentSelect.type=='2'">
+                <div class="form-group">
+                  <label class="control-label">控制器1:</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="请输入" name="controller_1_IP" required class="form-control"  ng-model="storageModule.controller_1_IP" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/"/>
+                    <div ng-if="interacted(storageForm.controller_1_IP)" ng-messages="storageForm.controller_1_IP.$error">
+                      <span class="help-block" ng-message="pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-message="required">控制器1不能为空</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label">控制器2:</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="请输入" name="controller_2_IP" required class="form-control"  ng-model="storageModule.controller_2_IP" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/"/>
+                    <div  ng-if="interacted(storageForm.controller_2_IP)" ng-messages="storageForm.controller_2_IP.$error">
+                      <span class="help-block" ng-message="pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-message="required">控制器2不能为空</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label">用户名:</label>
+                <div class="control-item">
+                  <input type="text" placeholder="请输入用户名" name="userName" required class="form-control"  ng-model="storageModule.userName" ng-pattern=""/>
+                  <div ng-if="interacted(storageForm.userName)" ng-messages="storageForm.userName.$error">
+                    <span class="help-block" ng-message="pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span class="help-block" ng-message="required">用户名不能为空</span>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label">密码:</label>
+                <div class="control-item storage-password">
+                  <i class="icon-aw-display" ng-click="storageModule.storageFun()" ng-if="!storageDispaly"></i>
+                  <i class="icon-aw-no-display" ng-click="storageModule.storageFun()" ng-if="storageDispaly"></i>
+                  <input type="password" placeholder="请输入密码" name="password" required class="form-control"  ng-model="storageModule.storagePassword" ng-pattern="" ng-if="!storageDispaly"/>
+                  <input type="text" placeholder="请输入密码" name="password" required class="form-control"  ng-model="storageModule.storagePassword" ng-pattern="" ng-if="storageDispaly"/>
+                  <div  ng-if="interacted(storageForm.password)" ng-messages="storageForm.password.$error">
+                    <span class="help-block" ng-message="pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span class="help-block" ng-message="required">密码不能为空</span>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label">存储池:</label>
+                <div class="control-item">
+                  <input type="text" placeholder="请输入存储池名称" name="storagePool" required class="form-control"  ng-model="storageModule.storagePoolName" ng-pattern=""/>
+                  <div ng-if="interacted(storageForm.storagePool)" ng-messages="storageForm.storagePool.$error">
+                    <span class="help-block" ng-if="storageForm.storagePool.$error.required">存储池名称不能为空</span>
+                  </div>
+                </div>
+              </div>
+              <div ng-if="storageModule.storageEquipmentSelect.type=='2'">
+                <div class="form-group">
+                  <label class="control-label">控制器1业务口:</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="请输入" name="controller_1" required class="form-control"  ng-model="storageModule.controller_1" ng-pattern=""/>
+                    <div ng-if="interacted(storageForm.controller_1)" ng-messages="storageForm.controller_1.$error">
+                      <span class="help-block" ng-message="required">控制器1业务口不能为空</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label">控制器2业务口:</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="请输入" name="controller_2" required class="form-control"  ng-model="storageModule.controller_2" ng-pattern=""/>
+                    <div ng-if="interacted(storageForm.controller_2)" ng-messages="storageForm.controller_2.$error">
+                      <span class="help-block" ng-message="required">控制器2业务口不能为空</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div ng-if="storageModule.storageManufacturerSelect.type!='3'">
+                <div class="form-group">
+                  <label class="control-label">&nbsp;</label>
+                  <div class="control-item">
+                    <button class="btn btn-next" ng-click="storageModule.checkNFS()" type="button">验证管理地址</button>
+                  </div>
+                </div>    
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label">&nbsp;</label>
+            <div class="control-item">
+              <button class="btn btn-default" ng-click="storageModule.completeStorage(storageForm)" type="button">{{'aws.register.info.next'|translate}}</button>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+</div>

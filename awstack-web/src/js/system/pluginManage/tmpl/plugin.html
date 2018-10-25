@@ -1,0 +1,561 @@
+<div class="page-inner">
+    <div class="alert alert-tips multi-mes" role="alert" ng-show="showalerttip">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="close()"><span aria-hidden="true">×</span></button>
+        <div class="alert-content">
+            <div class="alert-text">
+              {{"aws.function.tips.phyGuide.1"|translate}}<a ng-href="/system/physicalConductor">{{"aws.function.tips.phyGuide.2"|translate}}</a> > {{"aws.function.tips.phyGuide.3"|translate}}
+            </div>
+        </div>
+    </div>
+    <div>
+      <script type="text/ng-template" id="headerCheckboxtableContentParams.html">
+        <label class="checkbox">
+          <input type="checkbox" ng-model="checkboxestableContentParams.checked" class="select-all" value="" />
+          <i class="iconfont"></i>
+        </label>
+      </script>
+      <div class="table-action">
+          <button type="button" data-toggle="modal" ng-click="createFun('new')" ng-disabled="conCanAdd" class="btn btn-new"  licence-type="btn" id="system-containerMag-add"> <i class="icon-aw-add-to2"></i>{{"aws.action.add"|translate}}</button>
+          <button type="button" data-toggle="modal" ng-click="delFun(checkedItems)" ng-disabled="delDisable" class="btn btn-normal" licence-type="btn" id="system-containerMag-delRecord"> <i class="icon-aw-delete" ></i>{{"aws.function.operations.del"|translate}}</button>
+          <into-information modular="'plugin'"></into-information>
+          <div class="pull-right">
+            <div class="search-box">
+              <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm.item" placeholder="{{'aws.instances.search'|translate}}" />
+              </form>
+            </div>
+            <button class="btn btn-renovat" ng-click="refreshCon()"><i class="icon-aw-refresh"></i></button>
+          </div>
+      </div>
+      <div class="table-content">
+        <empty-tip empty-type="contentLoadData"></empty-tip>
+        <table ng-table="tableContentParams" class="table">
+          <colgroup>
+            <col width="5%">
+            <col width="15%">
+            <col width="30%">
+            <col width="13%">
+            <col width="15%">
+            <col width="21%">
+          </colgroup>
+          <tr ng-repeat="item in $data">
+            <td header="'headerCheckboxtableContentParams.html'" class="check-td">
+              <label class="checkbox">
+                <input type="checkbox" name="r" ng-model="checkboxestableContentParams.items[item.pluginId]" value="{{item.pluginId}}" />
+                <i class="iconfont"></i>
+              </label>
+            </td>
+            <td data-title="headers.name" sortable="'pluginName'">
+              <div class="edit-name">
+                <a ng-click="enterDetail(item)" title="{{item.pluginNameCopy}}">{{item.pluginNameCopy}}</a>
+              </div>
+            </td>
+            <td data-title="headers.progress">
+              <div class="bar-percent">
+                <div quota-bar bardata="item.Ratio" id="plugin"></div>
+              </div>
+            </td>
+            <td data-title="headers.status">
+              <span ng-if="item.type=='con'" ng-class="{'bg-green':(item.pluginStatus=='3'),'bg-blue':(item.pluginStatus=='0'||item.pluginStatus=='1'||item.pluginStatus=='2'||item.pluginStatus=='8'),'bg-red':(item.pluginStatus=='4'||item.pluginStatus=='9')}">{{'aws.function.contentStatusType.'+item.statusType|translate}}{{'aws.function.contentStatus.'+item.pluginStatus|translate}}</span>
+              <span ng-if="item.type=='phy'" ng-class="{'bg-green':(item.pluginStatus=='3'),'bg-blue':(item.pluginStatus=='2'||item.pluginStatus=='1'),'bg-orange':(item.pluginStatus=='4'||item.pluginStatus=='5'||item.pluginStatus=='6'||item.pluginStatus=='7')}">{{'aws.function.status.'+item.pluginStatus|translate}}</span>
+              <span ng-if="item.type=='paas'" ng-class="{'bg-green':(item.pluginStatus=='0'),'bg-grey':(item.pluginStatus=='1'||item.pluginStatus=='2')}">{{'aws.function.paas.'+item.pluginStatus|translate}}</span>
+            </td>
+            <td data-title="headers.addtime" sortable="'createTimes'">
+                <span title="{{item.createTimes}}">{{item.createTimes}}</span>
+            </td>
+            <td data-title="headers.handle">
+              <div ng-if="item.type=='con'">
+                <button class="btn btn-normal" ng-disabled="canHandle.install" ng-click="installPlugin(item)">{{'aws.function.operations.add'|translate}}</button>
+                <button class="btn btn-normal" ng-disabled="canHandle.clean" ng-click="cleanPlugin(item)">{{'aws.function.operations.clean'|translate}}</button>
+              </div>
+              <div ng-if="item.type=='phy'">
+                <button class="btn btn-normal" ng-disabled="(item.pluginStatus!='1'&&item.pluginStatus!='6') || item.canPlug" ng-click="installPlugin(item)">{{'aws.function.operations.add'|translate}}</button>
+                <button class="btn btn-normal" ng-disabled="(item.pluginStatus!='1'&&item.pluginStatus!='7'&&item.pluginStatus!='4'&&item.pluginStatus!='3') || item.canClear"  ng-click="cleanPlugin(item)">{{'aws.function.operations.cleanEnvironment'|translate}}</button>
+              </div>
+              <div ng-if="item.type=='paas'">
+                <button class="btn btn-normal small" ng-show="item.pluginName =='COC'||item.pluginName =='SkyCloudSecurity'"  ng-click="syncCOCSky(item.pluginName)" ng-disabled="!item.canSync">
+                     <span ng-if="item.pluginName =='COC'">同步数据</span>
+                     <span ng-if="item.pluginName =='SkyCloudSecurity'">同步用户</span>
+                </button>
+                <button class="btn btn-normal small"  ng-click="editPaas(item)">{{'aws.action.edit'|translate}}</button>
+                <button class="btn btn-normal small"  ng-click="delFun(item,'left')">{{'aws.function.operations.clean'|translate}}</button>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>   
+    </div>
+  <script type="text/ng-template" id="createFunction.html">
+    <div class="modal-common function-box">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{'aws.function.operations.create'|translate}}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning" role="alert" ng-if="canHandles.enableCeph">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="close()"><span aria-hidden="true">×</span></button>
+          <div class="alert-content">
+              <div class="alert-text">
+                {{'aws.function.tips.cephtips'|translate}}
+              </div>
+          </div>
+        </div>
+        <form name="functionForm" novalidate class="function-container">
+          <div class="control-group">
+            <label class="control-label">{{'aws.function.functiontype.add'|translate}}：</label>
+            <div class="controls">
+              <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+              <ui-select ng-model="paramsData.selected" ng-disabled="departDisabled" ng-change="changeType(paramsData.selected)">
+                <ui-select-match placeholder="{{'aws.function.functiontype.type'|translate}}">{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat=" data in typeList | filter:{name:$select.search}">
+                  <div ng-bind-html="data.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <div ng-if="paramsData.selected.type=='1'">
+            <div class="control-group radio-wrap">
+              <label class="control-label">{{'aws.function.functiontype.useceph'|translate}}：</label>
+              <div class="controls">
+                  <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                  <div class="radio-item clearFix">
+                    <label class="radio"><input type="radio" ng-model="container.useCeph" name="yes"  value="1" /><i class="iconfont"></i>{{'aws.function.functiontype.yes'|translate}}</label>
+                    <label class="radio"><input type="radio" ng-model="container.useCeph" name="no" value="0" /><i class="iconfont"></i>{{'aws.function.functiontype.no'|translate}}</label>
+                  </div>
+              </div>
+            </div>
+            <div class="control-group ip_cidr">
+              <label class="control-label">{{'aws.function.functiontype.masterip'|translate}}：</label>
+              <div class="controls clearfix">
+                <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                <input type="text" placeholder="{{'aws.function.functiontype.masteripholder'|translate}}" name="K8Smaster"  required class="form-control" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))([-]((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))))?((\,)((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))([-]((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))))?)*$/" ng-model="container.masters"/>
+                <div class="error" ng-if="interacted(functionForm.K8Smaster)" ng-messages="functionForm.K8Smaster.$error">
+                  <span ng-if="functionForm.K8Smaster.$error.pattern">{{'aws.function.tips.masteriptips'|translate}}</span>
+                  <span ng-if="functionForm.K8Smaster.$error.required">{{'aws.function.tips.noEmpty'|translate}}</span>
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.function.functiontype.masterippwd'|translate}}：</label>
+              <div class="controls ksnode-pass">
+                <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                <i class="icon-aw-display" ng-click="passwordDisplay('mps')" ng-if="!mpsDispaly"></i>
+                <i class="icon-aw-no-display" ng-click="passwordDisplay('mps')" ng-if="mpsDispaly"></i>
+                <input id="ksmpsw" type="password" class="form-controls" name="masterPassword" ng-model="container.masterPassword" placeholder="{{'aws.function.functiontype.password'|translate}}" required ng-maxlength="32"/>
+                <div class="error" ng-messages='functionForm.masterPassword.$error' ng-if="interacted(functionForm.masterPassword)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.function.functiontype.masterNodeName'|translate}}：</label>
+              <div class="controls">
+                <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                <input type="text" class="form-controls" name="mastername" ng-model="container.masterDiskName" ng-maxlength="50" ng-pattern="/^\/dev\/[a-z]+\d*/" placeholder="{{'aws.function.functiontype.masterNodeNameHolder'|translate}}" required/>
+                <div class="error" ng-messages='functionForm.mastername.$error' ng-if="interacted(functionForm.mastername)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}50{{"aws.errors.lenghtUnit"|translate}}</div>
+                  <div ng-message="pattern">{{'aws.function.tips.disktips'|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group ip_cidr">
+              <label class="control-label">{{'aws.function.functiontype.nodeip'|translate}}：</label>
+              <div class="controls clearfix">
+                <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                <input type="text" placeholder="{{'aws.function.functiontype.nodeipholder'|translate}}" name="K8S"  required class="form-control" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))([-]((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))))?((\,)((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))([-]((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))))?)*$/" ng-model="container.nodes"/>
+                <div class="error" ng-if="interacted(functionForm.K8S)" ng-messages="functionForm.K8S.$error">
+                  <span ng-if="functionForm.K8S.$error.pattern">{{'aws.function.tips.masteriptips'|translate}}</span>
+                  <span ng-if="functionForm.K8S.$error.required">{{'aws.function.tips.noEmpty'|translate}}</span>
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.function.functiontype.nodepwd'|translate}}：</label>
+              <div class="controls ksnode-pass">
+                <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                <i class="icon-aw-display" ng-click="passwordDisplay()" ng-if="!psDispaly"></i>
+                <i class="icon-aw-no-display" ng-click="passwordDisplay()" ng-if="psDispaly"></i>
+                <input id="kspsw" type="password" class="form-controls" name="password" ng-model="container.nodePassword" placeholder="{{'aws.function.functiontype.nodepwdholder'|translate}}" required ng-maxlength="32"/>
+                <div class="error" ng-messages='functionForm.password.$error' ng-if="interacted(functionForm.password)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                  <!--<div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>-->
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{'aws.function.functiontype.nodeName'|translate}}：</label>
+              <div class="controls">
+                <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                <input type="text" class="form-controls" name="name" ng-model="container.nodeDiskName" ng-maxlength="50" ng-pattern="/^\/dev\/[a-z]+\d*/" placeholder="{{'aws.function.functiontype.nodeNameholder'|translate}}" required/>
+                <div class="error" ng-messages='functionForm.name.$error' ng-if="interacted(functionForm.name)">
+                  <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}50{{"aws.errors.lenghtUnit"|translate}}</div>
+                  <div ng-message="pattern">{{'aws.function.tips.disktips'|translate}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div ng-if="paramsData.selected.type=='2'">
+            <div class="control-group">
+              <label class="control-label">{{'aws.function.functiontype.floatip'|translate}}：</label>
+              <div class="controls clearfix">
+                <span class="text-tips icon-aw-bz" uib-popover="{{'aws.function.tips.business'|translate}}" popover-enable="true" popover-trigger="mouseenter" popover-placement = "right"></span>
+              </div>
+            </div>
+            <div class="ip-group">
+              <div class="control-group">
+                <label class="control-label">CIDR：</label>
+                <div class="controls clearfix">
+                  <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                  <input type="text" placeholder="{{'aws.function.tips.cidrholder'|translate}}" id="ironiccidr" name="ironicCider" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))[\/]([1-9]|[1-2][0-9]|[3][0]|[3][1])$/" required class="form-control"ng-model="ironic.cidr" ng-disabled="canHandles.enableDisable"/>
+                  <div  class="error" ng-if="interacted(functionForm.ironicCider)" ng-messages="functionForm.ironicCider.$error">
+                    <span ng-if="functionForm.ironicCider.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span ng-if="functionForm.ironicCider.$error.required">{{'aws.function.tips.ciderNoEmpty'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+              <div>             
+                <div class="control-group">
+                  <label class="control-label">{{'aws.function.functiontype.startip'|translate}}：</label>
+                  <div class="controls clearfix">
+                    <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                    <input type="text" placeholder="{{'aws.function.functiontype.startipholder'|translate}}" name="ironicStart" incidrs="ironiccidr" required class="form-control" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="ironic.start"  ng-disabled="canHandles.enableDisable"/>
+                    <div class="error" ng-if="interacted(functionForm.ironicStart)" ng-messages="functionForm.ironicStart.$error">
+                      <span ng-if="functionForm.ironicStart.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span ng-if="functionForm.ironicStart.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                      <span ng-if="functionForm.ironicStart.$error.incidrs && !functionForm.ironicStart.$error.required && !functionForm.ironicStart.$error.pattern">{{'aws.function.tips.cidrtips'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">{{'aws.function.functiontype.endip'|translate}}：</label>
+                  <div class="controls clearfix">
+                    <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                    <input type="text" name="ironicEnd" placeholder="{{'aws.function.functiontype.endipholder'|translate}}"  incidrs="ironiccidr" gtips required class="form-control" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="ironic.end" ng-disabled="canHandles.enableDisable"/>
+                    <div class="error" ng-if="interacted(functionForm.ironicEnd)" ng-messages="functionForm.ironicEnd.$error">
+                      <span ng-if="functionForm.ironicEnd.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span ng-if="functionForm.ironicEnd.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                      <span ng-if="functionForm.ironicEnd.$error.incidrs && !functionForm.ironicEnd.$error.required && !functionForm.ironicEnd.$error.pattern">{{'aws.function.tips.cidrtips'|translate}}</span>
+                      <span ng-if="functionForm.ironicEnd.$error.gtips">{{'aws.function.tips.iptips'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label">{{'aws.function.functiontype.gateway'|translate}}：</label>
+                <div class="controls clearfix">
+                  <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                  <input type="text" name="ironicGateway" placeholder="{{'aws.function.tips.gateway'|translate}}" incidrs="ironiccidr" required class="form-control" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="ironic.Gateway" ng-disabled="canHandles.enableDisable"/>
+                  <div class="error" ng-if="interacted(functionForm.ironicGateway)" ng-messages="functionForm.ironicGateway.$error">
+                    <span ng-if="functionForm.ironicGateway.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span ng-if="functionForm.ironicGateway.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    <span ng-if="functionForm.ironicGateway.$error.incidrs && !functionForm.ironicGateway.$error.required && !functionForm.ironicGateway.$error.pattern">{{'aws.function.tips.cidrtips'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>            
+          </div>
+          <div ng-if="paramsData.selected.type=='COC' || paramsData.selected.type=='TBase' || paramsData.selected.type=='TBDS'">
+            <div class="control-group">
+              <label class="control-label">URL地址：</label>
+              <div class="controls">
+                  <input type="text" class="form-controls" name="url" placeholder = "请输入URL地址" ng-model="paas[paramsData.selected.type].url" ng-maxlength="1024" 
+                  ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required />
+                  <div class="error" ng-messages="(submitted ||functionForm.url.$dirty) && functionForm.url.$error">
+                      <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                  </div>
+              </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">管理员用户名：</label>
+                <div class="controls">
+                    <input type="text" class="form-controls" name="username" placeholder = "请输入管理员用户名" ng-model="paas[paramsData.selected.type].username" required />
+                    <div class="error" ng-messages="(submitted ||functionForm.username.$dirty) && functionForm.username.$error">
+                        <form-validate></form-validate>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">管理员密码：</label>
+                <div class="controls">
+                    <input type="password" class="form-controls"  name="password" placeholder = "请输入管理员密码" ng-model="paas[paramsData.selected.type].password" required/>
+                    <div class="error" ng-messages="(submitted ||functionForm.password.$dirty) && functionForm.password.$error">
+                        <form-validate></form-validate>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group" ng-if="paramsData.selected.type=='COC'">
+              <label class="control-label">自动化运维agent：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="agentUrl" placeholder = "请输入自动化运维agent" ng-model="paas[paramsData.selected.type].agentUrl"  ng-maxlength="1024" 
+                ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/"required/>
+                <div class="error" ng-messages="(submitted ||functionForm.agentUrl.$dirty) && functionForm.agentUrl.$error">
+                  <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" ng-if="paramsData.selected.type =='TBDS'">
+              <label class="control-label">端口1：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="port1" placeholder = "请输入端口1" ng-model="paas[paramsData.selected.type].port1" min="1" max="65535" limitnumrange required />
+                <div class="error" ng-messages="(submitted ||functionForm.port1.$dirty) && functionForm.port1.$error" >
+                  <form-validate></form-validate>
+                  <div ng-message="limitnumrange">{{"aws.errors."+['limit_1_65535']|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" ng-if="paramsData.selected.type =='TBDS'">
+              <label class="control-label">端口2：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="port2" placeholder = "请输入端口2" ng-model="paas[paramsData.selected.type].port2" min="1" max="65535" limitnumrange required />
+                <div class="error" ng-messages="(submitted ||functionForm.port2.$dirty) && functionForm.port2.$error" >
+                  <form-validate></form-validate>
+                  <div ng-message="limitnumrange">{{"aws.errors."+['limit_1_65535']|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" ng-if="paramsData.selected.type =='TBase'">
+              <label class="control-label">TStudio URL：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="TStudio" placeholder = "请输入TStudio URL" ng-model="paas[paramsData.selected.type].TStudio" ng-maxlength="1024" 
+                ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required />
+                <div class="error" ng-messages="(submitted ||functionForm.TStudio.$dirty) && functionForm.TStudio.$error" >
+                  <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div ng-if="paramsData.selected.type=='SkyCloudSecurity'">
+              <div class="control-group">
+                <label class="control-label">管理员URL地址：</label>
+                <div class="controls">
+                    <input type="text" class="form-controls" name="url" placeholder = "请输入管理员URL地址" ng-model="paas[paramsData.selected.type].url" ng-maxlength="1024" 
+                    ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required />
+                    <div class="error" ng-messages="(submitted ||functionForm.url.$dirty) && functionForm.url.$error">
+                        <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                    </div>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label">租户URL地址：</label>
+                <div class="controls">
+                    <input type="text" class="form-controls" name="tenantUrl" placeholder = "请输入租户URL地址" ng-model="paas[paramsData.selected.type].tenantUrl" ng-maxlength="1024" 
+                    ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required />
+                    <div class="error" ng-messages="(submitted ||functionForm.tenantUrl.$dirty) && functionForm.tenantUrl.$error">
+                        <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                    </div>
+                </div>
+              </div>
+          </div>
+          <div ng-if="paramsData.selected.type=='TDSQL' || paramsData.selected.type=='CTSDB' 
+          || paramsData.selected.type=='TSF'|| paramsData.selected.type=='CloudSecurity'
+          || paramsData.selected.type=='CMQ' || paramsData.selected.type=='APIGateway'
+          || paramsData.selected.type=='BlueKing' || paramsData.selected.type=='Alauda'">
+            <div class="control-group">
+              <label class="control-label">URL地址：</label>
+              <div class="controls">
+                  <input type="text" class="form-controls" name="url" placeholder = "请输入URL地址"  ng-model="paas[paramsData.selected.type].url" ng-maxlength="1024" 
+                  ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/"required />
+                  <div class="error" ng-messages="(submitted ||functionForm.url.$dirty) && functionForm.url.$error">
+                    <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                  </div>
+              </div>
+            </div>
+            <div class="control-group" ng-if="paramsData.selected.type=='CloudSecurity'">
+              <label class="control-label">安全加固agent：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="agentUrl" placeholder = "请输入安全加固agent" ng-model="paas[paramsData.selected.type].agentUrl" ng-maxlength="1024" 
+                ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required />
+                <div class="error" ng-messages="(submitted ||functionForm.agentUrl.$dirty) && functionForm.agentUrl.$error">
+                  <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+        <p class="error text-center"  ng-if="rangeSame||ironic.includeCheck||ironicFloatingCheck.includeCheck">{{'aws.function.tips.addphytips'|translate}}
+          </p>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="functionConfirm(functionForm)">{{"aws.action.ok"|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+      </div>
+    </div>
+  </script>
+
+  <script type="text/ng-template" id="editFunction.html">
+    <div class="modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">编辑</h3>
+      </div>
+      <div class="modal-body">
+        <form name="editFuncForm">
+          <div class="control-group">
+            <label class="control-label">名称：</label>
+            <div class="controls">
+              <span class="val">{{'aws.function.paas.'+paasEditType | translate}}</span>
+            </div>
+          </div>
+          <div ng-if="paasEditType =='COC' || paasEditType =='TBase' || paasEditType =='TBDS'">
+            <div class="control-group">
+              <label class="control-label">URL地址：</label>
+              <div class="controls">
+                  <input type="text" class="form-controls" name="url" placeholder = "请输入URL地址" ng-model="paasEdit.url" ng-maxlength="1024" 
+                  ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required />
+                  <div class="error" ng-messages="(submittedvalid ||editFuncForm.url.$dirty) && editFuncForm.url.$error">
+                    <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                  </div>
+              </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">管理员用户名：</label>
+                <div class="controls">
+                    <input type="text" class="form-controls" name="username" placeholder = "请输入管理员用户名" ng-model="paasEdit.username" required />
+                    <div class="error" ng-messages="(submittedvalid ||editFuncForm.username.$dirty) && editFuncForm.username.$error">
+                        <form-validate></form-validate>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">管理员密码：</label>
+                <div class="controls">
+                    <input type="password" class="form-controls"  name="password" placeholder = "请输入管理员密码" ng-model="paasEdit.password" required/>
+                    <div class="error" ng-messages="(submittedvalid ||editFuncForm.password.$dirty) && editFuncForm.password.$error">
+                        <form-validate></form-validate>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group" ng-if="paasEditType =='COC'">
+              <label class="control-label">自动化运维agent：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="agentUrl" placeholder = "请输入自动化运维agent" ng-model="paasEdit.agentUrl" ng-maxlength="1024" 
+                ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required />
+                <div class="error" ng-messages="(submitted ||editFuncForm.agentUrl.$dirty) && editFuncForm.agentUrl.$error" >
+                  <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" ng-if="paasEditType =='TBDS'">
+              <label class="control-label">端口1：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="port1" placeholder = "请输入端口1" ng-model="paasEdit.port1" min="1" max="65535" limitnumrange required />
+                <div class="error" ng-messages="(submitted ||editFuncForm.port1.$dirty) && editFuncForm.port1.$error" >
+                  <form-validate></form-validate>
+                  <div ng-message="limitnumrange">{{"aws.errors."+['limit_1_65535']|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" ng-if="paasEditType =='TBDS'">
+              <label class="control-label">端口2：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="port2"  placeholder = "请输入端口2" ng-model="paasEdit.port2" min="1" max="65535" limitnumrange required />
+                <div class="error" ng-messages="(submitted ||editFuncForm.port2.$dirty) && editFuncForm.port2.$error" >
+                  <form-validate></form-validate>
+                  <div ng-message="limitnumrange">{{"aws.errors."+['limit_1_65535']|translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" ng-if="paasEditType =='TBase'">
+              <label class="control-label">TStudio URL：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="TStudio" placeholder = "请输入TStudio URL" ng-model="paasEdit.TStudio" ng-maxlength="1024" 
+                ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required />
+                <div class="error" ng-messages="(submitted ||editFuncForm.TStudio.$dirty) && editFuncForm.TStudio.$error" >
+                  <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div ng-if="paasEditType=='TDSQL' || paasEditType=='CTSDB' 
+            || paasEditType=='TSF'|| paasEditType=='CloudSecurity'
+            || paasEditType=='CMQ' || paasEditType=='APIGateway'
+            || paasEditType=='BlueKing' || paasEditType=='Alauda'">
+            <div class="control-group">
+              <label class="control-label">URL地址：</label>
+              <div class="controls">
+                  <input type="text" class="form-controls" name="url" placeholder = "请输入URL地址"  ng-model="paasEdit.url" ng-maxlength="1024" 
+                  ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required />
+                  <div class="error" ng-messages="(submittedvalid ||editFuncForm.url.$dirty) && editFuncForm.url.$error">
+                      <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                  </div>
+              </div>
+            </div>
+            <div class="control-group" ng-if="paasEditType =='CloudSecurity'">
+              <label class="control-label">安全加固agent：</label>
+              <div class="controls">
+                <input type="text" class="form-controls" name="agentUrl"  placeholder = "请输入安全加固agent"  ng-model="paasEdit.agentUrl" ng-maxlength="1024" 
+                ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required/>
+                <div class="error" ng-messages="(submitted ||editFuncForm.agentUrl.$dirty) && editFuncForm.agentUrl.$error">
+                  <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div ng-if="paasEditType=='SkyCloudSecurity'">
+              <div class="control-group">
+                <label class="control-label">管理员URL地址：</label>
+                <div class="controls">
+                    <input type="text" class="form-controls" name="url" placeholder = "请输入管理员URL地址" ng-model="paasEdit.url" ng-maxlength="1024" 
+                    ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required />
+                    <div class="error" ng-messages="(submittedvalid ||editFuncForm.url.$dirty) && editFuncForm.url.$error">
+                        <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                    </div>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label">租户URL地址：</label>
+                <div class="controls">
+                    <input type="text" class="form-controls" name="tenantUrl" placeholder = "请输入租户URL地址" ng-model="paasEdit.tenantUrl" ng-maxlength="1024" 
+                    ng-pattern="/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/" required />
+                    <div class="error" ng-messages="(submittedvalid ||editFuncForm.tenantUrl.$dirty) && editFuncForm.tenantUrl.$error">
+                        <form-validate max-num = "1024" pattern-msg="'aws.errors.correctUrl'|translate"></form-validate>
+                    </div>
+                </div>
+              </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="editFuncConfirm(editFuncForm)">{{"aws.action.ok"|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+      </div>
+    </div>
+  </script>
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body plugin-detail" animation="animation">
+      <div class="tab-content">
+        <div class ="detail-row">
+          <div class="detail-title">
+            <a class="an-close"  ng-href="/system/plugin"><i class="icon-aw-mail-reply"></i></a>
+            <span>{{'aws.function.functiontype.'+currentPlugin|translate}}{{'aws.function.functiontype.detail'|translate}}</span>
+          </div>
+          <div class="detail-info">
+            <div class="tab-content-line"></div>
+            <h4>{{'aws.function.functiontype.log'|translate}}</h4>
+            <div class="log-wrap">
+             <!--  <table class="table">
+                <tr>
+                  <th>显示安装日志</th>
+                </tr>
+                <tr ng-repeat="log in phyLogMessages track by $index" ng-if="currentPlugin=='phy'">
+                  <td>{{log}}</td>
+                </tr>
+                <tr ng-repeat="log in conLogMessages track by $index" ng-if="currentPlugin=='con'">
+                  <td>{{log}}</td>
+                </tr>
+              </table> -->
+              <div>
+                <pre>{{logMessages}}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </pane>
+  </div>
+</div>

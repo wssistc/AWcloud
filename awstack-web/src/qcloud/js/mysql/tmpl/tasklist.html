@@ -1,0 +1,236 @@
+<div class="page-inner"> 
+  <div class="page-title">
+    <h2>MYSQL-任务列表</h2>
+    <!-- <ui-select class="sel-lg" ng-model="queryLimit.region" ng-change="changeRegion(queryLimit.region);" title="切换地域">
+      <ui-select-match placeholder="切换地域" >{{$select.selected.name}}</ui-select-match>
+      <ui-select-choices repeat="region in regions.options">
+        <div ng-bind-html="region.name | highlight: $select.search"></div>
+      </ui-select-choices>
+    </ui-select> -->
+    <div class="btn-item-group">
+      <button ng-repeat="region in regions.options" ng-click="changeRegion(region.value)" ng-class="{'active':queryLimit.regionId==region.value}" ng-bind="region.name"></button>
+    </div>
+  </div>
+  <div class="table-action">
+    <div class="tab-select pull-left clearfix">
+      <span class="btn" ng-class="{'active':timeStep=='all'}" type="button" ng-click="timeSelectTab('all')">全部</span>
+      <span class="btn" ng-class="{'active':timeStep=='today'}" type="button" ng-click="timeSelectTab('today')">今天</span>
+      <span class="btn" ng-class="{'active':timeStep=='yesterday'}" type="button" ng-click="timeSelectTab('yesterday')">昨天</span>
+      <span class="btn" ng-class="{'active':timeStep=='7d'}" type="button" ng-click="timeSelectTab('7d')">最近7天</span>
+      <span class="btn" ng-class="{'active':timeStep=='30d'}" type="button" ng-click="timeSelectTab('30d')">最近30天</span>
+    </div>
+    <div class="calendar-select pull-left">
+        <input type="text" id="time-calendar" class="form-control" placeholder="自定义" ng-class="{'active':timeStep==''}">
+        <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+    </div>
+    <div class="search-box">
+      <form name="searchForm" novalidate >
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search" ng-click="applyGlobalSearch()"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" ng-Enter="applyGlobalSearch()" placeholder='根据任务ID搜索' />
+      </form>
+    </div>
+    <!--<button class="btn btn-refresh" ng-click="refreshtasklist()"><i class="icon-aw-refresh"></i>刷新</button> -->
+  </div>
+  <div class="table-content">
+    <table  class="table" >
+      <thead>
+        <th>任务ID</th>
+        <th>任务类型</th>
+        <th>所属地域</th>
+        <th>任务执行进度</th>
+        <th>任务执行状态</th>
+        <th>任务开始时间</th>
+        <th>任务结束时间</th>
+        <th>操作</th>
+      </thead>
+      <tbody>
+        <tr ng-repeat="task in tasklistData">
+          <td>{{task.jobId}}</td>
+          <td>
+            <span ng-if="task.type">{{"CN.mysql.taskTypeList." + task.type | translate}}</span>
+          </td>
+          <td>{{"CN.region." + task.region | translate}}</td>
+          <td>
+            <div class="basic-bar" type="basic" chart-bar bardata='{"data":task.progress,"type":"basic"}'></div>
+          </td>
+          <td>
+            <span ng-if="task.status">{{"CN.mysql.taskStatusList." + task.status | translate}}</span>
+          </td>
+          <td>{{task.startTime}}</td>
+          <td>{{task.endTime}}</td>
+          <td><a ng-click="viewTaskDetail(task)"  ng-if="task.type==5 || task.type==6 || task.type==9 || task.type==11">查看详情</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <page-component total="mysqlTotal" change-page="changePage(obj)" step="pageStep"></page-component>  
+  </div>
+</div>
+<script type="text/ng-template" id="taskDetailModal.html">
+    <div class="task-modal modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{taskTypeDetail_title}}</h3>
+      </div>
+      <div class="modal-body">
+        <div ng-if="taskType=='1'"><!--数据库回档-->
+          
+        </div>
+        <div ng-if="taskType=='5'"><!--任务类型为参数设置-->
+          <ul class="tc-list clearfix">
+            <li>
+                <em>任务ID</em>
+                <span>{{taskDetailData.jobId}}</span>
+            </li>
+            <li>
+                <em>操作时间</em>
+                <span>{{taskDetailData.startTime}}</span>
+            </li>
+            <li>
+                <em>操作进度</em>
+                <span>{{taskDetailData.progress}}%</span>
+            </li>
+            <li>
+              <em>任务状态</em>
+              <span ng-class="{'success':taskDetailData.status=='2','fail':taskDetailData.status==3,'running':taskDetailData.status==0}">{{"CN.mysql.taskStatusList." + taskDetailData.status | translate}}</span>
+            </li>
+          </ul>
+          <table  class="table">
+            <colgroup>
+              <col width="33.3%">
+              <col width="33.3%">
+              <col width="33.3%">
+            </colgroup>
+            <thead>
+              <th>实例名称</th>
+              <th>任务状态</th>
+              <th>提示信息</th>
+            </thead>
+            <tbody>
+              <tr>
+                <!-- <td><span class="ycx">{{taskDetailData.detail[0].cdbInstanceId}}</span></td> -->
+                <td><span class="ycx">{{cdbName}}</span></td>
+                <td>{{"CN.mysql.taskStatusList." + taskDetailData.status | translate}}</td>
+                <td><i ng-class=" {'icon-aw-angle-down':!showParamSubJobInfo,'icon-aw-angle-up':showParamSubJobInfo}" ng-click="showParamSubJobInfo=!showParamSubJobInfo;"></i></td>
+              </tr>
+            </tbody>
+          </table> 
+          <div  class="sub-table" ng-if="showParamSubJobInfo">
+            <table  class="table">
+              <colgroup>
+                <col width="33.3%">
+                <col width="33.3%">
+                <col width="33.3%">
+              </colgroup>
+              <thead>
+                <th>参数名</th>
+                <th>状态</th>
+                <th>提示信息</th>
+              </thead>
+              <tbody>
+                <tr ng-repeat="subjob in taskDetailData.detail[0].paramList">
+                  <td>{{subjob.name}}</td>
+                  <td>{{subjob.code==0?"成功":"失败"}}</td>
+                  <td>{{subjob.message}}</td>
+                </tr>
+              </tbody>
+            </table> 
+          </div>
+        </div>
+        <div ng-if="taskType=='6'"><!--任务类型为初始化-->
+          <ul class="tc-list clearfix">
+            <li>
+                <em>任务ID</em>
+                <span>{{taskDetailData.jobId}}</span>
+            </li>
+            <li>
+                <em>实例名称</em>
+                <span>{{cdbName}}</span>
+            </li>
+            <li>
+                <em>操作时间</em>
+                <span>{{taskDetailData.startTime}}</span>
+            </li>
+            <li>
+              <em>结果提示</em>
+              <span ng-class="{'success':taskDetailData.status==2,'fail':taskDetailData.status==3}">{{"CN.mysql.taskStatusList." + taskDetailData.status | translate}}</span>
+            </li>
+          </ul>
+        </div>
+        <div ng-if="taskType=='9'"><!--只读实例升级-->
+          <ul class="tc-list clearfix">
+            <li>
+                <em>任务ID</em>
+                <span>{{taskDetailData.jobId}}</span>
+            </li>
+            <li>
+                <em>实例名称</em>
+                <span>{{cdbName}}</span>
+            </li>
+            <li>
+                <em>操作时间</em>
+                <span>{{taskDetailData.startTime}}</span>
+            </li>
+            <li>
+              <em>结果提示</em>
+              <span ng-class="{'success':taskDetailData.status==2,'fail':taskDetailData.status==3}">{{"CN.mysql.taskStatusList." + taskDetailData.status | translate}}</span>
+            </li>
+          </ul>
+        </div>
+        <div ng-if="taskType=='11'"><!--主实例升级-->
+          <ul class="tc-list clearfix">
+            <li>
+                <em>任务ID</em>
+                <span>{{taskDetailData.jobId}}</span>
+            </li>
+            <li>
+                <em>实例名称</em>
+                <span>{{cdbName}}</span>
+            </li>
+            <li>
+                <em>操作时间</em>
+                <span>{{taskDetailData.startTime}}</span>
+            </li>
+            <li>
+              <em>结果提示</em>
+              <span ng-class="{'success':taskDetailData.status==2,'fail':taskDetailData.status==3}">{{"CN.mysql.taskStatusList." + taskDetailData.status | translate}}</span>
+            </li>
+          </ul>
+        </div>
+        <div ng-if="taskType=='13'"><!--任务类型为切换主实例-->
+          <ul class="tc-list clearfix">
+            <li>
+                <em>任务ID</em>
+                <span>{{taskDetailData.jobId}}</span>
+            </li>
+            <li>
+                <em>灾备实例ID</em>
+                <span>{{}}</span>
+            </li>
+            <li>
+                <em>主实例ID</em>
+                <span>{{}}</span>
+            </li>
+            <li>
+              <em>结果提示</em>
+              <span>{{}}</span>
+            </li>
+            <li>
+              <em>操作时间</em>
+              <span>{{}}</span>
+            </li>
+            <li>
+              <em>灾备实例地域</em>
+              <span>{{}}</span>
+            </li>
+             <li>
+              <em>主实例地域</em>
+              <span>{{}}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">关闭</button>
+      </div>
+    </div>
+  </script>

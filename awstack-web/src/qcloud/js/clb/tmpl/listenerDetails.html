@@ -1,0 +1,87 @@
+<div class="page-inner">
+  <pane class="detail-body" animation="animation">
+    <div class="tab-content">
+      <div class="detail-row">
+        <div class="detail-title">
+          <a href="" class="an-close" ng-click="goBackToListeners()">
+            <i class="icon-aw-mail-reply"></i>
+          </a>
+          <span class="tab-title">监听器详情</span>
+        </div>
+        <div class="detail-info">
+          <table class="table table-info">
+            <colgroup>
+              <col width="15%">
+              <col width="35%">
+              <col width="15%">
+              <col width="35%">
+            </colgroup>
+            <tr>
+              <td>负载均衡器名称</td>
+              <td>{{loadBalancer ? loadBalancer["loadBalancerName"] : ""}}</td>
+              <td>负载均衡器ID</td>
+              <td>{{loadBalancer ? loadBalancer["unLoadBalancerId"] : ""}}</td>
+            </tr>
+            <tr>
+              <td>监听器名称</td>
+              <td>{{listener ? listener["listenerName"] : ""}}</td>
+              <td>监听器ID</td>
+              <td>{{listener ? listener["unListenerId"] : ""}}</td>
+            </tr>
+            <tr>
+              <td>负载均衡器监听端口</td>
+              <td>{{listener ? listener["loadBalancerPort"] : ""}}</td>
+              <td>监听器后端转发端口</td>
+              <td>{{listener ? listener["instancePort"] : ""}}</td>
+            </tr>
+            <tr>
+              <td>监听器协议类型</td>
+              <td>{{listener ? listenerProtocols[listener["protocol"]] : ""}}</td>
+              <td>均衡方式</td>
+              <td>{{listener ? (listenerHttpHash[listener["httpHash"]] || "-") : ""}}</td>
+            </tr>
+            <tr>
+              <td>会话保持</td>
+              <td class="{{listener['sessionExpire'] > 0 ? 'green' : 'orange'}}">
+                {{listener ? (listener["sessionExpire"] > 0 ? "已开启" : "未开启") : ""}}
+              </td>
+              <td>会话保持时间</td>
+              <td>{{listener ? (listener["sessionExpire"] > 0 ?
+                listener["sessionExpire"].toString() + "s" : "-") : ""}}
+              </td>
+            </tr>
+            <tr>
+              <td>健康检查</td>
+              <td class="{{listener['healthSwitch'] === 1 ? 'green' : 'orange'}}">
+                {{listener ? listenerHealthSwitch[listener["healthSwitch"]] : ""}}
+              </td>
+              <td>监听器状态</td>
+              <td class="{{listener['status'] === 1 ? 'green' : 'orange'}}">
+                {{listener ? listenerStatuses[listener["status"]] : ""}}
+              </td>
+            </tr>
+            <tr ng-if="listener['healthSwitch'] === 1">
+              <td>检查目录</td>
+              <td>{{listener ? listener["httpCheckPath"] || "-" : ""}}</td>
+              <td>检查方式</td>
+              <td>{{listener ? listenerHealthCheckTypes[listener["protocol"]] : ""}}</td>
+            </tr>
+            <tr ng-if="listener['healthSwitch'] === 1">
+              <td>检查选项</td>
+              <td colspan="3">
+                {{listener ? getCheckoutOptionContents(listener["timeOut"], listener["intervalTime"],
+                listener["unhealthNum"], listener["healthNum"]).join("； ") : ""}}
+              </td>
+            </tr>
+            <tr ng-if="listener['protocol'] === 1 && listener['healthSwitch'] === 1">
+              <td>检查的HTTP状态码</td>
+              <td colspan="3">
+                {{listener ? getHTTPCodeContents(listener["httpCode"]).join(", ") : ""}}
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </pane>
+</div>

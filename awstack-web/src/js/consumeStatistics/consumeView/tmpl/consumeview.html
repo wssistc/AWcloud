@@ -1,0 +1,378 @@
+<div class="page-inner measure-box">
+    <div class="table-action" ng-class="{'time-error':filterForm.startTime.$error.pattern || filterForm.endTime.$error.pattern || filterForm.endTime.$error.gtBillTime }" ng-show="isProject">
+        <form class="form-inline date-box" role="form" name="filterForm" novalidate>
+            <!--<div class="control-group">
+                <label class="control-label">{{"aws.auth.enterpriseName"|translate}}：</label>
+                <div class="controls">
+                    <ui-select ng-model="filterData.enterpriseId" ng-change="queryFun()" name="enterprise" title='选择企业'>
+                        <ui-select-match placeholder='选择企业'>
+                            {{$select.selected.enterpriseName=="全部"?"选择企业":$select.selected.enterpriseName}}
+                        </ui-select-match>
+                        <ui-select-choices repeat="enterprise.enterpriseId as enterprise in enterprises.options">
+                            <div ng-bind-html="enterprise.enterpriseName"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>-->
+            <!--<div class="control-group">
+                <label class="control-label">企业名称：</label>
+                <div class="controls">
+                    <input type="text" ng-model="tableCnsForm.enterpriseId" ng-disabled="true">
+                </div>
+            </div>-->
+            <div class="form-group control-group time-picker start">
+                <label class="control-label">{{"aws.bill.startTime"|translate}}：</label>
+                <div class="input-group controls date form_date col-md-5">
+                    <input class="form-control fromTime" name="startTime" type="text" size="16"
+                           ng-model="filterData.startAt" placeholder={{"aws.bill.startTime"|translate}}
+                           ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])$/"
+                           gt-bill-time="filterData" autocomplete="off" gt-curr-time>
+                    <span class="input-group-addon calendar-cont">
+                        <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                    </span>
+                    <div class="error" ng-messages="filterForm.startTime.$error">
+                        <div ng-message="pattern">{{"aws.bill.error.pattern"|translate}}</div>
+                        <div ng-message="gtCurrTime">{{"aws.bill.error.gtCurrTime"|translate}}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group control-group time-picker end">
+                <label class="control-label">{{"aws.bill.endTime"|translate}}：</label>
+                <div class="input-group controls date form_date col-md-5">
+                    <input class="form-control endTime" name="endTime" type="text" size="16" ng-model="filterData.endAt"
+                           placeholder={{"aws.bill.endTime"|translate}}
+                           ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])$/"
+                           gt-bill-time="filterData" autocomplete="off" gt-curr-time>
+                    <span class="input-group-addon calendar-cont">
+                        <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                    </span>
+                    <div class="error" ng-messages="filterForm.endTime.$error">
+                        <div ng-message="pattern">{{"aws.bill.error.pattern"|translate}}</div>
+                        <div ng-message="gtBillTime">{{"aws.bill.error.gtTime"|translate}}</div>
+                        <div ng-message="gtCurrTime">{{"aws.bill.error.gtCurrTime"|translate}}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group control-group">
+                <span class="pull-left">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <button type="submit" class="btn btn-default" ng-click="queryFun()" ng-disabled="filterForm.$invalid"><i class="icon-aw-search"></i>{{"aws.bill.search"|translate}}</button>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="box" ng-show="isProject">
+        <div class="col-4" ng-show="isAdmin">
+            <div class="title"><strong>{{"aws.bill.adminCount"|translate}}</strong></div>
+            <div class="panels clearfix">
+                <div class="pie-wrap">
+                    <div class="pie" chart-pie panel="regionConsumePie.panels"></div>
+                    <div class="pie-center" ng-if="consume_total && consume_total.regions>=0">
+                        <div class="num">{{consume_total.regions}}</div>
+                        <div class="text">{{"aws.bill.regionAmoutTotal"|translate}}</div>
+                    </div>
+                </div>
+                <div class="pie-legend">
+                    <dl class="dl-horizontal" ng-repeat="legend in regionConsumePie.panels.data">
+                        <dt title="{{legend.name}}"><i style="background-color:{{regionConsumePie.panels.colors[$index]}}"></i>{{legend.name}}
+                            <!--{{"aws.bill.regionAmout"|translate}}：-->：
+                        </dt>
+                        <dd>{{legend.value}}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="col-4" ng-show="isAdmin">
+            <div class="title">{{"aws.bill.domainCount"|translate}}TOP5</div>
+            <div class="panels clearfix">
+                <div class="bar-wrap">
+                    <ul>
+                        <li ng-repeat="item in domains_consume_data" class="clearfix">
+                            <div consume-chart-bar bardata="item">
+                                </div>
+                        </li>
+                    </ul>
+                    <div class="nodata" ng-if="domainsDataNull">{{"aws.bill.domainCountDataNull"|translate}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="title">{{"aws.bill.projectCount"|translate}}TOP5</div>
+            <div class="panels clearfix">
+                <div class="bar-wrap">
+                    <ul>
+                        <li ng-repeat="item in projects_consume_data" class="clearfix">
+                            <div consume-chart-bar bardata="item">
+                                </div>
+                        </li>
+                    </ul>
+                    <div class="nodata" ng-if="projectsDataNull">{{"aws.bill.projectCountDataNull"|translate}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <form class="form-inline date-box " role="form" name="tableFilterForm" novalidate>
+            <div class="table-action">
+                <!--<div class="control-group">
+                    <label class="control-label">企业名称：</label>
+                    <div class="controls">
+                        <ui-select ng-model="tableCnsForm.enterpriseId" ng-change="enterpriseQueryFun()"
+                                   name="enterprise" title='选择企业'>
+                            <ui-select-match placeholder='选择企业'>
+                                {{$select.selected.enterpriseName=="全部"?"选择企业":$select.selected.enterpriseName}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="enterprise.enterpriseId as enterprise in enterprises.options">
+                                <div ng-bind-html="enterprise.enterpriseName"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>-->
+
+                <!-- region Start -->
+                <div class="control-group">
+                    <label class="control-label">{{"aws.bill.region"|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="tableCnsForm.region" ng-change="changeRegion()" name="data_center"
+                                   title={{"aws.bill.region"|translate}}>
+                            <ui-select-match placeholder={{"aws.bill.choiceRegion"|translate}}>
+                                {{$select.selected.regionName}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="reg.region as reg in regions.options">
+                                <div ng-bind-html="reg.regionName"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+
+                <!-- 部门/domain Start -->
+                <div class="control-group">
+                    <label class="control-label">{{"aws.bill.domain"|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="tableCnsForm.domainId" ng-change="changeDomain()" name="domain"
+                                   title={{"aws.bill.domain"|translate}}>
+                            <ui-select-match placeholder={{"aws.bill.choiceDomain"|translate}}>
+                                {{$select.selected.domainName=="全部"?"全部":$select.selected.domainName}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="domain.domainId as domain in domains.options">
+                                <div ng-bind-html="domain.domainName"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+
+                <!-- 项目/Project Start -->
+                <div class="control-group">
+                    <label class="control-label">{{"aws.bill.project"|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="projects.selected" ng-change="changeProject(projects.selected)"
+                                   name="project" title={{"aws.bill.choiceProject"|translate}}>
+                            <ui-select-match placeholder={{"aws.bill.choiceProject"|translate}}>
+                                {{$select.selected.projectName}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="project.projectId as project in projects.options">
+                                <div ng-bind-html="project.projectName"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+
+                <!-- 用户/user Start -->
+                <div class="control-group">
+                    <label class="control-label">{{"aws.bill.user"|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="users.selected" ng-change="changeUsers(users.selected)" ng-disabled="isUser" name="userName" title={{"aws.bill.choiceUser"|translate}}>
+                            <ui-select-match placeholder={{"aws.bill.choiceUser"|translate}}>{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="userName in users.options">
+                                <div ng-bind-html="userName"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="table-action" ng-class="{'time-error':tableFilterForm.startTime.$error.pattern || tableFilterForm.endTime.$error.pattern || tableFilterForm.endTime.$error.gtBillTime }">
+
+                <!-- 类型/type Start -->
+                <div class="control-group">
+                    <label class="control-label">{{"aws.bill.prodType"|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="tableCnsForm.prodTypeId" ng-change="changeProdType()" name="resType"
+                                   title={{"aws.bill.choiceProdType"|translate}}>
+                            <ui-select-match placeholder={{"aws.bill.choiceProdType"|translate}}>
+                                {{$select.selected.prodTypeName}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="resType.prodTypeId as resType in productTypes.options">
+                                <div ng-bind-html="resType.prodTypeName"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+
+                <div class="form-group control-group time-picker start">
+                    <label class="control-label">{{"aws.bill.startTime"|translate}}：</label>
+                    <div class="input-group controls date form_date col-md-5">
+                        <input class="form-control fromTime" name="startTime" type="text" size="16"
+                               ng-model="tableCnsForm.startAt" placeholder={{"aws.bill.startTime"|translate}}
+                               ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])$/"
+                               gt-bill-time="tableCnsForm" autocomplete="off" gt-curr-time>
+                        <span class="input-group-addon calendar-cont">
+                          <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                        </span>
+                        <div class="error" ng-messages="tableFilterForm.startTime.$error">
+                            <div ng-message="pattern">{{"aws.bill.error.pattern"|translate}}</div>
+                            <div ng-message="gtCurrTime">{{"aws.bill.error.gtCurrTime"|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group control-group time-picker end">
+                    <label class="control-label">{{"aws.bill.endTime"|translate}}：</label>
+                    <div class="input-group controls date form_date col-md-5">
+                        <input class="form-control endTime" name="endTime" type="text" size="16"
+                               ng-model="tableCnsForm.endAt" placeholder={{"aws.bill.endTime"|translate}}
+                               ng-pattern="/^\d{4}-([0][1-9]|[1][0-2])-([0-2][1-9]|[1-2][0]|[3][0-1])$/"
+                               gt-bill-time="tableCnsForm" autocomplete="off" gt-curr-time>
+                        <span class="input-group-addon calendar-cont">
+                                <span class="glyphicon glyphicon-calendar fa fa-calendar"></span>
+                        </span>
+                        <div class="error" ng-messages="tableFilterForm.endTime.$error">
+                            <div ng-message="pattern">{{"aws.bill.error.pattern"|translate}}</div>
+                            <div ng-message="gtBillTime">{{"aws.bill.error.gtTime"|translate}}</div>
+                            <div ng-message="gtCurrTime">{{"aws.bill.error.gtCurrTime"|translate}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group control-group">
+                    <span class="pull-left">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <button type="button" class="btn btn-default" ng-click="tableQueryFun(tableFilterForm)" ng-disabled="tableFilterForm.$invalid"><i class="icon-aw-search"></i>{{"aws.bill.search"|translate}}</button>
+                    <!--<a href={{downloadExcelHref}} class="btn btn-default"><i class="icon-aw-download"></i>下载</a>-->
+                    <!--charset需要设置成“utf-8”，add-bom需要设置成“true”-->
+                    <!--csv-header第一个字段绝对不能是“ID”，可以是id, Id, iD等-->
+                    <button type="button" class="btn btn-info" ng-csv="downloadAllData()"
+                            charset="utf-8" add-bom="true"
+                            csv-header="['企业名称', '数据中心', '部门名称', '项目名称', '产品类型', '实例名称', '消费金额', '计费开始时间']"
+                            filename="消费详情.csv">
+                        {{"aws.bill.download"|translate}}
+                    </button>
+
+                    <!--<button class="btn btn-refresh" ng-click="refresResTable()"><i class="icon-aw-refresh"></i>刷新</button>-->
+                </div>
+            </div>
+        </form>
+        <div class="table-content">
+            <uib-tabset active="" justified="true">
+                <uib-tab index="$index" heading='列表' ng-click="treDisplay('1')">
+                    <table class="table">
+                        <thead>
+                        <th>{{"aws.bill.enterprise"|translate}}</th>
+                        <th>{{"aws.bill.region"|translate}}</th>
+                        <th>{{"aws.bill.domain"|translate}}</th>
+                        <th>{{"aws.bill.project"|translate}}</th>
+                        <th>用户名称</th>
+                        <th>{{"aws.bill.prodType"|translate}}</th>
+                        <th>{{"aws.bill.productName"|translate}}</th>
+                        <th>{{"aws.bill.totalAmount"|translate}}</th>
+                        <th>{{"aws.bill.billStartAt"|translate}}</th>
+                        <th>{{"aws.bill.operate"|translate}}</th>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="item in resTable">
+                            <td>{{item.enterprise_name}}</td>
+                            <td>{{item.region}}</td>
+                            <td>{{item.domain_name}}</td>
+                            <td>{{item.project_name}}</td>
+                            <td>{{item.user_name}}</td>
+                            <td>{{item.resTypeName}}</td>
+                            <td>{{item.res_name}}</td>
+                            <!--<td>{{item.unit_price}}</td>-->
+                            <td>{{item.amount}}</td>
+                            <td>{{item.start_at}}</td>
+                            <td>
+                                <a href="#/bill/consumeview?resId={{item.res_id}}&&enterpriseId={{item.enterprise_id}}">{{"aws.bill.detail"|translate}}</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <page-component total="resDataTotal" change-page="changeResTablePage(obj)"
+                                    step="resPageStep"></page-component>
+                </uib-tab>
+                <uib-tab index="$index+1" heading="趋势图" ng-click="treDisplay('0')">
+                    <div class="box areaChart" ng-if="trendBlock">
+                        <div class="col-12" ng-repeat="item in panels | orderBy:'priority' " >
+                            <div class="inner">
+                                <div class="panels clearfix displayIndex">
+                                    <div class="area-chart-title">{{item.title}}</div>
+                                    <div class="control-group">
+                                        <div class="control-label">展示指标：</div>
+                                        <div class="controls">
+                                            <ui-select ng-model="dIndex.selected" ng-change="disIndexFun(dIndex.selected)" ng-disabled="true">
+                                                <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                                <ui-select-choices repeat="item.values as item in displayDate">
+                                                    <div ng-bind-html="item.name"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                        </div>
+                                    </div>
+                                    <div class="area-chart-wrap" chart-area panel="item" trend="'trend'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </uib-tab>
+            </uib-tabset>
+            
+        </div>
+        <div class="detail-body" animation="animation">
+            <div class='animateContent {{animation}} '>
+                <div class='detailInner'>
+                    <div class="tab-content">
+                        <div class="detail-row">
+                            <div class="detail-header"></div>
+                            <div class="detail-title">
+                                <a class="an-close" href="#/bill/consumeview"><i class="icon-aw-mail-reply"></i></a>
+                                <span class="ng-binding">{{"aws.bill.resDetail"|translate}}</span>
+                            </div>
+                            <div class="detail-info">
+                                <table class="table">
+                                    <thead>
+                                    <th>{{"aws.bill.enterprise"|translate}}</th>
+                                    <th>{{"aws.bill.region"|translate}}</th>
+                                    <th>{{"aws.bill.domain"|translate}}</th>
+                                    <th>{{"aws.bill.project"|translate}}</th>
+                                    <th>{{"aws.bill.prodType"|translate}}</th>
+                                    <th>{{"aws.bill.productName"|translate}}</th>
+                                    <th>{{"aws.bill.productStatus"|translate}}</th>
+                                    <th>{{"aws.bill.productPrice"|translate}}</th>
+                                    <th>{{"aws.bill.totalAmount"|translate}}</th>
+                                    <th>{{"aws.bill.billStartAt"|translate}}</th>
+                                    </thead>
+                                    <tbody>
+                                    <tr ng-repeat="item in resDetailTable">
+                                        <td>{{item.enterprise_name}}</td>
+                                        <td>{{item.region}}</td>
+                                        <td>{{item.domain_name}}</td>
+                                        <td>{{item.project_name}}</td>
+                                        <td>{{item.resTypeName}}</td>
+                                        <td title="{{item.configInfo}}">{{item.res_name}}</td>
+                                        <td>{{((item.extra).indexOf('power_off')>-1 ||
+                                            (item.extra).indexOf('delete')>-1) ? '停止计费':'计费中'}}
+                                        </td>
+                                        <td>{{item.unit_price}}</td>
+                                        <td>{{item.amount}}</td>
+                                        <td>{{item.start_at}}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <page-component total="resDetailTotal" change-page="changeDetailDataPage(obj)"
+                                                step="resDetailPageStep"></page-component>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

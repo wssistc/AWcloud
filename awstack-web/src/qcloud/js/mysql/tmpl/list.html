@@ -1,0 +1,1662 @@
+<div class="page-inner">
+	<div class="page-title">
+		<h2>MySQL-实例列表</h2>
+        <!-- <ui-select class="sel-sm" ng-model="region.selected" ng-change="selectedRegion(region.selected)" name="regionName" title="地域切换">
+          <ui-select-match placeholder="地域切换">{{$select.selected.regionName}}</ui-select-match>
+          <ui-select-choices repeat="item in regionList | filter:{regionName:$select.search}">
+            <div ng-bind-html="item.regionName | highlight: $select.search"></div>
+          </ui-select-choices>
+        </ui-select> -->
+        <div class="btn-item-group">
+          <button ng-repeat="item in regionList" ng-class="{'active':region.selected.region==item.region}" ng-bind="item.regionName" ng-click="selectedRegion(item)"></button>
+        </div>
+	</div>
+
+	<div class="table-action">
+    <a ng-href="#/buy/mysql" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新建</a>
+    <button type="button" class="btn btn-info" ng-click="setParam(editData)" ng-disabled="isSet">参数设置</button>
+    <button type="button" data-toggle="modal" class="btn btn-info" ng-click="renew()" ng-disabled="isRenew">续费</button>
+    <button type="button" data-toggle="modal" class="btn btn-info" ng-click="autoRenew()" ng-disabled="isAutoRenew">设置自动续费</button>
+    <button type="button" data-toggle="modal" class="btn btn-info" ng-click="cancelRenew()" ng-disabled="isCancelRenew">取消自动续费</button>
+    <button type="button" class="btn btn-info" ng-disabled="canExport" ng-csv="ExportFunc()"
+            charset="utf-8" add-bom="true"
+            csv-header="['实例名', '实例ID', '实例类型','所属地域', '实例规格', '数据库版本', '所属网络', '内网IP', '内网端口', '计费模式','到期时间','创建时间']"
+            filename="cdb.{{region.selected.region}}.{{project.selected.projectId}}.csv">
+      下载
+    </button>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="搜索" />
+      </form>
+    </div>
+	</div>
+	<div class="table-content">
+  	<table class="table table-check" ng-table="tableList"> 
+      <tbody>
+  	    <tr ng-repeat="item in $data">
+  	      <td header="'headerCheckbox.html'" class="check-td">
+  	        <label class="checkbox" ng-if="item.taskStatus==0 && item.status==1">
+  	          <input type="checkbox" name="r" ng-model="checkboxes.items[item.uInstanceId]" value="{{item.uInstanceId}}" />
+  	          <i class="iconfont"></i>
+  	        </label>
+            <i class="icon-aw-refresh aw-spin" ng-if="item.taskStatus!=0 || item.status!=1"></i>
+  	      </td>
+  	      <td data-title="'ID/实例名'" sortable="'uInstanceId'">
+            <div class="edit-name">
+              <a class="disabled" ng-if="item.status!=1||item.taskStatus!=0">
+                <em class="readonly-icon" ng-if="item.cdbInstanceType == 3">M</em>
+                <em class="readonly-icon" ng-if="item.roInfo.length>0">R</em>
+                <em class="renew-icon" ng-if="item.autoRenew == 1">续</em>
+                {{item.uInstanceId}}
+              </a>
+              <a ng-if="item.status==1&&item.taskStatus==0" ng-click="detailFunc(item)">
+                <em class="readonly-icon" ng-if="item.cdbInstanceType == 3">M</em>
+                <em class="readonly-icon" ng-if="item.roInfo.length>0">R</em>
+                <em class="renew-icon" ng-if="item.autoRenew == 1">续</em>
+                {{item.uInstanceId}}
+              </a>
+              <span>{{item.cdbInstanceName}}</span>
+              <i class="icon-aw-modify blue" ng-hide="item.taskStatus!=0 || item.status!=1" ng-click="editFunc('name',item)"></i>
+            </div>
+          </td>
+  	      <td data-title="'状态'" sortable="'status_t'">
+            <span ng-if="item.initFlag!=0||(item.initFlag==0&&item.status!=1)" ng-class="{1:'green',0:'blue',4:'orange'}[item.status]">{{item.status_t}}</span>
+            <span ng-if="item.initFlag==0&&item.status==1" class="orange">{{item.initFlag_t}}</span>
+  	      </td>
+          <td data-title="'任务'" sortable="'taskStatus'">
+            <span class="orange" ng-if="item.taskStatus==0||item.status==4">--</span>
+            <span class="orange" ng-if="item.taskStatus!=0&&item.status!=4">{{item.taskStatus_t}}</span>
+          </td>
+  	      <td data-title="'实例类型'" header-class="'th-hide'" class="td-hide" sortable="'cdbInstanceType_t'">{{item.cdbInstanceType_t}}</td>
+          <!-- <td data-title="'所属项目'" sortable="'projectName'">{{item.projectName}}</td> -->
+          <td data-title="'所属地域'" sortable="'region_name'">{{item.region_name}}</td>
+          <td data-title="'配置'" sortable="'cdbType'">
+            <span class="cdb-type-text">{{"CN.mysql.cdbType."+item.cdbType|translate}}</span>
+            <span class="cdb-type-value">{{item.memory+"MB/"+item.volume+"GB/"+item.maxQueryCount+"QPS"}}</span>
+          </td>
+          <td data-title="'数据库版本'" header-class="'th-hide'" class="td-hide" sortable="'engineVersion'">{{"MySQL"+item.engineVersion}}</td>
+          <td data-title="'所属网络'" sortable="'vpcId'">
+            <span>{{item.networkName}}</span>
+          </td>
+          <td data-title="'内网地址'" sortable="'cdbInstanceVip'">{{item.cdbInstanceVip+":"+item.cdbInstanceVport}}</td>
+          <td data-title="'计费模式'" sortable="'payType'">{{item.payType_t}}</td>
+          <td data-title="'到期时间'" sortable="'cdbInstanceDeadlineTime'">{{item.cdbInstanceDeadlineTime | formatDate}}</td>
+          <td data-title="'操作'">
+              <span ng-if="item.initFlag==0&&item.taskStatus==0&&item.status!=0&&item.status!=4" class="blue" ng-click="editFunc('myinit',item)">初始化</span>
+              <span ng-if="item.status!=1||item.taskStatus!=0">
+                <a class="disabled">升级</a>
+              </span>
+              <span ng-if="item.status==1&&item.taskStatus==0">
+                <a ng-click="upgrade(item)"  ng-class="{'disabled':item.taskStatus!=0}">升级</a>
+              </span>
+              <span ng-if="item.status==0||item.status==4">
+                <a class="disabled">销毁</a>
+              </span>
+              <span ng-if="item.status==1">
+                <a ng-if="item.payType==1" ng-click="distory(item)">销毁</a>
+              </span>
+          </td>
+  	    </tr>
+      </tbody>
+    </table>  
+    <!-- <page-component total="mysqlTotal" change-page="changePage(obj)" step="pageStep"></page-component>   -->
+	</div>
+  <div class="animateContent {{animation}}">
+    <div class="detailInner">
+      <div class="detail-body">
+      <div class="tab-content">
+        <div class="detail-tab">
+          <div class="dt-title">
+            <a ng-hide="IsRoDetail" ng-click="goBack()">返回<i class="icon-aw-angle-left"></i></a>
+            <a ng-if="IsRoDetail" ng-click="goDetail()">返回<i class="icon-aw-angle-left"></i></a>
+            <span> {{detailData.uInstanceId}} 详情</span>
+          </div>
+          <div class="dt-box">
+            <ul class="nav nav-tabs clearfix" ta-nav tablist="listA" on-select="tabSelect(obj)" active="tabAct">
+              <!-- <li class="active"><a>实例详情</a></li>
+              <li class=""><a>实例监控</a></li>
+              <li><a>参数设置</a></li>
+              <li><a>帐号管理</a></li>
+              <li><a>只读实例</a></li> -->
+            </ul>
+            <!-- <tab-nav class="nav nav-tabs clearfix" tabList="tabs" active="tabCurrent"></tab-nav> -->  
+            <div class="dt-content">
+              <div class="tab-pane active" ng-class="{'active':tabAct==1}">
+                <div class="left-col">
+                  <div class="part">
+                    <h5 class="decr-title">基本信息</h5>
+                    <table class="table no-style decr-text">
+                      <tr>
+                        <td>
+                          <span class="decr-dt">实例名</span>
+                          <span class="text">{{detailData.cdbInstanceName}}</span>
+                          <span class="edit-status" ng-if="enabledEdit" ng-hide="IsRoDetail" ng-click="editFunc('name',detailData)">更改</span>
+                        </td>
+                        <td>
+                          <span class="decr-dt">实例ID</span>
+                          <span class="text" id="uInstanceId">{{detailData.uInstanceId}}</span>
+                          <!-- <div class="copy-box">
+                            <a copy="#uInstanceId" class="blue">复制</a>
+                          </div> -->
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span class="decr-dt">状态</span>
+                          <span ng-class="{1:'green',0:'blue',4:'orange'}[detailData.status]" ng-if="detailData.initFlag==1">{{detailData.ins_status}}</span>
+                          <span class="text" ng-if="detailData.initFlag==0">{{detailData.ins_status}}</span>
+                          <span class="edit-status" ng-if="detailData.initFlag==0" ng-click="editFunc('myinit',detailData)">初始化</span>
+                        </td>
+                        <td>
+                          <span class="decr-dt">地域</span>
+                          <span class="text">{{detailData.region_info}}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span class="decr-dt">所属网络</span>
+                          <span class="text">{{detailData.network_info}}</span>
+                        </td>
+                        <td>
+                          <span class="decr-dt">字符集</span>
+                          <span class="text">{{detailData.character}}</span>
+                          <span class="edit-status" ng-if="enabledEdit" ng-hide="IsRoDetail" ng-click="editFunc('charset',detailData)">修改</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span class="decr-dt">内网地址</span>
+                          <span class="text">{{detailData.cdbInstanceVip}}</span>
+                        </td>
+                        <td>
+                          <span class="decr-dt">端口</span>
+                          <span class="text">{{detailData.cdbInstanceVport}}</span>
+                          <span class="edit-status" ng-if="enabledEdit" ng-hide="IsRoDetail" ng-click="editFunc('port',detailData)">修改</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span class="decr-dt">外网帐号</span>
+                          <span class="text">{{detailData.wanaccount}}</span>
+                        </td>
+                        <td>
+                          <span class="decr-dt">外网地址</span>
+                          <span ng-show="cdbWanLoading"><i class="min-loading aw-spin"></i>更新中</span>
+                          <!-- <span class="edit-status" ng-hide="IsRoDetail" ng-if="!detailData.cdbWanAdress && enabledEdit && !cdbWanLoading" ng-click="editFunc('openextrance',detailData)">开启</span> -->
+                          <span class="text" ng-hide="IsRoDetail" ng-if="detailData.cdbWanStatus!=0 && !cdbWanLoading">{{detailData.cdbWanAdress}}</span>
+                          <span class="edit-status" ng-hide="IsRoDetail" ng-if="detailData.cdbWanAdress && enabledEdit && !cdbWanLoading" ng-click="editFunc('closeextrance',detailData)">关闭</span>
+                          <span class="orange" ng-if="IsRoDetail">只读实例暂不支持</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span class="decr-dt">所属项目</span>
+                          <span class="text">{{detailData.projectName}}</span>
+                        </td>
+                        <td>
+                          <div ng-if="detailData.gtid">
+                            <span class="decr-dt">GTID</span>
+                            <span>{{detailData.gtid}}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div class="part">
+                    <h5 class="decr-title">配置信息</h5>
+                    <table class="table no-style decr-text">
+                      <tr>
+                        <td>
+                          <span class="decr-dt">数据库版本</span>
+                          <span class="text">{{detailData.ins_version}}</span>
+                          </td>
+                        <td>
+                          <span class="decr-dt">实例类型</span>
+                          <span class="text">{{detailData.ins_type}}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span class="decr-dt">binlog容量</span>
+                          <span class="text">{{detailData.binlogSize}}GB</span>
+                        </td>
+                        <td>
+                          <span class="decr-dt">访问次数</span>
+                          <span class="text">{{detailData.ins_querycount}}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span class="decr-dt">已使用/总容量</span>
+                          <span class="text">{{detailData.ins_vol}}</span>
+                          <span class="edit-status" ng-if="enabledEdit" ng-hide="IsRoDetail" ng-click="upgrade(detailData)">升级</span>
+                        </td>
+                        <td>
+                          <span class="decr-dt">创建时间</span>
+                          <span class="text" ng-bind="detailData.cdbInstanceCreateTime"></span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span class="decr-dt">计费模式</span>
+                          <span class="text">{{detailData.ins_paytype}}</span>
+                        </td>
+                        <td>
+                          <span class="decr-dt" ng-hide="IsRoDetail">到期时间</span>
+                          <span class="text" ng-hide="IsRoDetail" ng-bind="detailData.cdbInstanceDeadlineTime|formatDate"></span>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div class="part" ng-if="IsRoDetail">
+                    <h5 class="decr-title">所属主实例</h5>
+                    <table class="table no-style decr-text">
+                      <tr>
+                        <td>
+                          <span class="decr-dt">实例ID</span>
+                          <span class="blue" ng-click="goDetail()">{{detailData.masterCdbInstanceId}}</span>
+                          </td>
+                        <td>
+                          <span class="decr-dt">所属地域</span>
+                          <span class="text">{{detailData.region_info}}</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane" ng-class="{'active':tabAct==2}">2</div>
+              <div class="tab-pane" ng-class="{'active':tabAct==3}">
+                <div class="table-content">
+                  <ul class="nav nav-tabs clearfix">
+                      <li ng-class="{'active':paramListTab=='param'}" ><a ng-click="paramListTab='param';choseParamList('param')">数据库参数</a></li>
+                      <li ng-class="{'active':paramListTab=='history'}"><a ng-click="paramListTab='history';choseParamList('history')">修改历史</a></li>
+                  </ul>
+                  <div class="dt-content">
+                    <div class="tab-pane" ng-class="{'active':paramListTab=='param'}">
+                      <form name="paramValueForm">
+                        <div class="table-action">
+                          <div class="btn-group" ng-hide="cfmEdit">
+                            <button class="btn btn-info" ng-click="cfmEdit=true;"><i class="icon-aw-modify"></i>修改当前值</button>
+                            <!--导入参数缺API-->
+                            <!-- <button class="btn btn-info" ng-click="importParams(detailData)"><i class="icon-aw-modify"></i>导入参数</button> -->
+                            <button class="btn btn-info" ng-click="exportParams(detailData)"><i class="icon-aw-modify"></i>导出参数</button>
+                            <button class="btn btn-info" ng-click="importFromTmpl(detailData)"><i class="icon-aw-modify"></i>从模板导入</button>
+                            <button class="btn btn-info" ng-click="saveAsTmpl(detailData)"><i class="icon-aw-modify"></i>另存为模板</button>
+                            <button class="btn btn-refresh" ng-click="refreshParamList()"><i class="icon-aw-refresh"></i>刷新</button>
+                          </div>
+                          <div class="clearfix" ng-show="cfmEdit">
+                              <button class="btn btn-info" ng-click="editParamsConfirm('all',paramValueForm)">确认修改</button>
+                              <button class="btn btn-default" ng-click="cfmEdit=false;cancelEdit();">取消</button>
+
+                          </div>
+                          <div ng-if="importAndCoverTip" style="color:red;">
+                            <i class="icon-aw-prompt"></i>从模板导入将修改{{coverValueCount}}个当前运行值
+                          </div>
+                        </div>
+                        <table class="table">
+                          <colgroup>
+                              <col width="30%">
+                              <col width="15%">
+                              <col width="15%">
+                              <col width="20%">
+                              <col width="20%">
+                          </colgroup>
+                          <thead>
+                              <tr>
+                                  <th>参数名</th>
+                                  <th>是否重启</th>
+                                  <th>参数默认值</th>
+                                  <th>参数当前值</th>
+                                  <th>参数可修改值</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                            <tr ng-repeat="item in paramList">
+                              <td>{{item.name}} <i class="icon-aw-prompt"  uib-popover={{item.desc}}  popover-trigger="mouseenter" ></i></td>
+                              <td>{{item._need_reboot}}</td>
+                              <td>{{item.default | uppercase}}</td>
+                              <td>
+                                <span class="edit-name" ng-if="!item.showEdit && !cfmEdit" >
+                                  {{item.curValue | uppercase}} <i class="icon-aw-modify blue" ng-click="item.showEdit=true;modifyParamValue('one',item)"></i>
+                                </span>
+                                <span ng-if="item.showEdit || cfmEdit">
+                                    <input type="text"  class="form-controls input-sm" ng-class="{'diff':item.diff}" name="cur_value_{{$index}}" ng-model="item.cur_value "  ng-if="item.isRange" min="item.min" max="item.max"  limitnumrange required >
+                                    <ui-select class="uisel-sm" ng-model="item.cur_value " name="cur_value_{{$index}}" ng-if="item.isEnum"  ng-class="{'diff':item.diff}">
+                                      <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                                      <ui-select-choices repeat="val in item.enum_value track by $index">
+                                        <div ng-bind-html="val | highlight: $select.search"></div>
+                                      </ui-select-choices>
+                                   </ui-select>
+                                    <span class="icon-items" ng-show="!cfmEdit && item.showEdit">
+                                      <i class="icon-aw-yes" ng-click="editParamsConfirm('one',paramValueForm,item,$index)"></i>
+                                      <i class="icon-aw-wrong" ng-click="item.showEdit=false;item.cur_value=item.curValue;"></i>
+                                    </span>
+                                    <div class="" ng-messages="paramValueForm['cur_value_'+$index].$error" ng-if="interacted(paramValueForm['cur_value_'+$index])" style="color:red;">
+                                      <div ng-message="required">*必填项</div>
+                                      <div ng-message="limitnumrange">*请输入{{item.min}}~{{item.max}}的值</div>
+                                    </div>
+                                  </span>
+                              </td>
+                              <td>
+                                <span class="ycx" ng-if="item.enum_value.length<=3">{{item.rangeValue}}</span>
+                                <span class="ycx" ng-if="item.enum_value.length>3" uib-popover={{item.rangeValue}}  popover-trigger="mouseenter" >{{item.rangeValue}}</span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </form>
+                    </div>
+                    <div class="tab-pane" ng-class="{'active':paramListTab=='history'}">
+                      <table ng-table="paramModifyHistoryTable" class="table " show-filter="false">
+                        <colgroup>
+                            <col width="30%">
+                            <col width="15%">
+                            <col width="15%">
+                            <col width="15%">
+                            <col width="25%">
+                        </colgroup>
+                        <tr ng-repeat="item in $data">
+                          <td data-title="'参数名称'" sortable="'paramName'">{{item.paramName}} </td>
+                          <td data-title="'修改前参数值'" sortable="'oldValue'">{{item.oldValue}}</td>
+                          <td data-title="'修改后参数值'" sortable="'newValue'">{{item.newValue}}</td>
+                          <td data-title="'修改状态'" sortable="'isSucess'">{{item.isSucess==1?"成功":"失败"}}</td>
+                          <td data-title="'修改时间'" sortable="'modifyTime'">{{item.modifyTime}}</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane" ng-class="{'active':tabAct==4}">
+                <div class="table-action">
+                  <button class="btn btn-primary" ng-click="createAccount()" ng-disabled="detailData.initFlag==0"><i class="icon-aw-add-to2"></i>新建账号</button>
+                  <span ng-if="detailData.initFlag==0" class="table-action-tips">请先初始化密码</span>
+                </div>
+                <div class="table-content no-scroll">
+                  <table class="table" ng-table="tableparam" show-filter="false">
+                    <colgroup>
+                      <col width="10%">
+                      <col width="10%">
+                      <col width="15%">
+                      <col width="15%">
+                      <col width="30%">
+                      <col width="15%">
+                    </colgroup>
+                    <tbody>
+                      <tr ng-repeat="item in $data">
+                        <td data-title="'帐号名'" sortable="'user'">{{item.user}}</td>
+                        <td data-title="'主机'" sortable="'host'">{{item.host}}</td>
+                        <td data-title="'创建时间'" sortable="'create_time'">{{item.create_time?item.create_time:"--"}}</td>
+                        <td data-title="'更新时间'">{{item.modify_time?item.modify_time:"--"}}</td>
+                        <td data-title="'备注'">{{item.remarks?item.remarks:"--"}}</td>
+                        <td data-title="'操作'">
+                          <div class="btn-items">
+                            <a class="blue" ng-click="editPermit(item)" ng-if="!(item.host=='%'&&item.user=='root')">修改权限</a>
+                            <a class="blue" ng-click="editFunc('myinit',detailData)" ng-if="detailData.initFlag==0">初始化密码</a>
+                            <a class="blue" ng-click="createAccount(item)" ng-if="!(item.host=='%'&&item.user=='root')">克隆帐号</a>
+                            <a ng-click="editPassWord(item)" ng-if="item.host=='%'&&item.user=='root'&&detailData.initFlag!=0">重置密码</a>
+                            <div ng-if="!(item.host=='%'&&item.user=='root')" class="dropdown min-dropdown">
+                              <a href="" data-toggle="dropdown">更多<i class="icon-aw-angle-down"></i></a>
+                              <ul class="dropdown-menu">
+                                <li><a ng-click="editPassWord(item)">重置密码</a> </li>
+                                <li><a ng-click="delAccount(item)">删除帐号</a> </li>
+                                <li><a ng-click="editRemarks(item)">修改备注</a> </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="tab-pane" ng-class="{'active':tabAct==5}">
+                <div class="table-action">
+                  <button class="btn btn-primary" ng-disabled="noCreateOnly||!enabledEdit||upReadOnly" ng-click="createReadInstan()"><i class="icon-aw-add-to2"></i>新建</button>
+                  <span ng-if="noCreateOnly" class="table-action-tips">最多能创建3个RO组</span>
+                  <span ng-if="upReadOnly" class="table-action-tips">目前仅支持高IO版4000MB内存、100GB容量及以上规格实例开通只读实例，请先升级主实例版本</span>
+                </div>
+                <div class="table-content">
+                  <table class="table">
+                  <tr>
+                    <th>实例名/RO组</th>
+                    <th>状态</th>
+                    <th>配置</th>
+                    <th>内网地址</th>
+                    <th>计费模式</th>
+                    <th>到期时间</th>
+                    <th>操作</th>
+                  </tr>
+                  <tr ng-repeat="item in readOnlyList">
+                    <td>
+                      <div class="edit-name">
+                        <a ng-if="item.status!=1" class="disabled">{{item.roList[0].uInstanceId}}</a>
+                        <a ng-if="item.status==1" ng-click="roDetail(item.roList[0])">{{item.roList[0].uInstanceId}}</a>
+                        <span>{{item.roList[0].cdbInstanceName}}</span>     
+                      </div>
+                    </td>
+                    <td>
+                      <i class="icon-aw-refresh aw-spin green" ng-if="item.roList[0].status!=1"></i>
+                      <span ng-class="{1:'green',0:'blue',4:'orange'}[item.roList[0].status]" ng-bind="item.roList[0].ins_status"></span>
+                    </td>
+                    <td>
+                      <span>{{item.roList[0].typeName+" - 内存"+item.roList[0].cdbMem+"MB, 硬盘"+item.roList[0].cdbVolume+"GB, "+item.roList[0].cdbQps+"次/秒 MySQL"+item.roList[0].cdbVersion}}</span>
+                    </td>
+                    <td>
+                      <span ng-bind="item.address"></span>
+                    </td>
+                    <td>
+                      <span ng-bind="item.roList[0].ins_paytype"></span>
+                    </td>
+                    <td>
+                      --
+                    </td>
+                    <td>
+                      <a ng-if="item.status!=1" class="disabled">升级</a>
+                      <a ng-if="item.status!=1" class="disabled">销毁</a>
+                      <span class="blue" ng-if="item.status==1" ng-click="updateReadInstan(item)">升级</span>
+                      <span class="blue" ng-if="item.status==1" ng-click="ReadDel(item.roList[0])">销毁</span>
+                    </td>
+                  </tr>
+                  </table>
+                  <!-- <ul>
+                    <li ng-repeat="item in readOnlyList" class="read-item" ng-class="{'last':$last}">
+                      <div>
+                        <table class="table">
+                          <colgroup>
+                            <col width="20%">
+                            <col width="18%">
+                            <col width="50%">
+                            <col width="12%">
+                          </colgroup>
+                          <tr>
+                            <th>
+                              RO组{{item.groupName}}
+                            </th>
+                            <th>
+                              地址{{item.address}}
+                            </th>
+                            <th>
+                              所属网络{{item.network_info}}
+                            </th>
+                            <th>
+                              <span class="blue" ng-click="updateReadInstan(item)">升级</span>
+                            </th>
+                          </tr>
+                        </table>
+                      </div>
+                      <div class="" ng-repeat="list in item.roList">
+                        <table class="table last">
+                          <colgroup>
+                            <col width="20%">
+                            <col width="18%">
+                            <col width="25%">
+                            <col width="25%">
+                            <col width="12%">
+                          </colgroup>
+                          <tr>
+                            <td>
+                              {{list.uInstanceId}}
+                              {{list.cdbInstanceName}}
+                            </td>
+                            <td>
+                              {{list.ins_status}}
+                            </td>
+                            <td>
+                              计费模式{{list.ins_paytype}}
+                            </td>
+                            <td>
+                              到期时间--
+                            </td>
+                            <td>
+                              <span class="blue" ng-click="roDetail(list)">管理</span>
+                              <span class="blue" ng-click="ReadDel(list)">销毁</span>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </li>
+                  </ul> -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+<div class="loading" ng-class="{'in':loading}">
+  <div class="loading-backdrop"></div>
+  <span class="loading-icon aw-spin"><i></i></span>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="editPrivile.html">
+  <div class="modal-common">
+    <form name="editPrivile">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">设置权限</h3>
+      </div>
+      <div class="modal-body">
+        <div class="PrivieList"></div>
+        <div class="privie-list">
+          <div class="left-c">
+            <ul class="level-one">
+              <li class="first" ng-class="{'active':firstCur==true}"><a ng-click="getGlobalPriv()">全局特权</a></li>
+              <li>
+                <a ng-click="privToggle()"><i ng-class="{true:'icon-aw-angle-up',false:'icon-aw-angle-down'}[curoLev]"></i><span>对象级特权</span></a>
+                <ul class="level-two" ng-show="curoLev">
+                  <li ng-repeat="(db,tab) in databaseList">
+                    <a ng-click="databasePrivieList(db)" ng-class="{'active':actDb==db}">
+                      <i ng-class="{true:'icon-aw-angle-up',false:'icon-aw-angle-down'}[curdLev&&(actDb==db)]"></i>
+                      <span ng-bind="db"></span>
+                    </a>
+                    <ul class="level-three" ng-if="tab" ng-show="actDb==db&&curdLev">
+                      <li ng-repeat="(table,col) in tab">
+                        <a ng-click="databaseTable(db,table)" ng-class="{'active':actTb==table}">
+                          <i ng-class="{true:'icon-aw-angle-up',false:'icon-aw-angle-down'}[curtLev&&(actTb==table)]"></i>
+                          <span ng-bind="table"></span>
+                        </a>
+                        <ul class="level-four" ng-if="col" ng-show="actTb==table&&curtLev">
+                          <li ng-repeat="item in col">
+                            <a href="" ng-bind="item" ng-class="{'active':actCol==item}" ng-click="databaseCol(db,table,item)"></a>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div class="right-c">
+            <ul class="checkbox-item" ng-if="curPriv=='global_support_priv'" ng-class="{'show':curPriv=='global_support_priv'}">
+              <li ng-repeat="item in PrivieList">
+                <label class="checkbox">
+                  <input type="checkbox" ng-model="AllPrivieList.global[item]" ng-true-value="1" ng-false-value="0" name="privilege" />
+                  <i class="iconfont"></i>
+                  <span ng-bind="item"></span>
+                </label>
+              </li>
+            </ul>
+            <ul class="checkbox-item" ng-if="curPriv=='db_support_priv'" ng-class="{'show':curPriv=='db_support_priv'}">
+              <li ng-repeat="item in PrivieList">
+                <label class="checkbox">
+                  <input type="checkbox" ng-model="AllPrivieList.db_priv[curDb][item]" ng-true-value="1" ng-false-value="0" name="privilege" />
+                  <i class="iconfont"></i>
+                  <span ng-bind="item"></span>
+                </label>
+              </li>
+            </ul>
+            <ul class="checkbox-item" ng-if="curPriv=='tb_support_priv'" ng-class="{'show':curPriv=='tb_support_priv'}">
+              <li ng-repeat="item in PrivieList">
+                <label class="checkbox">
+                  <input type="checkbox" ng-model="AllPrivieList.tb_priv[curDb][curTb][item]" ng-true-value="1" ng-false-value="0" name="privilege" />
+                  <i class="iconfont"></i>
+                  <span ng-bind="item"></span>
+                </label>
+              </li>
+            </ul>
+            <ul class="checkbox-item" ng-if="curPriv=='col_support_priv'" ng-class="{'show':curPriv=='col_support_priv'}">
+              <li ng-repeat="item in PrivieList">
+                <label class="checkbox">
+                  <input type="checkbox" ng-model="AllPrivieList.col_priv[curDb][curTb][curCol][item]" ng-true-value="1" ng-false-value="0" name="privilege" />
+                  <i class="iconfont"></i>
+                  <span ng-bind="item"></span>
+                </label>
+              </li>
+            </ul>
+          </div>
+          <div class="clear"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="subDisabled" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="name.html">
+  <div class="modal-common">
+    <form name="updateName">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">修改实例名</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">实例名称</label>
+          <div class="controls">
+            <input type="text" name="name" instan-name class="form-control" ng-model="req.cdbInstanceName" ng-maxlength="60" required/>
+            <div class="error" ng-messages="(submitalid || updateName.name.$dirty) && updateName.name.$error">
+              <form-validate max-num="60"></form-validate>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="subDisabled" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="createReadInstan.html">
+  <div class="modal-common">
+    <form name="createReadInstan">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">新建只读实例</h3>
+      </div>
+      <div class="modal-body">
+        <!-- <div class="control-group">
+          <label class="control-label">计费模式</label>
+          <div class="controls">
+            <span>{{"CN.mysql.payType."+instan.payType|translate}}</span>
+          </div>
+        </div> -->
+        <div class="control-group">
+          <label class="control-label">配置类型</label>
+          <div class="controls">
+            <span>高IO版</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">数据库版本</label>
+          <div class="controls">
+            <span>{{instan.ins_version}}</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">所属网络</label>
+          <div class="controls">
+            <span>{{instan.network_info}}</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">实例规格</label>
+          <div class="controls">
+            <ui-select ng-model="memory.selected" ng-change="selMem(memory.selected)" name="memory" required>
+              <ui-select-match>{{$select.selected.memory+"MB"}}</ui-select-match>
+              <ui-select-choices  repeat="item in proList | filter: {memory : $select.search} ">
+                <div ng-bind-html="item.memory+'MB' | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">硬盘</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+            <input type="text" ng-model="slider.value" min="slider.options.floor" max="slider.options.ceil"  step="slider.options.step" num-range required/>
+            <span class="unit">GB</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">购买数量</label>
+          <div class="controls">
+            <div class="count-box" count="goodsNum" count-box count-min="1" count-max="1">
+                <span class="minus">-</span>
+                <input type="text" name="goodsNum" ng-model="goodsNum" class="button-num" required />
+                <span class="add" ng-click="addnum()">+</span>
+              </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">配置费用</label>
+          <div class="controls">
+            <span ng-if="priceIng" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+            <div class="price-tips" ng-class="{'in':!priceIng}">
+              <span class="unit-box">{{price}}<span class="unit-txt">元/时/台</span></span><span>提示只读实例会随主实例释放而释放</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="subMt||createReadInstan.$invalid" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="updateReadInstan.html">
+  <div class="modal-common">
+    <form name="updateReadonlyform">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">RO组升级</h3>
+      </div>
+      <div class="modal-body">
+        <!-- <div class="control-group">
+          <label class="control-label">RO组名称</label>
+          <div class="controls">
+            <span>{{instan.groupName}}</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">包含只读实例</label>
+          <div class="controls">
+            <table class="table">
+              <tr>
+                <td>实例名</td>
+                <td>属性</td>
+                <td>实例ID</td>
+              </tr>
+              <tr ng-repeat="item in instan.roList">
+                <td>{{item.cdbInstanceName}}</td>
+                <td>只读实例</td>
+                <td>{{item.uInstanceId}}</td>
+              </tr>
+            </table>
+          </div>
+        </div> -->
+        <div class="control-group">
+          <label class="control-label">实例名称</label>
+          <div class="controls">
+            <span>{{instan.roList[0].cdbInstanceName}}</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">所属网络</label>
+          <div class="controls">
+            <span>{{instan.network_info}}</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">当前规格</label>
+          <div class="controls">
+            <span>{{instan.roList[0].typeName+" - 内存"+instan.roList[0].cdbMem+"MB, 硬盘"+instan.roList[0].cdbVolume+"GB, "+instan.roList[0].cdbQps+"次/秒 MySQL"+instan.roList[0].cdbVersion}}</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">实例规格</label>
+          <div class="controls">
+            <ui-select ng-model="memory.selected" ng-change="selMem(memory.selected)" name="memory">
+              <ui-select-match>{{$select.selected.memory+"MB"}}</ui-select-match>
+              <ui-select-choices  repeat="item in proList | filter: {memory : $select.search} ">
+                <div ng-bind-html="item.memory+'MB' | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">访问次数</label>
+          <div class="controls">
+            <span>{{memory.selected.qps+"次/秒"}}<em>（切换为其他实例规格最高可大37000次/秒）</em></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">硬盘</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+            <input type="text" ng-model="slider.value" max="slider.options.ceil" min="slider.options.floor" step="slider.options.step" ng-blur="delayCheck=true" ng-focus="delayCheck=false" num-range/>
+            <span class="unit">GB</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">配置费用</label>
+          <div class="controls">
+            <div class="price-tips in" ng-if="noGetPrice">
+              <span class="unit-box">0.00<span class="unit-txt">元<span ng-if="curData.payType==1">/时/台</span></span></span>
+            </div>
+            <span ng-if="priceIng&&!noGetPrice" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+            <div class="price-tips" ng-class="{'in':!priceIng&&!noGetPrice}">
+              <span class="unit-box">{{price}}<span class="unit-txt">元<span ng-if="curData.payType==1">/时/台</span></span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="canCheck || noGetPrice || subMt" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="createuser.html">
+  <div class="modal-common">
+    <form name="createuser" novalidate>
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">创建帐号</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>帐号名</label>
+          <div class="controls">
+            <input type="text" name="user" class="form-control" reg-user-name placeholder="由字母，数字、下划线组成、字母开头，字母或数字结尾" ng-minlength="8" ng-maxlength="16" ng-model="req.user" required/>
+            <div class="error" ng-messages="(submitalid || createuser.user.$dirty) && createuser.user.$error">
+              <form-validate max-num="16" min-num="8"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>主机名</label>
+          <div class="controls">
+            <input type="text" name="host" class="form-control" placeholder="IP形式，支持填入%，127.0.0.1；英文单词，如 localhost" reg-num-let ng-maxlength="32" ng-model="req.host" required/>
+            <div class="error" ng-messages="(submitalid || createuser.host.$dirty) && createuser.host.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>设置密码</label>
+          <div class="controls">
+            <input type="password" name="password" id="password" placeholder="至少包含字母、数字和字符（_+-&=!@#$%^*()）中的两种" class="form-control" ng-minlength="8" ng-maxlength="16" regpass ng-model="req.password" required/>
+            <div class="error" ng-messages="(submitalid || createuser.password.$dirty) && createuser.password.$error">
+                <form-validate max-num="16" min-num="8"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>确认密码</label>
+          <div class="controls">
+            <input type="password" name="repassword" placeholder="请再次输入密码" class="form-control" ng-model="repassword" pw-check="password" required/>
+            <div class="error" ng-messages="(submitalid || createuser.repassword.$dirty) && createuser.repassword.$error">
+              <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">备注</label>
+          <div class="controls">
+            <textarea class="form-control" name="decr" ng-model="req.remarks" ng-maxlength="255">
+            </textarea>
+            <div class="error" ng-messages="(submitalid || createuser.decr.$dirty) && createuser.decr.$error">
+              <form-validate max-num="255"></form-validate> 
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="subDisabled || createuser.$invalid" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="editpassword.html">
+  <div class="modal-common">
+    <form name="editpassword">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">重置密码</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">帐号名</label>
+          <div class="controls">{{req.user}}</div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">主机名</label>
+          <div class="controls">{{req.host}}</div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>新密码</label>
+          <div class="controls">
+            <input type="password" name="password" id="password" placeholder="至少包含字母、数字和字符（_+-&=!@#$%^*()）中的两种" class="form-control" ng-minlength="8" ng-maxlength="16" regpass ng-model="req.password" required/>
+            <div class="error" ng-messages="(submitalid || editpassword.password.$dirty) && editpassword.password.$error">
+                <form-validate max-num="16" min-num="8"></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>确认密码</label>
+          <div class="controls">
+            <input type="password" name="repassword" class="form-control" placeholder="请再次输入密码" ng-model="repassword" pw-check="password" required/>
+            <div class="error" ng-messages="(submitalid || editpassword.repassword.$dirty) && editpassword.repassword.$error">
+                <form-validate></form-validate>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="editpassword.$invalid" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="deluser.html">
+  <div class="modal-common">
+    <form name="deluser">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">删除帐号</h3>
+      </div>
+      <div class="modal-body">
+        <uib-alert type="warning" class="alert-tip">
+          确认删除帐号！
+        </uib-alert>
+        <div class="control-group">
+          <label class="control-label">帐号名</label>
+          <div class="controls">{{req.user}}</div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">主机名</label>
+          <div class="controls">{{req.host}}</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="deluser.$pristine && deluser.$invalid" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="editremarks.html">
+  <div class="modal-common">
+    <form name="editremarks">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">修改备注</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">备注信息</label>
+          <div class="controls">
+            <textarea class="form-controls" name="remarks" ng-model="req.remarks" maxlength="255" required /></textarea>
+            <span class="tips">最多255个字符</span>
+            <form-validate class="error" ng-messages="editremarks.remarks.$dirty && editremarks.remarks.$error"></form-validate>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="editremarks.$pristine && editremarks.$invalid" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="port.html">
+  <div class="modal-common">
+    <form name="updatePort">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">修改端口号</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">端口</label>
+          <div class="controls">
+            <input type="text" min="portRange.min" max="portRange.max" limitnumrange placeholder="1024-65535" name="port" class="form-control" ng-model="req.port" required/>
+            <div class="error" ng-messages="(submitalid || updatePort.port.$dirty) && updatePort.port.$error">
+              <form-validate rangemax="portRange.max" rangemin="portRange.min"></form-validate>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="updatePort.$invalid" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="openextrance.html">
+  <div class="modal-common">
+    <form name="openNet">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">开启外网</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">访问帐号</label>
+          <div class="controls">
+            <span>cdb_outerroot</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>新密码</label>
+          <div class="controls">
+              <input type="password" placeholder="至少包含字母、数字和字符（_+-&=!@#$%^*()）中的两种,且长度为8-16个字符" ng-minlength="8" ng-maxlength="16" name="password" class="form-control" id="password"  ng-model="req.password" regpass required/>
+              <div class="error" ng-messages="(submitalid || openNet.password.$dirty) && openNet.password.$error">
+                <form-validate max-num="16" min-num="8"></form-validate>
+              </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>确认密码</label>
+          <div class="controls">
+              <input type="password" placeholder="请再次输入密码" name="repassword" class="form-control" ng-model="repassword" required pw-check="password"/>
+              <div class="error" ng-messages="(submitalid || openNet.repassword.$dirty) && openNet.repassword.$error">
+                <form-validate></form-validate>
+              </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="subDisabled" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="closeextrance.html">
+  <div class="modal-common">
+    <form name="closeNet">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">关闭外网</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">访问帐号</label>
+          <div class="controls">
+            <span>cdb_outerroot</span>
+          </div>
+        </div>
+        <!-- <div class="control-group">
+          <label class="control-label"><span class="red">*</span>输入密码</label>
+          <div class="controls">
+              <input type="password" placeholder="至少包含字母、数字和字符（_+-&=!@#$%^*()）中的两种,且长度为8-16个字符" ng-minlength="8" ng-maxlength="16" name="password" class="form-control" id="password"  ng-model="req.password" regpass required/>
+              <div class="error" ng-messages="(submitalid || closeNet.password.$dirty) && closeNet.password.$error">
+                <form-validate max-num="16" min-num="8"></form-validate>
+              </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>确认密码</label>
+          <div class="controls">
+              <input type="password" name="repassword" placeholder="请再次输入密码" class="form-control" ng-model="repassword" required pw-check="password"/>
+              <div class="error" ng-messages="(submitalid || closeNet.repassword.$dirty) && closeNet.repassword.$error">
+                <form-validate></form-validate>
+              </div>
+          </div>
+        </div> -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="subDisabled" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="charset.html">
+  <div class="modal-common">
+    <form name="updateCharset">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">修改字符集</h3>
+      </div>
+      <div class="modal-body">
+        <uib-alert type="warning" class="alert-tip">
+          修改字符集将需要重启实例，预计耗时50秒。重启期间不能对该实例进行修改。
+完成修改后将为您跳转到任务列表页查看任务详情
+        </uib-alert>
+        <div class="control-group">
+          <label class="control-label">支持字符集</label>
+          <div class="controls">
+            <div class="radio-item clearFix">
+                <label class="radio"><input type="radio" ng-model="req.charset" value="LATIN1" name="character"/><i class="iconfont"></i>LATIN1</label>
+                <label class="radio"><input type="radio" ng-model="req.charset" value="UTF8" name="character"/><i class="iconfont"></i>UTF8</label>
+                <label class="radio"><input type="radio" ng-model="req.charset" value="GBK" name="character"/><i class="iconfont"></i>GBK</label>
+                <label class="radio"><input type="radio" ng-model="req.charset" value="UTF8MB4" name="character"/><i class="iconfont"></i>UTF8MB4</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="subDisabled" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="myinit.html">
+  <div class="modal-common">
+    <form name="myinit" novalidate>
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">初始化</h3>
+      </div>
+      <div class="modal-body">
+      <uib-alert type="warning" class="alert-tip">
+          初始化操作会重启实例，本次操作大概耗时50秒。可到任务列表页查看进度。
+        </uib-alert>
+        <div class="control-group">
+          <label class="control-label">支持字符集</label>
+          <div class="controls">
+            <div class="radio-item clearFix">
+                <label class="radio"><input type="radio" ng-model="req.charset" value="LATIN1" name="character"/><i class="iconfont"></i>LATIN1</label>
+                <label class="radio"><input type="radio" ng-model="req.charset" value="UTF8" name="character"/><i class="iconfont"></i>UTF8</label>
+                <label class="radio"><input type="radio" ng-model="req.charset" value="GBK" name="character"/><i class="iconfont"></i>GBK</label>
+                <label class="radio"><input type="radio" ng-model="req.charset" value="UTF8MB4" name="character"/><i class="iconfont"></i>UTF8MB4</label>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">表名大小写敏感</label>
+          <div class="controls">
+            <div class="checkbox switch-btn">
+              <label>
+                <input type="checkbox" class="form-controls" ng-model="req.lowerCaseTableNames">
+                <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>自定义端口</label>
+          <div class="controls">
+              <input type="text" class="form-control" placeholder="1024~65535" name="port" ng-model="req.port" min="portRange.min" max="portRange.max" required limitnumrange/>
+              <div class="error" ng-messages="(submitalid || myinit.port.$dirty) && myinit.port.$error">
+                <form-validate rangemin="portRange.min" rangemax="portRange.max"></form-validate>
+              </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>root帐号密码</label>
+          <div class="controls">
+              <input type="password" placeholder="至少包含字母、数字和字符（_+-&=!@#$%^*()）中的两种,且长度为8-16个字符" ng-minlength="8" ng-maxlength="16" name="password" class="form-control" id="password"  ng-model="req.password" regpass required/>
+              <div class="error" ng-messages="(submitalid || myinit.password.$dirty) && myinit.password.$error">
+                <form-validate max-num="16" min-num="8"></form-validate>
+              </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><span class="red">*</span>确认密码</label>
+          <div class="controls">
+              <input type="password" placeholder="请再次输入密码" name="repassword" ng-minlength="8" ng-maxlength="16"  class="form-control" ng-model="repassword" required pw-check="password"/>
+              <div class="error" ng-messages="(submitalid || myinit.repassword.$dirty) && myinit.repassword.$error">
+                <form-validate></form-validate>
+              </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="subDisabled||myinit.$invalid" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="upgrade.html">
+  <div class="modal-common">
+    <form name="upgradeMysql">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">常规实例升级</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">实例名称</label>
+          <div class="controls">
+            <span>{{curData.cdbInstanceName}}</span>
+          </div>
+        </div>
+        <div class="control-group" ng-if="curData.payType==0">
+          <label class="control-label">到期时间</label>
+          <div class="controls">
+            <span>{{curData.cdbInstanceDeadlineTime | formatDate}}</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">所属网络</label>
+          <div class="controls">
+            <span>{{curData.networkName?curData.networkName:curData.network_info}}</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">当前规格</label>
+          <div class="controls">
+            <span>{{"内存"+curData.memory+", 硬盘"+curData.volume+"GB, "+curData.maxQueryCount+"次/秒 MySQL"+curData.engineVersion}}</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">实例规格</label>
+          <div class="controls">
+            <ui-select ng-model="memory.selected" ng-change="selMem(memory.selected)" name="memory" required>
+              <ui-select-match>{{"内存"+$select.selected.memory+"MB"}}</ui-select-match>
+              <ui-select-choices  repeat="item in Types | filter: {memory : $select.search}">
+                <div ng-bind-html="item.memory | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <!-- <div class="control-group">
+          <label class="control-label">数据库版本</label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button ng-class="{'active':curMysql==item}" ng-click="selMysql(item)" ng-repeat="item in curTypes.mysqlversion">MySQL{{item}}</button>
+            </div>
+          </div>
+        </div> -->
+        <div class="control-group">
+          <label class="control-label">访问次数</label>
+          <div class="controls">
+            <span>{{curTypes.qps+"次/秒"}}（切换为其他实例规格最高可大37000次/秒）</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">硬盘</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+            <input type="text" ng-model="slider.value" max="slider.options.ceil" min="slider.options.floor" step="slider.options.step" ng-blur="delayCheck=true" ng-focus="delayCheck=false" num-range required />
+            <span class="unit">GB</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">数据复制方式</label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button class="active" title="仅MySQL5.6支持半同步和强同步复制.">异步复制</button>
+            </div>
+            <span class="tips">一主一备组成集群，数据采用异步复制模式。</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">总计费用</label>
+          <div class="controls">
+            <div class="price-tips in" ng-if="noGetPrice">
+              <span class="unit-box">0.00<span class="unit-txt">元<span ng-if="curData.payType==1">/时/台</span></span></span>
+            </div>
+            <span ng-if="priceIng&&!noGetPrice" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+            <div class="price-tips" ng-class="{'in':!priceIng&&!noGetPrice}">
+              <span class="unit-box">{{price}}<span class="unit-txt">元<span ng-if="curData.payType==1">/时/台</span></span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-disabled="!canCheck||noGetPrice||subMt||upgradeMysql.$invalid" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="createMysql.html">
+    <div class="modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+        <h3 class="modal-title">新建云数据库MySQL</h3>
+      </div>
+      <div class="modal-body ">
+        <form name="newMysql">
+          <div class="control-group">
+            <label class="control-label">计费模式</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button ng-class="{'active':curPay==item.value}" ng-click="selPayType(item)" ng-repeat="item in payType">{{item.text}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">地域</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button ng-class="{'active':item.region==regionCur}" ng-click="selReg(item)" ng-repeat="item in regionList">{{"CN.region."+item.region|translate}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">可用区</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button ng-class="{'active':key==curZoneId}" ng-click="selZone(key,val)" ng-repeat="(key,val) in shopconfigs.goodsDescription">{{"CN.mysql.zoneId."+key|translate}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">网络</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button ng-class="{'active':curNetC=='base'}" ng-click="curNetC='base'">基础网络</button>
+                <button ng-if="isSupportVpc" ng-class="{'active':curNetC=='perNet'}" ng-click="chooseNetwork()">私有网络</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" ng-if="curNetC=='perNet'">
+            <label class="control-label">&nbsp;</label>
+            <div class="controls">
+              <div>
+                <ui-select class="uisel-sm" ng-model="network.select" ng-change="selNetwork(network.select)" name="network" ng-disabled="!networkList">
+                  <ui-select-match>{{$select.selected.vpcName}}</ui-select-match>
+                  <ui-select-choices  repeat="item in networkList | filter: {vpcName : $select.search} ">
+                    <div ng-bind-html="item.vpcName | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+
+                <ui-select class="uisel-sm" ng-model="subnet.select" name="subnet" required ng-disabled="!subNetList">
+                  <ui-select-match>{{$select.selected.subnetName}}</ui-select-match>
+                  <ui-select-choices  repeat="item in subNetList | filter: {subnetName : $select.search} ">
+                    <div ng-bind-html="item.subnetName | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+                <button class="btn btn-refresh" ng-click="refreshNet()"><i class="icon-aw-repeat green"></i>刷新</button>
+              </div>
+              <span class="tips">可用区内无有效子网，请更换可用区或新建子网</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">配置类型</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button class="active">{{curTypes.typeName}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">数据库版本</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button ng-class="{'active':curMysql==item}" ng-click="selMysql(item)" ng-repeat="item in curTypes.mysqlversion">MySQL{{item}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">实例规格</label>
+            <div class="controls">
+              <ui-select ng-model="memory.selected" ng-change="selMem(memory.selected)" name="memory">
+                <ui-select-match>{{$select.selected.memory+"MB"}}</ui-select-match>
+                <ui-select-choices  repeat="item in Types | filter: {memory : $select.search} ">
+                  <div ng-bind-html="item.memory | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">硬盘</label>
+            <div class="controls rzslider-box">
+              <rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+              <input type="text" ng-model="slider.value" max="slider.options.floor" min="slider.options.ceil"/>
+              <span class="unit">GB</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">数据复制方式</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button class="active" title="仅MySQL5.6支持半同步和强同步复制.">异步复制</button>
+              </div>
+              <span class="tips">一主一备组成集群，数据采用异步复制模式。</span>
+            </div>
+          </div>
+          <!-- <div class="control-group">
+            <label class="control-label">指定项目</label>
+            <div class="controls">
+              <ui-select ng-model="project.selected" ng-change="selectedProject(project.selected)" name="project" title="项目切换">
+                <ui-select-match placeholder="项目切换">{{$select.selected.projectName}}</ui-select-match>
+                <ui-select-choices repeat="item in projectList | filter:{projectName:$select.search}">
+                  <div ng-bind-html="item.projectName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div> -->
+          <div class="control-group">
+            <label class="control-label">购买数量</label>
+            <div class="controls">
+              <div class="count-box">
+                <span class="minus" ng-click="reducenum()">-</span>
+                <input type="text" name="" ng-model="goodsNum" class="button-num" min="1" max="10" required limitnumrange/>
+                <span ng-disabled="!canAdd()" class="add" ng-click="addnum()">+</span>
+              </div>
+              
+            </div>
+          </div>
+          <div class="control-group" ng-show="curPay=='prePay'">
+            <label class="control-label">购买时长</label>
+            <div class="controls">
+              <div class="btn-item-group">
+                <button ng-class="{'active':item.value==curPeri}" ng-click="selPeri(item)" ng-repeat="item in periodList">{{item.text}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">总计费用</label>
+            <div class="controls">
+              <span class="unit-box">{{price}}<span class="unit-txt">元</span></span>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </div>
+</script>
+<script type="text/ng-template" id="renew.html">
+  <div class="modal-common">
+    <form name="renewRedisForm">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">续费</h3>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label class="control-label">续费时常</label>
+          <div class="controls">
+            <ui-select class="uisel-sm" ng-model="crsPriceUnit.selected" ng-change="changeUnit(crsPriceUnit.selected.name)" title="单位切换">
+              <ui-select-match placeholder="单位切换">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="item in crsPriceUnit | filter:{name:$select.search}">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+
+            <ui-select class="uisel-sm" ng-model="crsPriceTime.selected" ng-change="changeTime(crsPriceTime.selected.time)" title="时常切换">
+              <ui-select-match placeholder="时常切换">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="item in crsPriceTime | filter:{name:$select.search}">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">总费用</label>
+          <div class="controls">
+            <span class="unit-box">{{total.price / 100}}<span class="unit-txt">元</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="confirm()">确定</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </form>
+  </div>
+</script>
+<script type="text/ng-template" id="autoRenew.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">设为自动续费</h3>
+    </div>
+    <div class="modal-body">
+      <uib-alert type="info" class="alert-tip">
+        下列设备（共{{val.length}}项）到期后将按月自动续费，请您确保设备到期时账户余额充足
+      </uib-alert>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>自动续费项目</th>
+            <th>到期时间</th>
+            <th>续费后到期时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in val">
+            <td>
+                实例名称{{item.cdbInstanceName}} <br>
+                实例ID{{item.uInstanceId}}
+            </td>
+            <td>{{item.cdbInstanceDeadlineTime | formatDate}}</td>
+            <td><span class="orange">{{item.lastTime}}</span></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="text-right" colspan="3">预计总计费<strong class="orange">{{totalUnitPrice}}.00</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirm('ok')">确定</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="cancelRenew.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">取消自动续费</h3>
+    </div>
+    <div class="modal-body">
+      <uib-alert type="warning" class="alert-tip">
+        确定取消所选实例的自动续费吗？
+      </uib-alert>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirm('cancel')">确定</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="editParams.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">修改参数设置</h3>
+    </div>
+    <div class="modal-body">
+      <uib-alert type="warning" class="alert-tip">
+        确定修改当前的参数设置吗？
+      </uib-alert>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="confirm()">确定</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="saveAsTmplModal.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">另存为参数模板</h3>
+    </div>
+    <div class="modal-body">
+      <form name="saveAsTmplModalForm" novalidate>
+        <div class="control-group">
+          <label class="control-label">模板名称</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="tmplName" ng-model="saveAsTmplForm.name" placeholder="请输入模板名称" ng-maxlength="60" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" required repeat-name />
+            <div class="error" ng-messages='saveAsTmplModalForm.tmplName.$error' ng-if="interacted(saveAsTmplModalForm.tmplName)">
+              <div ng-message="required">*必填项</div>
+              <div ng-message="maxlength">请至多输入60个字符</div>
+              <div ng-message="repeatName">模板名称已存在，请重新输入</div>
+              <div ng-message="pattern">只能输入字母、数字、汉字、横线以及下划线</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">模板描述</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="tmplDes" ng-model="paramTmplForm.desc" placeholder="请输入模板描述" ng-maxlength="80"  />
+            <div class="error" ng-messages='saveAsTmplModalForm.tmplDes.$error' ng-if="interacted(saveAsTmplModalForm.tmplDes)">
+              <div ng-message="maxlength">请至多输入80个字符</div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="saveAsTmplComfirm(saveAsTmplModalForm,saveAsTmplForm)">创建</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="importFromTmplModal.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">从参数模板导入</h3>
+    </div>
+    <div class="modal-body">
+      <uib-alert type="warning" class="alert-tip">
+        当前实例版本为MySQL{{detailData.engineVersion}}，只能选择版本为MySQL{{detailData.engineVersion}}的参数模板
+      </uib-alert>
+      <form name="importFromTmplModalForm" novalidate>
+        <div class="control-group">
+          <label class="control-label">选择参数模板</label>
+          <div class="controls">
+            <ui-select ng-model="importFromTmplForm.templateId" title='请选择参数模板' >
+                <ui-select-match title="{{$select.selected.name}}">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="tmpl.templateId as tmpl in paramTmplOptions">
+                <div ng-bind-html="tmpl.name | highlight: $select.search" title="{{tmpl.name}}"></div>
+                </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="importAndCoverCfm(importFromTmplForm)">导入并覆盖原有参数</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="modifyParamCfmModal.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">确认修改参数</h3>
+    </div>
+    <div class="modal-body">
+      <uib-alert type="warning" class="alert-tip">
+        修改参数需要重启实例，预计耗时01分15秒，确定要修改吗？
+      </uib-alert>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="modifyParamCfm()">确定</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="goTocdbInstanceListModal.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">参数修改成功</h3>
+    </div>
+    <div class="modal-body">
+      <uib-alert type="warning" class="alert-tip">
+        提交成功！ 本次操作会重启实例， 重启期间不能对该实例进行修改。
+        5秒后为您跳转到实例列表页。
+      </uib-alert>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="modifyParamSucc()">确定</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="noneModifyParamTipModal.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">确认修改参数</h3>
+    </div>
+    <div class="modal-body">
+      <uib-alert type="warning" class="alert-tip">
+        您当前没有修改任何参数值！
+      </uib-alert>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="noneModifyParamCfm()">确定</button>
+    </div>
+  </div>
+</script>

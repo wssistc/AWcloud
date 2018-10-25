@@ -1,0 +1,38 @@
+
+<div class="modal-common nickname-modal">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{'aws.monitor.alarmModule.weChatCheckTitle'|translate}}</h3>
+    </div>
+    <div class="modal-body">
+        <div class="control-group" ng-repeat="wechatInfo in wechatInfoList track by $index">
+            <div class="controls">
+                <div class="radio-item">
+                    <label>
+                        <input type="radio" name="wechat" value="{{wechatInfo.openId}}" ng-model="wechat.openId" />
+                        <i class="iconfont"></i>
+                    </label>
+                </div>
+            </div>
+            <div class="wechatImg">
+                <img ng-src= "{{wechatInfo.headimgurl}}">
+            </div>
+            <div class="wechatInfo">
+                <div>
+                    <span>{{'aws.monitor.alarmModule.nickName'|translate}}</span>
+                    <span class="wechatText">{{wechatInfo.nickName}}</span>
+                </div>
+                <div class="location">
+                    <span>{{'aws.monitor.alarmModule.location'|translate}}</span>
+                    <span class="wechatText">{{wechatInfo.province}}&nbsp;&nbsp;{{wechatInfo.city}}</span>
+                </div>
+            </div>
+            <div class="borderLine" ng-if = "$index != (wechatInfoList.length-1)"></div>
+        </div>
+        <div class="nickname-tips" ng-if = "!wechatInfoList.length">{{nicknameTips}}</div>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="checkConfirm()">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+    </div>
+</div>

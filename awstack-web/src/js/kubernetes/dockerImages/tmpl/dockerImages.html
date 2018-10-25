@@ -1,0 +1,58 @@
+<div ng-controller="dockerImagesCtrl">
+    <div class="table-action">
+        <!--<button type="button" data-toggle="modal" ng-click="" class="btn btn-primary">-->
+        <!--<i class="icon-aw-start-up"></i>{{"aws.k8s.dockerClusters.restartClusterReplica" |translate}}-->
+        <!--</button>-->
+        <button type="button" data-toggle="modal" class="btn btn-normal"
+                ng-click="deleteRepositoryTags()" ng-disabled="isMine == 0 || !canDelete">
+            <i class="icon-aw-delete"></i>
+            {{"aws.k8s.dockerImages.deleteImageRepoTags" |translate}}
+        </button>
+        <div class="pull-right">
+            <!-- <setting title-data="titleData" site-title="titleName" table-data="dockerClustersData" ></setting> -->
+            <div type="button" class="btn btn-renovat right-ports" ng-click="refresh()">
+                <i class="icon-aw-refresh"></i>
+            </div>
+            <div class="search-box right-ports">
+                <div class="search-box">
+                    <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(dockerImages_search.globalSearchTerm)">
+                        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i>
+                        </button>
+                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="dockerImages_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <table ng-table="tableParams" class="table" show-filter="false">
+    <colgroup>
+        <col width="20%">
+        <col width="20%">
+        <col width="60%">
+        <!--<col width="10%">-->
+    </colgroup>
+    <tr ng-repeat="item in $data">
+        <td header="'headerCheckbox.html'" ng-if="isMine != 0">
+        <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[item.tag]"/>
+            <i class="icon-aw-square"></i>
+        </label>
+        </td>
+        <td data-title='"aws.k8s.dockerImages.imageRepoTags"|translate' sortable="'tag'">
+        <a ng-click="goImgLogDetails(item.tag)">
+                <!-- ng-href="#/k8s/projects/{{projectId}}/repositories/{{encodedRepoName}}/tags/{{item.tag}}" -->
+            {{item.tag}}
+        </a>
+        </td>
+        <td data-title='"aws.k8s.dockerImages.pullImageCmd"|translate' sortable="'tag'">
+        <code>docker pull {{harbor}}/{{decodedRepoName}}:{{item.tag}}</code>
+        </td>
+    </tr>
+    </table>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value=""/>
+    <i class="icon-aw-square"></i>
+  </label>
+</script>

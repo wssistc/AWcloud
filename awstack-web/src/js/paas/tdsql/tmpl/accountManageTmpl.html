@@ -1,0 +1,381 @@
+<div class="tab-content" ng-controller="accountManageCtrl">    
+    <div class="table-action">
+        <button type="button"  class="btn btn-new" ng-click="createAccount()"><i class="icon-aw-add-to2"></i> {{'aws.action.create'|translate}} </button>
+        <button type="button" class="btn btn-normal" ng-click="modifyAuthority()" ng-disabled="canClone"><i class="icon-aw-modify"></i> {{'aws.tdsql.modifyAuthority'|translate}}</button>
+        <button type="button" class="btn btn-normal"  ng-click="copyAccount()" ng-disabled="canClone"><i class="icon-aw-copy"></i> {{'aws.tdsql.copyAccount'|translate}}</button>
+        <button type="button" class="btn btn-normal" ng-click="resetPassword()" ng-disabled="canClone"><i class="icon-aw-modify"></i> {{'aws.tdsql.resetPwd'|translate}}</button>
+        <button type="button" class="btn btn-normal" ng-click="deleteAccount()" ng-disabled="canClone"><i class="icon-aw-delete"></i> {{'aws.action.del'|translate}}</button>
+        <div class="pull-right">
+            <setting title-data="titleData" site-title="titleName" table-data="accountData" search-tearm="accountSearchTearm(obj)"></setting>
+            <div type="button" class="btn btn-renovat right-ports" ng-click="refreshAccount()">
+                <i class="icon-aw-refresh"></i>
+            </div>
+            <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(account_search.searchTearm)">
+                  <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                  <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="account_search.searchTearm" placeholder="{{'aws.action.search'|translate}}" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="table-content">
+        <empty-tip empty-type="loadAcconutData"></empty-tip>
+        <table ng-table="accountTable" class="table">
+            <tr ng-repeat="account in $data track by $index">
+                <td header="'accountCheckbox.html'">
+                  <label class="checkbox" >
+                    <input type="checkbox" ng-model="accountCheckbox.items[account.id]" />
+                    <i class="iconfont"></i>
+                  </label>
+                </td>
+                <td data-title="'aws.tdsql.accountName'|translate" sortable="'user'" ng-if="titleData[0].value">
+                    {{account.user}}
+                </td>
+                <td data-title="'aws.tdsql.hosts'|translate" sortable="'host'" ng-if="titleData[1].value">
+                    {{account.host}}
+                </td>
+                <td data-title="'aws.tdsql.accountType'|translate" sortable="'readonly'" ng-if="titleData[2].value">
+                    {{account.readonly}}
+                </td>
+                <td data-title="'aws.tdsql.createTime'|translate" sortable="'create_time'" ng-if="titleData[3].value">
+                    {{account.create_time | translate}}
+                </td>
+                <td data-title="'aws.tdsql.updateTime'|translate" sortable="'update_time'" ng-if="titleData[4].value">
+                    {{account.update_time}}
+                </td> 
+                <td data-title="'aws.tdsql.remarks'|translate" sortable="'remark'" ng-if="titleData[5].value">
+                    {{account.remark}}
+                </td>    
+            </tr>  
+        </table>
+    </div>
+</div>
+<script type="text/ng-template" id="accountCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="accountCheckbox.checked" class="select-all-accountTable" value="" />
+      <i class="iconfont"></i>
+    </label>
+</script>
+<script type="text/ng-template" id="createAccount.html">
+  <div class="modal-common createAccount-modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.tdsql.createAccount"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="createAccountForm" novalidate>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.accountName'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="name"  ng-model="account.user" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.tdsql.placeholder.accountName"|translate}}' required/>
+              <div class="error" ng-messages='createAccountForm.name.$error' ng-if="interactedAccount(createAccountForm.name)">
+                <form-validate></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group radio-wrap">
+            <label class="control-label">{{'aws.tdsql.readonlyAccount'|translate}}：</label>
+            <div class="controls">
+              <!-- <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.monitor.alarmModule.info.resourceType'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+              <div class="radio-item clearFix">
+                <label class="radio">
+                  <input type="radio" ng-model="account.readonly" name="physical"  value="1" /><i class="iconfont"></i>
+                  是
+                </label>
+                <label class="radio">
+                  <input type="radio" ng-model="account.readonly" name="vmhost" value="0" /><i class="iconfont"></i>
+                  否
+                </label>
+              </div>
+              <div class="error readonly-msg">
+                <span>{{"aws.tdsql.placeholder.readOnlyAccountMsg"|translate}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.hosts'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="hosts"  ng-model="account.host" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.tdsql.placeholder.hosts"|translate}}'/>
+              <div class="error" ng-messages='createAccountForm.hosts.$error' ng-if="interactedAccount(createAccountForm.hosts)">
+                <form-validate pattern-msg="hostsErrorMsg"></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{'aws.tdsql.password'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="password"  ng-model="account.pwd" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.tdsql.placeholder.password"|translate}}'/>
+              <div class="error" ng-messages='createAccountForm.password.$error' ng-if="interactedAccount(createAccountForm.password)">
+                <form-validate  pattern-msg="pwdErrorMsg"></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.confirmPwd'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="confirmPwd"  ng-model="account.confirmPwd" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.tdsql.placeholder.password"|translate}}'/>
+              <div class="error" ng-messages='createAccountForm.confirmPwd.$error' ng-if="interactedAccount(createAccountForm.confirmPwd)">
+                <form-validate pattern-msg="pwdErrorMsg"></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.remarks'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="remarks"  ng-model="account.remark" ng-maxlength="32" ng-maxlength="256" placeholder='{{"aws.tdsql.placeholder.remarks"|translate}}'/>
+              <div class="error" ng-messages='createAccountForm.remarks.$error' ng-if="interactedAccount(createAccountForm.remarks)">
+                <form-validate max-num="256"></form-validate>
+              </div>
+            </div>
+          </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="createAccountConfirm(createAccountForm)">{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="copyAccount.html">
+  <div class="modal-common createAccount-modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.tdsql.copyAccount"|translate}}:{{copyAccount.user}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="copyAccountForm" novalidate>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.accountName'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="name"  ng-model="account.user" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.tdsql.placeholder.accountName"|translate}}' required/>
+              <div class="error" ng-messages='copyAccountForm.name.$error' ng-if="interactedAccount(copyAccountForm.name)">
+                <form-validate></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group radio-wrap">
+            <label class="control-label">{{'aws.tdsql.readonlyAccount'|translate}}：</label>
+            <div class="controls">
+              <!-- <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.monitor.alarmModule.info.resourceType'|translate}}"  popover-trigger="mouseenter" popover-placement = "top" ></i> -->
+              <div class="radio-item clearFix">
+                <label class="radio">
+                  <input type="radio" ng-model="account.readonly" name="physical"  value="1" /><i class="iconfont"></i>
+                  是
+                </label>
+                <label class="radio">
+                  <input type="radio" ng-model="account.readonly" name="vmhost" value="0" /><i class="iconfont"></i>
+                  否
+                </label>
+              </div>
+              <div class="error readonly-msg">
+                <span>{{"aws.tdsql.placeholder.readOnlyAccountMsg"|translate}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.hosts'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="hosts"  ng-model="account.host" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.tdsql.placeholder.hosts"|translate}}'/>
+              <div class="error" ng-messages='copyAccountForm.hosts.$error' ng-if="interactedAccount(copyAccountForm.hosts)">
+                <form-validate pattern-msg="hostsErrorMsg"></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{'aws.tdsql.password'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="password"  ng-model="account.pwd" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.tdsql.placeholder.password"|translate}}'/>
+              <div class="error" ng-messages='copyAccountForm.password.$error' ng-if="interactedAccount(copyAccountForm.password)">
+                <form-validate  pattern-msg="pwdErrorMsg"></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.confirmPwd'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="confirmPwd"  ng-model="account.confirmPwd" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.tdsql.placeholder.password"|translate}}'/>
+              <div class="error" ng-messages='copyAccountForm.confirmPwd.$error' ng-if="interactedAccount(copyAccountForm.confirmPwd)">
+                <form-validate pattern-msg="pwdErrorMsg"></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.remarks'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="remarks"  ng-model="account.remark" ng-maxlength="32" ng-maxlength="256" placeholder='{{"aws.tdsql.placeholder.remarks"|translate}}'/>
+              <div class="error" ng-messages='copyAccountForm.remarks.$error' ng-if="interactedAccount(copyAccountForm.remarks)">
+                <form-validate max-num="256"></form-validate>
+              </div>
+            </div>
+          </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="copyAccountConfirm(copyAccountForm)">{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="modifyAuthority.html">
+  <div class="modal-common modifyAuthority-modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.tdsql.createAccount"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="modifyAuthorityForm" novalidate>
+          <div class="control-group" >
+            <label class="control-label"><span class="red">*</span>&nbsp;{{'aws.tdsql.accountName'|translate}}：</label>
+            <div class="controls">
+                test@%
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.authorizedObject'|translate}}：</label>
+            <div class="controls authority-controls">
+               <ui-select ng-model="modifyData.authorizedObject.library" name="library" title='{{"aws.networks.choseNetType"|translate}}' required>
+                    <ui-select-match placeholder='{{"aws.networks.choseNetType"|translate}}'>{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="library in libraryList">
+                        <div title="library.name" class="modify-uiselect">{{library.name}}</div>
+                    </ui-select-choices>
+               </ui-select>
+               <div class="error" ng-messages='modifyAuthorityForm.library.$error' ng-if="interactedModify(modifyAuthorityForm.library)">
+                 <form-validate></form-validate>
+               </div>
+            </div>
+            <div class="controls authority-controls">
+               <ui-select ng-model="modifyData.authorizedObject.library" name="library" title='{{"aws.networks.choseNetType"|translate}}' required>
+                    <ui-select-match placeholder='{{"aws.networks.choseNetType"|translate}}'>{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="library in libraryList">
+                        <div title="library.name" class="modify-uiselect">{{library.name}}</div>
+                    </ui-select-choices>
+               </ui-select>
+               <div class="error" ng-messages='modifyAuthorityForm.library.$error' ng-if="interactedModify(modifyAuthorityForm.library)">
+                 <form-validate></form-validate>
+               </div>
+            </div>
+            <div class="controls authority-controls">
+               <ui-select ng-model="modifyData.authorizedObject.library" name="library" title='{{"aws.networks.choseNetType"|translate}}' required>
+                    <ui-select-match placeholder='{{"aws.networks.choseNetType"|translate}}'>{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="library in libraryList">
+                        <div title="library.name" class="modify-uiselect">{{library.name}}</div>
+                    </ui-select-choices>
+               </ui-select>
+               <div class="error" ng-messages='modifyAuthorityForm.library.$error' ng-if="interactedModify(modifyAuthorityForm.library)">
+                 <form-validate></form-validate>
+               </div>
+            </div>
+          </div>
+          <div class="selected-container">
+             <div class="control-group">
+                <div class="controls">
+                    <label class="checkbox">
+                        <input type="checkbox" class="form-controls chk" ng-model="modifyData.selectedAll" />
+                        <i class="iconfont"></i>全选
+                    </label>
+                </div>
+             </div>
+             <div ng-repeat="select in selectItem">
+                 <div class="control-group select-group">
+                    <div class="controls">
+                        <label class="checkbox">
+                            <input type="checkbox" class="form-controls chk" ng-model="select.value" />
+                            <i class="iconfont"></i>{{select.name}}
+                        </label>
+                    </div>
+                 </div>
+             </div>
+          </div>
+          <div class="bottom-msg">
+              <div>1.GRANT USAGE ON *.* TO 'demo'@'%'</div>
+              <div>2.GRANT SELECT ON `test`.* TO 'demo'@'%'</div>
+          </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="createAccountConfirm(createAccountForm)">{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="resetPassword.html">
+  <div class="modal-common resetPassword-modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{'aws.tdsql.resetPwd'|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="resetPasswordForm" novalidate>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.insName'|translate}}：</label>
+            <div class="controls">
+              {{account.user}}
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.accountName'|translate}}：</label>
+            <div class="controls">
+              {{account.user}}
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.hosts'|translate}}：</label>
+            <div class="controls">
+              {{account.host}}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{'aws.tdsql.password'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="password"  ng-model="account.pwd" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.tdsql.placeholder.password"|translate}}'/>
+              <div class="error" ng-messages='resetPasswordForm.password.$error' ng-if="interactedReset(resetPasswordForm.password)">
+                <form-validate  pattern-msg="pwdErrorMsg"></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.confirmPwd'|translate}}：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="confirmPwd"  ng-model="account.confirmPwd" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.tdsql.placeholder.password"|translate}}'/>
+              <div class="error" ng-messages='resetPasswordForm.confirmPwd.$error' ng-if="interactedReset(resetPasswordForm.confirmPwd)">
+                <form-validate pattern-msg="pwdErrorMsg"></form-validate>
+              </div>
+            </div>
+          </div>
+<<<<<<< HEAD
+          <!-- <div class="control-group" >
+=======
+          <!--<div class="control-group" >
+>>>>>>> modification for TDSQL
+            <label class="control-label">{{'aws.tdsql.phone'|translate}}：</label>
+            <div class="controls phone-controls">
+              <input type="text" class="form-controls" name="phone"  ng-model="account.remarks" ng-pattern="/(^(13\d|15[^4,\D]|17[13678]|18\d)\d{8}|170[^346,\D]\d{7})$/" placeholder='{{"aws.tdsql.placeholder.remarks"|translate}}'/>
+              <button type="button"  class="btn btn-new" ng-click="createAccount()">{{'aws.tdsql.getVerification'|translate}}</button>
+              <div class="error" ng-messages='resetPasswordForm.phone.$error' ng-if="interactedReset(resetPasswordForm.phone)">
+                <form-validate pattern-msg="phoneErrorMsg"></form-validate>
+              </div>
+            </div>
+          </div>
+          <div class="control-group" >
+            <label class="control-label">{{'aws.tdsql.verification'|translate}}：</label>
+            <div class="controls phone-controls">
+              <input type="text" class="form-controls" name="verificationCode"  ng-model="account.remarks" ng-pattern="/^[0-9]{6}$/" placeholder='{{"aws.tdsql.placeholder.remarks"|translate}}' required/>
+              <div class="error" ng-messages='resetPasswordForm.verificationCode.$error' ng-if="interactedReset(resetPasswordForm.verificationCode)">
+                <form-validate pattern-msg="verificationErrorMsg"></form-validate>
+              </div>
+            </div>
+<<<<<<< HEAD
+          </div> -->
+=======
+          </div>-->
+>>>>>>> modification for TDSQL
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="resetPwd(resetPasswordForm)">{{"aws.action.ok"|translate}}</button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>

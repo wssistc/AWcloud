@@ -1,0 +1,52 @@
+
+<div>
+  <div class="inner clearfix">
+    <div class="logo">
+      <a ng-href="{{logoUrl}}">AWSTACK</a>
+    </div>
+    <div class="dep-pro">
+      <span class="title-item" >vCenter名称：</span>
+      <div class="dep-box clearFix">
+        <ui-select class="ui-select-black" ng-model="tops.vmData.selected" ng-change="changevmtype(tops.vmData.selected)">
+          <ui-select-match placeholder="请选择名称" title="{{$select.selected.vCenterName}}">{{$select.selected.vCenterName}}</ui-select-match>
+          <ui-select-choices repeat="vmtype in tops.vmList | filter:{vCenterName:$select.search}">
+            <div ng-bind-html="vmtype.vCenterName | highlight: $select.search"></div>
+          </ui-select-choices>
+        </ui-select>
+      </div>
+    </div>
+    <ul class="user-mes-box clearfix hide">
+      <li class="user-notice-panel" ng-if="show_email">
+        <a href=""><i class=" icon-aw-info"></i><span class="num">{{totalUnHandledTickes}}</span></a>
+        <div class="dropdown-layer notice-support">
+          <ul>
+            <li><span class="title">{{"aws.tmpl.header.TicketTips"|translate}}</span></li>
+            <li ng-repeat="item in unHandledTickes">
+              <a href="#/ticket/lists"><span>{{"aws.workflow."+item.variables.type | translate}}</span> >></a>
+            </li>
+            <li ng-if="ticketsMore"><a href="#/ticket/lists"><span>查看全部</span> >></a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="admin-center-info">
+        <a><span>{{userName}}</span><i class="iconfont"></i></a>
+        <div class="dropdown-layer admin-center">
+          <ul class="admin-center-menu">
+            <!-- <li><a ng-href="#"><i class="icon-aw-user"></i>{{"aws.tmpl.header.personalinformation"|translate}}</a></li>
+            <li ng-show="ADMIN || DOMAIN_ADMIN"><a ng-href="/permit/user"><i class="icon-aw-modify"></i>{{"aws.tmpl.header.user"|translate}}</a></li> -->
+            <li><a ng-href="#" ng-click="logOut()" class="cursor-pointer"><i class="icon-aw-shut-down"></i>{{"aws.tmpl.header.quit"|translate}}</a></li>
+          </ul>
+        </div>
+      </li>
+
+    </ul>
+    <div class="translate-select pull-right hide">
+      <ui-select class="ui-select-black" ng-model="tran.selected" ng-change="tranSelect(tran.selected)">
+        <ui-select-match placeholder="{{$select.selected.text}}" title="{{$select.selected.text}}">{{$select.selected.text}}</ui-select-match>
+        <ui-select-choices repeat="item in trans.list">
+          <div ng-bind-html="item.text"></div>
+        </ui-select-choices>
+      </ui-select>
+    </div>
+  </div>
+</div>

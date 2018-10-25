@@ -1,0 +1,512 @@
+<div id="main">
+  <!-- 步骤 start -->
+  <div class="step-box">
+    <div class="container">
+      <ul class="text-list clearfix">
+        <li class="first" ng-class="{'active': stepOneActive}">
+          <i class="icon-aw-pc"></i>
+          <p>{{'aws.register.info.hostChoice'|translate}}</p>
+        </li>
+        <li ng-class="{'active': stepTwoActive}">
+          <i class="icon-aw-internet"></i>
+          <p>{{'aws.register.info.netSetting'|translate}}</p>
+          <div class="state-items">
+            <span class="icon-aw-angle-right"></span>
+            <span class="icon-aw-correct"></span>
+          </div>
+        </li>
+        <li ng-class="{'active': stepThreeActive}">
+          <i class="icon-aw-user"></i>
+          <p>{{'aws.register.info.accSetting'|translate}}</p>
+          <div class="state-items">
+            <span class="icon-aw-angle-right"></span>
+            <span class="icon-aw-correct"></span>
+          </div>
+        </li>
+        <li class="last" ng-class="{'active': stepFourActive}">
+          <i class="icon-aw-information"></i>
+          <p>{{'aws.register.info.infoSummary'|translate}}</p>
+          <div class="state-items">
+            <span class="icon-aw-angle-right"></span>
+            <span class="icon-aw-correct"></span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="container">
+    <div ng-if="stepOne" class="host-box">
+      <!-- 表格 start -->
+      <table class="table border">
+        <thead>
+          <tr>
+            <th class="check-all">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="checkboxes.checked" class="select-all">
+                <i class="icon-aw-square"></i>
+              </label>
+            </th>
+            <th>{{'aws.register.info.hostName'|translate}}</th>
+            <th>{{'aws.register.info.area'|translate}}</th>
+            <th>{{'aws.register.info.ManagementNetwork'|translate}}</th>
+            <th>{{'aws.register.info.cpu'|translate}}</th>
+            <th>{{'aws.register.info.mem'|translate}}</th>
+            <th>SSD（GB）</th>
+            <th>SATA（GB）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in stepOneData">
+            <td class="check-td">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="checkboxes.items[item.id]">
+                <i class="icon-aw-square"></i>
+              </label>
+            </td>
+            <td class="col-2">
+              <span ng-dblclick="oneModule.edit(item)" ng-if="oneModule.editActive!==item.id">{{item.hostName}}</span>
+              <div class="edit-input" ng-if="oneModule.editActive===item.id">
+                <input type="text" ng-model="item.hostName" ng-blur="oneModule.save(item)" class="form-control" />
+                <i class="icon-aw-storage" ng-click="oneModule.save(item)"></i>
+              </div>
+            </td>
+            <td>{{item.regionName}}</td>
+            <td>{{item.hostInfoMap.ip}}</td>
+            <td>{{item.hostInfoMap.cpu.core}}</td>
+            <td>{{item.hostInfoMap.mem | unitFilter | number:1}}</td>
+            <td>{{item.hostInfoMap.ssdAll}}</td>
+            <td>{{item.hostInfoMap.sataAll}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <br>
+      <div class="text-center">
+        <button class="btn btn-default" ng-click="oneModule.completeOne()" ng-disabled="oneModule.isDisabled" type="button">{{'aws.register.info.next'|translate}}</button>
+      </div>
+    </div>
+    <div ng-if="stepTwo" class="internet-box">
+      <form class="form-horizontal" name="ipForm">
+        <fieldset>
+          <div class="row-head">
+            <div class="col-1">
+              <label class="radio-inline">
+                <input type="radio" name="inlineRadioOptions" ng-model="twoModule.cidrOn" value="ip" />
+                <i class="icon-aw-circle"></i><span>{{'aws.register.info.iprange'|translate}}</span>
+              </label>
+            </div>
+            <div class="col-1">
+              <label class="radio-inline">
+                <input type="radio" name="inlineRadioOptions" ng-model="twoModule.cidrOn" value="cidr" />
+                <i class="icon-aw-circle"></i><span>CIDR</span>
+              </label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-1 font-h">
+              <a class="icon-tip" data-toggle="tooltip" data-placement="bottom" title=""><i class="icon-aw-question-mark"></i></a>
+              <strong>{{'aws.register.info.clusternetwork'|translate}}:</strong>
+            </div>
+            <div class="col-1 font-h">{{'aws.register.info.iprange'|translate}}:</div>
+            <div class="col-10" ng-if="twoModule.cidrOn!=='cidr'">
+              <div class="add-group clearfix" ng-repeat="item in twoModule.clusterRange">
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.start'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="192.168.1.1" name="{{item.startname}}" required class="form-control" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.start" />
+                    <div ng-if="ipForm[item.startname].$invalid && ipForm[item.startname].$dirty">
+                      <span class="help-block" ng-if="ipForm[item.startname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm[item.startname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.end'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" name="{{item.endname}}" placeholder="192.168.1.255" required class="form-control" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.end" />
+                    <div ng-if="ipForm[item.endname].$invalid && ipForm[item.endname].$dirty">
+                      <span class="help-block" ng-if="ipForm[item.endname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm[item.endname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+                <span class="add-ip" ng-if="$index==0" ng-click="twoModule.addCluster($index)">{{'aws.register.info.addRangeIp'|translate}}</span>
+                <span class="del-ip" ng-if="$index" ng-click="twoModule.delCluster($index)"><i class="icon-aw-1shut-down"></i></span>
+              </div>
+              <div class="form-group">
+                <label class="control-label">{{'aws.register.info.netmask'|translate}}</label>
+                <div class="control-item">
+                  <input type="text" placeholder="255.255.255.0" name="clusterNetmask" required ng-pattern="/^(254|252|248|240|224|192|128|0)\.0\.0\.0|255\.(254|252|248|240|224|192|128|0)\.0\.0|255\.255\.(254|252|248|240|224|192|128|0)\.0|255\.255\.255\.(254|252|248|240|224|192|128|0)$/" class="form-control" ng-model="twoModule.clusterNetmask" />
+                  <div ng-if="ipForm.clusterNetmask.$invalid && ipForm.clusterNetmask.$dirty">
+                    <span class="help-block" ng-if="ipForm.clusterNetmask.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.clusterNetmask.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-10" ng-if="twoModule.cidrOn=='cidr'">
+              <div class="form-group">
+                <label class="control-label"></label>
+                <div class="control-item">
+                  <input type="text" placeholder="192.168.1.0/24" name="clustercidr" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))[\/]([1-9]|[1-2][0-9]|[3][0]|[3][1])$/" required ng-model="twoModule.clusterCidr" class="form-control" ng-model="clusterCidr">
+                  <div ng-if="ipForm.clustercidr.$invalid && ipForm.clustercidr.$dirty">
+                    <span class="help-block" ng-if="ipForm.clustercidr.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.clustercidr.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-1 font-h">&nbsp;</div>
+            <div class="col-1 font-h">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="clusterCheck" ng-model="twoModule.clusterCheck" /><i class="icon-aw-square"></i><span>{{'aws.register.info.vlan'|translate}}</span></label>
+              </div>
+            </div>
+            <div class="col-10">
+              <div class="form-group">
+                <label class="control-label">&nbsp;</label>
+                <div class="control-item" ng-if="twoModule.clusterCheck">
+                  <input type="text" class="form-control" name="clustervlan" ng-pattern="/^[1-9]\d*$/" ng-model="twoModule.clusterVlan" />
+                  <div ng-if="ipForm.clustervlan.$invalid && ipForm.clustervlan.$dirty">
+                    <span class="help-block" ng-if="ipForm.clustervlan.$error.pattern">{{'aws.register.info.inputint'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <div class="row">
+            <div class="col-1 font-h">
+              <a class="icon-tip" data-toggle="tooltip" data-placement="bottom" title=""><i class="icon-aw-question-mark"></i></a>
+              <strong>{{'aws.register.info.Storagenetwork'|translate}}:</strong>
+            </div>
+            <div class="col-1 font-h">{{'aws.register.info.iprange'|translate}}：</div>
+            <div class="col-10" ng-if="twoModule.cidrOn!=='cidr'">
+              <div class="add-group clearfix" ng-repeat="item in twoModule.storageRange">
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.start'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="192.168.2.1" class="form-control" name="{{item.startname}}" required ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.start">
+                    <div ng-if="ipForm[item.startname].$invalid && ipForm[item.startname].$dirty">
+                      <span class="help-block" ng-if="ipForm[item.startname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm[item.startname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.end'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="192.168.2.255" class="form-control" name="{{item.endname}}" required ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.end">
+                    <div ng-if="ipForm[item.endname].$invalid && ipForm[item.endname].$dirty">
+                      <span class="help-block" ng-if="ipForm[item.endname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm[item.endname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+                <span class="add-ip" ng-if="$index==0" ng-click="twoModule.addStorage()">{{'aws.register.info.addRangeIp'|translate}}</span>
+                <span class="del-ip" ng-if="$index" ng-click="twoModule.delStorage($index)"><i class="icon-aw-1shut-down"></i></span>
+              </div>
+              <div class="form-group">
+                <label class="control-label">{{'aws.register.info.netmask'|translate}}</label>
+                <div class="control-item">
+                  <input type="text" placeholder="255.255.255.0" name="storageNetmask" required ng-pattern="/^(254|252|248|240|224|192|128|0)\.0\.0\.0|255\.(254|252|248|240|224|192|128|0)\.0\.0|255\.255\.(254|252|248|240|224|192|128|0)\.0|255\.255\.255\.(254|252|248|240|224|192|128|0)$/" class="form-control" ng-model="twoModule.storageNetmask" />
+                  <div ng-if="ipForm.storageNetmask.$invalid && ipForm.storageNetmask.$dirty">
+                    <span class="help-block" ng-if="ipForm.storageNetmask.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.storageNetmask.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-10" ng-if="twoModule.cidrOn=='cidr'">
+              <div class="form-group">
+                <label class="control-label"></label>
+                <div class="control-item">
+                  <input type="text" placeholder="192.168.2.0/24" required name="storagecidr" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))[\/]([1-9]|[1-2][0-9]|[3][0]|[3][1])$/" ng-model="twoModule.storageCidr" class="form-control" />
+                  <div ng-if="ipForm.storagecidr.$invalid && ipForm.storagecidr.$dirty">
+                    <span class="help-block" ng-if="ipForm.storagecidr.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.storagecidr.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-1">&nbsp;</div>
+            <div class="col-1 font-h">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="storageCheck" ng-model="twoModule.storageCheck" /><i class="icon-aw-square"></i><span>{{'aws.register.info.vlan'|translate}}</span></label>
+              </div>
+            </div>
+            <div class="col-10">
+              <div class="form-group">
+                <label class="control-label">&nbsp;</label>
+                <div class="control-item" ng-if="twoModule.storageCheck">
+                  <input type="text" name="storagevlan" ng-pattern="/^[1-9]\d*$/" placeholder="" class="form-control" ng-model="twoModule.storageVlan" />
+                  <div ng-if="ipForm.storagevlan.$invalid && ipForm.storagevlan.$dirty">
+                    <span class="help-block" ng-if="ipForm.storagevlan.$error.pattern">{{'aws.register.info.inputint'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <div class="row">
+            <div class="col-1 font-h">
+              <a class="icon-tip" data-toggle="tooltip" data-placement="bottom" title=""><i class="icon-aw-question-mark"></i></a>
+              <strong>{{'aws.register.info.TenantNetwork'|translate}}:</strong>
+            </div>
+            <div class="col-1 font-h">IP范围：</div>
+            <div class="col-10" ng-if="twoModule.cidrOn!=='cidr'">
+              <div class="add-group clearfix" ng-repeat="item in twoModule.tenantRange">
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.start'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="192.168.3.1" class="form-control" name="{{item.startname}}" required ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.start">
+                    <div ng-if="ipForm[item.startname].$invalid && ipForm[item.startname].$dirty">
+                      <span class="help-block" ng-if="ipForm[item.startname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm[item.startname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label">{{'aws.register.info.end'|translate}}</label>
+                  <div class="control-item">
+                    <input type="text" placeholder="192.168.3.255" class="form-control" name="{{item.endname}}" required ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/" ng-model="item.end">
+                    <div ng-if="ipForm[item.endname].$invalid && ipForm[item.endname].$dirty">
+                      <span class="help-block" ng-if="ipForm[item.endname].$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                      <span class="help-block" ng-if="ipForm[item.endname].$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                    </div>
+                  </div>
+                </div>
+                <span class="add-ip" ng-if="$index==0" ng-click="twoModule.addTenant()">{{'aws.register.info.addRangeIp'|translate}}</span>
+                <span class="del-ip" ng-if="$index" ng-click="twoModule.delTenant($index)"><i class="icon-aw-1shut-down"></i></span>
+              </div>
+              <div class="form-group">
+                <label class="control-label">{{'aws.register.info.netmask'|translate}}</label>
+                <div class="control-item">
+                  <input type="text" placeholder="255.255.255.0" name="tenantNetmask" required ng-pattern="/^(254|252|248|240|224|192|128|0)\.0\.0\.0|255\.(254|252|248|240|224|192|128|0)\.0\.0|255\.255\.(254|252|248|240|224|192|128|0)\.0|255\.255\.255\.(254|252|248|240|224|192|128|0)$/" class="form-control" ng-model="twoModule.tenantNetmask" />
+                  <div ng-if="ipForm.tenantNetmask.$invalid && ipForm.tenantNetmask.$dirty">
+                    <span class="help-block" ng-if="ipForm.tenantNetmask.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.tenantNetmask.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-10" ng-if="twoModule.cidrOn=='cidr'">
+              <div class="form-group">
+                <label class="control-label"></label>
+                <div class="control-item">
+                  <input type="text" placeholder="192.168.3.0/24" required name="tenantcidr" ng-pattern="/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))[\/]([1-9]|[1-2][0-9]|[3][0]|[3][1])$/" ng-model="twoModule.tenantCidr" class="form-control" />
+                  <div ng-if="ipForm.tenantcidr.$invalid && ipForm.tenantcidr.$dirty">
+                    <span class="help-block" ng-if="ipForm.tenantcidr.$error.pattern">{{'aws.register.info.iperrorformat'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.tenantcidr.$error.required">{{'aws.register.info.ipnotnone'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-1">&nbsp;</div>
+            <div class="col-1 font-h">
+              <span class="text">vlan</span>
+            </div>
+            <div class="col-10">
+              <div class="form-group">
+                <label class="control-label">{{'aws.register.info.start'|translate}}</label>
+                <div class="control-item">
+                  <input type="text" placeholder="" name="tenantStart" class="form-control" required ng-pattern="/^[1-9]\d*$/" ng-model="twoModule.tenantStart" />
+                  <div ng-if="ipForm.tenantStart.$invalid && ipForm.tenantStart.$dirty">
+                    <span class="help-block" ng-if="ipForm.tenantStart.$error.pattern">{{'aws.register.info.inputint'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.tenantStart.$error.required">{{'aws.register.info.required'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label">{{'aws.register.info.end'|translate}}</label>
+                <div class="control-item">
+                  <input type="text" placeholder="" name="tenantEnd" required ng-pattern="/^[1-9]\d*$/" class="form-control" ng-model="twoModule.tenantEnd" />
+                  <div ng-if="ipForm.tenantEnd.$invalid && ipForm.tenantEnd.$dirty">
+                    <span class="help-block" ng-if="ipForm.tenantEnd.$error.pattern">{{'aws.register.info.inputint'|translate}}</span>
+                    <span class="help-block" ng-if="ipForm.tenantEnd.$error.required">{{'aws.register.info.required'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <div class="row">
+            <div class="col-1 font-h">
+              <a class="icon-tip" data-toggle="tooltip" data-placement="bottom" title=""><i class="icon-aw-question-mark"></i></a>
+              <strong>{{'aws.register.info.extNetwork'|translate}}:</strong>
+            </div>
+            <div class="col-1 font-h">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="publicCheck" ng-model="twoModule.publicCheck" /><i class="icon-aw-square"></i><span>{{'aws.register.info.vlan'|translate}}</span></label>
+              </div>
+            </div>
+            <div class="col-10">
+              <div class="form-group">
+                <label class="control-label">&nbsp;</label>
+                <div class="control-item" ng-if="twoModule.publicCheck">
+                  <input type="text" placeholder="" class="form-control" ng-pattern="/^[1-9]\d*$/" name="publicvlan" ng-model="twoModule.publicVlan" />
+                  <div ng-if="ipForm.publicvlan.$invalid && ipForm.publicvlan.$dirty">
+                    <span class="help-block" ng-if="ipForm.publicvlan.$error.pattern">{'aws.register.info.inputint'|translate}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <br>
+        <div class="text-center">
+          <button class="btn btn-default" ng-click="twoModule.prev()" type="button">{{'aws.register.info.last'|translate}}</button>
+          <button class="btn btn-next" ng-disabled="ipForm.$invalid" ng-click="twoModule.completeTwo()" type="button">{{'aws.register.info.next'|translate}}</button>
+        </div>
+      </form>
+    </div>
+    <div ng-if="stepThree" class="account-box">
+      <form class="form-horizontal" name="accountForm">
+        <fieldset>
+          <div class="form-group">
+            <label class="control-label">{{'aws.register.info.area'|translate}}:</label>
+            <div class="control-item">
+              <input type="text" placeholder="" class="form-control" ng-blur="threeModule.change(threeModule.accountData.region)" ng-model="threeModule.accountData.region" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label">
+              <a class="icon-tip" data-toggle="tooltip" data-placement="bottom" title=""><i class="icon-aw-question-mark"></i></a> {{'aws.register.info.Administrator'|translate}}:
+            </label>
+            <div class="control-item">
+              <input type="text" placeholder="" required name="username" ng-disabled="threeModule.isdisabled" ng-blur="threeModule.exist(threeModule.accountData.username)" class="form-control" ng-model="threeModule.accountData.username" ng-pattern="/^[a-zA-Z0-9_]{4,16}$/" />
+              <div ng-if="accountForm.username.$invalid && accountForm.username.$dirty">
+                <span class="help-block" ng-if="accountForm.username.$error.required">{{'aws.register.info.required'|translate}}</span>
+                <span class="help-block" ng-if="accountForm.username.$error.pattern">{{'aws.register.info.char4_16'|translate}}</span>
+              </div>
+              <div ng-if="threeModule.idExist" class="help-block">{{'aws.register.info.accountexit'|translate}}</div>
+              <div ng-if="threeModule.canUsed" class="help-success"><i class="icon-aw-correct"></i></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label">{{'aws.register.info.passwd'|translate}}:</label>
+            <div class="control-item">
+              <input type="password" placeholder="" name="accpassword" required id="accpassword" ng-minlength="5" ng-maxlength="16" class="form-control" ng-model="threeModule.accountData.password" />
+              <div ng-if="accountForm.accpassword.$invalid && accountForm.accpassword.$dirty">
+                <span class="help-block" ng-if="accountForm.accpassword.$error.required">{{'aws.register.info.required'|translate}}</span>
+                <span class="help-block" ng-if="accountForm.accpassword.$error.minlength">{{'aws.register.info.passwd6'|translate}}</span>
+                <span class="help-block" ng-if="accountForm.accpassword.$error.maxlength">{{'aws.register.info.passwd16'|translate}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label">{{'aws.register.info.confirm'|translate}}:</label>
+            <div class="control-item">
+              <input type="password" placeholder="" name="reaccpassword" required pw-check="accpassword" class="form-control" ng-model="threeModule.accountData.repassword" />
+              <div ng-if="accountForm.reaccpassword.$invalid && accountForm.reaccpassword.$dirty">
+                <span class="help-block" ng-if="accountForm.reaccpassword.$error.pwCheck || accountForm.reaccpassword.$error.required">{{'aws.register.info.passwddiff'|translate}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label">&nbsp;</label>
+            <div class="control-item">
+              <button class="btn btn-default" ng-click="threeModule.prev()" type="button">{{'aws.register.info.last'|translate}}</button>
+              <button class="btn btn-next" ng-disabled="accountForm.$invalid || fourModule.isdisabled" ng-click="threeModule.completeThree()" type="button">{{'aws.register.info.next'|translate}}</button>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+    <div ng-if="stepFour" class="infor-box">
+      <!-- 表格 start -->
+      <table class="table border">
+        <thead>
+          <tr>
+            <th>{{'aws.register.info.hostName'|translate}}</th>
+            <th>{{'aws.register.info.area'|translate}}</th>
+            <th>{{'aws.register.info.ManagementNetwork'|translate}}</th>
+            <th>{{'aws.register.info.cpu'|translate}}</th>
+            <th>{{'aws.register.info.mem'|translate}}</th>
+            <th>SSD（GB）</th>
+            <th>SATA（GB）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in fourModule.checkedList">
+            <td class="col-2">
+              <span>{{item.hostName}}</span>
+            </td>
+            <td>{{item.regionName}}</td>
+            <td>{{item.hostInfoMap.ip}}</td>
+            <td>{{item.hostInfoMap.cpu.core}}</td>
+            <td>{{item.hostInfoMap.mem | unitFilter | number:1}}</td>
+            <td>{{item.hostInfoMap.ssdAll}}</td>
+            <td>{{item.hostInfoMap.sataAll}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="table border">
+        <caption>{{'aws.register.info.netSetting'|translate}}</caption>
+        <thead>
+          <tr>
+            <th>{{'aws.register.info.type'|translate}}</th>
+            <th>CIDR</th>
+            <th>{{'aws.register.info.IPaddresses'|translate}}</th>
+            <th>{{'aws.register.info.vlantag'|translate}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in fourModule.usedList">
+            <td>{{item.name}}</td>
+            <td>{{item.cidr}}</td>
+            <td><span ng-repeat="ip in item.iprange">{{ip.start}}-{{ip.end}}</span></td>
+            <td>{{item.vlan}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="table">
+        <caption>{{'aws.register.info.areaConf'|translate}}</caption>
+        <tfoot>
+          <tr>
+            <td>{{'aws.register.info.area'|translate}}： {{fourModule.regionName}} </td>
+        </tfoot>
+      </table>
+      <table class="table">
+        <caption>{{'aws.register.info.EAdministrator'|translate}}</caption>
+        <tfoot>
+          <tr>
+            <td>{{'aws.register.info.account'|translate}}： {{fourModule.username}} </td>
+            <td>{{'aws.register.info.passwd'|translate}}:
+              <input type="password" readonly ng-model="fourModule.password" class="inline-block form-control" />
+            </td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+        </tfoot>
+      </table>
+      <br>
+      <br>
+      <div class="text-center">
+        <button class="btn btn-default" ng-click="fourModule.prev()" type="button">{{'aws.register.info.last'|translate}}</button>
+        <button class="btn btn-next" ng-click="fourModule.completeFour()" type="button">{{'aws.register.info.deployment'|translate}}</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,410 @@
+<div class="page-inner overview">
+  <!-- 概况 start -->
+  <div class="box cluster-box">
+    <div class="col-3">
+      <div class="user-box">
+        <!-- <h2>{{"aws.overview.welcome"|translate}}，<span ng-bind="userName"></span></h2> -->
+        <a  ng-href="/single" >
+          <div class="cluster-item">
+            <div class="cluster-left">
+              <div class="circle-blue">
+                <i class="icon-aw-data-center"></i>
+              </div>
+            </div>
+            <div class="cluster-right">
+              <span>{{overViewData.regionDetailData.regions_total}}</span>
+              <div>{{"aws.overview.datacluster"|translate}}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="col-3">
+    
+      <div class="user-box">
+        <a ng-href="/permit/department">
+          <div class="cluster-item">
+            <div class="cluster-left">
+            <div class="circle-green">
+              <i class="icon-aw-bm"></i>
+            </div>
+            </div>
+            <div class="cluster-right">
+              <span>{{overViewData.regionDetailData.domain_total}}</span>
+              <div ng-href="/permit/department">{{"aws.overview.domain"|translate}}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="col-3">
+      <div class="user-box">
+        <a ng-href="/permit/project">
+          <div class="cluster-item">
+            <div class="cluster-left">
+              <div class="circle-waterblue">
+                <i class="icon-aw-project"></i>
+              </div>
+            </div>
+            <div class="cluster-right">
+              <span>{{overViewData.regionDetailData.project_total}}</span>
+              <div ng-href="/permit/project">{{"aws.overview.project"|translate}}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="col-3">
+      <div class="user-box">
+        <a ng-href="/monitor/alarmevent" class="cluster-left">
+          <div class="cluster-item">
+            <div class="cluster-left">
+            <div class="circle-orange">
+              <i class="icon-aw-warning"></i>
+            </div>
+            </div>
+            <div class="cluster-right">
+              <span class="cluster-warning">{{overViewData.regionDetailData.alarm_total}}</span>
+              <div ng-href="/monitor/alarmevent">{{"aws.overview.alarmNews"|translate}}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="box">
+    <div class="col-6">
+      <div class="title">{{"aws.overview.phyHost"|translate}}</div>
+      <div class="content-rowtwo">
+        <div class="right-con chart-hardware">
+          <div class="map-bg">
+            <!-- <div id="container"></div>
+            <span class="pre icon-aw-angle-left" ng-if="switchRegionChart.hardware.pre" ng-click="switchRegionChart.pre()"></span>
+            <span class="next icon-aw-angle-right" ng-if="switchRegionChart.hardware.next" ng-click="switchRegionChart.next()"></span> -->
+            <ul class="network-type clearfix">
+              <li>
+                <div>
+                  <i class="net-bg icon-aw-router">
+                    <span class="net-ip">
+                      <i></i>
+                    {{regionNetworks.floating}}
+                    </span>
+                  </i>
+                  <span class="net-name">{{"aws.overview.floating"|translate}}</span>
+                </div>
+                <div>
+                  <em class="vertical-line">
+                    <i></i>
+                    <i></i>
+                  </em>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <i class="net-bg icon-aw-router">
+                    <span class="net-ip">
+                      <i></i>
+                    {{regionNetworks.cluster}}
+                    </span>
+                  </i>
+                  <span class="net-name">{{"aws.overview.cluster"|translate}}</span>
+                </div>
+                <div>
+                  <em class="vertical-line">
+                    <i></i>
+                    <i></i>
+                  </em>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <i class="net-bg icon-aw-router">
+                    <span class="net-ip">
+                      <i></i>
+                    {{regionNetworks.tenant}}
+                    </span>
+                  </i>
+                  <span class="net-name">{{"aws.overview.tenant"|translate}}</span>
+                </div>
+                <div>
+                  <em class="vertical-line">
+                    <i></i>
+                    <i></i>
+                  </em>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <i class="net-bg icon-aw-router">
+                    <span class="net-ip">
+                      <i></i>
+                    {{regionNetworks.storage}}
+                    </span>
+                  </i>
+                  <span class="net-name">{{"aws.overview.storage"|translate}}</span>
+                </div>
+                <div>
+                  <em class="vertical-line">
+                    <i></i>
+                    <i></i>
+                  </em>
+                </div>
+              </li>
+            </ul>
+            <ul class="nodes-type clearfix">
+              <li ng-repeat="item in regionNodes">
+                <div>
+                  <i class="nodemv-bg icon-aw-pm" ng-class="{'warn-bg':!item.health}">
+                    <span class="net-ip">
+                      <i></i>
+                    {{item.hostInfoMap.ip}}
+                    </span>
+                  </i>
+                  <span class="mv-name"  ng-class="{'warn-bg':!item.health}">{{item.hostName}}</span>
+                </div>
+              </li>
+            </ul>
+            <!--<ul class="legend-tip clearfix">
+              <li>
+                <i></i>
+                <span>{{"aws.overview.virtualServer"|translate}}</span>
+              </li>
+               <li>
+                <i></i>
+                <span>物理裸机</span>
+              </li>
+            </ul> -->
+          </div>
+        </div>
+        <table class="tables region-hardware">
+          <thead>
+            <tr>
+              <th class="region-tb-name">{{"aws.overview.datacluster"|translate}}</th>
+              <!-- <th>{{"aws.overview.virtualServer"|translate}} / {{"aws.overview.physicalHost"|translate}}</th> -->
+              <th>{{"aws.overview.virtualServer"|translate}}</th>
+              <th>{{"aws.overview.normal"|translate}}</th>
+              <th>{{"aws.overview.error"|translate}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat = "item in overViewData.RegionPhy"  ng-if="item.type" ng-mouseenter="changeReg(item)">
+              <td class="region-name"><a ng-click="intoSingle(item)"  title="{{item.regionName}}">{{item.regionName}}</a></td>
+              <!-- <td class="phy-num">{{item.ironic.total}}/{{item.physical.total}}</td>
+              <td class="normal-num">{{item.ironic.success}}/{{item.physical.success}}</td>
+              <td class="abnormal-num">{{item.ironic.error}}/{{item.physical.error}}</td> -->
+              <td class="phy-num">{{item.ironic.total}}</td>
+              <td class="normal-num">{{item.ironic.success}}</td>
+              <td class="abnormal-num">{{item.ironic.error}}</td>
+            </tr>
+            <tr ng-repeat = "item in overViewData.RegionPhy"  ng-if="!item.type" class="datacenter-tips">
+              <td class="region-name"><a ng-click="intoSingle(item)" title="{{item.regionName}}">{{item.regionName}}</a></td>
+              <td colspan="3">{{item.tips}}</td>
+            </tr>
+          </tbody>
+        </table>  
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="title">{{"aws.overview.vmHost"|translate}}</div>
+       <div class="content-rowtwo">
+          <div class="right-con">
+            <div class="panels clearfix">
+              <div class="pie-wrap">
+                <div class="pie" chart-pie panel='panels'></div>
+                <div class="pie-center" ng-if="panels.data.length != 0">
+                  <div class="num">{{overViewData.RegionVmTotal}}</div>
+                  <div class="text">{{'aws.monitor.virtual.sum'|translate}}</div>
+                </div>
+              </div>
+              <div class="pie-legend">
+                <dl class="dl-horizontal" ng-repeat="legend in panels.data">
+                  <dt title="{{legend.name}} : {{legend.value}}"><i style="background-color:{{panels.colors[$index]}}"></i></dt><span class="pie-legend-name"  ng-show="panels.data.length<3">{{legend.regionName}}:</span>
+                  <span class="pie-legend-value" ng-show="panels.data.length<3">{{legend.value}}</span>
+                </dl>
+              </div>
+            </div>
+          </div>
+          <table class="tables">
+          <thead>
+            <tr>
+              <th class="region-tb-name">{{"aws.overview.datacluster"|translate}}</th>
+              <th>{{"aws.overview.vmHostNumber"|translate}}</th>
+              <th>{{"aws.overview.normal"|translate}}</th>
+              <th>{{"aws.overview.error"|translate}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat = "item in overViewData.RegionVm"  ng-if="item.type">
+              <td class="region-name">
+                <i class="icon-box" ng-style="{background:overViewData.colors[$index]}"></i>
+                <a  ng-click="intoSingle(item)" title="{{item.regionName}}">{{item.regionName}}</a>
+              </td>
+              <td class="phy-num">{{item.total}}</td>
+              <td class="normal-num">{{item.success}}</td>
+              <td class="abnormal-num">{{item.error}}</td>
+            </tr>
+            <tr ng-repeat = "item in overViewData.RegionVm"  ng-if="!item.type" class="datacenter-tips">
+              <td class="region-name"><a ng-click="intoSingle(item)" title="{{item.regionName}}">{{item.regionName}}</a></td>
+              <td colspan="3">{{item.tips}}</td>
+            </tr>
+          </tbody>
+        </table>  
+        </div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="col-3">
+      <div class="inner">
+        <div class="title clearfix">
+          <span>{{"aws.overview.cpurate"|translate}}</span>
+          <ul class="region-tips" ng-if="piesCpu.data[0].values.length!=0">
+            <li ng-repeat="item in overViewData.totalCpu">
+              <i class="icon-box" title="{{item.name}}" ng-style="{background:overViewData.colors[$index]}"></i>
+              <span class="region-name" title="{{item.name}}" ng-show="overViewData.totalCpu.length<3">{{item.name}}</span>
+              <div class="tips" ng-if="!item.tips">
+                <em></em>
+                <div class="tips-title clearfix">
+                  <span class="title">{{item.name}}</span>
+                  <!-- <span class="unit">单位：GB</span> -->
+                </div>
+                <div class="total-item">{{"aws.overview.totalCore"|translate}}：<i title="{{item.total}}">{{item.total}}</i></div>
+                <div class="used-item">{{"aws.overview.inUsed"|translate}}：<i title="{{item.used}}">{{item.used}}</i></div>
+                <div class="free-item">{{"aws.overview.unUsed"|translate}}：<i title="{{item.free}}">{{item.free}}</i></div>
+              </div>
+              <div class="tips" ng-if="item.tips">
+                <em></em>
+                <div class="tips-title clearfix">
+                  <span class="errors-tips">{{item.tips}}</span>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <span class="chart-tips" ng-if="piesCpu.data[0].values.length==0">{{"aws.overview.nodata"|translate}}</span>
+        <div class="panels clearfix" ng-if="piesCpu.data[0].values.length!=0">
+          <div echart-multiline style="height: 260px;" data="piesCpu"></div>
+          <!-- <div class="area-chart-wrap" chart-area panel="piesCpu" view="true" queue="'cpu'"></div> -->
+        </div>
+      </div>
+    </div>
+    <div class="col-3" >
+      <div class="inner">
+        <div class="title clearfix">
+          <span>{{"aws.overview.memrate"|translate}}</span>
+          <ul class="region-tips" ng-if="piesMem.data[0].values.length!=0">
+            <li ng-repeat="item in overViewData.totalMem">
+              <i class="icon-box" title="{{item.name}}" ng-style="{background:overViewData.colors[$index]}"></i>
+              <span class="region-name" title="{{item.name}}" ng-show="overViewData.totalMem.length<3">{{item.name}}</span>
+              <div class="tips"  ng-if="!item.tips">
+                <em></em>
+                <div class="tips-title clearfix">
+                  <span class="title">{{item.name}}</span>
+                  <span class="unit">{{"aws.overview.unit"|translate}}：{{item.unit}}</span>
+                </div>
+                <div class="total-item">{{"aws.overview.totalMemory"|translate}}：<i title="{{item.total}}">{{item.total}}</i></div>
+                <div class="used-item">{{"aws.overview.inUsed"|translate}}：<i title="{{item.used}}">{{item.used}}</i></div>
+                <div class="free-item">{{"aws.overview.unUsed"|translate}}：<i title="{{item.free}}">{{item.free}}</i></div>
+              </div>
+              <div class="tips" ng-if="item.tips">
+                <em></em>
+                <div class="tips-title clearfix">
+                  <span class="errors-tips">{{item.tips}}</span>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <span class="chart-tips" ng-if="piesMem.data[0].values.length==0">{{"aws.overview.nodata"|translate}}</span>
+        <div class="panels clearfix" ng-if="piesMem.data[0].values.length!=0">
+          <div echart-multiline style="height: 260px;" data="piesMem"></div>
+          <!-- <div class="area-chart-wrap" chart-area panel="piesMem" view="true"></div> -->
+        </div>
+      </div>
+    </div>
+    <div class="col-3" >
+      <div class="inner">
+        <div class="title clearfix">
+          <span>{{"aws.overview.storagerate"|translate}}</span>
+          <ul class="region-tips" ng-if="piesStorage.data[0].values.length!=0">
+            <li ng-repeat="item in overViewData.totalSto">
+              <i class="icon-box" title="{{item.name}}" ng-style="{background:overViewData.colors[$index]}"></i>
+              <span class="region-name" title="{{item.name}}"  ng-show="overViewData.totalSto.length<3">{{item.name}}</span>
+              <div class="tips" ng-if="!item.tips">
+                <em></em>
+                <div class="tips-title clearfix">
+                  <span class="title">{{item.name}}</span>
+                  <span class="unit">{{"aws.overview.unit"|translate}}：{{item.unit}}</span>
+                </div>
+                <div class="total-item">{{"aws.overview.totalMemory"|translate}}：<i title="{{item.total}}">{{item.total}}</i></div>
+                <div class="used-item">{{"aws.overview.inUsed"|translate}}：<i title="{{item.used}}">{{item.used}}</i></div>
+                <div class="free-item">{{"aws.overview.unUsed"|translate}}：<i title="{{item.free}}">{{item.free}}</i></div>
+              </div>
+              <div class="tips" ng-if="item.tips">
+                <em></em>
+                <div class="tips-title clearfix">
+                  <span class="errors-tips">{{item.tips}}</span>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <span class="chart-tips" ng-if="piesStorage.data[0].values.length==0">{{"aws.overview.nodata"|translate}}</span>
+        <div class="panels clearfix" ng-if="piesStorage.data[0].values.length!=0">
+          <div echart-multiline style="height: 260px;" data="piesStorage"></div>
+          <!-- <div class="area-chart-wrap" chart-area panel="piesStorage" view="true"></div> -->
+        </div>
+      </div>
+    </div>
+    <div class="col-3" >
+      <div class="inner">
+        <div class="title clearfix">
+          <span>{{"aws.overview.iprate"|translate}}</span>
+          <ul class="region-tips" ng-if="piesIp.data[0].values.length!=0">
+            <li ng-repeat="item in overViewData.totalIp">
+              <i class="icon-box" title="{{item.name}}" ng-style="{background:overViewData.colors[$index]}"></i>
+              <span class="region-name" title="{{item.name}}" ng-show="overViewData.totalIp.length<3">{{item.name}}</span>
+              <div class="tips" ng-if="!item.tips">
+                <em></em>
+                <div class="tips-title clearfix">
+                  <span class="title">{{item.name}}</span>
+                  <span class="unit">{{"aws.overview.unit"|translate}}：{{item.unit}}</span>
+                </div>
+                <div class="total-item">{{"aws.overview.totalNumber"|translate}}：<i title="{{item.total}}">{{item.total}}</i></div>
+                <div class="used-item">{{"aws.overview.inUsed"|translate}}：<i title="{{item.used}}">{{item.used}}</i></div>
+                <div class="free-item">{{"aws.overview.unUsed"|translate}}：<i title="{{item.free}}">{{item.free}}</i></div>
+              </div>
+              <div class="tips" ng-if="item.tips">
+                <em></em>
+                <div class="tips-title clearfix">
+                  <span class="errors-tips">{{item.tips}}</span>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <span class="chart-tips" ng-if="piesIp.data[0].values.length==0">{{"aws.overview.nodata"|translate}}</span>
+        <div class="panels clearfix" ng-if="piesIp.data[0].values.length!=0">
+          <div echart-multiline style="height: 260px;" data="piesIp"></div>
+          <!-- <div class="area-chart-wrap" chart-area panel="piesIp" view="true" queue="'vlan'"></div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--<script type="text/ng-template"  id="registedInsTable.html">
+    <table class="table ins-tip">
+      <thead>
+        <tr>
+          <th>{{"aws.overview.hostName"|translate}}</th>
+          <th>{{"aws.overview.vmHostNumber"|translate}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="host in insRegistedInfo">
+          <td><span>{{host.phyInsName}}</span></td>
+          <td><span>{{host.vmNum}}</span></td>
+        </tr>
+      </tbody>
+    </table>
+</script>-->

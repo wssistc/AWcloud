@@ -1,0 +1,13 @@
+<div class="page-inner monitor-view ">
+  <h4> 路由器</h4>
+  <div class="table-content">
+    <table ng-table="tableParams" class="table">
+      <tr ng-repeat="router in $data">
+        <td data-title="'路由器名称'" sortable="'name'">{{router.name}}</td>
+        <td data-title="'状态'" sortable="'statu'"><span>{{router.statu}}</span></td>
+        <td data-title="'外部网络'" sortable="'ext_net'"><span>{{router.ext_net}}</span></td>
+        <td data-title="'使用SNAT'" sortable="'snat'"><span>{{router.snat}}</span></td>
+      </tr>
+    </table>
+  </div>
+</div>

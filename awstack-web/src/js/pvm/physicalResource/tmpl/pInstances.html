@@ -1,0 +1,318 @@
+<div class="page-inner">
+    <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='2'}">
+        <div class="table-action">
+            <button type="button" class="btn btn-new" disabled="disabled"><i class="icon-aw-add-to2"></i> 申请</button>
+            <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-start-up"></i> {{'aws.instances.boot'|translate}}</button>
+            <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-pc"></i> {{'aws.instances.vnc'|translate}}</button>
+            <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-turn-off"></i> 锁定</button>
+            <div class="dropdown">
+                <button type="button" class="btn btn-normal dropdown-toggle" disabled="disabled">{{'aws.instances.moreOps'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+            </div>
+            <div class="pull-right">
+                <into-information modular="'pvminstances'"></into-information>
+                <button class="btn btn-renovat right-ports" disabled="disabled"><i class="icon-aw-refresh"></i></button>
+                <div class="search-box right-ports">
+                    <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.img.search' | translate}}" />
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="table-content">
+            <table class="table">
+                <colgroup>
+                    <col width="5%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="20%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>
+                            <label class="checkbox">
+                                <input type="checkbox" name="r" disabled="disabled" />
+                                <i class="iconfont"></i>
+                            </label>
+                        </th>
+                        <th>物理机名称</th>
+                        <th>{{'aws.instances.status'|translate}}</th>
+                        <th>{{'aws.instances.IPaddress'|translate}}</th>
+                        <th>{{'aws.instances.imgName'|translate}}</th>
+                        <th>操作锁定</th>
+                        <th>描述</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td colspan="7" class="text-center">
+                        如需使用物理资源管理块功能，请打开”系统管理 > 系统设置 > <a href="/#/system/plugin">功能管理</a> “界面添加”物理机管理”模块
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='1'}">
+        <div class="table-action">
+            <div class='btn-box'>
+                <button type="button" ng-click="applypvm()" class="btn btn-new " licence-type="btn" id="PhyRes-vol-apply"><i class="icon-aw-add-to2"></i> 申请</button>
+                <button ng-click="bootServer(checkedItems)" class="btn" ng-class="{'btn-normal':boot_btn,'btn-normal':!boot_btn,'disabled':boot_btn}" uib-popover="{{isDisabled?('aws.pvm.servers.placeholder.plsSelServer' | translate):('aws.pvm.tip.tip1'| translate)}}" popover-enable="boot_btn" popover-trigger="mouseenter" popover-placement="bottom" licence-type="btn" id="PhyRes-vol-enable">
+                    <i class="icon-aw-start-up"></i> {{'aws.instances.boot'|translate}}
+                </button>
+                <button ng-click="vncServer(editData)" class="btn" ng-class="{'btn-normal':shutoff_btn || lock_btn,'btn-normal':!shutoff_btn && !lock_btn,'disabled':shutoff_btn || lock_btn}" uib-popover="{{isDisabled?('aws.pvm.servers.placeholder.plsSelServer' | translate):('aws.pvm.tip.tip12'| translate)}}" popover-enable="shutoff_btn || lock_btn" popover-trigger="mouseenter" popover-placement="bottom" licence-type="btn" id="PhyRes-vol-control" licence-if="ADMIN">
+                    <i class="icon-aw-pc"></i> {{'aws.instances.vnc'|translate}}
+                </button>
+                <button ng-click="lockServer(checkedItems)" class="btn" ng-class="{'btn-normal':lock_btn,'btn-normal':!lock_btn,'disabled':lock_btn}" uib-popover="{{isDisabled?('aws.pvm.servers.placeholder.plsSelServer' | translate):('aws.pvm.tip.tip10'| translate)}}" popover-enable="lock_btn" popover-trigger="mouseenter" popover-placement="bottom" licence-type="btn" id="PhyRes-vol-locking">
+                    <i class="icon-aw-turn-off"></i>  锁定
+                </button>
+                <div class="dropdown" licence-type="btn-group">
+                    <button type="button" class="btn btn-normal dropdown-toggle" ng-disabled="delisDisabled" data-toggle="dropdown">{{'aws.instances.moreOps'|translate}}<i class="icon-aw-angle-down-1"></i></button>
+                    <ul class="dropdown-menu">
+                        <li licence-type="btn" id="PhyRes-vol-reinstallSystem">
+                            <button ng-click="resetServer(checkedItems)" ng-class="{'disabled':reset_btn}" uib-popover="{{isDisabled?'':restTip}}" popover-enable="reset_btn" popover-trigger="mouseenter" popover-placement="left">系统重装</button>
+                        </li>
+                        <li licence-type="btn" id="PhyRes-vol-Unlock">
+                            <button ng-click="unlockServer(checkedItems)" ng-class="{'disabled':unlock_btn}" uib-popover="{{isDisabled?'':('aws.pvm.tip.tip11'| translate)}}" popover-enable="unlock_btn" popover-trigger="mouseenter" popover-placement="left">解锁</button>
+                        </li>
+                        <li licence-type="btn" id="PhyRes-vol-shutdown">
+                            <button ng-click="shutdownServer(checkedItems)" ng-class="{'disabled':shutoff_btn}" uib-popover="{{isDisabled?'':('aws.pvm.tip.tip2'| translate)}}" popover-enable="shutoff_btn" popover-trigger="mouseenter" popover-placement="left">关机</button>
+                        </li>
+                        <li licence-type="btn" id="PhyRes-vol-restart">
+                            <button ng-click="rebootServer(checkedItems)" ng-class="{'disabled':shutoff_btn}" uib-popover="{{isDisabled?'':('aws.pvm.tip.tip3'| translate)}}" popover-enable="shutoff_btn" popover-trigger="mouseenter" popover-placement="left">重启</button>
+                        </li>
+                        <li licence-type="btn" id="PhyRes-vol-del">
+                            <button ng-click="delServer(checkedItems) " ng-class="{'disabled':del_btn}"  popover-enable="del_btn">删除</button>
+                        </li>
+                        <li licence-type="btn" id="system-ipmi-monitorclient">
+                            <button ng-click="getMonitorClient(editData)" >获取监控客户端</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pull-right">
+                <!-- <setting title-data="titleData" site-title="titleName" table-data="networksTableData" search-tearm="networkSearchTearm(obj)"></setting> -->
+                <setting title-data="titleData" site-title="titleName"></setting>
+                <button class="btn btn-renovat right-ports" ng-click="getServers()"><i class="icon-aw-refresh"></i></button>
+                <div class="search-box right-ports">
+                    <form name="searchForm" novalidate="" ng-keyup="applyGlobalSearch()" class="ng-pristine ng-valid ng-valid-maxlength">
+                        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"> <i class="icon-aw-search"></i>
+                        </button>
+                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{ 'aws.action.search'| translate}}" />
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="table-content">
+            <table ng-table="tableParams" class="table">
+                <colgroup>
+                    <col width="5%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="20%">
+                </colgroup>
+                <tr ng-repeat="item in $data">
+                    <td header="'headerCheckbox.html'" class="check-td">
+                        <label class="checkbox">
+                            <input type="checkbox" name="r" ng-model="checkboxes.items[item.uid]" value="{{item.uid}}" />
+                            <i class="iconfont"></i>
+                        </label>
+                    </td>
+                    <td data-title="'物理机名称'" sortable="'name'" ng-if="titleData[0].value">
+                        <div class="edit-name">
+                            <a ng-href="#/pvm/pvminstances?id={{item.uid}}" title="{{item.name}}">{{item.name}}</a>
+                        </div>
+                    </td>
+                    <td data-title="'aws.instances.status'|translate" sortable="'status'" ng-if="titleData[1].value">
+                        <span ng-class="{
+          'bg-green':(item.status=='active'||item.status=='up'),
+          'bg-blue':(item.status=='building'||item.status=='build'||item.status=='powering-off'||item.status=='powering-on'||item.status=='deleting'||item.status=='deleted'||item.status=='soft-deleting'||item.status=='soft-delete'||item.status=='reboot_pending'||item.status=='reboot'||item.status=='pausing'||item.status=='unpausing'||item.status=='suspending'||item.status=='resuming'||item.status=='resize'||item.status=='resize_prep'||item.status=='resize_finish'||item.status=='resize_migrating'||item.status=='image_backup'||item.status=='image_snapshot'||item.status=='spawning'||item.status=='migrating'||item.status=='rebuilding'||item.status=='rebuild'),
+          'bg-orange':(item.status=='stopped'||item.status=='shutoff'||item.status=='paused'||item.status=='suspended'||item.status=='resized'||item.status=='verify_resize'||item.status=='revert_resize'||item.status=='down'||item.status=='unknow'||item.status=='unrecognized'),'bg-red':(item.status=='error')
+          }">{{'aws.instances.table.status.'+item.status| translate}}<i ng-class="{'icon-aw-refresh':(item.status=='build'||item.status=='building' || item.status=='soft-deleting'|| item.status=='powering-off' ||item.status=='powering-on' ||item.status=='deleting' ||item.status=='reboot'||item.status=='reboot_pending' || item.status=='resuming' || item.status=='suspending' || item.status=='unpausing' || item.status=='pausing'  || item.status =='resize_migrating' || item.status =='resized'  || item.status =='resize_prep' || item.status =='resize_finish'  || item.status =='image_backup' || item.status =='image_snapshot' || item.status =='spawning' || item.status == 'verify_resize' || item.status =='resize' || item.status =='rebuilding' || item.status =='rebuild' || item.status =='migrating')}" class="aw-spin"></i>
+          </span>
+                    </td>
+                    <td data-title="'aws.instances.IPaddress'|translate" sortable="'fixedIps'" ng-if="titleData[2].value">
+                        <span ng-repeat="fixedIp in item.fixedIps track by $index">{{fixedIp}}<br></span>
+                    </td>
+                    <td data-title="'aws.instances.imgName'|translate" sortable="'imageName'" ng-if="titleData[3].value">{{item.imageName}}</td>
+                    <td data-title="'操作锁定'" sortable="'locked'" ng-if="titleData[4].value"><span class="date">{{'aws.pvm.servers.table.locked.' + item.locked | translate}}</span></td>
+                    <td data-title="'描述'|translate" ng-if="titleData[5].value">
+                        <span ng-click="showDesc(item)" class="bluePointer" ng-if="!item.showDesc">添加描述</span>
+                        <div ng-if="item.showDesc">
+                            <form name="descForm" novalidate>
+                                <div class="controls">
+                                    <input type="text" class="form-controls" id="editDescInput" name="desc" ng-model="item.description" ng-maxlength="32" ng-blur="editDesc(item,descForm,phymac_desc)" />
+                                    <div class="red" ng-messages="descForm.desc.$error">
+                                        <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <empty-tip empty-type="loadData"></empty-tip>
+        </div>
+    </div>
+    <div ng-controller="detailCtrl">
+        <pane class="detail-body vm-view monitor-view" animation="animation">
+            <div class="tab-content">
+                <div class="detail-row ins-info">
+                    <div class="detail-header">
+                    </div>
+                    <div class="detail-title">
+                        <a class="an-close" ng-href="/pvm/pvminstances"><i class=" icon-aw-mail-reply"></i></a>
+                        <span>{{phymacName}}详情</span>
+                    </div>
+                    <div class="detail-info">
+                        <div class="tab-content-line"></div>
+                        <div class="">
+                            <table class="table table-info column">
+                                <tr>
+                                    <td>物理机名称：</td>
+                                    <td>{{insConfigDatas.name}}</td>
+                                    <td>状态：</td>
+                                    <td>{{'aws.instances.table.status.'+insConfigDatas.status| translate}}</td>
+                                </tr>
+                                <tr>
+                                    <td>IP地址：</td>
+                                    <td>
+                                        <span ng-repeat="ip in insConfigDatas.fixedIps">{{ip}}<br/></span>
+                                    </td>
+                                    <td>操作锁定：</td>
+                                    <td>{{'aws.instances.table.status.lock.'+insConfigDatas.locked| translate}}</td>
+                                </tr>
+                                <tr>
+                                    <td>备注：</td>
+                                    <td>{{insConfigDatas.description}}</td>
+                                    <td>镜像：</td>
+                                    <!-- <td><span ng-repeat="volume in insConfigDatas.volumes">设备:{{volume.device}},名称:{{volume.name}},大小:{{volume.size}}<br/></span></td> -->
+                                    <td>{{insConfigDatas.imageName}}</td>
+                                </tr>
+                                <tr>
+                                    <td>硬件配置：</td>
+                                    <td> CPU：{{insConfigDatas.vcpus}}{{'aws.instances.info.core'|translate}}，{{'aws.instances.info.memory'|translate}}：{{insConfigDatas.ram/1024}}GB</td>
+                                    <td>申请时间：</td>
+                                    <td>{{insConfigDatas.createtime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                                </tr>
+                                <tr>
+                                    <td>网络名称：</td>
+                                    <td><span ng-repeat="net in insConfigDatas.netName">{{net}}<br/></span></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </pane>
+    </div>
+</div>
+<script type="text/ng-template" id="monitorClientModal.html">
+    <div class="modal-common monitor-client-modal" ng-class="{'fold':!fold,'unfold':fold}">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">获取监控客户端</h3>
+        </div>
+        <div class="modal-body clearfix">
+            <div class="left-box clearfix" ng-class="{'fold':!fold,'unfold':fold}">
+                <div class="tab-offset-right phyinstances">
+                    <ul class="nav nav-tabs left" ng-init="tab.index=0">
+                        <li ng-class="{active: tab.index == 0}">
+                            <a ng-click="tab.index = 0">Windows</a>
+                        </li>
+                        <li ng-class="{active: tab.index == 1}">
+                            <a ng-click="tab.index =1">Linux</a>
+                        </li>
+                    </ul> 
+                </div>
+                <span class="fold-arrow" ng-click="fold =!fold" ng-class="{'blue':!fold,'unfold-arrow':fold}">
+                支持的操作系统版本
+                <i  class="conf-icon icon-aw-angle-right" ng-class="{'icon-aw-angle-left':fold,'icon-aw-angle-right':!fold}" ></i>
+            </span>
+                <fieldset>
+                    <h5>1. 安装包下载</h5>
+                    <div ng-show="tab.index == 0">
+                        <p>在被纳管物理机(请先配置网络，使得本机可以访问云管)，浏览器访问URL</p>
+                        <div class="frag">
+                            <p class="blue">http://{{hostIP}}/telegraf_window_1.0.1_x64.zip</p>
+                        </div>
+                    </div>
+                    <div ng-show="tab.index == 1">
+                        <p>在被纳管物理机(请先配置网络，使得本机可以访问云管)，执行命令：</p>
+                        <div class="frag">
+                            <p class="blue"># wget http://{{hostIP}}/telegraf-1.5.x86_64_centos6.5.tar.gz</p>
+                            <p class="blue"># wget http://{{hostIP}}/telegraf-1.5.x86_64_centos7.tar.gz</p>
+                            <p class="blue"># wget http://{{hostIP}}/telegraf-1.5.amd64_ubuntu14.tar.gz</p>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <h5>2. 安装包解压缩</h5>
+                    <p ng-show="tab.index == 0">将安装包解压缩至目录C:\telegraf\下</p>
+                    <div ng-show="tab.index == 1">
+                        <p>在存放安装包目录下,执行命令：</p>
+                        <div class="frag">
+                            <p class="blue"># tar zxvf telegraf-1.5.x86_64_centos6.5.tar.gz</p>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <h5>3. 自动安装与启动</h5>
+                    <div ng-show="tab.index == 0">
+                        <p>管理员身份运行cmd，执行以下命令：</p>
+                        <div class="frag">
+                            <p class="blue">
+                            C:/telegraf/telegraf_window_1.0.1_x64/telegraf_window.bat
+                                <span>{{influxdbip}}</span></br> 
+                                <span>{{uid}}</span>
+                                <span>{{regionKey}}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div ng-show="tab.index == 1">
+                        <p>在解压缩目录下，执行以下命令：</p>
+                        <div class="frag">
+                            <p class="blue">
+                              # ./telegraf_centos6.5.sh
+                              <span>{{influxdbip}}</span></br>
+                              <span>{{uid}}</span>
+                              <span>{{regionKey}}</span>
+                            </p>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="right-box clearfix" ng-show="fold">
+                <div ng-show="tab.index == 0">
+                    <h4>Windows</h4>
+                    <p>支持的操作系统版本：</p>
+                    <div class="v-wrap win">
+                        <li ng-repeat="item in winSysVersionList">{{item}}</li>
+                    </div>
+                </div>
+                <div ng-show="tab.index == 1">
+                    <h4>Linux</h4>
+                    <p>支持的操作系统版本：</p>
+                    <div class="v-wrap linux">
+                        <li ng-repeat="item in linuxSysVersionList">{{item}}</li>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+        <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+        <i class="iconfont"></i>
+    </label>
+</script>

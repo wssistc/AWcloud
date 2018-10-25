@@ -1,0 +1,867 @@
+<div class="page-inner">
+  <pane class="detail-body" animation="animation">
+    <div class="tab-content">
+      <div class="detail-row">
+        <div class="detail-title">
+          <a class="an-close" ng-href="#/clb/instance">
+            <i class="icon-aw-mail-reply"></i>
+          </a>
+          <span class="tab-title">负载均衡实例详情</span>
+        </div>
+        <div class="detail-info">
+          <uib-tabset active="activeTabId" justified="true">
+            <uib-tab index="0" heading="实例概况">
+              <table class="table table-info">
+                <colgroup>
+                  <col width="15%">
+                  <col width="35%">
+                  <col width="15%">
+                  <col width="35%">
+                </colgroup>
+                <tr>
+                  <td>实例名称</td>
+                  <td>{{loadBalancer ? loadBalancer["loadBalancerName"] : ""}}</td>
+                  <td>创建时间</td>
+                  <td>{{loadBalancer ? loadBalancer["createTime"] : ""}}</td>
+                </tr>
+                <tr>
+                  <td>实例ID</td>
+                  <td>{{loadBalancer ? loadBalancer["unLoadBalancerId"] : ""}}</td>
+                  <td>修改时间</td>
+                  <td>{{loadBalancer ? loadBalancer["statusTime"] : ""}}</td>
+                </tr>
+                <tr>
+                  <td>所属项目</td>
+                  <td>{{loadBalancer && loadBalancer["projectName"] === 'default' ? "默认项目" :
+                    loadBalancer["projectName"]}}
+                  </td>
+                  <td>所属网络</td>
+                  <td>
+                    {{loadBalancer ?
+                    (loadBalancer["vpcName"] === 'base' ? "基础网络" : loadBalancer["vpcName"] || "-") :
+                    ""}}
+                  </td>
+                </tr>
+                <tr>
+                  <td>地域</td>
+                  <td>{{loadBalancer ? loadBalancer.regionName : ""}}
+                  </td>
+                  <td>类型</td>
+                  <td>{{loadBalancer ? loadBalancerTypes[loadBalancer["loadBalancerType"]] : ""}}</td>
+                </tr>
+                <tr>
+                  <td>域名</td>
+                  <td>{{loadBalancer ? loadBalancer["domain"] : ""}}</td>
+                  <td>VIP</td>
+                  <td>{{loadBalancer ? loadBalancer["loadBalancerVips"].join(", ") : ""}}</td>
+                </tr>
+              </table>
+            </uib-tab>
+            <uib-tab index="1" heading="监听器管理">
+              <div class="table-action">
+                <button type="button" data-toggle="modal" class="btn btn-primary"
+                        ng-click="createLBListener()">
+                  <i class="icon-aw-add-to2"></i>新建监听器
+                </button>
+                <button type="button" data-toggle="modal" class="btn btn-primary"
+                        ng-click="modifyLBListener()" ng-disabled="!canModifyLBL">
+                  <i class="icon-aw-modify"></i>修改监听器
+                </button>
+                <button type="button" data-toggle="modal" class="btn btn-primary"
+                        ng-click="deleteLBListeners()" ng-disabled="!canDeleteLBL">
+                  <i class="icon-aw-delete"></i>删除监听器
+                </button>
+                <button type="button" class="btn btn-primary" ng-csv="downloadAllLBListenersData()"
+                        charset="utf-8" add-bom="true"
+                        csv-header="['监听器ID', '监听器名称', '所属负载均衡器ID', '所属负载均衡器名称', '负载均衡器监听端口',
+                        '监听器后端转发端口', '监听器协议类型', '监听器状态', '负载均衡方式', '会话保持', '会话保持时间', '健康检查',
+                        '检查目录', '检查方式', '检查选项', '检查的HTTP状态码']"
+                        filename="listeners.{{currentRegionCode}}.{{currentProjectId}}.{{loadBalancer['unLoadBalancerId']}}.csv">
+                  下载
+                </button>
+                <button class="btn btn-refresh" ng-click="refreshLBListeners()">
+                  <i class="icon-aw-refresh"></i>
+                  刷新
+                </button>
+              </div>
+              <div class="table-content">
+                <table ng-table="lbListenersTable" class="table" show-filter="false">
+                  <colgroup>
+                    <col width="4%">
+                    <col width="12%">
+                    <col width="12%">
+                    <col width="12%">
+                    <col width="12%">
+                    <col width="12%">
+                    <col width="12%">
+                    <col width="12%">
+                    <col width="12%">
+                  </colgroup>
+                  <tr ng-repeat="listener in lbListenersTable.data">
+                    <td header="'lblHeaderCheckbox.html'">
+                      <label class="checkbox">
+                        <input type="checkbox" ng-model="lblCheckboxes.items[listener.unListenerId]"/>
+                        <i class="iconfont"></i>
+                      </label>
+                    </td>
+                    <td data-title="'监听器名称'" sortable="'listenerName'">
+                      <a
+                        ng-href="#/clb/instance/{{loadBalancer['unLoadBalancerId']}}/listener/{{listener['unListenerId']}}">
+                        {{listener["listenerName"]}}
+                      </a>
+                    </td>
+                    <td data-title="'监听端口'" sortable="'loadBalancerPort'">
+                      <span>{{listener["loadBalancerPort"]}}</span>
+                    </td>
+                    <td data-title="'后端转发端口'" sortable="'instancePort'">
+                      <span>{{listener["instancePort"]}}</span>
+                    </td>
+                    <td data-title="'协议类型'" sortable="'protocol'">
+                      <span>{{listenerProtocols[listener["protocol"]]}}</span>
+                    </td>
+                    <td data-title="'均衡方式'" sortable="'httpHash'">
+                      <span>{{listenerHttpHash[listener["httpHash"]] || "-"}}</span>
+                    </td>
+                    <td data-title="'健康检查'" sortable="'healthSwitch'">
+                      <span class="{{listener['healthSwitch'] === 1 ? 'green' : 'orange'}}">
+                        {{listenerHealthSwitch[listener["healthSwitch"]]}}
+                      </span>
+                    </td>
+                    <style>
+                      .popover {
+                        max-width: 100%;
+                        max-height: 100%;
+                      }
+                    </style>
+                    <td data-title="'健康状态'" sortable="'healthStatus'">
+                      <div ng-mouseover="listener.popoverOpened=true"
+                           ng-mouseleave="listener.popoverOpened=false">
+                        <button ng-if="listener['healthSwitch'] === 1"
+                                ng-disabled="listener['totalServerStatus'] === '未绑定CVM'"
+                                ng-mouseenter="selectListener(listener)"
+                                popover-trigger="none"
+                                popover-placement="left"
+                                popover-is-open="listener.popoverOpened"
+                                uib-popover-template="'showHealthStatusDetails.html'"
+                                type="button" class="btn btn-default {{
+                              listener['totalServerStatus'] === '健康' ? 'btn-success' :
+                              (listener['totalServerStatus'] === '异常' ? 'btn-danger' : '')
+                              }}">
+                          <span>{{listener["healthSwitch"] === 1 ? listener["totalServerStatus"] : "-"}}</span>
+                        </button>
+                      </div>
+                      <span ng-if="listener['healthSwitch'] === 0">-</span>
+                    </td>
+                    <td data-title="'监听器状态'" sortable="'status'">
+                      <span class="{{listener['status'] === 1 ? 'green' : 'orange'}}">
+                        {{listenerStatuses[listener["status"]]}}
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </uib-tab>
+            <uib-tab index="2" heading="云主机管理">
+              <div class="table-action">
+                <button type="button" data-toggle="modal" class="btn btn-primary"
+                        ng-click="bindLBServers()">
+                  <i class="icon-aw-add-to2"></i>绑定云主机
+                </button>
+                <button type="button" data-toggle="modal" class="btn btn-primary"
+                        ng-click="unbindLBServer()" ng-disabled="!canUnbindLBServer">
+                  <i class="icon-aw-delete"></i>解绑
+                </button>
+                <button type="button" data-toggle="modal" class="btn btn-primary"
+                        ng-click="modifyLBServerWeight()" ng-disabled="!canModifyLBBindingServerWeight">
+                  <i class="icon-aw-modify"></i>修改权重
+                </button>
+                <button type="button" class="btn btn-primary" ng-csv="downloadAllLBBindingServersData()"
+                        charset="utf-8" add-bom="true"
+                        csv-header="['id', '名称', '内网IP', '公网IP', '权重', '状态']"
+                        filename="bindedservers.{{currentRegionCode}}.{{currentProjectId}}.{{loadBalancer['unLoadBalancerId']}}.csv">
+                  下载
+                </button>
+                <button class="btn btn-refresh" ng-click="refreshLBBindingServers()">
+                  <i class="icon-aw-refresh"></i>
+                  刷新
+                </button>
+              </div>
+              <div class="table-content">
+                <table ng-table="lbbindingServersTable" class="table" show-filter="false">
+                  <colgroup>
+                    <col width="6%">
+                    <col width="13%">
+                    <col width="13%">
+                    <col width="13%">
+                    <col width="13%">
+                    <col width="13%">
+                    <col width="13%">
+                    <!--<col width="13%">-->
+                  </colgroup>
+                  <tr ng-repeat="server in lbbindingServersTable.data">
+                    <td header="'lbBindingServerHeaderCheckbox.html'">
+                      <label class="checkbox">
+                        <input type="checkbox" ng-model="lbBindServerCheckboxes.items[server.unInstanceId]"/>
+                        <i class="iconfont"></i>
+                      </label>
+                    </td>
+                    <td data-title="'云主机ID'" sortable="'server'">
+                      <a ng-click="jumpToCVMDetails(server['unInstanceId'])">
+                        {{server["unInstanceId"]}}
+                      </a>
+                    </td>
+                    <td data-title="'云主机名称'" sortable="'instanceName'">
+                      <span>{{server["instanceName"] || "-"}}</span>
+                    </td>
+                    <td data-title="'内网IP'" sortable="'lanIp'">
+                      <span>{{server["lanIp"] || "-"}}</span>
+                    </td>
+                    <td data-title="'公网IP'" sortable="'wanIpSet'">
+                      <span>{{server["wanIpSet"].join(", ") || "-"}}</span>
+                    </td>
+                    <td data-title="'权重'" sortable="'weight'">
+                      <span>{{server["weight"] || "-"}}</span>
+                    </td>
+                    <td data-title="'云主机状态'" sortable="'instanceStatus'">
+                      <span>{{lbServerStatus[server["instanceStatus"]]}}</span>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </uib-tab>
+          </uib-tabset>
+        </div>
+      </div>
+    </div>
+  </pane>
+</div>
+
+<script type="text/ng-template" id="lblHeaderCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="lblCheckboxes.allChecked" class="select-all" value=""/>
+    <i class="icon-aw-square"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="showHealthStatusDetails.html">
+  <div class="modal-common">
+    <div class="modal-body">
+      <div class="table-content">
+        <table ng-table="serverStatusesTable" class="table" show-filter="false">
+          <tr ng-repeat="serverStatus in serversStatuses">
+            <td data-title="'ID'">
+              <a ng-href="#/cvm/instances?id={{serverStatus['serverId']}}">
+                {{serverStatus["serverId"]}}
+              </a>
+            </td>
+            <td data-title="'名称'">
+              <span>{{serverStatus["serverName"]}}</span>
+            </td>
+            <td data-title="'IP'">
+              <span>{{serverStatus["ip"]}}</span>
+            </td>
+            <td data-title="'协议'">
+              <span>{{serverStatus["protocol"]}}</span>
+            </td>
+            <td data-title="'端口映射'">
+              <span>{{serverStatus["vport"]}} -> {{serverStatus["port"]}}</span>
+            </td>
+            <td data-title="'状态'">
+              <span class="{{serverStatus['status'] === '健康' ? 'green' : 'red'}}">
+                {{serverStatus["status"]}}
+              </span>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="createLBListener.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">新建监听器</h3>
+    </div>
+    <div class="modal-body">
+      <form name="createLBListenerForm">
+        <div class="control-group">
+          <label class="control-label">监听器名称&nbsp;<span class="red">*</span></label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="listenerName"
+                   ng-model="postData.listenerName" required
+                   placeholder="请输入监听器的名称"
+                   ng-pattern="/^[\u4e00-\u9fa5_a-zA-Z0-9\-]+$/" ng-maxlength="20"/>
+            <div class="error" ng-if="createLBListenerForm.listenerName.$dirty &&
+            createLBListenerForm.listenerName.$invalid">
+              <div ng-if="createLBListenerForm.listenerName.$error.pattern">
+                <span>监听器的名称必须是：英文、汉字、数字、连接线"-"或下划线"_"</span>
+              </div>
+              <div ng-if="createLBListenerForm.listenerName.$error.maxlength">
+                <span>监听器的名称不能超过20个字符！</span>
+              </div>
+              <div ng-if="createLBListenerForm.listenerName.$error.required">
+                <span>监听器的名称是必填项！</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">监听器协议：</label>
+          <div class="controls">
+            <ui-select ng-model="postData.protocol" name="protocol" required>
+              <ui-select-match placeholder="请选择监听器监听的协议">{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="item.code as item in listenerProtocols | filter: $select.search">
+                <div ng-bind-html="item.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-if="createLBListenerForm.protocol.$dirty && createLBListenerForm.protocol.$invalid">
+              <div ng-if="createLBListenerForm.protocol.$error.required">必填项</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">监听器端口&nbsp;<span class="red">*</span></label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="loadBalancerPort"
+                   ng-model="postData.loadBalancerPort" required
+                   placeholder="请输入监听器的端口，端口范围：1-65535"
+                   ng-pattern="/^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/"/>
+            <div class="error" ng-if="createLBListenerForm.loadBalancerPort.$dirty &&
+            createLBListenerForm.loadBalancerPort.$invalid">
+              <div ng-if="createLBListenerForm.loadBalancerPort.$error.pattern">
+                <span>监听器端口必须是整数，范围是：1-65535</span>
+              </div>
+              <div ng-if="createLBListenerForm.loadBalancerPort.$error.required">
+                <span>监听器端口是必填项！</span>
+              </div>
+            </div>
+            <div class="error" ng-if="loadBalancerPortConflict">
+              <div>
+                <span>监听器端口冲突，请换一个未使用的端口！</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">后端端口&nbsp;<span class="red">*</span></label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="instancePort"
+                   ng-model="postData.instancePort" required
+                   placeholder="请输入后端云服务器监听端口，端口范围是：1-65535"
+                   ng-pattern="/^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/"/>
+            <div class="error" ng-if="createLBListenerForm.instancePort.$dirty &&
+            createLBListenerForm.instancePort.$invalid">
+              <div ng-if="createLBListenerForm.instancePort.$error.pattern">
+                <span>后端云服务器监听端口必须是整数，范围是：1-65535</span>
+              </div>
+              <div ng-if="createLBListenerForm.instancePort.$error.required">
+                <span>后端云服务器监听端口是必填项！</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">均衡方式：</label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button type="button" class="type-btn"
+                      ng-disabled="!canSelectHttpHash"
+                      ng-class='{"active": item.abbr === postData.httpHash}'
+                      ng-click="selectHttpHash(item)"
+                      ng-repeat="item in httpHashList">
+                <span>{{item.name}}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">是否保持会话：</label>
+          <div class="controls">
+            <div class="checkbox switch-btn">
+              <label>
+                <input type="checkbox" class="form-controls"
+                       ng-model="postData.sessionKeepAlive"
+                       ng-disabled="!canSelectSessionKeepAlive">
+                <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.sessionKeepAlive">
+          <label class="control-label">会话保持时间：</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="sessionExpireSlider[selectedProtocol].value"
+                      rz-slider-options="sessionExpireSlider[selectedProtocol].options">
+            </rzslider>
+            <input type="text" ng-model="sessionExpireSlider[selectedProtocol].value">
+            <span class="unit">秒</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">健康检查：</label>
+          <div class="controls">
+            <div class="checkbox switch-btn">
+              <label>
+                <input type="checkbox" class="form-controls"
+                       ng-model="postData.healthSwitch">
+                <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.healthSwitch && selectedProtocol === 'tcpudp'">
+          <label class="control-label">响应超时时间：</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="timeoutSlider.value" rz-slider-options="timeoutSlider.options"></rzslider>
+            <input type="text" ng-model="timeoutSlider.value">
+            <span class="unit">秒</span>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.healthSwitch">
+          <label class="control-label">检查间隔时间：</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="intervalTimeSlider[selectedProtocol].value"
+                      rz-slider-options="intervalTimeSlider[selectedProtocol].options">
+            </rzslider>
+            <input type="text" ng-model="intervalTimeSlider[selectedProtocol].value">
+            <span class="unit">秒</span>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.healthSwitch">
+          <label class="control-label">健康阀值：</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="healthNumSlider.value"
+                      rz-slider-options="healthNumSlider.options">
+            </rzslider>
+            <input type="text" ng-model="healthNumSlider.value">
+            <span class="unit">次</span>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.healthSwitch">
+          <label class="control-label">不健康阀值：</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="unhealthNumSlider.value"
+                      rz-slider-options="unhealthNumSlider.options">
+            </rzslider>
+            <input type="text" ng-model="unhealthNumSlider.value">
+            <span class="unit">次</span>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.healthSwitch && selectedProtocol === 'http'">
+          <label class="control-label">HTTP状态码：</label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button type="button" class="type-btn"
+                      ng-repeat="item in httpCodeList"
+                      ng-class='{"active": item.selected}'
+                      ng-click="selectHttpCode(item)">
+                <span>{{item.name}}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.healthSwitch && selectedProtocol === 'http'">
+          <label class="control-label">健康检查路径：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="httpCheckPath"
+                   ng-model="postData.httpCheckPath" ng-pattern="/^(\/[^\/\s]*)+\/?$/"
+                   placeholder="请输入监听器健康检查的路径，默认是'/'"/>
+            <div class="error" ng-if="createLBListenerForm.httpCheckPath.$invalid">
+              <div ng-if="createLBListenerForm.httpCheckPath.$error.pattern">
+                <span>路径格式不符合Linux路径：不能包含空白字符！</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="$close(postData)"
+              ng-disabled="createLBListenerForm.$invalid || loadBalancerPortConflict">确定
+      </button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="modifyLBListener.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">修改监听器</h3>
+    </div>
+    <div class="modal-body">
+      <form name="modifyLBListenerForm">
+        <div class="control-group">
+          <label class="control-label">监听器名称：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="listenerName"
+                   ng-model="postData.listenerName" required
+                   placeholder="请输入监听器的名称"
+                   ng-pattern="/^[\u4e00-\u9fa5_a-zA-Z0-9\-]+$/" ng-maxlength="20"/>
+            <div class="error" ng-if="modifyLBListenerForm.listenerName.$dirty &&
+            modifyLBListenerForm.listenerName.$invalid">
+              <div ng-if="modifyLBListenerForm.listenerName.$error.pattern">
+                <span>监听器的名称必须是：英文、汉字、数字、连接线"-"或下划线"_"</span>
+              </div>
+              <div ng-if="modifyLBListenerForm.listenerName.$error.maxlength">
+                <span>监听器的名称不能超过20个字符！</span>
+              </div>
+              <div ng-if="modifyLBListenerForm.listenerName.$error.required">
+                <span>监听器的名称是必填项！</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--“监听器协议”不能修改-->
+        <div class="control-group">
+          <label class="control-label">监听器协议：</label>
+          <div class="controls">
+            <input type="text" name="protocol" ng-disabled="true"
+                   ng-model="listenerProtocols[postData.protocol]">
+          </div>
+        </div>
+        <!--“监听器端口”不能修改-->
+        <div class="control-group">
+          <label class="control-label">监听器端口：</label>
+          <div class="controls">
+            <input type="text" name="loadBalancerPort" ng-disabled="true"
+                   ng-model="postData.loadBalancerPort">
+          </div>
+        </div>
+        <!--“后端端口”不能修改-->
+        <div class="control-group">
+          <label class="control-label">后端端口：</label>
+          <div class="controls">
+            <input type="text" name="instancePort" ng-disabled="true"
+                   ng-model="postData.instancePort">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">均衡方式：</label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button type="button" class="type-btn"
+                      ng-disabled="!canSelectHttpHash"
+                      ng-class='{"active": item.abbr === postData.httpHash}'
+                      ng-click="selectHttpHash(item)"
+                      ng-repeat="item in httpHashList">
+                <span>{{item.name}}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">是否保持会话：</label>
+          <div class="controls">
+            <div class="checkbox switch-btn">
+              <label>
+                <input type="checkbox" class="form-controls"
+                       ng-model="postData.sessionKeepAlive"
+                       ng-disabled="!canSelectSessionKeepAlive">
+                <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.sessionKeepAlive">
+          <label class="control-label">会话保持时间：</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="sessionExpireSlider[selectedProtocol].value"
+                      rz-slider-options="sessionExpireSlider[selectedProtocol].options">
+            </rzslider>
+            <input type="text" ng-model="sessionExpireSlider[selectedProtocol].value">
+            <span class="unit">秒</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">健康检查：</label>
+          <div class="controls">
+            <div class="checkbox switch-btn">
+              <label>
+                <input type="checkbox" class="form-controls"
+                       ng-model="postData.healthSwitch">
+                <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.healthSwitch && selectedProtocol === 'tcpudp'">
+          <label class="control-label">响应超时时间：</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="timeoutSlider.value" rz-slider-options="timeoutSlider.options"></rzslider>
+            <input type="text" ng-model="timeoutSlider.value">
+            <span class="unit">秒</span>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.healthSwitch">
+          <label class="control-label">检查间隔时间：</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="intervalTimeSlider[selectedProtocol].value"
+                      rz-slider-options="intervalTimeSlider[selectedProtocol].options">
+            </rzslider>
+            <input type="text" ng-model="intervalTimeSlider[selectedProtocol].value">
+            <span class="unit">秒</span>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.healthSwitch">
+          <label class="control-label">健康阀值：</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="healthNumSlider.value"
+                      rz-slider-options="healthNumSlider.options">
+            </rzslider>
+            <input type="text" ng-model="healthNumSlider.value">
+            <span class="unit">次</span>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.healthSwitch">
+          <label class="control-label">不健康阀值：</label>
+          <div class="controls rzslider-box">
+            <rzslider rz-slider-model="unhealthNumSlider.value"
+                      rz-slider-options="unhealthNumSlider.options">
+            </rzslider>
+            <input type="text" ng-model="unhealthNumSlider.value">
+            <span class="unit">次</span>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.healthSwitch && selectedProtocol === 'http'">
+          <label class="control-label">HTTP状态码：</label>
+          <div class="controls">
+            <div class="btn-item-group">
+              <button type="button" class="type-btn"
+                      ng-repeat="item in httpCodeList"
+                      ng-class='{"active": item.selected}'
+                      ng-click="selectHttpCode(item)">
+                <span>{{item.name}}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-if="postData.healthSwitch && selectedProtocol === 'http'">
+          <label class="control-label">健康检查路径：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="httpCheckPath"
+                   ng-model="postData.httpCheckPath" ng-pattern="/^(\/[^\/\s]*)+\/?$/"
+                   placeholder="请输入监听器健康检查的路径，默认是'/'"/>
+            <div class="error" ng-if="modifyLBListenerForm.httpCheckPath.$invalid">
+              <div ng-if="modifyLBListenerForm.httpCheckPath.$error.pattern">
+                <span>路径格式不符合Linux路径：不能包含空白字符！</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="$close(postData)"
+              ng-disabled="modifyLBListenerForm.$invalid">确定
+      </button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="lbBindingServerHeaderCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="lbBindServerCheckboxes.allChecked" class="select-all" value=""/>
+    <i class="icon-aw-square"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="modifyLBServerWeigth.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">修改权重</h3>
+    </div>
+    <div class="modal-body">
+      <form name="modifyLBServerWeightForm">
+        <div class="control-group">
+          <label class="control-label">权重</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="weight"
+                   ng-model="postData.weight" required
+                   placeholder="请输入权重(0-100)"
+                   ng-pattern="/^([0-9]|[1-9][0-9]|100)$/"/>
+            <div class="error" ng-if="modifyLBServerWeightForm.weight.$dirty &&
+            modifyLBServerWeightForm.weight.$invalid">
+              <div ng-if="modifyLBServerWeightForm.weight.$error.pattern">
+                <span>云主机的权重必须是整数，范围是0-100</span>
+              </div>
+              <div ng-if="modifyLBServerWeightForm.weight.$error.required">
+                <span>云主机的权重是必填项！</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" type="button" ng-disabled="modifyLBServerWeightForm.$invalid"
+                  ng-click="$close(postData)">确定
+          </button>
+          <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="bindLBServersHeaderCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="serversCheckboxes.allChecked" class="select-all" value=""/>
+    <i class="icon-aw-square"></i>
+  </label>
+</script>
+
+<script type="text/ng-template" id="bindLBServers.html">
+  <div class="modal-common privilegeTo-modal">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">新增关联云服务器</h3>
+    </div>
+    <div class="modal-body">
+      <div class="clearfix">
+        <div class="left-select-table">
+          <h5 class="ng-binding">选择云服务器</h5>
+          <div class="search-box">
+            <input type="text" class="form-control" placeholder="可输入名称或者或内网IP搜索"
+                   ng-model="searchContent" style="width: 325px">
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <colgroup>
+                <col width="10%">
+                <col width="90%">
+              </colgroup>
+              <tr ng-repeat="instance in instanceSet | filter : searchContent">
+                <td header="'bindLBServersHeaderCheckbox.html'">
+                  <label class="checkbox">
+                    <input type="checkbox" ng-disabled="!instance.canBeSelected"
+                           ng-model="serversCheckboxes.items[instance.id]"/>
+                    <i class="iconfont"></i>
+                  </label>
+                </td>
+                <td>
+                  <div>
+                  <span>
+                    {{!instance.canBeSelected ? (instance.status === 2 ? "[已绑定]" : "[服务器异常]") : ""}}{{instance.name}}
+                  </span>
+                    <br/>
+                  <span>
+                    {{instance.lanIp}}{{instance.wanIpSet.length > 1 ? "/" + instance.wanIpSet.join("，") + "（公）" : ""}}
+                  </span>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="btnGroup">
+          <button class="btn btn-primary">&gt;</button>
+          <button class="btn btn-primary">&lt;</button>
+        </div>
+
+        <div class="right-select-table">
+          <h5 class="ng-binding">已选择（{{postData.length}}）</h5>
+          <table class="table">
+            <colgroup>
+              <col width="78%">
+              <col width="14%">
+              <col width="8%">
+            </colgroup>
+            <thead>
+            <tr>
+              <th>云服务器</th>
+              <th>权重
+                <i class="icon-aw-prompt" popover-trigger="mouseenter"
+                   uib-popover="权重越大转发的请求越多，默认为10，可配置范围为0-100； 当权重设置为0，该服务器不会再接受新请求； 如开启会话保持，可能会造成后端服务器的请求不均匀。">
+                </i>
+              </th>
+              <th>删除</th>
+            </tr>
+            </thead>
+          </table>
+          <div class="table-responsive">
+            <table class="table">
+              <colgroup>
+                <col width="78%">
+                <col width="14%">
+                <col width="8%">
+              </colgroup>
+              <tr ng-repeat="instance in postData">
+                <td>
+                  <div>
+                    <span>{{instance.name}}</span><br/>
+                  <span>
+                    {{instance.lanIp}}{{instance.wanIpSet.length > 1 ? "/" + instance.wanIpSet.join("，") + "（公）" : ""}}
+                  </span>
+                  </div>
+                </td>
+                <td>
+                  <div class="count-box">
+                    <input type="button" ng-disabled="instance.weight < 1" class="minus" value="-"
+                           ng-click="reduceWeight(instance)">
+                    <input type="text" name="lbNum" class="button-num" required
+                           ng-pattern="/^([0-9]|[1-9][0-9]|100)$/" ng-model="instance.weight">
+                    <input type="button" class="add" value="+"
+                           ng-click="addWeight(instance)">
+                  </div>
+                </td>
+                <td><i class="icon-aw-wrong" ng-click="deleteInstance(instance)"></i></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="$close(postData)">确定
+      </button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="unbindLBServers.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">解绑</h3>
+    </div>
+    <div class="modal-body">
+      <form name="unbindLBServersForm">
+        <uib-alert type="warning" class="alert-tip">
+          确认要解绑选中的云主机？
+        </uib-alert>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="$close(selectedItems)">确定
+      </button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="deleteLBListeners.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">删除监听器</h3>
+    </div>
+    <div class="modal-body">
+      <form name="deleteLBListenersForm">
+        <uib-alert type="warning" class="alert-tip">
+          确认要删除选中的监听器？
+        </uib-alert>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="$close(selectedItems)">确定
+      </button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+    </div>
+  </div>
+</script>

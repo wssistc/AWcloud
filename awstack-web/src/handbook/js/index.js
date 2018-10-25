@@ -1,0 +1,862 @@
+"use strict";
+import "./common/filters/filters";
+import "./common/services/services";
+import "./common/services/angularResizeSrv";
+// import { zh_CN } from "./i18n/zh_CN";
+// import { en_US } from "./i18n/en_US";
+
+
+
+angular.module("app",["ngRoute","ngSanitize","ngCsv","pascalprecht.translate","services","rt.resize","filtersModule"])
+.constant("API_HOST", GLOBALCONFIG.APIHOST)
+.config(["$routeProvider", "$locationProvider", "$httpProvider", "$translateProvider", function($routeProvider, $locationProvider, $httpProvider, $translateProvider){
+    // $translateProvider.translations("en", en_US);
+    // $translateProvider.translations("zh", zh_CN);
+    // $translateProvider.preferredLanguage("zh");
+    $httpProvider.interceptors.push(["$q", "$rootScope","API_HOST",function(q,$rootScope,api_host){
+      return {
+        request:function(config){
+          return config;
+        },
+        response:function(res){
+          var regMes = /(connect)[^connect]*(timed)[^timed*](out)/;//连接超时
+          var reg = /(\u4f59\u989d)[^\u4f59\u989d]*(\u4e0d\u8db3)/;//余额不足
+          var regLess = /(balance)[^0]*(less)[^0]*(error)/;//mysqlw余额不足
+          var regDeal = /(deal)[^0]*(lock)[^0]*(error)/;//mysqlw余额不足
+          if (/\.html/.test(res.config.url)) {
+              return res;
+          }
+          //$rootScope.$broadcast("alert-error",res.data.code);
+          return res.data;
+        },
+        requestError:function(rej){
+          return rej;
+        },
+        responseError:function(rej){
+          return rej;
+        }
+      }
+    }]);
+    
+$routeProvider
+.when("/vm/concept",{
+        templateUrl:"js/page/conceptOfVM.html",
+        active:{
+          parent:"vmManage",
+          current:"vmConcept"
+        }
+      })
+.when("/vm/shortResource",{
+        templateUrl:"js/page/shortResource.html",
+        active:{
+          parent:"vmManage",
+          current:"shortResource"
+        }
+      })
+.when("/vm/securityGroup",{
+        templateUrl:"js/page/securityGroup.html",
+        active:{
+          parent:"vmManage",
+          current:"securityGroup"
+        }
+      })
+.when("/vm/createNewVM",{
+        templateUrl:"js/page/createNewVM.html",
+        active:{
+          parent:"vmManage",
+          current:"createNewVM"
+        }
+      })
+.when("/vm/checkOutVm",{
+        templateUrl:"js/page/checkOutVM.html",
+        active:{
+          parent:"vmManage",
+          current:"checkOutVm"
+        }
+      })
+.when("/vm/commonOperationOfVM",{
+        templateUrl:"js/page/commonOperationOfVM.html",
+        active:{
+          parent:"vmManage",
+          current:"commonOperationOfVM"
+        }
+      })
+.when("/vm/VMs",{
+        templateUrl:"js/page/VMs.html",
+        active:{
+          parent:"vmManage",
+          current:"VMs"
+        }
+      })
+.when("/vm/virtualNetworkAdapter",{
+        templateUrl:"js/page/virtualNetworkAdapter.html",
+        active:{
+          parent:"vmManage",
+          current:"virtualNetworkAdapter"
+        }
+      })
+.when("/vm/imagesManagement",{
+        templateUrl:"js/page/imageManagement.html",
+        active:{
+          parent:"vmManage",
+          current:"imagesManagement"
+        }
+      })
+.when("/vm/createImage",{
+        templateUrl:"js/page/createImage.html",
+        active:{
+          parent:"vmManage",
+          current:"createImage"
+        }
+      })
+.when("/vm/cloudhardDisk",{
+        templateUrl:"js/page/cloudHardDisk.html",
+        active:{
+          parent:"vmManage",
+          current:"cloudhardDisk"
+        }
+      })
+.when("/vm/snapshot",{
+        templateUrl:"js/page/snapshot.html",
+        active:{
+          parent:"vmManage",
+          current:"snapshot"
+        }
+      })
+.when("/vm/backups",{
+        templateUrl:"js/page/backups.html",
+        active:{
+          parent:"vmManage",
+          current:"backups"
+        }
+      })
+.when("/vm/router",{
+        templateUrl:"js/page/router.html",
+        active:{
+          parent:"vmManage",
+          current:"router"
+        }
+      })
+.when("/vm/externalNetwork",{
+        templateUrl:"js/page/externalNetwork.html",
+        active:{
+          parent:"vmManage",
+          current:"externalNetwork"
+        }
+      })
+.when("/vm/loadBalancing",{
+        templateUrl:"js/page/loadBalancing.html",
+        active:{
+          parent:"vmManage",
+          current:"loadBalancing"
+        }
+      })
+.when("/vm/IPSecVPN",{
+        templateUrl:"js/page/IPSecVPN.html",
+        active:{
+          parent:"vmManage",
+          current:"IPSecVPN"
+        }
+      })
+.when("/vm/keyPair",{
+        templateUrl:"js/page/keyPair.html",
+        active:{
+          parent:"vmManage",
+          current:"keyPair"
+        }
+      })
+.when("/vm/elasticExpansion",{
+        templateUrl:"js/page/elasticExpansion.html",
+        active:{
+          parent:"vmManage",
+          current:"elasticExpansion"
+        }
+      })
+.when("/vm/recycleBin",{
+        templateUrl:"js/page/recycleBin.html",
+        active:{
+          parent:"vmManage",
+          current:"recycleBin"
+        }
+      })
+.when("/physic/physicalMachine",{
+        templateUrl:"js/page/physicalMachine.html",
+        active:{
+          parent:"phyManage",
+          current:"physicalMachine"
+        }
+      })
+.when("/physic/containerCluster",{
+        templateUrl:"js/page/containerCluster.html",
+        active:{
+          parent:"k8sManage",
+          current:"containerCluster"
+        }
+      })
+.when("/physic/containerService",{
+        templateUrl:"js/page/containerService.html",
+        active:{
+          parent:"k8sManage",
+          current:"containerService"
+        }
+      })
+.when("/physic/imageService",{
+        templateUrl:"js/page/imageService.html",
+        active:{
+          parent:"k8sManage",
+          current:"imageService"
+        }
+      })
+.when("/alarm/alarmSetting",{
+        templateUrl:"js/page/alarmSetting.html",
+        active:{
+          parent:"alarmManage",
+          current:"alarmSetting"
+        }
+      })
+.when("/alarm/alarmTemplate",{
+        templateUrl:"js/page/alarmTemplate.html",
+        active:{
+          parent:"alarmManage",
+          current:"alarmTemplate"
+        }
+      })
+.when("/alarm/contactGroup",{
+        templateUrl:"js/page/contactGroup.html",
+        active:{
+          parent:"alarmManage",
+          current:"contactGroup"
+        }
+      })
+.when("/workOrder/managementOfWorkOrder",{
+        templateUrl:"js/page/managementOfWorkOrder.html",
+        active:{
+          parent:"workOrder",
+          current:"workOrder"
+        }
+      })
+.when("/log/logManagement",{
+        templateUrl:"js/page/logManagement.html",
+        active:{
+          parent:"logManagement",
+          current:"logManagement"
+        }
+      })
+.when("/identity/identityManagement",{
+        templateUrl:"js/page/identityManagement.html",
+        active:{
+          parent:"identityManagement",
+          current:"identityManagement"
+        }
+      })
+.when("/maintenance/hostSet",{
+        templateUrl:"js/page/hostSet.html",
+        active:{
+          parent:"maintenanceManage",
+          current:"hostSet"
+        }
+      })
+.when("/maintenance/dataCenterManagement",{
+        templateUrl:"js/page/dataCenterManagement.html",
+        active:{
+          parent:"maintenanceManage",
+          current:"dataCenterManagement"
+        }
+      })
+.when("/maintenance/nodeManagement",{
+        templateUrl:"js/page/nodeManagement.html",
+        active:{
+          parent:"maintenanceManage",
+          current:"nodeManagement"
+        }
+      })
+.when("/maintenance/nanofilmPhysicalMachine",{
+        templateUrl:"js/page/nanofilmPhysicalMachine.html",
+        active:{
+          parent:"maintenanceManage",
+          current:"nanofilmPhysicalMachine"
+        }
+      })
+.when("/maintenance/resourcePoolPhysicalMachine",{
+        templateUrl:"js/page/resourcePoolPhysicalMachine.html",
+        active:{
+          parent:"maintenanceManage",
+          current:"resourcePoolPhysicalMachine"
+        }
+      })
+.when("/maintenance/storageManagement",{
+        templateUrl:"js/page/storageManagement.html",
+        active:{
+          parent:"maintenanceManage",
+          current:"storageManagement"
+        }
+      })
+.when("/maintenance/plannedTask",{
+        templateUrl:"js/page/plannedTask.html",
+        active:{
+          parent:"maintenanceManage",
+          current:"plannedTask"
+        }
+      })
+.when("/maintenance/CephManagement",{
+        templateUrl:"js/page/CephManagement.html",
+        active:{
+          parent:"maintenanceManage",
+          current:"CephManagement"
+        }
+      })
+.when("/maintenance/transmissionEquipmentManagement",{
+        templateUrl:"js/page/transmissionEquipmentManagement.html",
+        active:{
+          parent:"maintenanceManage",
+          current:"transmissionEquipmentManagement"
+        }
+      })
+.when("/maintenance/networkManagement",{
+        templateUrl:"js/page/networkManagement.html",
+        active:{
+          parent:"maintenanceManage",
+          current:"networkManagement"
+        }
+      })
+.when("/maintenance/systemInspection",{
+        templateUrl:"js/page/systemInspection.html",
+        active:{
+          parent:"maintenanceManage",
+          current:"systemInspection"
+        }
+      })
+.when("/maintenance/imagesManagement",{
+        templateUrl:"js/page/imagesManagement.html",
+        active:{
+          parent:"maintenanceManage",
+          current:"imagesManagement"
+        }
+      })
+.when("/operate/specifications",{
+        templateUrl:"js/page/specifications.html",
+        active:{
+          parent:"operateManage",
+          current:"specifications"
+        }
+      })
+.when("/operate/quotaManagement",{
+        templateUrl:"js/page/quotaManagement.html",
+        active:{
+          parent:"operateManage",
+          current:"quotaManagement"
+        }
+      })
+.when("/operate/bandwidthSpeedLimit",{
+        templateUrl:"js/page/bandwidthSpeedLimit.html",
+        active:{
+          parent:"operateManage",
+          current:"bandwidthSpeedLimit"
+        }
+      })
+.when("/operate/resourceMeasurement",{
+        templateUrl:"js/page/resourceMeasurement.html",
+        active:{
+          parent:"operateManage",
+          current:"resourceMeasurement"
+        }
+      })
+.when("/operate/billingManagement",{
+        templateUrl:"js/page/billingManagement.html",
+        active:{
+          parent:"operateManage",
+          current:"billingManagement"
+        }
+      })
+.when("/operate/processManagement",{
+        templateUrl:"js/page/processManagement.html",
+        active:{
+          parent:"operateManage",
+          current:"processManagement"
+        }
+      })
+.when("/operate/leaseSet",{
+        templateUrl:"js/page/leaseSet.html",
+        active:{
+          parent:"operateManage",
+          current:"leaseSet"
+        }
+      })
+.when("/system/mixedCloudSet",{
+        templateUrl:"js/page/mixedCloudSet.html",
+        active:{
+          parent:"systemSet",
+          current:"mixedCloudSet"
+        }
+      })
+.when("/system/mailServer",{
+        templateUrl:"js/page/mailServer.html",
+        active:{
+          parent:"systemSet",
+          current:"mailServer"
+        }
+      })
+.when("/system/wechatSet",{
+        templateUrl:"js/page/wechatSet.html",
+        active:{
+          parent:"systemSet",
+          current:"wechatSet"
+        }
+      })
+.when("/system/softwareAuthorization",{
+        templateUrl:"js/page/softwareAuthorization.html",
+        active:{
+          parent:"systemSet",
+          current:"softwareAuthorization"
+        }
+      })
+.when("/system/functionManagement",{
+        templateUrl:"js/page/functionManagement.html",
+        active:{
+          parent:"systemSet",
+          current:"functionManagement"
+        }
+      })
+.when("/system/cloudPlatformUpgrade",{
+        templateUrl:"js/page/cloudPlatformUpgrade.html",
+        active:{
+          parent:"systemSet",
+          current:"cloudPlatformUpgrade"
+        }
+      })
+.when("/system/securitySet",{
+        templateUrl:"js/page/securitySet.html",
+        active:{
+          parent:"systemSet",
+          current:"securitySet"
+        }
+      })
+.when("/system/routineSet",{
+        templateUrl:"js/page/routineSet.html",
+        active:{
+          parent:"systemSet",
+          current:"routineSet"
+        }
+      })
+.when("/Vmware/VmwareManagement",{
+        templateUrl:"js/page/VmwareManagement.html",
+        active:{
+          parent:"VmwareManagement",
+          current:"VmwareManagement"
+        }
+      })
+.when("/tencent/tencentCloud",{
+        templateUrl:"js/page/tencentCloud.html",
+        active:{
+          parent:"tencentCloud",
+          current:"tencentCloud"
+        }
+      })
+.when("/physic/physicImage",{
+        templateUrl:"js/page/physicImage.html",
+        active:{
+          parent:"phyManage",
+          current:"physicImage"
+        }
+      })
+.when("/physic/physicNetwork",{
+        templateUrl:"js/page/physicNetwork.html",
+        active:{
+          parent:"phyManage",
+          current:"physicNetwork"
+        }
+      })
+.when("/Paas/PaasManagement",{
+        templateUrl:"js/page/paasManagement.html",
+        active:{
+          parent:"PaasManagement",
+          current:"PaasManagement"
+        }
+      })
+      .otherwise({ redirectTo: "/vm/concept" });
+      //$locationProvider.html5Mode(false);
+}])
+
+      
+.controller("mainCtrl",["alertSrv","$scope","$http","$location","$routeParams","$window","$timeout","$interval","API_HOST","$rootScope",function(alertSrv,scope,$http,$location,$routeParams,$window,$timeout,$interval,API_HOST,rootScope){
+  var self = scope;
+      rootScope.sideMenu = {
+          sideMenuList:[],
+          activeSubMenu:"",
+          menuKeyword:""
+      };
+      rootScope.sideMenu.sideMenuList =[
+          {
+              text:"虚拟资源管理",
+              keywords:"vmManage",
+              href:"/vm/concept",
+              child:[
+                  {
+                      text:"云主机概念",
+                      keywords:"vmConcept",
+                      href:"/vm/concept"
+                  },
+                  {
+                      text:"新建云主机",
+                      keywords:"createNewVM",
+                      href:"/vm/createNewVM"
+                  },
+                  {
+                      text:"查看云主机",
+                      keywords:"checkOutVm",
+                      href:"/vm/checkOutVm"
+                  },
+                  {
+                      text:"云主机常用操作",
+                      keywords:"commonOperationOfVM",
+                      href:"/vm/commonOperationOfVM"
+                  },
+                  {
+                      text:"云主机组",
+                      keywords:"VMs",
+                      href:"/vm/VMs"
+                  },
+                  {
+                      text:"虚拟网卡",
+                      keywords:"virtualNetworkAdapter",
+                      href:"/vm/virtualNetworkAdapter"
+                  },
+                  {
+                      text:"镜像管理",
+                      keywords:"imagesManagement",
+                      href:"/vm/imagesManagement"
+                  },
+                  {
+                      text:"制作镜像",
+                      keywords:"createImage",
+                      href:"/vm/createImage"
+                  },
+                  {
+                      text:"云硬盘",
+                      keywords:"cloudhardDisk",
+                      href:"/vm/cloudhardDisk"
+                  },
+                  {
+                      text:"快照",
+                      keywords:"snapshot",
+                      href:"/vm/snapshot"
+                  },
+                  {
+                      text:"备份",
+                      keywords:"backups",
+                      href:"/vm/backups"
+                  },
+                  {
+                      text:"路由器",
+                      keywords:"router",
+                      href:"/vm/router"
+                  },
+                  {
+                      text:"外部网络",
+                      keywords:"externalNetwork",
+                      href:"/vm/externalNetwork"
+                  },
+                  {
+                      text:"负载均衡",
+                      keywords:"loadBalancing",
+                      href:"/vm/loadBalancing"
+                  },
+                  {
+                      text:"IPSec VPN",
+                      keywords:"IPSecVPN",
+                      href:"/vm/IPSecVPN"
+                  },
+                  {
+                      text:"密钥对",
+                      keywords:"keyPair",
+                      href:"/vm/keyPair"
+                  },
+                  {
+                      text:"安全组",
+                      keywords:"securityGroup",
+                      href:"/vm/securityGroup"
+                  },
+                  {
+                      text:"弹性扩展",
+                      keywords:"elasticExpansion",
+                      href:"/vm/elasticExpansion"
+                  },
+                  {
+                      text:"回收站",
+                      keywords:"recycleBin",
+                      href:"/vm/recycleBin"
+                  },
+                  {
+                      text:"资源不足说明",
+                      keywords:"shortResource",
+                      href:"/vm/shortResource"
+                  }
+              ]
+          },
+          {
+              text:"物理资源管理",
+              keywords:"phyManage",
+              href:"/physic/physicalMachine",
+              child:[
+                  {
+                      text:"物理机",
+                      keywords:"physicalMachine",
+                      href:"/physic/physicalMachine"
+                  },
+                  {
+                      text:"镜像",
+                      keywords:"physicImage",
+                      href:"/physic/physicImage"
+                  },
+                  {
+                      text:"网络",
+                      keywords:"physicNetwork",
+                      href:"/physic/physicNetwork"
+                  }
+              ]
+          },
+          {
+              text:"容器管理",
+              keywords:"k8sManage",
+              href:"/physic/containerCluster",
+              child:[
+                  {
+                      text:"容器集群",
+                      keywords:"containerCluster",
+                      href:"/physic/containerCluster"
+                  },
+                  {
+                      text:"容器服务",
+                      keywords:"containerService",
+                      href:"/physic/containerService"
+                  },
+                  {
+                      text:"镜像服务",
+                      keywords:"imageService",
+                      href:"/physic/imageService"
+                  }
+              ]
+          },
+          {
+              text:"监控管理",
+              keywords:"alarmManage",
+              href:"/alarm/alarmSetting",
+              child:[
+                  {
+                      text:"告警设置",
+                      keywords:"alarmSetting",
+                      href:"/alarm/alarmSetting"
+                  },
+                 {
+                      text:"告警模板",
+                      keywords:"alarmTemplate",
+                      href:"/alarm/alarmTemplate"
+                  },
+                  {
+                      text:"联系人组",
+                      keywords:"contactGroup",
+                      href:"/alarm/contactGroup"
+                  }
+              ]
+          },
+         {
+              text:"工单管理",
+              keywords:"workOrder",
+              href:"/workOrder/managementOfWorkOrder",
+          },
+         {
+              text:"日志管理",
+              keywords:"logManagement",
+              href:"/log/logManagement",
+          },
+         {
+              text:"身份管理",
+              keywords:"identityManagement",
+              href:"/identity/identityManagement",
+          },
+         {
+              text:"运维管理",
+              keywords:"maintenanceManage",
+              href:"/maintenance/hostSet",
+              child:[
+                  {
+                      text:"主机集合",
+                      keywords:"hostSet",
+                      href:"/maintenance/hostSet"
+                  },
+                 {
+                      text:"数据中心管理",
+                      keywords:"dataCenterManagement",
+                      href:"/maintenance/dataCenterManagement"
+                  },
+                  {
+                      text:"节点管理",
+                      keywords:"nodeManagement",
+                      href:"/maintenance/nodeManagement"
+                  },
+                  {
+                      text:"纳管物理机",
+                      keywords:"nanofilmPhysicalMachine",
+                      href:"/maintenance/nanofilmPhysicalMachine"
+                  },
+                  {
+                      text:"资源池物理机",
+                      keywords:"resourcePoolPhysicalMachine",
+                      href:"/maintenance/resourcePoolPhysicalMachine"
+                  },
+                  {
+                      text:"存储管理",
+                      keywords:"storageManagement",
+                      href:"/maintenance/storageManagement"
+                  },
+                  {
+                      text:"计划任务",
+                      keywords:"plannedTask",
+                      href:"/maintenance/plannedTask"
+                  },
+                  {
+                      text:"Ceph管理",
+                      keywords:"CephManagement",
+                      href:"/maintenance/CephManagement"
+                  },
+                  {
+                      text:"透传设备管理",
+                      keywords:"transmissionEquipmentManagement",
+                      href:"/maintenance/transmissionEquipmentManagement"
+                  },
+                  {
+                      text:"网络管理",
+                      keywords:"networkManagement",
+                      href:"/maintenance/networkManagement"
+                  },
+                  {
+                      text:"系统巡检",
+                      keywords:"systemInspection",
+                      href:"/maintenance/systemInspection"
+                  },
+                  {
+                      text:"镜像库管理",
+                      keywords:"imagesManagement",
+                      href:"/maintenance/imagesManagement"
+                  }
+              ]
+          },
+         {
+              text:"运营管理",
+              keywords:"operateManage",
+              href:"/operate/specifications",
+              child:[
+                  {
+                      text:"规格",
+                      keywords:"specifications",
+                      href:"/operate/specifications"
+                  },
+                 {
+                      text:"配额管理",
+                      keywords:"quotaManagement",
+                      href:"/operate/quotaManagement"
+                  },
+                  {
+                      text:"带宽限速",
+                      keywords:"bandwidthSpeedLimit",
+                      href:"/operate/bandwidthSpeedLimit"
+                  },
+                  {
+                      text:"资源计量",
+                      keywords:"resourceMeasurement",
+                      href:"/operate/resourceMeasurement"
+                  },
+                  {
+                      text:"计费管理",
+                      keywords:"billingManagement",
+                      href:"/operate/billingManagement"
+                  },
+                  {
+                      text:"流程管理",
+                      keywords:"processManagement",
+                      href:"/operate/processManagement"
+                  },
+                  {
+                      text:"租赁设置",
+                      keywords:"leaseSet",
+                      href:"/operate/leaseSet"
+                  }
+              ]
+          },
+          {
+              text:"系统设置",
+              keywords:"systemSet",
+              href:"/system/mixedCloudSet",
+              child:[
+                  {
+                      text:"混合云设置",
+                      keywords:"mixedCloudSet",
+                      href:"/system/mixedCloudSet"
+                  },
+                 {
+                      text:"邮件服务器",
+                      keywords:"mailServer",
+                      href:"/system/mailServer"
+                  },
+                  {
+                      text:"微信设置",
+                      keywords:"wechatSet",
+                      href:"/system/wechatSet"
+                  },
+                  {
+                      text:"软件授权",
+                      keywords:"softwareAuthorization",
+                      href:"/system/softwareAuthorization"
+                  },
+                  {
+                      text:"功能管理",
+                      keywords:"functionManagement",
+                      href:"/system/functionManagement"
+                  },
+                  {
+                      text:"云平台升级",
+                      keywords:"cloudPlatformUpgrade",
+                      href:"/system/cloudPlatformUpgrade"
+                  },
+                  {
+                      text:"安全设置",
+                      keywords:"securitySet",
+                      href:"/system/securitySet"
+                  },
+                  {
+                      text:"常规设置",
+                      keywords:"routineSet",
+                      href:"/system/routineSet"
+                  }
+              ]
+          },
+          {
+              text:"VMware管理",
+              keywords:"VmwareManagement",
+              href:"/Vmware/VmwareManagement",
+          },
+          {
+              text:"腾讯云",
+              keywords:"tencentCloud",
+              href:"/tencent/tencentCloud",
+          },
+          {
+              text:"Paas",
+              keywords:"PaasManagement",
+              href:"/Paas/PaasManagement",
+          }
+      ]         
+          
+
+
+  function changeMenu(evt, current,prev) {
+    self.sideMenu.activeSubMenu = current.active.parent;
+    self.sideMenu.menuKeyword = current.active.current;
+  }
+
+  self.$on("$routeChangeSuccess",function(evt, current, prev){
+    changeMenu(evt, current,prev)
+  })
+
+  
+}])

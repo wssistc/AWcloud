@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0,0,1400,1200"  preserveAspectRatio="xMinYMin meet"
+	 >
+<g id="核心交换机">
+	<g>
+		<polygon fill="#EFEFEF" points="128.556,253.389 128.488,231.787 2.421,145.722 2.488,161.658 		"/>
+		<polygon fill="#EFEFEF" points="128.421,253.389 128.488,231.787 254.556,145.722 254.488,161.658 		"/>
+		<polygon fill="#FFFFFF" stroke="#E4E4E4" stroke-width="3" stroke-miterlimit="10" points="254.556,145.722 128.488,231.787 
+			2.421,145.722 128.488,83.993 		"/>
+	</g>
+	<path fill="none" stroke="#266CD3" stroke-width="5" stroke-miterlimit="10" d="M220.722,121.222l-10.114-4.735l6.468-4.256
+		c2.686-1.848,4.31-6.882,4.359-10.142l-0.713-17.367"/>
+	<path fill="none" stroke="#266CD3" stroke-width="5" stroke-miterlimit="10" d="M220.722,47.222l-93.15-43.611L35.315,48.784
+		l-0.894-0.562l0.014,0.993l-0.014,0.007l0.014,0.009l0.273,19.359c0.048,3.26,1.673,6.294,4.359,8.142l6.372,4.096l-10.124,4.957
+		l-0.894-0.562l0.014,0.993l-0.014,0.007l0.014,0.009l0.273,19.359c0.048,3.26,1.673,6.294,4.359,8.142l6.372,4.096l-10.124,4.957
+		l-0.894-0.562l0.014,0.993l-0.014,0.007l0.014,0.009l0.273,19.359c0.048,3.26,1.673,6.294,4.359,8.142l88.358,56.8l-0.004,0.691
+		l89.655-58.991c2.686-1.848,4.31-6.882,4.359-10.142l-0.713-17.367"/>
+	<path fill="none" stroke="#266CD3" stroke-width="5" stroke-miterlimit="10" d="M220.722,84.222l-10.114-4.735l6.468-4.256
+		c2.686-1.848,4.31-6.882,4.359-10.142l-0.713-17.367"/>
+	<g>
+		<polygon fill="#FFFFFF" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" points="220.722,121.222 127.572,180.814 
+			34.421,123.222 127.572,77.611 		"/>
+		<path fill="#CADCF2" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" d="M127.722,207.722l-0.15-26.907l-93.15-58.592
+			l0.287,20.368c0.048,3.26,1.673,6.294,4.359,8.142L127.722,207.722z"/>
+		<path fill="#CADCF2" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" d="M127.421,208.222l0.15-27.907l93.15-58.592
+			l0.713,17.367c-0.048,3.26-1.673,8.294-4.359,10.142L127.421,208.222z"/>
+		<ellipse fill="#F7B90D" cx="43.25" cy="140" rx="2.75" ry="5.5"/>
+		<ellipse fill="#266CD3" cx="51.25" cy="146" rx="2.75" ry="5.5"/>
+		<ellipse fill="#266CD3" cx="61.25" cy="152" rx="2.75" ry="5.5"/>
+	</g>
+	<g>
+		<polygon fill="#FFFFFF" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" points="220.722,84.222 127.572,143.814 
+			34.421,86.222 127.572,40.611 		"/>
+		<path fill="#CADCF2" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" d="M127.722,170.722l-0.15-26.907l-93.15-58.592
+			l0.287,20.368c0.048,3.26,1.673,6.294,4.359,8.142L127.722,170.722z"/>
+		<path fill="#CADCF2" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" d="M127.421,171.222l0.15-27.907l93.15-58.592
+			l0.713,17.367c-0.048,3.26-1.673,8.294-4.359,10.142L127.421,171.222z"/>
+		<ellipse fill="#F7B90D" cx="43.25" cy="103" rx="2.75" ry="5.5"/>
+		<ellipse fill="#266CD3" cx="51.25" cy="109" rx="2.75" ry="5.5"/>
+		<ellipse fill="#266CD3" cx="61.25" cy="115" rx="2.75" ry="5.5"/>
+	</g>
+	<g>
+		<polygon fill="#FFFFFF" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" points="220.722,47.222 127.572,106.814 
+			34.421,49.222 127.572,3.611 		"/>
+		<path fill="#CADCF2" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" d="M127.722,133.722l-0.15-26.907l-93.15-58.592
+			l0.287,20.368c0.048,3.26,1.673,6.294,4.359,8.142L127.722,133.722z"/>
+		<path fill="#CADCF2" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" d="M127.421,134.222l0.15-27.907l93.15-58.592
+			l0.713,17.367c-0.048,3.26-1.673,8.294-4.359,10.142L127.421,134.222z"/>
+		<ellipse fill="#F7B90D" cx="43.25" cy="66" rx="2.75" ry="5.5"/>
+		<ellipse fill="#266CD3" cx="51.25" cy="72" rx="2.75" ry="5.5"/>
+		<ellipse fill="#266CD3" cx="61.25" cy="78" rx="2.75" ry="5.5"/>
+	</g>
+</g>
+</svg>

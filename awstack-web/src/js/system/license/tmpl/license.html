@@ -1,0 +1,154 @@
+<div class="page-inner">
+    <div class="table-action">
+        <button type="button" ng-click="applylicense()" class="btn btn-new" licence-type="btn" id="system-Software-machineCode"><i class="icon-aw-jqm"></i>{{"aws.license.applyActivationCode"|translate}}</button>
+        <button type="button" ng-click="importlicense()" class="btn btn-normal" licence-type="btn" id="system-Software-ImportFile"><i class="icon-aw-dr"></i>{{"aws.license.importActivationCode"|translate}}</button>
+        <into-information modular="'license'"></into-information>
+    </div>
+    <div class="table-content">
+      <empty-tip empty-type="tableParams"></empty-tip>
+      <table ng-table="tableParams" class="table"> 
+        <colgroup>
+          <col width="14.28%">
+          <col width="14.28%">
+          <col width="14.28%">
+          <col width="14.28%">
+          <col width="14.28%">
+          <col width="14.28%">
+          <col width="14.28%">
+        </colgroup>
+        <tr ng-repeat="item in $data">
+          <td data-title="'aws.license.versionType'|translate">{{versionType}}</td>   
+          <td data-title="'aws.license.available_node'|translate">{{item.available_node}}</td>   
+          <td data-title="'aws.license.current_node'|translate">{{item.current_node}}</td>   
+          <td data-title="'aws.license.end_time'|translate">{{item.time}}</td>   
+          <td data-title="'aws.license.service_time'|translate">{{item.servicetime}}</td>   
+          <td data-title="'aws.license.is_valid'|translate">{{"aws.license.valid." + item.is_valid|translate}}</td>   
+          <td data-title="'aws.license.sn'|translate"><a  ng-href="/system/license?id='snArray'">{{"aws.license.detail"|translate}}</a></td>   
+        </tr>
+      </table>  
+    </div>
+  <!-- <div class="license-wrap ">
+    <div class="license">
+      <h2>AWSTACK {{"aws.license.title"|translate}}</h3>
+      <fieldset>
+        <div class="control-group">
+          <label class="control-label">{{"aws.license.is_valid"|translate}}：<span  ng-class='{"isvalid":licenseItem.is_valid==true,"isinvalid":licenseItem.is_valid==false}'>{{"aws.license.valid." + licenseItem.is_valid|translate}}</span></label>
+        </div>
+        <div class="box-wrap clearfix">
+          <div class="control-group left">
+            <label class="control-label">{{"aws.license.now"|translate}}：<span>{{licenseItem.now*1000 | date:'yyyy-MM-dd HH:mm:ss'}}</span></label>
+          </div>
+          <div class="control-group right">
+            <label class="control-label">{{"aws.license.end_time"|translate}}：<span>{{licenseItem.end_time*1000 | date:'yyyy-MM-dd HH:mm:ss'}}</span></label>
+          </div>
+        </div>
+      </fieldset>
+      <fieldset>
+        <div class="box-wrap clearfix">
+          <div class="control-group left">
+            <label class="control-label">{{"aws.license.available_node"|translate}}：<span class="avalible">{{licenseItem.available_node}}</span></label>
+          </div>
+          <div class="control-group right">
+            <label class="control-label">{{"aws.license.current_node"|translate}}：<span class="isvalid">{{licenseItem.current_node}}</span></label>
+          </div>
+          <progress-bar ng-if="nodePer" progress-value="nodePer" bar-type="'width'" ></progress-bar>
+        </div>
+        
+      </fieldset>
+      <fieldset>
+        <div class = "control-group">
+          <label class="control-label">{{"aws.license.checked_node"|translate}}：</label>
+        </div>
+        <div class="node-list"> <span ng-repeat="item in licenseItem.checked_node track by $index "> {{item}} </span> </div>
+      </fieldset>
+    </div>
+  </div> -->
+  <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+      <div class="tab-content">
+        <div class="detail-row">
+          <div class="detail-title">
+            <a class="an-close" ng-href="/system/license"><i class="icon-aw-mail-reply"></i></a>
+            <span>{{'aws.license.SNdetail'|translate}}</span>
+          </div>
+          <div class="detail-info">
+                <div class="table-content">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>{{"aws.license.sn"|translate}}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat='item in snItem track by $index'>
+                        <td>{{item}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+          </div>
+        </div>
+      </div>
+    </pane>
+  </div>
+</div>
+<script type="text/ng-template" id="apply-license.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$close()">×</button>
+      <h3 class="modal-title">{{"aws.license.applyActivationCode"|translate}}</h3>
+    </div>
+    <div class="modal-body ">
+      <form name="alForm">
+        <div class="control-group">
+          <label class="control-label">{{"aws.license.machinecode"|translate}}：</label>
+          <div class="controls">
+            <textarea class="form-control copytext" id="copylicense" ng-model="licenseItem.cluster_fingerprint" readonly></textarea>
+            <span class="btn copybtn" popover-placement="bottom" popover-trigger="mouseenter" uib-popover="{{copytext}}"><i class="icon-aw-copy" copy-text data-copytarget="#copylicense"></i></span>
+          </div>
+        </div>
+        <!--<div class="control-group">
+          <label class="control-label">说明信息：</label>
+          
+        </div>-->
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.return'|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="import-license.html">
+  <div class=" modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$close()">×</button>
+      <h3 class="modal-title">{{"aws.license.importActivationCode"|translate}}</h3>
+    </div>
+    <div class="modal-body ">
+      <form name="ilForm">
+        <div class="control-group">
+          <label class="control-label">{{"aws.license.activationCode"|translate}}：</label>
+          <div class="controls">
+            <div class="file-box clearfix">
+              <input type="text" class="form-left" name="license" required ng-model="selected_file" ng-readonly='true'>
+              <div class="file-item">
+                <a href="javascript:void(0);" class="file-btn"><input  name="file" type="file" id="upload" class="file-input" onchange="angular.element(this).scope().fileNameChanged()"></a>
+                <button type="button" class="file-choose-bg" >选择文件</button>
+              </div>
+            </div>
+            <div class="error" ng-messages="(submitInValid ||ilForm.license.$dirty) && ilForm.license.$error">
+              <form-validate></form-validate>
+            </div>
+            <div class="error" ng-if="fileCheck">
+              {{"aws.license.fileCheck"|translate}}
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirm(ilForm)">{{'aws.action.ok'|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+    </div>
+  </div>
+</script>

@@ -1,0 +1,121 @@
+<div class="page-inner">
+	<h3 class="page-title">扩展策略</h3>
+	<div class="table-action">
+		<button type="button" data-toggle="modal" ng-click="createPolicy()" class="btn btn-new" licence-type="btn" id="resource-scalpolicy-create"><i class="icon-aw-add-to2"></i>{{'aws.scalePolicy.ui.newScalePolicy'|translate}}</button>
+		<button type="button" data-toggle="modal" ng-disabled="!canDelete" ng-click="deletePolicy(checkedItems)" class="btn btn-normal" licence-type="btn" id="resource-scalpolicy-del"><i class="icon-aw-delete"></i>{{'aws.action.del'|translate}}</button>
+		<into-information modular="'scalpolicy'"></into-information>
+	</div>
+	<script type="text/ng-template" id="headerCheckbox.html">
+		<label class="checkbox">
+			<input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+			<i class="iconfont"></i>
+		</label>
+	</script>
+	<div class="table-content">
+		<table ng-table="tableParams" class="table " show-filter="false">
+			<empty-tip empty-type="loadData"></empty-tip>
+			<tr ng-repeat="policy in $data">
+				<td header="'headerCheckbox.html'">
+					<label class="checkbox">
+						<input type="checkbox" ng-model="checkboxes.items[policy.id]" />
+						<i class="iconfont"></i>
+					</label>
+				</td>
+				<td data-title="'aws.scalePolicy.ui.policyName'|translate" sortable="'name'">
+					<div class="edit-name edit-lg">
+						<span title="{{policy.name}}">{{policy.name}}</span>
+					</div>
+				</td>
+				<td data-title="'aws.scalePolicy.ui.scaleSteps'|translate" sortable="'step'">{{policy.step}}</td>
+				<td data-title="'aws.scalePolicy.ui.scaleType'|translate" sortable="'type'">{{"aws.scalePolicy.ui."+policy.type|translate}}</td>
+				<!-- <td data-title="'最大值'" sortable="'maxSize'">{{policy.maxSize}}</td>
+				<td data-title="'最小值'" sortable="'minSize'">{{policy.minSize}}</td> -->
+                 <td data-title="'aws.scalePolicy.ui.intervalTimePerSecond'|translate" sortable="'periods'">{{policy.periods}}</td>
+			</tr>
+		</table>
+	</div>
+</div>
+<script type="text/ng-template" id="newPolicy.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+			<h3 class="modal-title">{{'aws.scalePolicy.ui.newScalePolicy'|translate}}</h3>
+		</div>
+		<div class="modal-body">
+			<form name="policyForm" novalidate>
+				<div class="control-group">
+					<label class="control-label"><span class="red">*</span>{{'aws.scalePolicy.ui.policyName'|translate}}：</label>
+					<div class="controls">
+						<input type="text" class="form-controls" name="name" ng-model="postData.name" placeholder="{{'aws.scalePolicy.ui.policyNameInput'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+						<div class="error" ng-if="interacted(policyForm.name)" ng-messages="policyForm.name.$error" >
+								<div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+								<div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.noSpecial'|translate}}</div>
+								<div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+							</div>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label"><span class="red">*</span>{{'aws.scalePolicy.ui.scaleSteps'|translate}}：</label>
+					<div class="controls">
+					    <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.scalePolicy.info.scaleSteps"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+						<input type="text" class="form-controls" name="step" ng-model="postData.step" placeholder="{{'aws.scalePolicy.ui.scaleStepsInput'|translate}}" ng-pattern="/^(\+|-)?[1-9][0-9]*$/" min="-10" max="10" limitnumberrange required />
+						<div class="error" ng-if="interacted(policyForm.step)" ng-messages="policyForm.step.$error" >
+							<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+							<div ng-message="pattern">{{'aws.scalePolicy.ui.scaleStepsPatternInput'|translate}}</div>
+							<div ng-message="limitnumberrange">{{'aws.errors.limit_-10_10'|translate}}</div>
+						</div>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">{{'aws.scalePolicy.ui.scaleType'|translate}}：</label>
+					<div class="controls">
+					    <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.scalePolicy.info.scaleType"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+						<ui-select ng-model="type" ng-change="changeType(type)"  title="扩展类型">
+							<ui-select-match placeholder="{{'aws.scalePolicy.ui.scaleTypeChoice'|translate}}">{{$select.selected.name}}</ui-select-match>
+							<ui-select-choices repeat="type.value as type in typeList | propsFilter: {name: $select.search}">
+								<div ng-bind-html="type.name | highlight: $select.search"></div>
+							</ui-select-choices>
+						</ui-select>
+					</div>
+				</div>
+				<!-- <div class="control-group">
+					<label class="control-label">最大值：</label>
+					<div class="controls">
+						<input type="text" class="form-controls" id="maxSize" name="maxSize" ng-model="postData.maxSize" placeholder="请输入最大值" ng-pattern="/^[1-9][0-9]*$/" min="1" max="100" limitnumrange required />
+						<div class="error" ng-if="interacted(policyForm.maxSize)" ng-messages="policyForm.maxSize.$error" >
+							<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+							<div ng-message="pattern">请输入正整数</div>
+							<div ng-message="limitnumrange">请输入1~100之间的正整数</div>
+						</div>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">最小值：</label>
+					<div class="controls">
+						<input type="text" class="form-controls" name="minSize" ng-model="postData.minSize" placeholder="请输入最小值" ng-pattern="/^[1-9][0-9]*$/" min="" max="postData.maxSize" minmax="maxSize" required />
+						<div class="error" ng-if="interacted(policyForm.minSize)" ng-messages="policyForm.minSize.$error" >
+							<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+							<div ng-message="pattern">请输入正整数</div>
+							<div ng-message="minmax">请输入1~最大值之间的正整数</div>
+						</div>
+					</div>
+				</div> -->
+                <div class="control-group">
+                     <label class="control-label"><span class="red">*</span>{{'aws.scalePolicy.ui.intervalTimePerSecond'|translate}}：</label>
+                  	<div class="controls">
+                  	    <i class="icon-aw-question-mark question-tip" uib-popover='{{"aws.scalePolicy.info.intervalTimePerSecond"|translate}}'  popover-trigger="mouseenter" popover-placement = "top" ></i>
+                        <input type="text" class="form-controls" name="periods" ng-model="postData.periods" placeholder="{{'aws.scalePolicy.ui.intervalTimeInput'|translate}}" ng-change="checkInterval(postData.periods)" required />
+						<div class="error" ng-if="interacted(policyForm.periods)" ng-messages="policyForm.periods.$error" >
+							<div ng-message="required" ng-show="!patternInter">{{'aws.errors.required'|translate}}</div>
+							<div ng-if="patternInter">请输入1-4294967296内的正整数</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-click="createPolicy()">{{'aws.action.ok' | translate}}</button>
+			<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+		</div>
+	</div>
+</script>

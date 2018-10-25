@@ -1,0 +1,112 @@
+<div class="page-inner">
+  <div class="shop-title">
+    <a ng-href="#/vpc/vpc">返回<i class="icon-aw-angle-left"></i></a><span>新建私有网络</span>
+  </div>
+  <div class="shop-body">
+    <form name="vpcModalForm" class="vpc-form" novalidate>
+      <div class="split">
+        <h4>私有网络信息</h4>
+        <div class="control-group">
+          <label class="control-label">所属地域:</label>
+          <div class="controls">{{"CN.region." + vpcForm.region | translate}}</div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">私有网络名称:</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="vpcname" ng-model="vpcForm.vpcName" placeholder="请输入私有网络名称" ng-maxlength="20" required repeat-name />
+            <div class="error" ng-messages='vpcModalForm.vpcname.$error' ng-if="interacted(vpcModalForm.vpcname)">
+              <div ng-message="required">*必填项</div>
+              <div ng-message="maxlength">请至多输入20个字符</div>
+              <div ng-message="repeatName">该地域下此私有网络名称已存在，请重新输入</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group ip_cidr clearfix">
+          <label class="control-label">CIDR:</label>
+          <div class="controls">
+            <div class="flex">
+              <ui-select ng-model="vpcForm.vpc_cidr.ip_1" ng-change="changeVpcIp_1(vpcForm.vpc_cidr.ip_1);" >
+                <ui-select-match>{{$select.selected}}</ui-select-match>
+                <ui-select-choices repeat="ip_1 in vpcips_1">
+                  <div ng-bind-html="ip_1 | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+              <div class="ip-spilt">.</div>
+              <input type="text" class="form-controls " name="vpcip_2" id="vpcip_2" ng-model="vpcForm.vpc_cidr.ip_2" ng-blur="checkVpcIp2(vpcForm.vpc_cidr.ip_2)" ng-keyup="setSubIP(vpcForm.vpc_cidr.ip_2,'ip_2')" uib-popover={{vpcip_2_range}}  popover-trigger="focus"  />
+              <div class="ip-spilt">.</div>
+              <input type="text" class="form-controls" name="vpcip_3" id="vpcip_3" ng-model="vpcForm.vpc_cidr.ip_3" ng-blur="checkIp34(vpcForm.vpc_cidr.ip_3,'vpc','ip_3')" ng-keyup="setSubIP(vpcForm.vpc_cidr.ip_3,'ip_3')" uib-popover={{vpcip_3_range_tip}}  popover-trigger="focus" readonly />
+              <div class="ip-spilt">.</div>
+              <input type="text" class="form-controls" name="vpcip_4" id="vpcip_4" ng-model="vpcForm.vpc_cidr.ip_4" ng-blur="checkIp34(vpcForm.vpc_cidr.ip_4,'vpc','ip_4')" ng-keyup="setSubIP(vpcForm.vpc_cidr.ip_4,'ip_4')" uib-popover={{vpcip_4_range_tip}}  popover-trigger="focus" readonly />
+              <div class="ip-spilt">/</div>
+              <ui-select ng-model="vpcForm.vpc_cidr.ip_5" ng-change="changeIp_5(vpcForm.vpc_cidr.ip_5,'vpc');" >
+                <ui-select-match>{{$select.selected}}</ui-select-match>
+                <ui-select-choices repeat="ip_5 in vpcips_5">
+                  <div ng-bind-html="ip_5 | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="">
+        <h4>初始子网信息</h4>
+        <div class="control-group">
+          <label class="control-label">子网名称:</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="subname" ng-model="vpcForm.subnetName" placeholder="请输入子网名称" ng-maxlength="60"  required />
+            <div class="error" ng-messages='vpcModalForm.subname.$error' ng-if="interacted(vpcModalForm.vpcname)">
+              <div ng-message="required">*必填项</div>
+              <div ng-message="maxlength">请至多输入60个字符</div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group ip_cidr clearfix">
+          <label class="control-label">CIDR:</label>
+          <div class="controls">
+            <div class="flex">
+              <input type="text" class="form-controls " name="subip_1" id="subip_1" ng-model="vpcForm.sub_cidr.ip_1" readonly />
+              <div class="ip-spilt">.</div>
+              <input type="text" class="form-controls " name="subip_2" id="subip_2" ng-model="vpcForm.sub_cidr.ip_2" readonly />
+              <div class="ip-spilt">.</div>
+              <input type="text" class="form-controls" name="subip_3" id="subip_3" ng-model="vpcForm.sub_cidr.ip_3" ng-blur="checkIp34(vpcForm.sub_cidr.ip_3,'sub','ip_3')"  uib-popover={{subip_3_range_tip}}  popover-trigger="focus" readonly />
+              <div class="ip-spilt">.</div>
+              <input type="text" class="form-controls" name="subip_4" id="subip_4" ng-model="vpcForm.sub_cidr.ip_4"  ng-blur="checkIp34(vpcForm.sub_cidr.ip_4,'sub','ip_4')" uib-popover={{subip_4_range_tip}}  popover-trigger="focus" readonly />
+              <div class="ip-spilt">/</div>
+              <ui-select ng-model="vpcForm.sub_cidr.ip_5" ng-change="changeIp_5(vpcForm.sub_cidr.ip_5,'sub');" >
+                <ui-select-match>{{$select.selected}}</ui-select-match>
+                <ui-select-choices repeat="ip_5 as ip_5 in subips_5">
+                  <div ng-bind-html="ip_5 | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">可用区:</label>
+          <div class="controls">
+            <ui-select ng-model="vpcForm.subzone" title='请选择可用区' >
+              <ui-select-match>{{$select.selected.name}}</ui-select-match>
+              <ui-select-choices repeat="zone.value as zone in subzones">
+              <div ng-bind-html="zone.name | highlight: $select.search"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">关联路由表:</label>
+          <div class="controls">
+            默认
+          </div>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">&nbsp;</label>
+        <div class="controls">
+          <a class="btn btn-info" type="button"  ng-click="vpcConfirm(vpcModalForm)">确定</a>
+          <a class="btn btn-default" type="button" href="#/vpc/vpc">返回</a>
+          <div class="error" ng-if="buyFailedMsg">{{buyFailedMsg}}</div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

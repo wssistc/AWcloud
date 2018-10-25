@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0,0,1400,1200"  preserveAspectRatio="xMinYMin meet"
+	 >
+<g id="计算">
+	<g>
+		<polygon fill="#EFEFEF" points="128.556,253.389 128.488,231.787 2.421,145.722 2.488,161.658 		"/>
+		<polygon fill="#EFEFEF" points="128.421,253.389 128.488,231.787 254.556,145.722 254.488,161.658 		"/>
+		<polygon fill="#FFFFFF" stroke="#E4E4E4" stroke-width="3" stroke-miterlimit="10" points="254.556,145.722 128.488,231.787 
+			2.421,145.722 128.488,83.993 		"/>
+	</g>
+	<g>
+		<path fill="none" stroke="#266CD3" stroke-width="5" stroke-miterlimit="10" d="M52,53.5h0.461h-0.02l0.277,97.201
+			c0.048,3.26,1.707,6.238,4.393,8.086l68.389,46.73v0.705l88.616-60.991c2.686-1.848,4.29-4.882,4.339-8.142l-0.009-98.372"/>
+		<polyline fill="none" stroke="#266CD3" stroke-width="5" stroke-miterlimit="10" points="218.686,38.611 145.554,8.666 
+			52.508,53.25 		"/>
+		<polygon fill="#FFFFFF" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" points="218.722,38.611 125.572,96.203 
+			52.421,53.277 145.572,8.666 		"/>
+		<path fill="#CADCF2" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" d="M125.722,205.722l-0.15-109.913l-73.15-42.592
+			l0.287,97.372c0.048,3.26,1.673,6.294,4.359,8.142L125.722,205.722z"/>
+		<path fill="#CADCF2" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" d="M125.421,206.222l0.15-109.913l93.15-57.592
+			l-0.287,98.372c-0.048,3.26-1.673,6.294-4.359,8.142L125.421,206.222z"/>
+		<ellipse fill="#3DBF0D" cx="78.25" cy="109" rx="2.75" ry="5.5"/>
+		<ellipse fill="#266CD3" cx="87.25" cy="115" rx="2.75" ry="5.5"/>
+		<polygon fill="#266CD3" points="96.334,106.665 73.667,92.665 73.667,75.999 96.334,88.999 		"/>
+	</g>
+	<line fill="none" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" x1="62.667" y1="146" x2="113.333" y2="178.667"/>
+	<line fill="none" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" x1="62.667" y1="136" x2="113.333" y2="168.667"/>
+	<line fill="none" stroke="#266CD3" stroke-width="3" stroke-miterlimit="10" x1="62.667" y1="126" x2="113.333" y2="158.667"/>
+</g>
+</svg>

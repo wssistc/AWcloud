@@ -1,0 +1,348 @@
+<div class="page-inner">
+  <div class="table-action">
+        <div licence-type="btn" id="identity-users-create" class="pull-left">
+            <button type="button" class="btn btn-new" ng-controller="easyCtrl" ng-click="easyUser()"><i class="icon-aw-add-to2"></i>{{"aws.users.adduser"|translate}}</button>
+        </div>
+    <button type="button" class="btn btn-normal" ng-click="updateUser('edit',editData)"  title="{{notEditTip}}" ng-disabled="iseditDisabled" licence-type="btn" id="identity-users-edit"><i class="iconfont icon-aw-modify"></i>{{"aws.action.edit"|translate}}</button>
+    <button type="button" class="btn btn-normal" ng-click="deleteUser(checkedItems)" title="{{notDelTip}}" ng-disabled="delisDisabled" licence-type="btn" id="identity-users-del"> <i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+    <!-- <button type="button" class="btn btn-info" ng-click="allocatePrivilege('allocatePrivilege',editData)" title="{{notAllocateTip}}" ng-disabled="isDisabled"><i class="icon-aw-adjust"></i>{{"aws.users.allocatePrivilege"|translate}}</button> -->
+    <button type="button" class="btn btn-normal" ng-click="changePass(editData)" title="{{notEditPassTip}}" ng-disabled="isDisabled" licence-type="btn" id="identity-users-resetPassword"><i class="iconfont icon-aw-modify"></i>{{"aws.action.resetPass"|translate}}</button>
+    <!-- <button type="button" class="btn btn-info" ng-click="changeOrg(editData)" ng-disabled="sigDisabled"><i class="iconfont icon-aw-modify"></i>{{"aws.action.editOrg"|translate}}</button> -->
+    <!-- <button class="btn btn-refresh" ng-click="refreshUser()"><i class="icon-aw-refresh"></i>{{"aws.action.refresh"|translate}}</button>
+    <div class="search-box">
+        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="fa icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder={{"aws.action.search"|translate}} />
+        </form>
+    </div> -->
+    <div class="pull-right">
+        <into-information modular="'user'"></into-information>
+        <setting title-data="userTitleData" site-title="userTitleName" table-data="userTableData" search-tearm="userSearchTearm(obj)"></setting>
+        <button class="btn btn-renovat right-ports" ng-click="refreshUser()"><i class="icon-aw-refresh"></i></button>
+        <div class="search-box right-ports">
+            <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="fa icon-aw-search"></i></button>
+                <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder={{"aws.action.search"|translate}} />
+            </form>
+        </div>
+    </div>
+  </div>
+  <div class="table-content">
+    <empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="tableParams" class="table" show-filter="false">
+        <colgroup>
+          <col width="6%">
+          <col span="8">
+        </colgroup>
+        <tr ng-repeat="user in $data" >
+            <td header="'headerCheckbox.html'">
+                <label class="checkbox">
+                    <input type="checkbox" ng-model="checkboxes.items[user.id]" />
+                    <i class="iconfont"></i>
+                </label>
+            </td>
+            <td data-title="headers.name" sortable="'name'" ng-if="userTitleData[0].value">
+                <div class="edit-name edit-sm">
+                  <span title="{{user.name}}">{{user.name}}</span>
+                </div>
+            </td>
+            <td data-title="headers.role" sortable="'managementRole'" ng-if="userTitleData[1].value">
+                {{user.managementRoleName}}
+            </td>
+            <td data-title="headers.domainName" sortable="'domainName'" ng-if="userTitleData[2].value">
+                {{user.domainName}}
+            </td>
+            <!-- <td data-title="headers.realName" sortable="'realName'">
+                {{user.realName}}
+            </td> -->
+            <td data-title="'Email'" sortable="'email'" ng-if="userTitleData[3].value">
+                {{user.email}}
+            </td>
+            <td data-title="headers.phone" sortable="'phone'" ng-if="userTitleData[4].value">
+                {{user.phone}}
+            </td>
+            <td data-title="headers.status" sortable="'status'" ng-if="userTitleData[5].value">
+              <span ng-class="{true:'bg-green',false:'bg-orange'}[user.enabled==true]">{{user.status}}</span>
+            </td>
+            <td data-title="headers.createTime" sortable="'createTime'" ng-if="userTitleData[6].value">
+                <span class="date">{{user.createTime}}</span>
+            </td>
+            <td data-title="headers.operate" ng-if="userTitleData[7].value">
+                <button class="btn" ng-click="operateUser(user)" licence-type="btn-list" id="'identity-users-option'+$index" ng-class="{true:'btn-default',false:'btn-info'}[user.enabled==true]" ng-if="user.managementRole != user_managementRole">{{user.operate}}</button>
+            </td>
+        </tr>
+    </table>
+  </div>
+</div>
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+      <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+      <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="userModel.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{userModal_title}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="createUserForm" novalidate>
+          <!-- <div class="alert alert-danger" ng-if="editUser">提示：当密码为空表示不修改密码</div> -->
+          <div class="control-group">
+              <label class="control-label"><i class="red">*</i> {{"aws.users.cu.username"|translate}}：</label>
+              <div class="controls">
+                  <input type="text" class="form-controls" name="userName" ng-model="userForm.name"  ng-disabled="editUser" placeholder={{"aws.users.placeholder.username"|translate}} ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+                  <div class="error" ng-messages="(submitValid ||createUserForm.userName.$dirty) && createUserForm.userName.$error">
+                    <form-validate></form-validate>
+                  </div>
+              </div>
+          </div>
+          <!--<div class="control-group" ng-hide="hideadminActive">
+              <label class="control-label"><i class="red">*</i> {{"aws.users.cu.name"|translate}}：</label>
+              <div class="controls">
+                  <input type="text" class="form-controls" name="name" ng-model="userForm.realName" placeholder={{"aws.users.placeholder.name"|translate}}  ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"  ng-maxlength="32" required />
+                  <div class="error" ng-messages="(submitValid ||createUserForm.name.$dirty) && createUserForm.name.$error">
+                    <form-validate></form-validate>
+                  </div>
+              </div>
+          </div>-->
+          <!-- <div class="control-group" ng-hide="hideadminActive">
+              <label class="control-label">{{"aws.users.cu.org"|translate}}：</label>
+              <div class="controls">
+                  <ui-select ng-model="userForm.selectedOrg" ng-disabled="!orgs.options.length" >
+                      <ui-select-match placeholder={{"aws.users.placeholder.org"|translate}}>{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices  repeat="org in orgs.options">
+                          <div ng-bind-html="org.levname | highlight: $select.search"></div>
+                      </ui-select-choices>
+                  </ui-select>
+              </div>
+          </div> -->
+          <div class="control-group" ng-hide="editUser">
+              <label class="control-label"><i class="red">*</i> {{"aws.users.cu.role"|translate}}：</label>
+              <div class="controls">
+                  <ui-select ng-model="userForm.selectedRole" name="role" ng-disabled="!roles.options.length" ng-required="!editUser">
+                      <ui-select-match placeholder={{"aws.users.placeholder.role"|translate}}>{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="role in roles.options| propsFilter:{name:$select.search}">
+                          <div ng-bind-html="role.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                  </ui-select>
+                  <div class="error" ng-messages="(submitValid ||createUserForm.role.$dirty) && createUserForm.role.$error">
+                    <form-validate></form-validate>
+                  </div>
+              </div>
+          </div>
+          <div class="control-group" ng-hide="editUser">
+              <label class="control-label"><i class="red">*</i> {{"aws.users.cu.department"|translate}}：</label>
+              <div class="controls">
+                  <ui-select ng-model="userForm.selectedDepartment" name="domain" ng-change="changeDpm(userForm.selectedDepartment)" ng-disabled="!dpms.options.length" ng-required="!editUser">
+                      <ui-select-match placeholder={{"aws.users.placeholder.department"|translate}}>{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="dpm in dpms.options | propsFilter:{name:$select.search}">
+                          <div ng-bind-html="dpm.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                  </ui-select>
+                  <div class="error" ng-messages="(submitValid ||createUserForm.domain.$dirty) && createUserForm.domain.$error">
+                    <form-validate></form-validate>
+                  </div>
+              </div>
+          </div>
+          <div class="control-group" ng-if="!editUser &&  userForm.selectedRole.roleName!='domain_admin'">
+              <label class="control-label"><i class="red">*</i> {{"aws.users.cu.project"|translate}}：</label>
+              <div class="controls">
+                  <ui-select ng-model="userForm.selectedProject" name="project" ng-disabled="!projects.options.length" ng-required="!editUser">
+                      <ui-select-match placeholder={{"aws.users.placeholder.project"|translate}}>{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="project in projects.options | propsFilter:{name:$select.search}">
+                          <div ng-bind-html="project.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                  </ui-select>
+                  <div class="error" ng-messages="(submitValid ||createUserForm.project.$dirty) && createUserForm.project.$error">
+                    <form-validate></form-validate>
+                  </div>
+              </div>
+          </div>
+          <div class="control-group" ng-hide="editUser">
+              <label class="control-label"><i class="red">*</i> {{"aws.users.cu.privilege"|translate}}：</label>
+              <div class="controls">
+                  <ui-select ng-model="userForm.selectedPrivilege" name="privilege" ng-disabled="!privileges.options.length" ng-required="!editUser">
+                      <ui-select-match placeholder={{"aws.users.placeholder.privilege"|translate}}>{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices repeat="privilege in privileges.options | propsFilter:{name:$select.search}">
+                          <div ng-bind-html="privilege.name | highlight: $select.search"></div>
+                      </ui-select-choices>
+                  </ui-select>
+                  <div class="error" ng-messages="(submitValid ||createUserForm.privilege.$dirty) && createUserForm.privilege.$error">
+                    <form-validate></form-validate>
+                  </div>
+              </div>
+          </div>
+          <div class="control-group" ng-hide="editUser">
+              <label class="control-label"><i class="red">*</i> {{"aws.users.cu.password"|translate}}：</label>
+              <div class="controls">
+                  <input type="password" class="form-controls" name="password" ng-model="userForm.password"  id="user_pass" ng-init="userForm.password=''"  placeholder={{"aws.users.placeholder.password"|translate}}  
+                  ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,/\-\^\%])[0-9a-zA-Z!@._:,/\-\^\%]{8,16}$/" ng-required="!editUser"/>
+                  <div class="error" ng-messages="(submitValid ||createUserForm.password.$dirty) && createUserForm.password.$error">
+                      <form-validate pattern-msg="patternMsg"></form-validate>
+                  </div>
+              </div>
+          </div>
+          <div class="control-group" ng-hide="editUser">
+              <label class="control-label"><i class="red">*</i> {{"aws.users.cu.confirmPwd"|translate}}：</label>
+              <div class="controls">
+                  <input type="password" class="form-controls" name="confirmPassWord" ng-model="userForm.cfmPassword" placeholder={{"aws.users.placeholder.confirmPwd"|translate}} 
+                  ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,/\-\^\%])[0-9a-zA-Z!@._:,/\-\^\%]{8,16}$/" pw-check="user_pass" ng-required="!editUser"/>
+                  <div class="error" ng-messages="(submitValid ||createUserForm.confirmPassWord.$dirty) && createUserForm.confirmPassWord.$error" >
+                      <form-validate pattern-msg="patternMsg"></form-validate>
+                  </div>
+              </div>
+          </div>
+          <!--<div class="control-group radio-wrap" ng-hide="userForm.selectedRole.name ==='admin' || hideActive || hideadminActive">
+              <label class="control-label">{{"aws.users.operate"|translate}}：</label>
+              <div class="controls">
+                  <div class="radio-item clearFix">
+                      <label class="radio"><input type="radio" ng-model="userForm.enabled" name="active"  value=true /><i class="iconfont"></i>{{"aws.users.active"|translate}}</label>
+                      <label class="radio"><input type="radio" ng-model="userForm.enabled" name="lock" value=false /><i class="iconfont"></i>{{"aws.users.locked"|translate}}</label>
+                  </div>
+              </div>
+          </div>-->
+          <div class="control-group">
+              <label class="control-label">{{"aws.users.phone"|translate}}：</label>
+              <div class="controls">
+                  <input type="text" class="form-controls" name="phone" ng-model="userForm.phone" placeholder={{"aws.users.placeholder.phone"|translate}} ng-pattern="/(^(13\d|15[^4,\D]|17[13678]|18\d)\d{8}|170[^346,\D]\d{7})$/" />
+                  <div class="error" ng-messages="(submitValid ||createUserForm.phone.$dirty) && createUserForm.phone.$error">
+                      <span class="error" ng-message="pattern">{{'aws.errors.phone'|translate}}</span>
+                  </div>
+              </div>
+          </div>
+          <div class="control-group">
+              <label class="control-label">Email：</label>
+              <div class="controls">
+                  <input  class="form-controls" name="email" ng-model="userForm.email" placeholder={{"aws.users.placeholder.email"|translate}} ng-pattern="/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/" ng-maxlength="50"/>
+                  <div class="error" ng-messages="(submitValid ||createUserForm.email.$dirty) && createUserForm.email.$error" >
+                      <span class="error" ng-message="pattern" >{{'aws.errors.email'|translate}}</span>
+                      <span class="error" ng-message="maxlength">{{'aws.errors.emailmaxlength'|translate}}</span>
+                  </div>
+              </div>
+          </div>
+          
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="userConfirm(userForm,createUserForm)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="allocatePrivilege.html">
+    <div class="privilegeTo-modal modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{"aws.users.allocatePrivilege"|translate}}</h3>
+        </div>
+        <div class="modal-body">
+            <div class="left-select-table">
+                <h5>{{"aws.users.un_allocatePrivilege"|translate}}</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr ng-repeat="role in roles">
+                            <td>
+                                <label class="checkbox">
+                                    <input type="checkbox" ng-model="checkboxes.roles[role.id]" class="" />
+                                    <i class="iconfont"></i><span title="{{role.name}}">{{role.name}}</span>
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="btnGroup">
+                <button class="btn btn-primary selectBtn" ng-click="selectRolesToUser()" ng-disabled="!canSelect">&gt;</button>
+                <span ng-if="showSelectTip">{{selectips}}</span>
+                <!-- <button class="btn btn-primary removeBtn" ng-click="removeRolesFromUser()">&lt;</button> -->
+            </div>
+            <div class="right-select-table">
+                <h5>{{"aws.users.have_allocated"|translate}}</h5>
+                <div class="table-responsive">
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="table table-bordered">
+                        <tr ng-repeat="userRole in userRoles">
+                            <td>
+                                <label class="checkbox">
+                                    <input type="checkbox" ng-model="chkboxes.userRoles[userRole.id]" class="" />
+                                    <i class="iconfont"></i><span title="{{userRole.name}}">{{userRole.name}}</span>
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="$close()" ng-disabled="showSelectTip">{{"aws.action.ok"|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="userPassModel.html">
+  <div class="modal-common modal-smallest">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.action.resetPass"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="UserPassForm" novalidate>
+          <div class="control-group">
+              <label class="control-label"><span class="red">*</span>{{"aws.users.cu.password"|translate}}：</label>
+              <div class="controls">
+                   <input type="password" class="form-controls" name="password" ng-model="userForm.password"  id="user_pass" ng-init="userForm.password=''"  placeholder={{"aws.users.placeholder.password"|translate}}  
+                  ng-pattern="/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@._:,/\-\^\%])[0-9a-zA-Z!@._:,/\-\^\%]{8,16}$/" required/>
+                  <div class="error" ng-if="(submitValid ||UserPassForm.password.$dirty) && UserPassForm.password.$error">
+                      <span class="error" ng-if="UserPassForm.password.$error.pattern">{{'aws.register.info.special_8_16'|translate}}</span>
+                  </div>
+              </div>
+          </div>
+          <div class="control-group" >
+              <label class="control-label"><span class="red">*</span>{{"aws.users.cu.confirmPwd"|translate}}：</label>
+              <div class="controls">
+                  <input type="password" class="form-controls" name="confirmPassWord" ng-model="userForm.cfmPassword" placeholder={{"aws.users.placeholder.confirmPwd"|translate}} 
+                   ng-maxlength="32" ng-minlength="8" pw-check="user_pass" required/>
+                  <div class="error" ng-messages="(submitValid ||UserPassForm.confirmPassWord.$dirty) && UserPassForm.confirmPassWord.$error" >
+                      <form-validate></form-validate>
+                  </div>
+              </div>
+          </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="userPassConfirm(UserPassForm)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="allocateOrg.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.users.allocateOrg"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="UserOrgForm" novalidate>
+          <div class="control-group">
+              <label class="control-label">{{"aws.users.cu.org"|translate}}：</label>
+              <div class="controls">
+                  <ui-select ng-model="userOrgForm.selectedOrg" name="orgName" ng-disabled="!orgs.options.length">
+                      <ui-select-match placeholder={{"aws.users.placeholder.org"|translate}}>{{$select.selected.name}}</ui-select-match>
+                      <ui-select-choices  repeat="org in orgs.options">
+                          <div>{{org.levname | highlight: $select.search}}</div>
+                      </ui-select-choices>
+                  </ui-select>
+              </div>
+          </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="userOrgConfirm(userOrgForm,UserOrgForm)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+  </div>
+</script>
+
+

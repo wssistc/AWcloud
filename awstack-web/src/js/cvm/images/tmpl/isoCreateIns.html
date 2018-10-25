@@ -1,0 +1,172 @@
+<div class="">
+  <div class="">
+    <div class="clearfix content">
+      <div class="left-field">
+        <form name="imageForm" novalidate>
+          <div class="control-group">
+            <label class="control-label"><span class="red">*</span>{{'aws.img.img_name'|translate}}：</label>
+            <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover="提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <input type="text" class="form-controls" name="name" ng-model="postParams.image_name" placeholder="{{'aws.makeImage.inputImage'|translate}}" ng-pattern="/^(\w|\-)*$/" ng-maxlength="30" required />
+              <div class="error" ng-if="interacted(imageForm.name)" ng-messages="imageForm.name.$error" >
+                  <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.noZhSpecial'|translate}}</div>
+                  <div ng-message="maxlength">{{'aws.errors.maxlength30'|translate}}</div>
+                </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{'aws.img.os_type'|translate}}：</label>
+            <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover="提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <ui-select ng-model="os_distro_type.os_type" ng-change="changeOSType(os_distro_type.os_type)" title="{{'aws.img.os_type'|translate}}">
+                <ui-select-match placeholder="{{'aws.img.chooseOSType'|translate}}" >{{$select.selected.paramName}}</ui-select-match>
+                <ui-select-choices repeat="os_type in osTypeList | propsFilter: {paramName: $select.search}">
+                  <div ng-bind-html="os_type.paramName | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{'aws.img.OS'|translate}}：</label>
+            <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover="提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <ui-select ng-model="os_distro_type.os_distro" ng-change="changeOS(os_distro_type.os_distro)" title="{{'aws.img.OS'|translate}}">
+                <ui-select-match placeholder="{{'aws.img.chooseOS'|translate}}">{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="os_distro in osDistroList | propsFilter: {name: $select.search}">
+                  <div ng-bind-html="os_distro.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <!-- <div class="control-group">
+                <label class="control-label">{{'aws.img.version'|translate}}：</label>
+                <div class="controls">
+                  <input type="text" class="form-controls" ng-model="postParams.os_version" placeholder="{{'aws.img.chooseVersion' | translate}}" name="version" ng-maxlength="255" required />
+                  <div class="error" ng-if="interacted(imageForm.version)" ng-messages="imageForm.version.$error">
+                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                    <div ng-message="maxlength">{{'aws.errors.maxlength255'|translate}}</div>
+                  </div>
+                </div>
+              </div> -->
+          <div class="control-group">
+            <label class="control-label">ISO：</label>
+            <div class="controls">
+              <i class="icon-aw-question-mark question-tip"uib-popover="{{'aws.img.iso_message'|translate}}" 
+              popover-enable="true" popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <ui-select ng-model="iso" name="iso" ng-change="changeISO(iso)">
+                <ui-select-match placeholder="{{'aws.img.chooseISO'|translate}}">{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="iso in isoListData | propsFilter: {name: $select.search}">
+                  <div ng-bind-html="iso.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-if="checkISO">
+                <div>{{'aws.errors.required'|translate}}</div>
+              </div>
+            </div>
+          </div> 
+          <div class="control-group">
+            <label class="control-label">{{'aws.img.network'|translate}}：</label>
+            <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover="提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <ui-select ng-model="network" ng-change="changeNet(network)"  title="{{'aws.img.network'|translate}}">
+                <ui-select-match placeholder="{{'aws.img.chooseNet'|translate}}">{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="network in networkList | propsFilter: {name: $select.search}">
+                  <div ng-bind-html="network.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div> 
+          <div class="control-group">
+            <label class="control-label">{{'aws.img.conf_option'|translate}}：</label>
+            <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover="提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <ui-select ng-model="config" ng-change="changeConfig(config)" title="{{'aws.img.conf_option'|translate}}">
+                <ui-select-match placeholder="{{'aws.img.chooseConf'|translate}}">{{$select.selected.text}}</ui-select-match>
+                <ui-select-choices repeat="config in configList | propsFilter: {name: $select.search}">
+                  <div ng-bind-html="config.text | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select>
+            </div>
+          </div> 
+          <div class="control-group">
+            <label class="control-label"><span class="red">*</span>{{'aws.img.vol_size'|translate}}：</label>
+            <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover="提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <input type="text" class="form-controls" name="size" ng-model="postParams.disk_size" ng-pattern="/^[1-9]+[0-9]*$/"  min="1" max="200" limitnumrange  placeholder="{{'aws.img.vol_sizeChoose'|translate}}"  required />
+              <div class="error" ng-if="interacted(imageForm.size)" ng-messages="imageForm.size.$error" >
+                  <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+                  <div ng-message="pattern" class="volume-form-name-error">{{'aws.volumes.cv.pInputNum'|translate}}</div>
+                  <div ng-message="limitnumrange">{{'aws.img.int1_200'|translate}}</div>
+              </div>
+            </div>
+          </div>
+        <div class="control-group">
+            <label class="control-label">{{'aws.img.private'|translate}}：</label>
+            <div class="controls" class="checkbox">
+              <i class="icon-aw-question-mark question-tip" uib-popover="提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" class="form-controls" ng-model="postParams.is_private" ng-disabled="!ADMIN"/>
+                  <i class="iconfont"></i>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{'aws.makeImage.other_disk'|translate}}：</label>
+            <div class="controls" class="checkbox">
+              <i class="icon-aw-question-mark question-tip" uib-popover="提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" class="form-controls" ng-change="haveDisk()" ng-model="haveOtherDisk" />
+                  <i class="iconfont"></i>
+                </label>
+              </div>
+            </div>
+          </div> 
+          <div class="control-group" ng-if="haveOtherDisk" >
+            <label class="control-label">{{'aws.makeImage.disk'|translate}}：</label>
+            <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover="提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <ui-select multiple ng-model="selectedDisks" theme="bootstrap" sortable="true" ng-change="changeDisk(selectedDisks)"   close-on-select="false" >
+                <ui-select-match  placeholder="{{'aws.makeImage.makeImage'|translate}}">{{$item.name}}</ui-select-match>
+                <ui-select-choices   repeat="iso in isoList2 | propsFilter:  {name: $select.search}">
+                  <div ng-bind-html="iso.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select> 
+            </div>
+          </div>
+          <div class="control-group" ng-show="isWin2003">
+            <label class="control-label">{{'aws.makeImage.other_soft_disk'|translate}}：</label>
+            <div class="controls" class="checkbox">
+              <i class="icon-aw-question-mark question-tip" uib-popover="提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" class="form-controls" ng-init="haveOtherSoftDisk = true" ng-model="haveOtherSoftDisk" ng-disabled="isWin2003" />
+                  <i class="iconfont"></i>
+                </label>
+              </div>
+            </div>
+          </div> 
+          <div class="control-group" ng-show="isWin2003 && haveOtherSoftDisk" >
+            <label class="control-label"><span class="red">*</span>{{'aws.makeImage.soft_disk'|translate}}：</label>
+            <div class="controls">
+              <i class="icon-aw-question-mark question-tip" uib-popover="提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+              <ui-select multiple  name="softdisk" ng-model="soft.selectedSoftDisks" theme="bootstrap" sortable="true" ng-change="changeSoftDisk(soft.selectedSoftDisks)" close-on-select="false" ng-required="isWin2003 && haveOtherSoftDisk">
+                <ui-select-match  placeholder="{{'aws.makeImage.makeImage'|translate}}">{{$item.name}}</ui-select-match>
+                <ui-select-choices repeat="iso in isoList4 | propsFilter:  {name: $select.search}">
+                  <div ng-bind-html="iso.name | highlight: $select.search"></div>
+                </ui-select-choices>
+              </ui-select> 
+              <div class="error" ng-if="interacted(imageForm.softdisk)" ng-messages="imageForm.softdisk.$error" >
+                  <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+

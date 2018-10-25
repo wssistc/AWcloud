@@ -1,0 +1,246 @@
+<div class="page-inner">
+	<div class="table-action">
+		<button type="button" data-toggle="modal" ng-click="createSnap('new')" ng-disabled="!services.cinder"  class="btn btn-new" licence-type="btn" id="resource-regularSnap-createTadsk"><i class="icon-aw-add-to2"></i>新建任务</button>
+		<button type="button" data-toggle="modal" ng-click="createSnap('edit',editData)" ng-disabled = "isDisabled" class="btn btn-normal" licence-type="btn" id="resource-regularSnap-editTask"><i class="icon-aw-modify"></i>编辑任务</button>
+		<button type="button" data-toggle="modal" ng-disabled="delisDisabled" ng-click="delTask(editData)" class="btn btn-normal" licence-type="btn" id="resource-regularSnap-delTask"><i class="icon-aw-delete"></i>删除任务</button>
+		<div class="pull-right">
+				<into-information modular="'regularSnap'"></into-information>
+				<search-refresh  class="rs" refresh-fuc="refresh" context= "context" table-content="'tableParams'" table-data="tabledata" btn-type="checkbox"></search-refresh>  
+				<setting-col  title-data="tableCols" site-title="titleName" table-data="tabledata" config-search="configSearch" ></setting-col>
+		</div>
+	</div>
+	<script type="text/ng-template" id="headerCheckbox.html">
+		<label class="checkbox">
+			<input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+			<i class="iconfont"></i>
+		</label>
+	</script>
+	<div class="table-content">
+		<table ng-table-dynamic="tableParams with tableCols" class="table" show-filter="false">
+			<tr ng-repeat="job in $data track by $index ">
+				<td ng-repeat="item in $columns" ng-switch="item.field" >
+						<label class="checkbox" ng-switch-when="check">
+								<input name="job" type="checkbox" value={{job.id}} ng-model="checkboxes.items[job.scheduleJobId]" >
+								<i class="iconfont"></i>
+						</label>
+						<span ng-switch-when="scheduleJobId">
+								<a ng-href="/system/regularSnap?id={{job.scheduleJobId}}">{{job[item.field]}}</a>
+						</span>
+						<span ng-switch-when="serverName">
+								<a ng-href="/system/regularSnap?id={{job.scheduleJobId}}">{{job[item.field]}}</a>
+						</span>
+						<span ng-switch-when="operate">
+								<div class="checkbox switch-btn">
+									<label uib-popover="{{job.onetaskexecute?('aws.instances.snapshot.taskStatus.onetaskStatus'|translate):('aws.instances.snapshot.taskStatus.'+job.status | translate)}}"  popover-trigger="mouseenter" popover-placement = "left" >
+										<input type="checkbox" class="form-controls" ng-change="getStatus(job)" ng-model="job.task_switch" ng-disabled="job.onetaskexecute">
+										<i class="iconfont"></i>
+									</label>
+								</div>
+						</span>
+						<span ng-switch-default>{{job[item.field]}}</span>
+				</td>
+			</tr>
+		</table>
+		<service-tip service = "'cinder'"  menus="menuGuide"  menu-href="'/system/storageManagement'"></service-tip>
+		<loading-data  data="task_data"></loading-data>
+	</div>
+	<div ng-controller="detailCtrl">
+		<pane class="detail-body" animation="animation">
+			<div class="tab-content">
+				<div class="detail-row">
+					<div class="detail-header">
+					</div>
+					<div class="detail-title">
+						<a class="an-close" ng-href="/system/regularSnap"><i class="icon-aw-mail-reply"></i></a>
+						<span>{{'aws.tasks.taskId' | translate}}</span>
+					</div>
+					<div class="detail-info scroll tab-offset-right">
+						<ul class="nav nav-tabs nav-justified">
+							<li ng-class="{active:showDetail}" class="uib-tab nav-item " ng-click="getDetial()">
+								<a href="">{{'aws.tasks.basicInfo' | translate}}</a>
+							</li>
+							<li ng-class="{active:!showDetail}" class="uib-tab nav-item" ng-click="getDetialTask()">
+								<a href="">{{'aws.tasks.excuteLog' | translate}}</a>
+							</li>
+						</ul>
+						<div class="tab-content">
+							<table class="table table-info border" ng-show="showDetail">
+								<tbody>
+									<tr>
+										<td>{{translate.taskId}}</td>
+										<td>{{detail.scheduleJobId}}</td>
+										<td>{{translate.jobType}}</td>
+										<td>{{"aws.instances.snapshot.task."+detail.jobType | translate}}</td>
+									</tr>
+									<tr>
+										<td>{{translate.serverName}}</td>
+										<td>{{detail.serverName}}</td>
+										<td>{{translate.volumeNames}}</td>
+										<td>{{detail.volumeNames}}</td>
+									</tr>
+									<tr>
+										<td>{{translate.previousFireTime}}</td>
+										<td>{{detail.previousFireTime}}</td>
+										<td>{{translate.nextFireTime}}</td>
+										<td>{{detail.nextFireTime}}</td>
+									</tr>
+									<tr>
+										<td>{{translate.holdNumber}}</td>
+										<td>{{detail.holdNumber}}</td>
+										<td></td>
+										<td></td>
+									</tr>
+								</tbody>
+							</table>
+							<table ng-table="tableParams" class="table" ng-show="!showDetail">
+								<tr ng-repeat="item in detailData">
+									<td data-title="'aws.tasks.userName' | translate">{{item.userName}}</td> 
+									<td data-title="'aws.tasks.volume' | translate">{{item.volumeName}}</td> 
+									<td data-title="'aws.tasks.excuteTime' | translate">{{item.resultTime | date :'yyyy-MM-dd HH:mm:ss'}}</td>
+									<td data-title="'aws.tasks.result' | translate">{{"aws.statusCode." + item.resultCode | translate}}</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</pane>
+	</div>
+</div>
+<script type="text/ng-template" id="xxxx.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+			<h3 class="modal-title">{{'aws.img.create_image'|translate}}</h3>
+		</div>
+		<div class="modal-body">
+			<form name="imageForm" novalidate>
+				<div class="control-group">
+					<label class="control-label"><span class="red">*</span>{{'aws.img.img_name'|translate}}：</label>
+					<div class="controls">
+						<input type="text" class="form-controls" name="name" ng-model="postParams.image_name" placeholder="{{'aws.makeImage.inputImage'|translate}}" ng-pattern="/^(\w|\-)*$/" ng-maxlength="32" required />
+						<div class="error" ng-if="interacted(imageForm.name)" ng-messages="imageForm.name.$error" >
+								<div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+								<div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.noZhSpecial'|translate}}</div>
+								<div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+							</div>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">{{'aws.img.os_type'|translate}}：</label>
+					<div class="controls">
+						<ui-select ng-model="os_distro_type.os_type" ng-change="changeOSType(os_distro_type.os_type)" title="{{'aws.img.os_type'|translate}}">
+							<ui-select-match placeholder="{{'aws.img.chooseOSType'|translate}}" >{{$select.selected.dataName}}</ui-select-match>
+							<ui-select-choices repeat="os_type in osTypeList | propsFilter: {dataName: $select.search}">
+								<div ng-bind-html="os_type.dataName | highlight: $select.search"></div>
+							</ui-select-choices>
+						</ui-select>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">{{'aws.img.OS'|translate}}：</label>
+					<div class="controls">
+						<ui-select ng-model="os_distro_type.os_distro" ng-change="changeOS(os_distro_type.os_distro)" title="{{'aws.img.OS'|translate}}">
+							<ui-select-match placeholder="{{'aws.img.chooseOS'|translate}}">{{$select.selected.name}}</ui-select-match>
+							<ui-select-choices repeat="os_distro in osDistroList | propsFilter: {name: $select.search}">
+								<div ng-bind-html="os_distro.name | highlight: $select.search"></div>
+							</ui-select-choices>
+						</ui-select>
+					</div>
+				</div>
+				<div class="control-group">
+		          <label class="control-label">{{'aws.img.version'|translate}}：</label>
+		          <div class="controls">
+		            <input type="text" class="form-controls" ng-model="postParams.os_version" placeholder="{{'aws.img.chooseVersion' | translate}}" name="version" ng-maxlength="255" required />
+		            <div class="error" ng-if="interacted(imageForm.version)" ng-messages="imageForm.version.$error">
+		              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+		              <div ng-message="maxlength">{{'aws.errors.maxlength255'|translate}}</div>
+		            </div>
+		          </div>
+		        </div>
+				<div class="control-group">
+					<label class="control-label">ISO：</label>
+					<div class="controls">
+						<ui-select ng-model="iso" ng-change="changeISO(iso)"  title="ISO">
+							<ui-select-match placeholder="{{'aws.img.chooseISO'|translate}}">{{$select.selected.name}}</ui-select-match>
+							<ui-select-choices repeat="iso in isoList1 | propsFilter: {name: $select.search}">
+								<div ng-bind-html="iso.name | highlight: $select.search"></div>
+							</ui-select-choices>
+						</ui-select>
+					</div>
+				</div> 
+				<div class="control-group">
+					<label class="control-label">{{'aws.img.network'|translate}}：</label>
+					<div class="controls">
+						<ui-select ng-model="network" ng-change="changeNet(network)"  title="{{'aws.img.network'|translate}}">
+							<ui-select-match placeholder="{{'aws.img.chooseNet'|translate}}">{{$select.selected.name}}</ui-select-match>
+							<ui-select-choices repeat="network in networkList | propsFilter: {name: $select.search}">
+								<div ng-bind-html="network.name | highlight: $select.search"></div>
+							</ui-select-choices>
+						</ui-select>
+					</div>
+				</div> 
+				<div class="control-group">
+					<label class="control-label">{{'aws.img.conf_option'|translate}}：</label>
+					<div class="controls">
+						<ui-select ng-model="config" ng-change="changeConfig(config)" title="{{'aws.img.conf_option'|translate}}">
+							<ui-select-match placeholder="{{'aws.img.chooseConf'|translate}}">{{$select.selected.name}}</ui-select-match>
+							<ui-select-choices repeat="config in configList | propsFilter: {name: $select.search}">
+								<div ng-bind-html="config.name | highlight: $select.search"></div>
+							</ui-select-choices>
+						</ui-select>
+					</div>
+				</div> 
+				<div class="control-group">
+					<label class="control-label"><span class="red">*</span>{{'aws.img.disk_size'|translate}}：</label>
+					<div class="controls">
+						<input type="text" class="form-controls" name="size" ng-model="postParams.disk_size" ng-pattern="/^[1-9]+[0-9]*$/" ng-maxlength="20" placeholder="{{'aws.img.input_disk_size'|translate}}"  required />
+						<div class="error" ng-if="interacted(imageForm.size)" ng-messages="imageForm.size.$error" >
+								<div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+								<div ng-message="pattern" class="volume-form-name-error">{{'aws.volumes.cv.pInputNum'|translate}}</div>
+								<div ng-message="maxlength">{{'aws.errors.maxlength20'|translate}}</div>
+							</div>
+					</div>
+				</div>
+			 <div class="control-group">
+					<label class="control-label">{{'aws.img.private'|translate}}：</label>
+          <div class="controls" class="checkbox">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="form-controls" ng-model="postParams.is_private" />
+                <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+					<label class="control-label">{{'aws.makeImage.other_disk'|translate}}：</label>
+          <div class="controls" class="checkbox">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="form-controls" ng-change="haveDisk()" ng-model="haveOtherDisk" />
+                <i class="iconfont"></i>
+              </label>
+            </div>
+          </div>
+        </div> 
+        <div class="control-group" ng-if="haveOtherDisk" >
+					<label class="control-label">{{'aws.makeImage.disk'|translate}}：</label>
+					<div class="controls">
+						<ui-select multiple ng-model="selectedDisks" theme="bootstrap" sortable="true" ng-change="changeDisk(selectedDisks)" close-on-select="false" >
+					    <ui-select-match placeholder="{{'aws.makeImage.makeImage'|translate}}">{{$item.name}}</ui-select-match>
+					    <ui-select-choices repeat="iso in isoList2 | propsFilter:  {name: $select.search}">
+					      <div ng-bind-html="iso.name | highlight: $select.search"></div>
+					    </ui-select-choices>
+					  </ui-select> 
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-click="createImage()">{{'aws.action.ok' | translate}}</button>
+			<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+		</div>
+	</div>
+</script>
+	

@@ -1,0 +1,126 @@
+<div class="page-inner label-management"> 
+    <div class="table-action">
+    <button type="button" class="btn btn-primary" ng-click="createLabel()">{{'aws.action.create'|translate}}</button>
+    <button type="button" class="btn btn-info" ng-click="editLabel(checkedItems[0])" ng-disabled="">{{'aws.action.edit'|translate}}</button>
+    <button type="button" class="btn btn-info" ng-click="delLabel(checkedItems[0])" ng-disabled="">{{'aws.action.del'|translate}}</button>
+   
+    <div type="button" class="btn btn-renovat right-ports" ng-click="refreshLabel()">
+        <i class="icon-aw-refresh"></i>
+    </div>
+    <div class="search-box right-ports">
+        <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(Label_search.globalSearchTerm)">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="Label_search.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+        </form>
+    </div> 
+    </div>
+    <div class="table-content">
+    <!-- <empty-tip empty-type="volumeQoSData"></empty-tip> -->
+    <table ng-table="labelTable" class="table"> 
+        <colgroup>
+            <col width="10%">
+            <col width="18%">
+            <col width="18%">
+            <col width="18%">
+            <col width="18%">
+            <col width="18%">
+        </colgroup>
+        <tr ng-repeat="item in $data">
+            <td header="'headerCheckbox.html'" class="check-td">
+                <label class="checkbox">
+                    <input type="checkbox" name="" ng-model="checkFirst.items[item.id]" value="{{item.id}}" />
+                    <i class="iconfont"></i>
+                </label>
+            </td>
+            <td data-title=" ID ">
+                <a ng-href="/system/labelManagement?id={{items.id}}" title="{{instanceName}}">{{}}</a>
+            </td>
+            <td data-title="'aws.labelManagement.label'|translate">
+                {{}}
+            </td>
+            <td data-title="'aws.labelManagement.resourcesNum'|translate">
+                {{}}
+            </td>
+            <td data-title="'aws.labelManagement.creater'|translate">
+                {{}}
+            </td>  
+            <td data-title="'aws.labelManagement.createTime'|translate">
+                {{}}
+            </td>
+        </tr>
+    </table>  
+    </div>
+    <div ng-controller="detailCtrl">
+        <pane class="detail-body" animation="animation" >
+            <div class="tab-content">
+                <div class ="detail-row">
+                    <div class="detail-header"></div>
+                    <div class="detail-title">
+                        <a class="an-close" ng-href="/cvm/firewall"><i class="icon-aw-mail-reply"></i></a>
+                        <span>{{}}{{'aws.labelManagement.datails'|translate}}</span>
+                    </div>
+                    <div class="detail-info">
+                        <div>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </pane>
+    </div>
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+    <input type="checkbox" ng-model="checkFirst.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+    </label>
+</script>
+<!-- 新建和编辑 -->
+<script type="text/ng-template" id="labelManagement.html">
+    <div class="modal-common">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{createOrEditLabel}}</h3>
+        </div>
+        <div class="modal-body">
+            <form name="labelManagementForm">
+                
+                <div class="control-group" >
+                    <label class="control-label">{{"aws.labelManagement.name"|translate}}：</label>
+                    <div class="controls">
+                        
+                    </div>
+                </div>
+
+                <div class="control-group" >
+                    <label class="control-label">{{"aws.labelManagement.color"|translate}}：</label>
+                    <div class="controls">
+                        <ui-select ng-model="TransMagaMsg.hostName" name="hostName">
+                        <ui-select-match placeholder="{{}}">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="hostName in hostNameList | filter: {name : $select.search}">
+                                <div ng-bind-html="hostName.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+
+                <div class="control-group" >
+                    <label class="control-label">{{"aws.labelManagement.desc"|translate}}：</label>
+                    <div class="controls">
+                        
+                    </div>
+                </div>
+           
+            </form>
+           
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="ConfirmLabel(labelManagementForm,data)">{{"aws.action.ok"|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+        </div>
+    </div>
+</script>
+
+
+
+

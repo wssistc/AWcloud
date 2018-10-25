@@ -1,0 +1,12 @@
+<div>
+    <div class = "title">
+        <span>{{cephlist.nodeName}} {{cephlist.adress}}</span>
+        <a href="#/system/cephView?nodeName={{cephlist.nodeName}}"><i class="icon-aw-modify edit"></i></a> 
+    </div>
+    <div class="border-box clearfix" ng-class="{'border-box-large': cephlist.diskInfos.length>8}">
+        <div class="col-2" ng-repeat="item in cephlist.diskInfos track by $index">
+            <div ceph-ssd bardata="item" osd-btn = "osdBtn" ng-if="item.attribute == 'journal'"></div> 
+            <div ceph-hdd bardata="item" osd-btn = "osdBtn" ng-if="item.attribute == 'data'"></div>   
+        </div>
+    </div>
+</div>

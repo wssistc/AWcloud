@@ -1,0 +1,28 @@
+<div class=" modal-common modal-del">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="$close()">×</button>
+    </div>
+    <div class="modal-body">
+        <div class="box">
+            <span class="del" ng-show="show_del_job_tip"> {{"aws.instances.tipMsg.delsanpJob" | translate}}</span>
+            <span class="del"> {{"aws.instances.tipMsg.delSever" | translate}} </span>
+            <div class='checkbox'>
+                <label uib-popover="{{'aws.helpTip.instances.tip71' | translate}}"  popover-enable="allNoHostId" popover-trigger="mouseenter" popover-placement = "bottom">
+                    <input type='checkbox' ng-model="del.flag" ng-disabled="canDelSysDistRedio||allNoHostId" />
+                    <i class='iconfont'></i>同时删除系统盘
+                </label>
+            </div>
+        </div>
+        <!-- <div class = "box" ng-show="hasElastic.length">
+            <span>
+                <em ng-repeat="vm in hasElastic track by $index">{{vm.name}}<em ng-show="$index<hasElastic.length">，</em></em>
+                为弹性扩展创建的虚拟机
+            </span> 
+            <span >请到 虚拟资源管理 > 弹性扩展 > <a href="/#/cvm/extension">集群管理</a> 删除所在集群</span>
+        </div> -->
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-info del-btn"  ng-class="{'disabled':hasElastic.length}"type="button" ng-disabled="hasElastic.length" ng-click="confirmDel()">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+    </div>
+</div>

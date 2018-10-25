@@ -1,0 +1,538 @@
+<div class="modal-common initSetting-modal initConfig-modal">
+    <div class="modal-body">
+        <div class="settingBody">       
+           <div class="settingList">
+                <div class="listTitle">
+                    <span>{{"aws.node.init.initConfig" | translate}}</span>
+                </div>
+                <div class="listItem">
+                   <div class="title">
+                       <span ng-click="activeConfig('cartConfig',true)">1、{{"aws.node.init.cartConfig" | translate}}</span>
+                       <span class="status" ng-class="{'statusTrue': hasConfigCard}">{{hasConfigCard?("aws.node.init.setted" | translate):("aws.node.init.notSet" | translate)}}</span>
+                   </div>
+               </div>
+               <div class="listItem">
+                   <div class="title">
+                       <span ng-click="activeConfig('networkInspection')">2、{{"aws.node.init.netCheck" | translate}}</span>
+                       <span class="status" ng-class="{'statusTrue': hasNetCheck}">{{hasNetCheck?("aws.node.init.setted" | translate):("aws.node.init.notSet" | translate)}}</span>
+                   </div>
+               </div>
+               <div class="listItem">
+                   <div class="title">
+                       <span ng-click="activeConfig('diskConfig')">3、{{"aws.node.init.diskConfig" | translate}}</span>
+                       <span class="status" ng-class="{'statusTrue': hasConfigDisks}">{{hasConfigDisks?("aws.node.init.setted" | translate):("aws.node.init.notSet" | translate)}}</span>
+                   </div>
+               </div>
+               <!-- <div class="listItem">
+                   <div class="title">
+                       <span ng-click="activeConfig('diskInspectin')">4、硬盘检测</span>
+                       <span class="status" ng-class="{'statusTrue': diskInspectin}">{{diskInspectin?"已设置":"未设置"}}</span>
+                   </div>
+               </div> -->
+           </div>
+           <div class="settingInfo">
+                <div class="config-header">
+                   <div class="headTitle">
+                      <span ng-if="addNodeInfomation">提示信息</span>
+                      <span ng-if="cartConfig">{{"aws.node.init.cartConfig" | translate}}</span>
+                      <span ng-if="networkInspection">{{"aws.node.init.netCheck" | translate}}</span>
+                      <span ng-if="diskConfig">{{"aws.node.init.diskConfig" | translate}}</span>
+                   </div>
+                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+                </div>
+                <div ng-show="addNodeInfomation">
+                   <div class="info-box">
+                      <div class="left-icon">
+                         <span class="icon-aw-virtual-error"></span>
+                      </div>
+                      <div class="right-msg">
+                         <ul>
+                           <li>1. 添加节点时会重启平台相关服务，会影响虚拟机、镜像或硬盘的创建、删除和云主机的迁移等功能， 请确保当前没有相关操作。</li>
+                           <li>2. 确保分布式存储的健康状态为HEALTH_OK</li>
+                           <li>3. 添加节点会触发ceph平衡，可能导致操作耗时较长。</li>
+                           <li>4. 如果对接了通用存储，请确保通用存储的磁盘已经挂载到新增节点。</li>
+                           <li>5. 新增节点如果超过30分钟还没初始化完成，请排查节点是否有故障。</li>
+                         </ul>
+                      </div>
+                   </div>
+                </div>
+                <div ng-show="cartConfig">
+                    <div class="main-init">
+                        <div class="text-center">
+                          <div class="tool-tips" ng-show="toolNoUsed||noConfigCard">{{"aws.node.init.bindAndSaveCard" | translate}}</div>
+                          <div class="tool-tips tool-success" ng-show="saveCardsSuccess">{{"aws.node.init.cardSaveSuccess" | translate}}</div>
+                        </div>
+                        <div class="node-config">{{"aws.node.init.in" | translate}}{{nodeName}}{{"aws.node.init.toCardConfig" | translate}}</div>
+                        <div class="host-box" id="nics">
+                          <div class="nics-list">
+                            <ul class="no-use">
+                              <li ng-repeat = "v in cardJson.nics">
+                                <div class="addr" draggable="true" indexNum="{{$index}}">
+                                  <div class="nic-out nic10">
+                                    <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                                    <div class="nic-info">
+                                      <span class="nic-name" title="{{v.name}}">{{v.name}}</span>
+                                      <span class="nic-speed">{{v.speed}}Mbps</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </li>
+                            </ul>
+                            <p class="nic-error hide">{{"aws.node.init.bondCardHadUsed" | translate}}</p>
+                          </div>
+                          <div class="nics-bonds">
+                            <div class="tool-tips" ng-show="toolTips">{{"aws.node.init.sameCardRate" | translate}}</div>
+                            <div class="tool-tips" ng-show="toolUsed">{{"aws.node.init.cardHadUsed" | translate}}</div>
+                            <div class="tool-tips" ng-show="toolBond">{{"aws.node.init.bondMustHadTwoCard" | translate}}</div>
+                            <ul class="bond-merged clearfix">
+                              <li class="bond bonddrag" ng-repeat="i in cardJson.bonds" draggable="true">
+                                <div class="bond-inner">
+                                  <div class="bond-desc" indexNum="{{$index}}">
+                                    <b class="num">{{i.nics.length}}</b>
+                                    <span class="text">{{"aws.node.init.cardNumber" | translate}}</span>
+                                    <div class="select2-box">
+                                      <ui-select ng-model="i.selected">
+                                        <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                        <ui-select-choices repeat="data in bondsType | filter:{name:$select.search}">
+                                          <div ng-bind-html="data.name | highlight: $select.search"></div>
+                                        </ui-select-choices>
+                                      </ui-select>
+                                    </div>
+                                  </div>
+                                  <p><span class="bond-name">{{i.name}}</span><i class="icon-aw-delete" ng-click="bondsDelete($index)"></i></p>
+                                </div>
+                                <ul class="bond-detail">
+                                  <i class="point-left"></i>
+                                  <li ng-repeat="item in i.nics">
+                                    <span class="card-name">{{item.name}}</span>
+                                    <span class="card-speed">{{item.speed}}Mbps</span>
+                                    <span class=" icon-aw-wrong" ng-click="cardsDelete($index,i)"></span>
+                                  </li>
+                                </ul>
+                              </li>
+                              <li class="new-bond bond" ng-show="newBondsShow">
+                                <div class="new-bond-inner">
+                                  <i class="icon-aw-add-to"></i>
+                                  <span class="text">{{"aws.node.init.dragHereRecombine" | translate}}</span>
+                                </div>
+                              </li>
+                            </ul>
+                          </div>
+                          <ul class="nics-choose">
+                            <li class="cluster">
+                              <div class="inner nic-item">
+                                <div class="text">{{"aws.node.init.clusterNet" | translate}}<span class="net-remove">
+                                  <i class="icon-aw-wrong" ng-click="deleteNetcard('cluster')"></i>
+                                </span></div>
+                                <div class="addr netcontent" name="cluster">
+                                  <span class="text-tip" ng-class="{'hide':cardJson.nic_map.cluster.bonds}">{{"aws.node.init.useDragToCombine" | translate}}</span>
+                                <div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.cluster.bonds}">
+                                  <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                                  <div class="nic-info">
+                                    <span class="nic-name" title="{{cardJson.nic_map.cluster.bonds}}">{{cardJson.nic_map.cluster.bonds}}</span>
+                                    <span class="nic-speed">{{cardJson.nic_map.cluster.speed}}Mbps</span>
+                                  </div>
+                                </div>
+                                </div>
+                              </div>
+                            </li>
+                            <li class="mgmt">
+                              <div class="inner nic-item">
+                                <div class="text">{{"aws.node.init.manageNet" | translate}}<span class="net-remove">
+                                  <i class="icon-aw-wrong" ng-click="deleteNetcard('mgmt')"></i>
+                                </span></div>
+                                <div class="addr netcontent" name="mgmt">
+                                  <span class="text-tip" ng-class="{'hide':cardJson.nic_map.mgmt.bonds}">{{"aws.node.init.useDragToCombine" | translate}}</span>
+                                <div class="nic-out"  ng-class="{'nic1000':cardJson.nic_map.mgmt.bonds}">
+                                  <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                                  <div class="nic-info">
+                                    <span class="nic-name" title="{{cardJson.nic_map.mgmt.bonds}}">{{cardJson.nic_map.mgmt.bonds}}</span>
+                                    <span class="nic-speed">{{cardJson.nic_map.mgmt.speed}}Mbps</span>
+                                  </div>
+                                </div>
+                                </div>
+                              </div>
+                            </li>
+                            <li class="storage">
+                              <div class="inner nic-item">
+                                <div class="text">{{"aws.node.init.storageNet" | translate}}<span class="net-remove">
+                                  <i class="icon-aw-wrong" ng-click="deleteNetcard('storage')"></i>
+                                </span></div>
+                                <div class="addr netcontent" name="storage">
+                                  <span class="text-tip" ng-class="{'hide':cardJson.nic_map.storage.bonds}">{{"aws.node.init.useDragToCombine" | translate}}</span>
+                                <div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.storage.bonds}">
+                                  <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                                  <div class="nic-info">
+                                    <span class="nic-name" title="{{cardJson.nic_map.storage.bonds}}">{{cardJson.nic_map.storage.bonds}}</span>
+                                    <span class="nic-speed">{{cardJson.nic_map.storage.speed}}Mbps</span>
+                                  </div>
+                                </div>
+                                </div>
+                              </div>
+                            </li>
+                            <li class="tenant">
+                              <div class="inner nic-item">
+                                <div class="text">{{"aws.node.init.tanentNet" | translate}}<span class="net-remove">
+                                  <i class="icon-aw-wrong" ng-click="deleteNetcard('tenant')"></i>
+                                </span></div>
+                                <div class="addr netcontent" name="tenant">
+                                  <span class="text-tip" ng-class="{'hide':cardJson.nic_map.tenant.bonds}">{{"aws.node.init.useDragToCombine" | translate}}</span>
+                                <div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.tenant.bonds}">
+                                  <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                                  <div class="nic-info">
+                                    <span class="nic-name" title="{{cardJson.nic_map.tenant.bonds}}">{{cardJson.nic_map.tenant.bonds}}</span>
+                                    <span class="nic-speed">{{cardJson.nic_map.tenant.speed}}Mbps</span>
+                                  </div>
+                                </div>
+                                </div>
+                              </div>
+                            </li>
+                            <li class="public">
+                              <div class="inner nic-item">
+                                <div class="text">{{"aws.node.init.publicNet" | translate}}<span class="net-remove">
+                                  <i class="icon-aw-wrong" ng-click="deleteNetcard('public')"></i>
+                                </span></div>
+                                <div class="addr netcontent" name="public">
+                                  <span class="text-tip" ng-class="{'hide':cardJson.nic_map.public.bonds}">{{"aws.node.init.useDragToCombine" | translate}}</span>
+                                <div class="nic-out" ng-class="{'nic1000':cardJson.nic_map.public.bonds}">
+                                  <span class="nic-bg"><i class="icon-aw-network-card"></i></span>
+                                  <div class="nic-info">
+                                    <span class="nic-name" title="{{cardJson.nic_map.public.bonds}}">{{cardJson.nic_map.public.bonds}}</span>
+                                    <span class="nic-speed">{{cardJson.nic_map.public.speed}}Mbps</span>
+                                  </div>
+                                </div>
+                                </div>
+                              </div>
+                            </li>
+                          </ul>
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="networkInspection">
+                    <div class="disk-congfig">
+                      <div>
+                          <div ng-if="showCardConfigMsg" class="cardConfigMsg">{{"aws.node.init.finishAndSaveCardConfig" | translate}}</div>
+                          <div class="net-tip" ng-if="netTestCan.testLoad">
+                            <span>{{"aws.node.init.laterNetCheckWasteThreeMinute" | translate}}</span>
+                            <i class="icon-aw-load aw-spin"></i>
+                          </div>
+                          <div class="net-banner">
+                            <button class="btn btn-info net_cardCheck" ng-click="startTestNet()" type="button" ng-disabled="netTestCan.testBtn">{{"aws.node.init.startCheck" | translate}}</button>
+                          </div>
+                          <div class="table-content net-show">
+                            <table ng-table="tableParams" class="table border">
+                              <colgroup>
+                                <col width="25%">
+                                <col width="25%">
+                                <col width="25%">
+                                <col width="25%">
+                              </colgroup>
+                              <tr ng-repeat="item in $data">
+                                <td data-title="headers.hostName">{{item.name}}</td>
+                                <td data-title="headers.clusterNet" ng-class="{'red':item.clusterstatus=='1','green':item.clusterstatus=='0'}">{{item.cluster}}</td>
+                                <td data-title="headers.storageNet" ng-class="{'red':item.storagestatus=='1','green':item.storagestatus=='0'}">
+                                  {{item.storage}}
+                                </td>
+                                <td data-title="headers.tanentNet" ng-class="{'red':item.tenantstatus=='1','green':item.tenantstatus=='0'}">
+                                  <div ng-if="item.tenant.indexOf('\n')>-1" class="storage-vlan" ng-repeat="i in item.tenant.split('\n')">
+                                    {{i}}
+                                  </div>
+                                  <div ng-if="item.tenant.indexOf('\n')==-1">{{item.tenant}}</div>
+                                </td>
+                              </tr>
+                              <tr ng-if="netConfig">
+                                <td colspan="4" class="add-node">
+                                  <p class="red">{{"aws.node.init.cardConfigFail" | translate}}</p>
+                                </td> 
+                              </tr>
+                            </table>
+                          </div>
+                      </div>
+                    </div>
+                </div>
+                <div ng-show="diskConfig">
+                    <div class="main-init">
+                      <div class="text-center">
+                        <div class="tool-tips tool-success" ng-show="saveDisksSuccess">{{"aws.node.init.diskSaveSuccess" | translate}}</div>
+                        <!-- 点击完成的提示语句 -->
+                        <div class="tool-tips" ng-show="!hasConfigDisks&&!hasConfigCard&&clickFinish">{{"aws.node.init.finishAndSaveCardAndDiskConfig" | translate}}</div>
+                        <div class="tool-tips" ng-show="hasConfigDisks&&!hasConfigCard&&clickFinish">{{"aws.node.init.finishAndSaveCardConfig" | translate}}</div>
+                        <div class="tool-tips" ng-show="!hasConfigDisks&&hasConfigCard&&clickFinish">{{"aws.node.init.finishAndSaveDiskConfig" | translate}}</div>
+                        <!-- 本地盘和ceph不会同时出现的情况 -->
+                        <div ng-if="!hasCephStorage">
+                            <div class="tool-tips" ng-show="noDisk">
+                              <div ng-if="insDisk">{{"aws.node.init.confirmLocalVolumeSpaceFull" | translate}}</div>
+                              <div ng-if="cephDisk">{{"aws.node.init.confirmCephVolumeSpaceFull" | translate}}</div>
+                            </div>
+                        </div>
+                        <!-- 本地盘和ceph同时出现的情况 -->
+                        <div ng-if="hasCephStorage">
+                            <div class="tool-tips" ng-show="noDisk">
+                              <div ng-if="noCephDisk">{{"aws.node.init.confirmCephVolumeSpaceFull" | translate}}</div>
+                            </div>
+                        </div>
+                      </div>
+                      <div class="node-config">{{"aws.node.init.in" | translate}}{{nodeName}}{{"aws.node.init.toDiskConfig" | translate}}</div>
+                      <div class="host-box clearfix" id="disks">
+                          <div class="disks-list">
+                            <div class="available-disk">{{"aws.node.init.availableDisks" | translate}}</div>
+                            <ul class="no-use-disks clearfix">
+                              <li ng-repeat = "v in disksJson.disks">
+                                <div class="disks-item" draggable="true" indexNum="{{$index}}">
+                                  <div class="disk-out">
+                                    <span class="disk-circle"></span>
+                                    <span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+                                    <span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+                                    <span class="disk-capacity">{{v.capacity}}</span>
+                                  </div>
+                                </div>
+                                <div class="disks-detail">
+                                  <i></i>
+                                  <div class="detail-item">
+                                    <span class="title">{{"aws.node.init.diskName" | translate}}：</span>
+                                    <span class="title-name" title="{{v.name}}">{{v.name}}</span>
+                                  </div>
+                                  <div class="detail-item">
+                                    <span class="title">{{"aws.node.init.status" | translate}}：</span>
+                                    <span class="bg-green" ng-if="v.status">{{"aws.node.init.healthy" | translate}}</span>
+                                    <span class="bg-red" ng-if="!v.status">{{"aws.node.init.unhealthy" | translate}}</span>
+                                  </div>
+                                  <div class="detail-item">
+                                    <span class="title">{{"aws.node.init.diskType" | translate}}：</span>
+                                    <span ng-if="v.ssd">SSD </span>
+                                    <span ng-if="!v.ssd">HDD</span>
+                                  </div>
+                                  <div class="detail-item">
+                                    <span class="title">{{"aws.node.init.diskCapacity" | translate}}：</span>
+                                    <span>{{v.capacity}}</span>
+                                  </div>
+                                </div>
+                              </li>
+                            </ul>
+                          </div>
+                          <p class="disks-warning"></p>
+                          <div class="disks-content">
+                            <div class="disks-tab">
+                               <div class="disk-name" ng-class="{'active':insDisk}" ng-click="activeDiskTab('ins')" ng-if="showInsTab">{{"aws.node.init.insLocalVolSpace" | translate}}</div>
+                               <!-- <div class="disk-name" ng-class="{'active':shareDisk}" ng-click="activeDiskTab('share')">通用共享存储池</div> -->
+                               <div class="disk-name" ng-class="{'active':cephDisk}" ng-click="activeDiskTab('ceph')" ng-if="showCephTab">{{"aws.node.init.cephDisk" | translate}}</div>
+                            </div>
+                            <ul class="disks-group">
+                               <li ng-repeat="item in disksJson.configGroup" ng-if="item.show">
+                                  <div class="group-content clearfix">
+                                    <div class="data-content cephTab" ng-if="cephDisk">
+                                      <div class="disk-type">{{"aws.node.init.journalDisk" | translate}}</div>
+                                      <ul class="caching clearfix" indexNum="{{$index}}">
+                                        <!--<span class="tips" ng-if="item.caching.length==0">可拖拽区域</span> -->
+                                        <li ng-repeat = "v in item.caching">
+                                          <div class="disks-item">
+                                            <div class="disk-out">
+                                              <span class="disk-circle"></span>
+                                              <span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+                                              <span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+                                              <span class="disk-capacity">{{v.capacity}}</span>
+                                            </div>
+                                            <span class="disks-remove">
+                                                <i class="icon-aw-wrong" ng-click="deleteDisks($index,'caching',item)" indexNum="{{$index}}"></i>
+                                              </span>
+                                          </div>
+                                          <div class="disks-detail">
+                                            <i></i>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.diskName" | translate}}：</span>
+                                              <span class="title-name" title="{{v.name}}">{{v.name}}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.status" | translate}}：</span>
+                                              <span class="bg-green" ng-if="v.status">{{"aws.node.init.healthy" | translate}}</span>
+                                              <span class="bg-red" ng-if="!v.status">{{"aws.node.init.unhealthy" | translate}}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.diskType" | translate}}：</span>
+                                              <span ng-if="v.ssd">SSD </span>
+                                              <span ng-if="!v.ssd">HDD</span>
+                                            </div>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.diskCapacity" | translate}}：</span>
+                                              <span>{{v.capacity}}</span>
+                                            </div>
+                                            <!-- <div class="detail-item">
+                                              <span class="title">硬盘属性：</span>
+                                              <span>{{v.selected.name}}</span>
+                                            </div> -->
+                                          </div>
+                                        </li>
+                                      </ul>
+                                    </div>
+                                    <div class="data-content cephTab" ng-if="cephDisk">
+                                      <div class="disk-type">{{"aws.node.init.dataDisk" | translate}}</div>
+                                      <ul class="data clearfix" indexNum="{{$index}}">
+                                        <!-- <span class="tips" ng-if="item.data.length==0">可拖拽区域</span> -->
+                                        <li ng-repeat = "v in item.data">
+                                          <div class="disks-item">
+                                            <div class="disk-out">
+                                              <span class="disk-circle"></span>
+                                              <span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+                                              <span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+                                              <span class="disk-capacity">{{v.capacity}}</span>
+                                            </div>
+                                            <span class="disks-remove">
+                                                <i class="icon-aw-wrong" ng-click="deleteDisks($index,'data',item)" indexNum="{{$index}}"></i>
+                                              </span>
+                                          </div>
+                                          <div class="disks-detail">
+                                            <i></i>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.diskName" | translate}}：</span>
+                                              <span class="title-name" title="{{v.name}}">{{v.name}}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.healthy" | translate}}：</span>
+                                              <span class="bg-green" ng-if="v.status">{{"aws.node.init.status" | translate}}</span>
+                                              <span class="bg-red" ng-if="!v.status">{{"aws.node.init.unhealthy" | translate}}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.diskType" | translate}}：</span>
+                                              <span ng-if="v.ssd">SSD </span>
+                                              <span ng-if="!v.ssd">HDD</span>
+                                            </div>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.diskCapacity" | translate}}：</span>
+                                              <span>{{v.capacity}}</span>
+                                            </div>
+                                            <!-- <div class="detail-item">
+                                              <span class="title">硬盘属性：</span>
+                                              <span>{{v.selected.name}}</span>
+                                            </div> -->
+                                          </div>
+                                        </li>
+                                      </ul>
+                                    </div>
+                                    <div class="data-content insTab" ng-if="insDisk" ng-class="{'noCephTab':!cephDisk}">
+                                      <!-- <div class="disk-type">数据盘</div> -->
+                                      <ul class="localdisk clearfix" indexNum="{{$index}}">
+                                        <!-- <span class="tips" ng-if="item.data.length==0">可拖拽区域</span> -->
+                                        <li ng-repeat = "v in item.localdisk">
+                                          <div class="disks-item">
+                                            <div class="disk-out">
+                                              <span class="disk-circle"></span>
+                                              <span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+                                              <span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+                                              <span class="disk-capacity">{{v.capacity}}</span>
+                                            </div>
+                                            <span class="disks-remove">
+                                                <i class="icon-aw-wrong" ng-click="deleteDisks($index,'localdisk',item)" indexNum="{{$index}}"></i>
+                                              </span>
+                                          </div>
+                                          <div class="disks-detail">
+                                            <i></i>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.diskName" | translate}}：</span>
+                                              <span class="title-name" title="{{v.name}}">{{v.name}}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.status" | translate}}：</span>
+                                              <span class="bg-green" ng-if="v.status">{{"aws.node.init.healthy" | translate}}</span>
+                                              <span class="bg-red" ng-if="!v.status">{{"aws.node.init.unhealthy" | translate}}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.diskType" | translate}}：</span>
+                                              <span ng-if="v.ssd">SSD </span>
+                                              <span ng-if="!v.ssd">HDD</span>
+                                            </div>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.diskCapacity" | translate}}：</span>
+                                              <span>{{v.capacity}}</span>
+                                            </div>
+                                            <!-- <div class="detail-item">
+                                              <span class="title">硬盘属性：</span>
+                                              <span>{{v.selected.name}}</span>
+                                            </div> -->
+                                          </div>
+                                        </li>
+                                      </ul>
+                                    </div>
+                                    <div class="data-content" ng-if="shareDisk" ng-class="{'noCephTab':!cephDisk}">
+                                      <!-- <div class="disk-type">数据盘</div> -->
+                                      <ul class="data clearfix" indexNum="{{$index}}">
+                                        <!-- <span class="tips" ng-if="item.data.length==0">可拖拽区域</span> -->
+                                        <li ng-repeat = "v in item.data">
+                                          <div class="disks-item">
+                                            <div class="disk-out">
+                                              <span class="disk-circle"></span>
+                                              <span class="disk-hhd-bg" ng-if="!v.ssd"><i class="icon-aw-hdd"></i></span>
+                                              <span class="disk-ssd-bg" ng-if="v.ssd"><i class="icon-aw-ssd"></i></span>
+                                              <span class="disk-capacity">{{v.capacity}}</span>
+                                            </div>
+                                            <span class="disks-remove">
+                                                <i class="icon-aw-wrong" ng-click="deleteDisks($index,'data',item)" indexNum="{{$index}}"></i>
+                                              </span>
+                                          </div>
+                                          <div class="disks-detail">
+                                            <i></i>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.diskName" | translate}}：</span>
+                                              <span class="title-name" title="{{v.name}}">{{v.name}}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.status" | translate}}：</span>
+                                              <span class="bg-green" ng-if="v.status">{{"aws.node.init.healthy" | translate}}</span>
+                                              <span class="bg-red" ng-if="!v.status">{{"aws.node.init.unhealthy" | translate}}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.diskType" | translate}}：</span>
+                                              <span ng-if="v.ssd">SSD </span>
+                                              <span ng-if="!v.ssd">HDD</span>
+                                            </div>
+                                            <div class="detail-item">
+                                              <span class="title">{{"aws.node.init.diskCapacity" | translate}}：</span>
+                                              <span>{{v.capacity}}</span>
+                                            </div>
+                                            <!-- <div class="detail-item">
+                                              <span class="title">硬盘属性：</span>
+                                              <span>{{v.selected.name}}</span>
+                                            </div> -->
+                                          </div>
+                                        </li>
+                                      </ul>
+                                    </div>
+                                  </div>
+                               </li>
+                            </ul>
+                          </div>
+                      </div>
+                    </div>
+                </div>
+                <div ng-if="diskInspectin">
+                    <div ng-include="'js/system/dataCluster/tmpl/diskInspectin.html'"></div>
+                </div>
+           </div>
+        </div>
+    </div>
+    <div class="modal-footer" ng-if="addNodeInfomation">
+        <button class="btn btn-info" type="button" ng-click="infomationToCardConfig()">
+            下一步
+        </button>
+    </div>
+    <div class="modal-footer" ng-if="cartConfig">
+        <button class="btn btn-info" type="button" ng-click="saveCardsConfig()">
+            {{"aws.node.init.save" | translate}}
+        </button>
+        <button class="btn" type="button" ng-click="cardClickToNet()" ng-class="{'btn-default':(!hasConfigCard),'btn-info':hasConfigCard}">
+            {{"aws.node.init.nextStep" | translate}}
+        </button>
+    </div>
+    <div class="modal-footer" ng-if="networkInspection">
+        <button class="btn btn-default" type="button" ng-click="activeConfig('diskConfig')">
+            {{"aws.node.init.nextStep" | translate}}
+        </button>
+    </div>
+    <div class="modal-footer" ng-if="diskConfig">
+        <button class="btn btn-info" type="button" ng-click="saveDisksConfig()">
+            {{"aws.node.init.save" | translate}}
+        </button>
+        <button class="btn" type="button" ng-click="initConfigConfirm()" ng-class="{'btn-default':(!hasConfigDisks||!hasConfigCard),'btn-info':hasConfigDisks&&hasConfigCard}">
+            {{"aws.node.init.finished" | translate}}
+        </button>
+    </div>
+</div>

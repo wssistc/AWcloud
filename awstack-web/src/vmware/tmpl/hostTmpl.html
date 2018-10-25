@@ -1,0 +1,223 @@
+<div class="view-content">
+    <div class="table-action">
+        <button class="btn btn-refresh" ng-click="getHostList()"><i class="icon-aw-refresh"></i>{{'vmware.action.refresh'|translate}}</button>
+        <!-- <button type="button" data-toggle="modal" ng-click="addHost()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新建主机</button>
+        <button type="button" data-toggle="modal" ng-click=""  class="btn btn-default" ng-disabled="disabled"><i class=""></i>进入维护模式</button>
+        <button type="button" data-toggle="modal" ng-click="" class="btn btn-default" ng-disabled="disabled"><i class=""></i>退出维护模式</button> -->
+        <!-- <button type="button" data-toggle="modal" ng-click=""  class="btn btn-primary"><i class=""></i>重新连接主机</button>
+        <button type="button" data-toggle="modal" ng-click="add()" class="btn btn-primary"><i class=""></i>打开主机电源</button>
+        <button type="button" data-toggle="modal" ng-click=""  class="btn btn-primary"><i class=""></i>重新引导主机</button>
+        <div class="dropdown">
+          <button type="button" class="btn btn-info dropdown-toggle" ng-disabled="delisDisabled" data-toggle="dropdown">更多操作<i class=" icon-aw-angle-down"></i></button>
+          <ul class="dropdown-menu">
+            <li><button ng-click="" >新建虚拟机</button></li>
+            <li><button ng-click="" >部署OVF模板</button></li>
+            <li><button ng-click="" ></button></li>
+            <li><button ng-click="" ></button></li>
+          </ul>
+        </div> -->
+        <div class="search-box">
+          <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='搜索' />
+          </form>
+        </div>
+        
+        <!-- 高级搜索 start -->
+        <!-- <div class="advanced_search-box pull-right">
+            <span class="hide"><span class="link orange">清空</span><span class="link">普通搜索</span></span><span class="link ">高级搜索</span>
+            <button type="button" class="btn btn-sm"><i class="icon-aw-gear"></i></button>
+        </div> -->
+
+        <!-- 搜索结果 start -->
+        <ul class="advanced_search-choose clearfix hide">
+            <li>
+                <h5>状态</h5>
+                <div class="checkbox clearfix">
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>已打开电源
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>已关闭电源
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>已挂起
+                    </label>
+                </div>
+                <h5>VMware Tools版本状态</h5>
+                <div class="checkbox clearfix">
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>当前版本
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>未安装
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>第三方
+                    </label>
+                </div>
+                <h5>CPU 计数</h5>
+                <div class="checkbox clearfix">
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>1
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>2
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>4
+                    </label>
+                </div>
+            </li>
+            <li>
+                <h5>需要整合</h5>
+                <div class="checkbox clearfix">
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>是
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>否
+                    </label>
+                </div>
+                <h5>VMware Tools运行状态</h5>
+                <div class="checkbox clearfix">
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>未运行
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>正在运行
+                    </label>
+                </div>
+                <h5>网卡计数</h5>
+                <div class="checkbox clearfix">
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>1
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>2
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>3
+                    </label>
+                </div>
+            </li>
+            <li>
+                <h5>按问题阻止</h5>
+                <div class="checkbox clearfix">
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>是
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>否
+                    </label>
+                </div>
+                <h5>客户机操作系统</h5>
+                <div class="checkbox vertical">
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>Other
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>Red Hat Enterprise Linux6（64-bit）
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>SUSE Linux Enterprise 11（64-bit）
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>Ubuntu Linux（64-bit）
+                    </label>
+                </div>
+            </li>
+            <li>
+                <h5>FT角色</h5>
+                <div class="checkbox clearfix">
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>未配置
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>主
+                    </label>
+                </div>
+                <h5>兼容性</h5>
+                <div class="checkbox clearfix">
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>vmx-07
+                    </label>
+                    <label>
+                        <input type="checkbox" name="">
+                        <i class="iconfont"></i>vmx-08
+                    </label>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <script type="text/ng-template" id="headerCheckbox.html">
+        <label class="checkbox">
+          <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+          <i class="iconfont"></i>
+        </label>
+    </script>
+    <div class="table-content">
+        <!-- <empty-tip empty-type="loadData"></empty-tip> -->
+        <table ng-table="hostTable" class="table table-check" show-filter="false">
+          <tr ng-repeat="item in $data">
+            <td header="'headerCheckbox.html'">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="checkboxes.items[item.name]" />
+                <i class="iconfont"></i>
+              </label>
+            </td>
+            <td data-title="'名称'" sortable="'name'">
+              <span><a ng-click="goToHostDetail(item.name)">{{item.name}}</a></span>
+            </td>
+            <td data-title="'状况'" sortable="'powerStatus'">
+              <span>{{"vmware.host.table.powerStatus."+item.powerStatus | translate}}</span>
+            </td>
+            <td data-title="'状态'" sortable="'overallStatus'">
+              <span ng-class="{'bg-green':item.overallStatus == 'green','bg-orange':item.overallStatus == 'yellow','bg-red':item.overallStatus == 'red' || item.overallStatus == 'unknown'}">{{"vmware.host.table.overallStatus."+item.overallStatus | translate}}</span>
+            </td>
+            <td data-title="'群集'" sortable="'cluster.name'">
+              <span><a>{{item.cluster.name}}</a></span>
+            </td>
+            <td data-title="'CPU百分比(%)'" sortable="''">
+              <div class="basic-bar" type="basic" chart-bar bardata='{"data":item.cpuPercent,"type":"basic"}'></div>
+              <!-- <span>{{item.cpuPercent}}</span> -->
+            </td>
+            <td data-title="'内存百分比(%)'" sortable="''">
+              <div class="basic-bar" type="basic" chart-bar bardata='{"data":item.memoryPercent,"type":"basic"}'></div>
+              <!-- <span>{{item.memoryPercent}}</span> -->
+            </td>
+            <td data-title="'内存大小'" sortable="'memorySize'">
+              <span>{{item.memorySize}} MB</span>
+            </td>
+            <td data-title="'CPU计数'" sortable="'cpuCount'">
+              <span>{{item.cpuCount}}</span>
+            </td>
+          </tr>
+        </table>
+    </div>
+</div>

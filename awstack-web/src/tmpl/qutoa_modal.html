@@ -1,0 +1,27 @@
+<div>
+	<div class="total clearfix" ng-if="barType=='width'">
+		<i class="{{progressValue.icon}}"></i>
+		<div class="quotaNum">
+			<span class="quota-total" ng-bind="progressValue.total"></span>
+			<span class="quotaName" ng-bind="progressValue.type"></span>
+		</div>
+	</div>
+	<div class='progress {{barType}}'>
+		<div class='progress-bar {{progressValue.bar_style}}'></div>
+	</div> 
+	<div class="used" ng-if="barType=='width'">{{progressValue.usedText}}：<span ng-bind="progressValue.used"></span></div>
+	<div class="resBox" ng-if='!progressValue.icon'>
+		<dl class="dl-horizontal">
+			<dt ng-bind="progressValue.name"></dt>
+			<dd><span class="total" ng-bind="progressValue.total"></span></dd>
+		</dl>
+		<dl class="dl-horizontal">
+			<dt ng-bind="progressValue.normalText"></dt>
+			<dd><span class="normal" ng-bind="progressValue.success"></span></dd>
+		</dl>
+		<dl class="dl-horizontal">
+			<dt ng-bind="progressValue.abnormalText"></dt>
+			<dd><span class="abnormal" ng-bind="progressValue.error"></span></dd>
+		</dl>
+	</div>
+</div>

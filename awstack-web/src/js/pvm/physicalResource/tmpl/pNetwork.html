@@ -1,0 +1,847 @@
+<div class="page-inner network-page">
+    <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='2'}">
+        <div class="table-action">
+            <button type="button" class="btn btn-normal" disabled="disabled"><i class="icon-aw-modify"></i> {{"aws.action.edit"|translate}}</button>
+            <div class="pull-right">
+                <into-information modular="'pvmnetworks'"></into-information>
+                <button class="btn btn-renovat right-ports" disabled="disabled"><i class="icon-aw-refresh"></i></button>
+                <div class="search-box right-ports">
+                    <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="table-content">
+            <table class="table">
+                <colgroup>
+                    <col width="5%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="20%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>
+                            <label class="checkbox">
+                                <input type="checkbox" name="r" disabled="disabled" />
+                                <i class="iconfont"></i>
+                            </label>
+                        </th>
+                        <th>{{'aws.networks.networkName'|translate}}</th>
+                        <th>{{'aws.networks.bindSubnet'|translate}}</th>
+                        <th>{{'aws.networks.status'|translate}}</th>
+                        <th>{{'aws.networks.shared'|translate}}</th>
+                        <th>{{'aws.networks.external'|translate}}</th>
+                        <th>{{'aws.networks.netType'|translate}}</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td colspan="7" class="text-center">
+                        如需使用物理资源管理块功能，请打开”系统管理 > 系统设置 > <a href="/#/system/plugin">功能管理</a> “界面添加”物理机管理”模块
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="plugin-ctrl" ng-class="{'shows':pluginSwitch=='1'}">
+      <div class="table-action">
+        <div class="btn-box">
+            <button type="button" data-toggle="modal" ng-click="editNetwork(editData)" ng-disabled="isDisabled" title={{netEditBtnTip}} class="btn btn-normal" licence-type="btn" id="PhyRes-netWork-edit">
+                <i class="icon-aw-modify"></i> {{"aws.action.edit"|translate}}</button>
+        </div>
+        <div class="pull-right">
+            <button class="btn btn-renovat right-ports" ng-click="refreshNetworkTable()"><i class="icon-aw-refresh"></i></button>
+            <div class="search-box right-ports">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+                        <i class="icon-aw-search"></i>
+                    </button>
+                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.img.search'|translate}}" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="table-content">
+        <empty-tip empty-type="loadData"></empty-tip>
+        <table ng-table="tableParams" class="table">
+            <colgroup>
+                <col>
+                <col>
+                <col>
+            </colgroup>
+            <tr ng-repeat="item in $data">
+                <td header="'headerCheckbox_.html'" class="check-td">
+                    <label class="checkbox">
+                        <input type="checkbox" name="r" ng-model="checkboxes.items[item.id]" value="{{item.id}}" />
+                        <i class="iconfont"></i>
+                    </label>
+                </td>
+                <td data-title="'aws.networks.networkName'|translate" sortable="'name'">
+                    <div class="edit-name">
+                        <a ng-href="/pvm/pvmnetworks?id={{item.id}}">{{item.name}}</a>
+                    </div>
+                </td>
+                <td data-title="'aws.networks.bindSubnet'|translate">
+                    <span ng-repeat="subnet in item.subnets track by $index">{{subnet.name}}：{{subnet.cidr}}
+                        <br/>
+                    </span>
+                </td>
+                <td data-title="'aws.networks.status'|translate" sortable="'state'">
+                    <span ng-class="{true:'bg-green',false:'bg-orange'}[item.status=='ACTIVE']">{{item.state}}</span>
+                </td>
+                <td data-title="'aws.networks.shared'|translate" sortable="'_shared'" ng-if="showInfoCtrl._shared">{{item._shared}}</td>
+                <td data-title=" 'aws.networks.external'|translate" sortable="'_external'" ng-if="showInfoCtrl._external">{{item._external}}</td>
+                <td data-title="'aws.networks.netType'|translate" sortable="'_network_type'" ng-if="showInfoCtrl._network_type">{{item._network_type}}</td>
+            </tr>
+        </table>
+    </div>  
+    </div>
+    
+    <script type="text/ng-template" id="headerCheckbox_.html">
+        <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+            <i class="iconfont"></i>
+        </label>
+    </script>
+    <script type="text/ng-template" id="headerCheckbox.html">
+        <label class="checkbox">
+            <input type="checkbox" ng-model="subnetCheckboxes.checked" class="select-all" value="" />
+            <i class="iconfont"></i>
+        </label>
+    </script>
+    <script type="text/ng-template" id="creatNetwork.html">
+        <div class="modal-common modal-step phyMac-moadl">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="$dismiss()">×</button>
+                <h3 class="modal-title  clearfix">新建网络</h3>
+                <!-- <ul class="steps-item clearfix">
+                    <li class="clearfix step-start" ng-class="{'active':inStepOneBar<inStep}">
+                        <div class=" clearfix">
+                            <span>网络</span>
+                            <i>1</i>
+                        </div>
+                    </li>
+                    <li class="clearfix step-middle" ng-class="{'active':inStepTwoBar<inStep}">
+                        <div class="clearfix">
+                            <span>子网</span>
+                            <i>2</i>
+                        </div>
+                    </li>
+                    <li class="clearfix step-end" ng-class="{'active':inStepThreeBar<inStep}">
+                        <div class="clearfix">
+                            <span>子网详情</span>
+                            <i>3</i>
+                        </div>
+                    </li>
+                </ul> -->
+                <ul class="steps-sytle-ver clearfix">
+                    <li class="clearfix step-start" ng-class="{'active':inStepOneBar<inStep}">
+                        <div class="inner">
+                            <span>网络</span>
+                            <i>1</i>
+                        </div>
+                    </li>
+                    <li class="clearfix step-middle" ng-class="{'active':inStepTwoBar<inStep}">
+                        <div class="inner">
+                            <span>子网</span>
+                            <i>2</i>
+                        </div>
+                    </li>
+                    <li class="clearfix step-end" ng-class="{'active':inStepThreeBar<inStep}">
+                        <div class="inner">
+                            <span>子网详情</span>
+                            <i>3</i>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-body ">
+                <form name="createNetworkForm" novalidate>
+                    <div class="control-group  one-group" ng-show="inStep=='1'">
+                        <div class="control-group">
+                            <label class="control-label"><span class="red">*</span> 网络名称：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="name" ng-model="networkForm.name" placeholder="请输入" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+                                <div class="error" ng-messages="(submitValid ||createNetworkForm.name.$dirty) && createNetworkForm.name.$error">
+                                    <form-validate></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label"><span class="red">*</span>网络类型：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="networkType" ng-model="networkForm.networkType" placeholder="请输入" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required ng-disabled="true" />
+                                <div class="error" ng-messages="(submitValid ||createNetworkForm.networkType.$dirty) && createNetworkForm.networkType.$error">
+                                    <form-validate></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label"><span class="red">*</span>物理网络：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="phyNetwork" ng-model="networkForm.phyNetwork" placeholder="请输入" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+                                <div class="error" ng-messages="(submitValid ||createNetworkForm.phyNetwork.$dirty) && createNetworkForm.phyNetwork.$error">
+                                    <form-validate></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">共享：</label>
+                            <div class="controls check-box">
+                                <label class="checkbox">
+                                    <input type="checkbox" class="form-controls chk" name="shared" ng-model="networkForm.shared" />
+                                    <i class="iconfont"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <!--子网form-->
+                <form name="createNetwork_subnetForm" novalidate>
+                    <div class="control-group one-group" ng-show="inStep=='2'">
+                        <div class="control-group">
+                            <label class="control-label"> <span class="red">*</span>子网名称：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="subnetName" ng-model="networkForm.subnetName" placeholder="请输入" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+                                <div class="error" ng-messages="(submitValid ||createNetwork_subnetForm.subnetName.$dirty) && createNetwork_subnetForm.subnetName.$error">
+                                    <form-validate></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group ip_cidr">
+                            <label class="control-label"><span class="red">*</span>{{"aws.networks.subnetCidr"|translate}}：</label>
+                            <!--需求变更：ip地址段输入放开-->
+                            <div class="controls clearfix">
+                                <div class="flex">
+                                    <div class="ip-text">
+                                        <input type="text" class="form-controls" name="ip_1" ng-model="networkForm.init_cidr.ip_1" ng-keyup="setCidr()" ng-focus="setIpIsOverlap()" min="0" max="255" maxlength="3" placeholder="1~255" limitnumrange required />
+                                        <div class="error ip_1" ng-messages="createNetwork_subnetForm.ip_1.$error" ng-if="interacted(createNetwork_subnetForm.ip_1)">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            <div ng-message="limitnumrange">{{'aws.errors.limit_1_255'|translate}}</div>
+                                        </div>
+                                    </div>
+                                    <div class="ip-spilt">.</div>
+                                    <div class="ip-text">
+                                        <input type="text" class="form-controls" name="ip_2" ng-model="networkForm.init_cidr.ip_2" ng-keyup="setCidr()" ng-focus="setIpIsOverlap()" min="0" max="255" maxlength="3" placeholder="0~255" limitnumrange required />
+                                        <div class="error ip_2" ng-messages="createNetwork_subnetForm.ip_2.$error" ng-if="interacted(createNetwork_subnetForm.ip_2)">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                        </div>
+                                    </div>
+                                    <div class="ip-spilt">.</div>
+                                    <div class="ip-text">
+                                        <input type="text" class="form-controls" name="ip_3" ng-model="networkForm.init_cidr.ip_3" ng-keyup="setCidr()" ng-focus="setIpIsOverlap()" min="0" max="255" maxlength="3" placeholder="0~255" limitnumrange required/>
+                                        <div class="error ip_3" ng-messages="createNetwork_subnetForm.ip_3.$error" ng-if="interacted(createNetwork_subnetForm.ip_3)">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                        </div>
+                                    </div>
+                                    <div class="ip-spilt">.</div>
+                                    <div class="ip-text">
+                                        <input type="text" class="form-controls" name="ip_4" ng-model="networkForm.init_cidr.ip_4" ng-keyup="setCidr()" ng-focus="setIpIsOverlap()" min="0" max="255" maxlength="3" placeholder="0~255" limitnumrange required/>
+                                        <div class="error ip_4" ng-messages="createNetwork_subnetForm.ip_4.$error" ng-if="interacted(createNetwork_subnetForm.ip_4)">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                        </div>
+                                    </div>
+                                    <div class="ip-spilt">/</div>
+                                    <div class="ip-text">
+                                        <input type="text" class="form-controls" name="ip_5" ng-model="networkForm.init_cidr.ip_5" ng-keyup="setCidr()" ng-focus="setIpIsOverlap()" min="1" max="29" maxlength="2" placeholder="1~29" limitnumrange required/>
+                                        <div class="error ip_5" ng-messages="createNetwork_subnetForm.ip_5.$error" ng-if="interacted(createNetwork_subnetForm.ip_5)">
+                                            <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                            <div ng-message="limitnumrange">{{'aws.errors.limit_1_29'|translate}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">可用地址范围：</label>
+                            <div class="controls check-box">
+                                <label class="checkbox ">
+                                    <input type="checkbox" name="addressRange" ng-model="networkForm.addressArea" class="select-all" value="false" ng-disabled="canSetAllocationPools">
+                                    <i class="iconfont"></i>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-repeat="data in networkForm.allocationPools" ng-if="networkForm.addressArea">
+                            <label class="control-label" ng-if="!$index">IP地址池：</label>
+                            <label class="control-label" ng-if="$index">&nbsp;</label>
+                            <div class="controls addressRange-box">
+                                <label class="control-label "><span class="red">*</span>开始：</label>
+                                <div class="controls">
+                                    <input type="text" class="form-controls" name="startIp_{{$index}}" id="startIp_{{$index}}" ng-model="data.start" ng-focus="setIpIsOverlap()" cidr-val={{cidrVal}} placeholder="请输入起始IP" ipaddrpattern="'one'" gateway-incidr required />
+                                    <div class="error" ng-messages="createNetwork_subnetForm['startIp_'+$index].$error" ng-if="interacted(createNetwork_subnetForm['startIp_'+$index])">
+                                        <div ng-message="ipaddrpattern">{{"aws.networks.ipPatternError"|translate}}</div>
+                                        <div ng-message="gatewayIncidr">{{"aws.networks.gatewayIpNotinSubCidr"|translate}}
+                                            <span ng-if="cidrValValidate">,{{"aws.networks.gatewayIpRange"|translate}}：{{gatewayIpRange}}</span>
+                                        </div>
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="controls addressRange-box">
+                                <label class="control-label "><span class="red">*</span>结束：</label>
+                                <div class="controls">
+                                    <input type="text" class="form-controls" name="endIp_{{$index}}" ng-model="data.end" id="endIp_{{$index}}" ng-focus="setIpIsOverlap()" cidr-val={{cidrVal}} placeholder="请输入结束IP" ipaddrpattern="'one'" gateway-incidr required gtip="startIp_{{$index}}" />
+                                    <div class="error" ng-messages="createNetwork_subnetForm['endIp_'+$index].$error" ng-if="interacted(createNetwork_subnetForm['endIp_'+$index])">
+                                        <div ng-message="ipaddrpattern">{{"aws.networks.ipPatternError"|translate}}</div>
+                                        <div ng-message="gtip">{{'aws.errors.gtIpError'|translate}}</div>
+                                        <div ng-message="gatewayIncidr">{{"aws.networks.gatewayIpNotinSubCidr"|translate}}
+                                            <span ng-if="cidrValValidate">,{{"aws.networks.gatewayIpRange"|translate}}：{{gatewayIpRange}}</span>
+                                        </div>
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="phyMac-add-del-box">
+                                <a ng-click="delEditAddressRangeData($index)" ng-if="$index">
+                                    <i class="icon-aw-wrong"></i>
+                                </a>
+                                <a ng-click="addEditAddressRangeData()" ng-if="$index==(networkForm.allocationPools.length-1)">
+                                    <i class="icon-aw-add-to2"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">{{"aws.networks.gatewayIp"|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="gateway" ng-model="networkForm.gateway" ng-focus="setIpIsOverlap()" cidr-val={{cidrVal}} placeholder="若置空，系统将自动分配网关IP" ipaddrpattern="'one'" gateway-incidr />
+                                <div class="error" ng-messages="createNetwork_subnetForm.gateway.$error" ng-if="interacted(createNetwork_subnetForm.gateway)">
+                                    <div ng-message="ipaddrpattern">{{"aws.networks.ipPatternError"|translate}}</div>
+                                    <div ng-message="gatewayIncidr">{{"aws.networks.gatewayIpNotinSubCidr"|translate}}
+                                        <span ng-if="cidrValValidate">,{{"aws.networks.gatewayIpRange"|translate}}：{{gatewayIpRange}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="ipIsOverlap || ipEqToGateway ">
+                            <label class="control-label">&nbsp</label>
+                            <div class="controls">
+                                <div class="error " ng-if="ipIsOverlap"> {{"aws.networks.ipPoolIsOverlap"|translate}}</div>
+                                <div class="error " ng-if="ipEqToGateway">{{"aws.networks.ipInPoolEqToGateway"|translate}}</div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">{{"aws.networks.useDhcp"|translate}}：</label>
+                            <div class="controls check-box">
+                                <label class="checkbox">
+                                    <input type="checkbox" class="form-controls chk" name="use_DHCP" ng-model="networkForm.enableDhcp" />
+                                    <i class="iconfont"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <form name="createNetwork_subnetInfoForm" novalidate>
+                    <div Class="one-group" ng-show="inStep=='3'">
+                        <div class="control-group">
+                            <label class="control-label">{{"aws.networks.dnsNameserver"|translate}}：</label>
+                            <div class="controls">
+                                <textarea type="text" class="form-controls min" name="dnsNameserver" ng-model="networkForm.dnsNameserver" placeholder='{{"aws.networks.placeholder.dnsNameserver"|translate}}' specialipinput="dns"></textarea>
+                                <div class="error" ng-messages="createNetwork_subnetInfoForm.dnsNameserver.$error" ng-if="interacted(createNetwork_subnetInfoForm.dnsNameserver)">
+                                    <div ng-message="specialipinput">{{"aws.networks.dnsNameserverPattern"|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="networkForm.enableDhcp">
+                            <label class="control-label">{{"aws.networks.hostRoutes"|translate}}：</label>
+                            <div class="controls">
+                                <textarea type="text" class="form-controls min" name="hostRoutes" ng-model="networkForm.hostRoutes" placeholder='{{"aws.networks.placeholder.hostRoutes"|translate}}' additional-router></textarea>
+                                <div class="error" ng-messages="createNetwork_subnetInfoForm.hostRoutes.$error" ng-if="interacted(createNetwork_subnetInfoForm.hostRoutes)">
+                                    <div ng-message="additionalRouter">{{"aws.networks.additionalRouterPattern"|translate}} </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div ng-show="inStep=='1'">
+                    <button class="btn btn-info" type="button" ng-click="stepTo(2,createNetworkForm)">
+                        {{'aws.action.nextStep'|translate}}
+                    </button>
+                    <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                        {{'aws.action.cancel'|translate}}
+                    </button>
+                </div>
+                <div ng-show="inStep=='2'">
+                    <div>
+                        <button class="btn btn-default" type="button" ng-click="stepTo(1)">
+                            {{'aws.action.lastStep'|translate}}
+                        </button>
+                        <button class="btn btn-info" type="button" ng-click="stepTo(3,createNetwork_subnetForm)">
+                            {{'aws.action.nextStep'|translate}}
+                        </button>
+                        <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                            {{'aws.action.cancel'|translate}}
+                        </button>
+                    </div>
+                </div>
+                <div ng-show="inStep=='3'">
+                    <div>
+                        <button class="btn btn-default" type="button" ng-click="stepTo(2)">
+                            {{'aws.action.lastStep'|translate}}
+                        </button>
+                        <button class="btn btn-info" type="button" ng-click="createNetworkConfirm(createNetwork_subnetInfoForm)">
+                            {{'aws.action.create'|translate}}
+                        </button>
+                        <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                            {{'aws.action.cancel'|translate}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+    </script>
+    <script type="text/ng-template" id="editNetworkModal.html">
+        <div class="modal-common modal-smallest">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+                <h3 class="modal-title">{{"aws.action.edit"|translate}}</h3>
+            </div>
+            <div class="modal-body">
+                <form name="editNetworkForm" novalidate>
+                    <div class="control-group">
+                        <label class="control-label"> <span class="red">*</span>{{"aws.networks.name"|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="name" ng-model="editnetworkForm.netName" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+                            <div class="error" ng-messages="(editsubmitValid ||editNetworkForm.name.$dirty) && editNetworkForm.name.$error">
+                                <form-validate></form-validate>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-if="ADMIN">
+                        <label class="control-label">{{"aws.networks.shared"|translate}}：</label>
+                        <div class="controls">
+                            <label class="checkbox">
+                                <input type="checkbox" class="form-controls chk" name="shared" ng-model="editnetworkForm.shared" />
+                                <i class="iconfont"></i>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-info" type="button" ng-click="editNetConfirm(editNetworkForm)" ng-disabled="formSubmitted">{{"aws.action.ok"|translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+            </div>
+        </div>
+    </script>
+    <!--详情页-->
+    <div ng-controller="detailCtrl">
+        <pane class="detail-body" animation="animation">
+            <div class="tab-content network-page">
+                <div class="detail-row">
+                    <div class="detail-title">
+                        <a class="an-close" ng-href="/pvm/pvmnetworks">
+                            <i class="icon-aw-mail-reply"></i>
+                        </a>
+                        <span>{{baseInfo.name}}{{"aws.networks.detail"|translate}}</span>
+                    </div>
+                    <div class="detail-info phyMac-min-height">
+                        <div class="tab-content-line"></div>
+                        <div class="tab-offset-right">
+                            <ul class="nav nav-tabs nav-justified">
+                              <li ng-class="{active:tab.isShow==0}" class="uib-tab nav-item " ng-click="choseTab('baseInfo')">
+                                <a href="">{{"aws.networks.baseMsg"|translate}}</a>
+                              </li>
+                              <li ng-class="{active:tab.isShow==1}" class="uib-tab nav-item" ng-click="choseTab('portInfo')" >
+                                <a href="">{{'aws.networks.portMsg'|translate}}</a>
+                              </li>
+                              <li ng-class="{active:tab.isShow==2}" class="uib-tab nav-item" ng-click="choseTab('subnetManage')" >
+                                <a href="">{{'aws.networks.subnetManager'|translate}}</a>
+                              </li>
+                            </ul> 
+                        </div>
+                        <div ng-if="tab.isShow==0">
+                            <h3>{{"aws.networks.baseMsg"|translate}}</h3>
+                            <div class="detail-info">
+                                <div class="tab-content-line"></div>
+                                <table class="table table-info column">
+                                    <tr>
+                                        <td>{{"aws.networks.networkName"|translate}}</td>
+                                        <td>{{baseInfo.name}}</td>
+                                        <td>{{'aws.networks.shared'|translate}}</td>
+                                        <td>{{baseInfo.shared}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{'aws.networks.netType'|translate}}</td>
+                                        <td>{{baseInfo.networkType}}</td>
+                                        <td>{{'aws.networks.phyNet'|translate}}</td>
+                                        <td>{{baseInfo.physical_network}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div ng-if="tab.isShow==1">
+                            <h3>{{'aws.networks.portMsg'|translate}}</h3>
+                            <empty-tip empty-type="portData" tip-id="'port-tip-msg'"></empty-tip>
+                            <table ng-table="portInfoTable" class="table">
+                                <tr ng-repeat="item in $data">
+                                    <td data-title="'aws.networks.portName'|translate" sortable="'name'">{{item.name}}</td>
+                                    <td data-title="'aws.networks.ipAddr'|translate" sortable="'ip'">{{item.ip}}</td>
+                                    <td data-title="'aws.networks.status'|translate" sortable="'_status'">{{item._status}}</td>
+                                    <td data-title="'aws.networks.adminState'|translate" sortable="'_adminState'">{{item._adminState}}</td>
+                                    <td data-title="'aws.networks.deviceOwner'|translate" sortable="'deviceOwner'">{{item.deviceOwner}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div ng-if="tab.isShow==2">
+                            <h3>{{'aws.networks.subnetManager'|translate}}</h3>
+                            <div class="table-action">
+                                <div class="btn-box">
+                                    <button type="button" class="btn btn-new" ng-click="createSubnet()" licence-type="btn" id="PhyRes-netWork-subnet-create">
+                                        <i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}</button>
+                                    <button type="button" data-toggle="modal" ng-click="editSubnet()" ng-disabled="!canEdit" class="btn btn-normal" licence-type="btn" id="PhyRes-netWork-subnet-edit">
+                                        <i class="icon-aw-modify"></i>{{"aws.action.edit"|translate}}</button>
+                                    <button type="button" data-toggle="modal" ng-click="delSubnet()" ng-disabled="!candel" class="btn btn-normal" licence-type="btn" id="PhyRes-netWork-subnet-del">
+                                        <i class="icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+                                </div>
+                                <setting title-data="titleData" site-title="titleName" table-data="subNetTableData" search-tearm="networkSearchTearm(obj)"></setting>
+                                <div type="button" class="btn btn-renovat right-ports" ng-click="refreshSubnetTable()">
+                                    <i class="icon-aw-refresh"></i>
+                                </div>
+                                <div class="search-box right-ports">
+                                    <form name="searchForm" novalidate ng-keyup="applyGlobalSearch_(globalSearchTerm_)" class="ng-pristine ng-valid ng-valid-maxlength">
+                                        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm_" placeholder='{{"aws.action.search"|translate}}' />
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="table-content">
+                                <empty-tip empty-type="subnetData" tip-id="'subnet-tip-msg'"></empty-tip>
+                                <table ng-table="subnetTable" class="table">
+                                    <tr ng-repeat="subnet in $data">
+                                        <td header="'headerCheckbox.html'">
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="subnetCheckboxes.items[subnet.id]" value="{{subnet.id}}" />
+                                                <i class="iconfont"></i>
+                                            </label>
+                                        </td>
+                                        <td data-title="'aws.networks.subnetName'|translate" sortable="'name'" ng-if="titleData[0].value">{{subnet.name}}</td>
+                                        <td data-title="'aws.networks.subnetCidr'|translate" sortable="'cidr'" ng-if="titleData[1].value">{{subnet.cidr}}</td>
+                                        <td data-title="'aws.networks.gateway'|translate" sortable="'gateway_ip'" ng-if="titleData[2].value">{{subnet.gateway_ip}}<br/>   
+                                        </td>
+                                        <td data-title="'aws.networks.address_range'|translate" ng-if="titleData[3].value">
+                                            <span ng-repeat="item in subnet.allocation_pools track by $index">{{item.start}}~{{item.end}}
+                                                    <br/>
+                                                </span>
+                                        </td>
+                                        <td data-title="'aws.networks.IPvision'|translate" sortable="'ip_version'" ng-if="titleData[4].value">{{subnet.ip_version}}</td>
+                                        <td data-title="'aws.networks.enableDhcp'|translate" sortable="'enable_dhcp'" ng-if="titleData[5].value">{{subnet._enable_dhcp}}</td>
+                                        <td data-title="'aws.networks.hostRoutes'|translate" sortable="'host_routes'" ng-if="titleData[6].value">
+                                            <span ng-repeat="item in subnet.host_routes track by $index">{{item.destination}}~{{item.nexthop}}
+                                                    <br/>
+                                                </span>
+                                        </td>
+                                        <td data-title="'aws.networks.dnsNameserver'|translate" sortable="'dns_nameservers'" ng-if="titleData[7].value">
+                                            <span ng-repeat="item in subnet.dns_nameservers track by $index">{{item}}
+                                                    <br/>
+                                                </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </pane>
+    </div>
+    </div>
+    <script type="text/ng-template" id="createSubnet.html">
+        <div class="modal-common">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+                <h3 class="modal-title">{{"aws.networks.newSubnet"|translate}}</h3>
+            </div>
+            <div class="modal-body">
+                <form name="createSubnetForm">
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{"aws.networks.subnetName"|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="name" ng-model="subnetForm.name" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.networks.subnetName"|translate}}' required/>
+                            <div class="error" ng-messages='createSubnetForm.name.$error' ng-show="interacted(createSubnetForm.name)">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                                <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group ip_cidr">
+                        <label class="control-label"><span class="red">*</span>{{"aws.networks.subnetCidr"|translate}}：</label>
+                        <!--需求变更：ip地址段输入放开-->
+                        <div class="controls clearfix">
+                            <div class="flex">
+                                <div class="ip-text">
+                                    <input type="text" class="form-controls" name="ip_1" ng-model="subnetForm.init_cidr.ip_1" ng-keyup="setCidr_()" ng-focus="setIpIsOverlap()" min="1" max="255" maxlength="3" placeholder="1~255" limitnumrange required />
+                                    <div class="error ip_2" ng-messages="createSubnetForm.ip_1.$error" ng-if="interacted(createSubnetForm.ip_1)">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_1_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip-text">
+                                    <input type="text" class="form-controls" name="ip_2" ng-model="subnetForm.init_cidr.ip_2" ng-keyup="setCidr_()" ng-focus="setIpIsOverlap()" min="0" max="255" maxlength="3" placeholder="0~255" limitnumrange required />
+                                    <div class="error ip_2" ng-messages="createSubnetForm.ip_2.$error" ng-if="interacted(createSubnetForm.ip_2)">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip-text">
+                                    <input type="text" class="form-controls" name="ip_3" ng-model="subnetForm.init_cidr.ip_3" ng-keyup="setCidr_()" ng-focus="setIpIsOverlap()" min="0" max="255" maxlength="3" placeholder="0~255" limitnumrange required/>
+                                    <div class="error ip_3" ng-messages="createSubnetForm.ip_3.$error" ng-if="interacted(createSubnetForm.ip_3)">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip-text">
+                                    <input type="text" class="form-controls" name="ip_4" ng-model="subnetForm.init_cidr.ip_4" ng-keyup="setCidr_()" ng-focus="setIpIsOverlap()" min="0" max="255" maxlength="3" placeholder="0~255" limitnumrange required/>
+                                    <div class="error ip_4" ng-messages="createSubnetForm.ip_4.$error" ng-if="interacted(createSubnetForm.ip_4)">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">/</div>
+                                <div class="ip-text">
+                                    <input type="text" class="form-controls" name="ip_5" ng-model="subnetForm.init_cidr.ip_5" ng-keyup="setCidr_()" ng-focus="setIpIsOverlap()" min="1" max="29" maxlength="2" placeholder="1~29" limitnumrange required/>
+                                    <div class="error ip_5" ng-messages="createSubnetForm.ip_5.$error" ng-if="interacted(createSubnetForm.ip_5)">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_1_29'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.networks.allocateAddress"|translate}}：</label>
+                        <div class="controls">
+                            <label class="checkbox ">
+                                <input type="checkbox" name="use_gateway" ng-model="subnetForm.addressArea" class="select-all" value="false" ng-disabled="canSetAllocationPools">
+                                <i class="iconfont"></i>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-repeat="data in subnetForm.allocationPools" ng-if="subnetForm.addressArea">
+                        <label class="control-label" ng-if="!$index">{{"aws.networks.ipPool"|translate}}</label>
+                        <label class="control-label" ng-if="$index">&nbsp;</label>
+                        <div class="controls addressRange-box">
+                            <label class="control-label "><span class="red">*</span>{{"aws.networks.start"|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="subnet_startIp_{{$index}}" ng-model="data.start" ng-focus="setIpIsOverlap()" placeholder='{{"aws.networks.startIp"|translate}}' id="subnet_startIp_{{$index}}" cidr-val={{cidrVal}} ipaddrpattern="'one'" gateway-incidr required />
+                                <div class="error" ng-messages="createSubnetForm['subnet_startIp_'+$index].$error" ng-if="interacted(createSubnetForm['subnet_startIp_'+$index])">
+                                    <div ng-message="ipaddrpattern">{{"aws.networks.ipPatternError"|translate}}</div>
+                                    <div ng-message="gatewayIncidr">{{"aws.networks.gatewayIpNotinSubCidr"|translate}}</span>
+                                    </div>
+                                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="controls addressRange-box">
+                            <label class="control-label "><span class="red">*</span>{{"aws.networks.end"|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="subnet_endIp_{{$index}}" ng-model="data.end" ng-focus="setIpIsOverlap()" placeholder='{{"aws.networks.endIp"|translate}}' id="subnet_endIp_{{$index}}" cidr-val={{cidrVal}} ipaddrpattern="'one'" gateway-incidr required gtip="subnet_startIp_{{$index}}" />
+                                <div class="error" ng-messages="createSubnetForm['subnet_endIp_'+$index].$error" ng-if="interacted(createSubnetForm['subnet_endIp_'+$index])">
+                                    <div ng-message="ipaddrpattern">{{"aws.networks.ipPatternError"|translate}}</div>
+                                    <div ng-message="gtip">{{'aws.errors.gtIpError'|translate}}</div>
+                                    <div ng-message="gatewayIncidr">{{"aws.networks.gatewayIpNotinSubCidr"|translate}}</span>
+                                    </div>
+                                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="phyMac-add-del-box">
+                            <a ng-click="delEditAddressRangeData($index)" ng-if="$index">
+                                <i class="icon-aw-wrong"></i>
+                            </a>
+                            <a ng-click="addEditAddressRangeData()" ng-if="$index==(subnetForm.allocationPools.length-1)">
+                                <i class="icon-aw-add-to2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.networks.gatewayIp"|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="gateway" ng-model="subnetForm.gateway" ng-focus="setIpIsOverlap()" placeholder='{{"aws.networks.gatewayTips"|translate}}' ipaddrpattern="'one'" gateway-incidr cidr-val={{cidrVal}}/>
+                            <div class="error" ng-messages="createSubnetForm.gateway.$error" ng-if="interacted(createSubnetForm.gateway)">
+                                <div ng-message="ipaddrpattern">{{"aws.networks.ipPatternError"|translate}}</div>
+                                <div ng-message="gatewayIncidr">{{"aws.networks.gatewayIpNotinSubCidr"|translate}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-if="subnet_ipIsOverlap || subnet_ipEqToGateway ">
+                        <label class="control-label">&nbsp</label>
+                        <div class="controls">
+                            <div class="error " ng-if="subnet_ipIsOverlap"> {{"aws.networks.ipPoolIsOverlap"|translate}}</div>
+                            <div class="error " ng-if="subnet_ipEqToGateway">{{"aws.networks.ipInPoolEqToGateway"|translate}}</div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{"aws.networks.useDhcp"|translate}}：</label>
+                        <div class="controls">
+                            <label class="checkbox">
+                                <input type="checkbox" class="form-controls chk" name="use_DHCP" ng-model="subnetForm.enableDhcp" />
+                                <i class="iconfont"></i>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="control-group">
+                            <label class="control-label">{{"aws.networks.dnsNameserver"|translate}}：</label>
+                            <div class="controls">
+                                <textarea type="text" class="form-controls min" name="dnsNameserver" ng-model="subnetForm.dnsNameserver" placeholder='{{"aws.networks.placeholder.dnsNameserver"|translate}}' specialipinput="dns"></textarea>
+                                <div class="error" ng-messages="createSubnetForm.dnsNameserver.$error" ng-if="interacted(createSubnetForm.dnsNameserver)">
+                                    <div ng-message="specialipinput">{{"aws.networks.dnsNameserverPattern"|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="subnetForm.enableDhcp">
+                            <label class="control-label">{{"aws.networks.hostRoutes"|translate}}：</label>
+                            <div class="controls">
+                                <textarea type="text" class="form-controls min" name="hostRoutes" ng-model="subnetForm.hostRoutes" placeholder='{{"aws.networks.placeholder.hostRoutes"|translate}}' additional-router></textarea>
+                                <div class="error" ng-messages="createSubnetForm.hostRoutes.$error" ng-if="interacted(createSubnetForm.hostRoutes)">
+                                    <div ng-message="additionalRouter">{{"aws.networks.additionalRouterPattern"|translate}} </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-info" type="button" ng-disabled="beyondQuota_dep.subnet || beyondQuota_pro.subnet || formSubmitted " ng-click="createSubnetCfm(createSubnetForm)">{{"aws.action.ok"|translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+            </div>
+        </div>
+    </script>
+    <script type="text/ng-template" id="editSubnet.html">
+        <div class="modal-common">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+                <h3 class="modal-title">{{"aws.networks.editSubnet"|translate}}</h3>
+            </div>
+            <div class="modal-body">
+                <form name="editSubnetForm">
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{"aws.networks.subnetName"|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="name" ng-model="editSubnetData.name" ng-maxlength="32" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" placeholder='{{"aws.networks.subnetName"|translate}}' required/>
+                            <div class="error" ng-messages='editSubnetForm.name.$error' ng-show="interacted(editSubnetForm.name)">
+                                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                <div ng-message="maxlength">{{"aws.errors.maxlengthbig"|translate}}32{{"aws.errors.lenghtUnit"|translate}}</div>
+                                <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group ip_cidr">
+                        <label class="control-label">{{"aws.networks.subnetCidr"|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="cidr" ng-model="editSubnetData.cidr" ng-disabled="true" />
+                        </div>
+                        <!--<div class="controls clearfix">
+                            <div class="flex">
+                                <div class="ip-text">
+                                    <input type="text" class="form-controls" name="ip_1" ng-model="editSubnetData.init_cidr.ip_1" ng-keyup="setCidr()" ng-focus="setIpIsOverlap()"
+                                        min="0" max="255" maxlength="3" placeholder="1~255" limitnumrange required />
+                                    <div class="error ip_2" ng-messages="editSubnetForm.ip_1.$error" ng-if="interacted(editSubnetForm.ip_1)">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_1_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip-text">
+                                    <input type="text" class="form-controls" name="ip_2" ng-model="editSubnetData.init_cidr.ip_2" ng-keyup="setCidr()" ng-focus="setIpIsOverlap()"
+                                        min="0" max="255" maxlength="3" placeholder="0~255" limitnumrange required />
+                                    <div class="error ip_2" ng-messages="editSubnetForm.ip_2.$error" ng-if="interacted(editSubnetForm.ip_2)">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip-text">
+                                    <input type="text" class="form-controls" name="ip_3" ng-model="editSubnetData.init_cidr.ip_3" ng-keyup="setCidr()" ng-focus="setIpIsOverlap()"
+                                        min="0" max="255" maxlength="3" placeholder="0~255" limitnumrange required/>
+                                    <div class="error ip_3" ng-messages="editSubnetForm.ip_3.$error" ng-if="interacted(editSubnetForm.ip_3)">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">.</div>
+                                <div class="ip-text">
+                                    <input type="text" class="form-controls" name="ip_4" ng-model="editSubnetData.init_cidr.ip_4" ng-keyup="setCidr()" ng-focus="setIpIsOverlap()"
+                                        min="0" max="255" maxlength="3" placeholder="0~255" limitnumrange required/>
+                                    <div class="error ip_4" ng-messages="editSubnetForm.ip_4.$error" ng-if="interacted(editSubnetForm.ip_4)">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_0_255'|translate}}</div>
+                                    </div>
+                                </div>
+                                <div class="ip-spilt">/</div>
+                                <div class="ip-text">
+                                    <input type="text" class="form-controls" name="ip_5" ng-model="editSubnetData.init_cidr.ip_5" ng-keyup="setCidr()" ng-focus="setIpIsOverlap()"
+                                        min="0" max="29" maxlength="2" placeholder="1~29" limitnumrange required/>
+                                    <div class="error ip_5" ng-messages="editSubnetForm.ip_5.$error" ng-if="interacted(editSubnetForm.ip_5)">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                        <div ng-message="limitnumrange">{{'aws.errors.limit_1_29'|translate}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>-->
+                    </div>
+                    <div class="control-group" ng-repeat="data in editSubnetData.allocationPools">
+                        <label class="control-label" ng-if="!$index">{{"aws.networks.ipPool"|translate}}：</label>
+                        <label class="control-label" ng-if="$index">&nbsp;</label>
+                        <div class="controls addressRange-box">
+                            <label class="control-label "><span class="red">*</span>{{"aws.networks.start"|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="subnetEdit_startIp_{{$index}}" ng-model="data.start" ng-focus="setIpIsOverlap()" placeholder='{{"aws.networks.startIp"|translate}}' id="subnetEdit_startIp_{{$index}}" cidr-val={{cidrVal}} ipaddrpattern="'one'" gateway-incidr required />
+                                <div class="error" ng-messages="editSubnetForm['subnetEdit_startIp_'+$index].$error" ng-if="interacted(editSubnetForm['subnetEdit_startIp_'+$index])">
+                                    <div ng-message="ipaddrpattern">{{"aws.networks.ipPatternError"|translate}}</div>
+                                    <div ng-message="gatewayIncidr">{{"aws.networks.gatewayIpNotinSubCidr"|translate}}</span>
+                                    </div>
+                                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="controls addressRange-box">
+                            <label class="control-label "><span class="red">*</span>{{"aws.networks.end"|translate}}：</label>
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="subnetEdit_endIp_{{$index}}" ng-model="data.end" ng-focus="setIpIsOverlap()" placeholder='{{"aws.networks.startIp"|translate}}' id="subnetEdit_endIp_{{$index}}" cidr-val={{cidrVal}} ipaddrpattern="'one'" gateway-incidr required gtip="subnetEdit_startIp_{{$index}}" />
+                                <div class="error" ng-messages="editSubnetForm['subnetEdit_endIp_'+$index].$error" ng-if="interacted(editSubnetForm['subnetEdit_endIp_'+$index])">
+                                    <div ng-message="ipaddrpattern">{{"aws.networks.ipPatternError"|translate}}</div>
+                                    <div ng-message="gtip">{{'aws.errors.gtIpError'|translate}}</div>
+                                    <div ng-message="gatewayIncidr">{{"aws.networks.gatewayIpNotinSubCidr"|translate}}</span>
+                                    </div>
+                                    <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="phyMac-add-del-box">
+                            <a ng-click="delEditAddressRangeData($index)" ng-if="$index">
+                                <i class="icon-aw-wrong"></i>
+                            </a>
+                            <a ng-click="addEditAddressRangeData()" ng-if="$index==(editSubnetData.allocationPools.length-1)">
+                                <i class="icon-aw-add-to2"></i>
+                            </a>
+                        </div>
+                    </div>
+            </div>
+            <div class="control-group" ng-if="editsubnet_ipIsOverlap ">
+                <label class="control-label">&nbsp</label>
+                <div class="controls">
+                    <div class="error " ng-if="editsubnet_ipIsOverlap"> {{"aws.networks.ipPoolIsOverlap"|translate}}</div>
+                </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-info" type="button" ng-click="editSubnetCfm(editSubnetForm)">{{"aws.action.ok"|translate}}</button>
+                <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+            </div>
+        </div>
+    </script>

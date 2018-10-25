@@ -1,0 +1,80 @@
+<div class="modal-common">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{"aws.system.flavor.createInsConfig"|translate}}</h3>
+    </div>
+    <div class="modal-body">
+        <form name="flavorForm">
+            <div class="control-group">
+                <label class="control-label">{{"aws.system.flavor.name"|translate}}：</label>
+                <div class="controls">
+                    <input type="text" name="name" class="form-controls" placeholder="{{'aws.system.flavor.inputFlavorName'|translate}}" required ng-model="newFlavorData.name" ng-maxlength="32" />
+                    <div class="error" ng-messages="flavorForm.name.$error" ng-if="interacted(flavorForm,'name')">
+                        <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+                        <div ng-message="maxlength">{{"aws.message.textLength"|translate}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{"aws.system.flavor.vcpus"|translate}}：</label>
+                <div class="controls">
+                    <input type="text" name="vcpus" class="form-controls" ng-model="newFlavorData.vcpus" placeholder="请输入CPU核数" ng-pattern="/^(1|\d*[2468]|\d+[0])$/" checknum maxs="'240'" required id="vcpus" />
+                    <div class="error" ng-messages="flavorForm.vcpus.$error" ng-if="interacted(flavorForm,'vcpus')">
+                        <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+                        <div ng-message="pattern">{{"aws.errors.evenGt_1" |translate}}</div>
+                        <div ng-message="checknum">{{"aws.system.flavor.cupkernel" |translate}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">{{"aws.system.flavor.vcpus_max"|translate}}：</label>
+              <div class="controls">
+                  <input type="text" uib-popover='{{"aws.system.flavor.vcpusmaxtips"|translate}}' popover-placement="top-right" popover-trigger="mouseenter" name="vcpus_max" class="form-controls" ng-model="newFlavorData.vcpus_max"
+                    min="vcpus.min_max.min" max="240" minmax="vcpus"  required />
+                <div class="error" ng-messages="flavorForm.vcpus_max.$error">
+                  <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+                  <div ng-message="minmax" ng-if="!flavorForm.vcpus.$error.checknum">{{"aws.errors.vcpus_min"|translate:vcpus.min_max}}</div>
+                  <div ng-message="checknum">{{"aws.system.flavor.cupkernel" |translate}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{"aws.system.flavor.ram"|translate}}：</label>
+                <div class="controls">
+                    <input type="text" name="ram" class="form-controls" ng-model="newFlavorData.ram" placeholder="请输入内存" required limitnumrange min="1" max="4000" ng-focus="focusSet()" />
+                    <div class="error" ng-messages="flavorForm.ram.$error" ng-if="interacted(flavorForm,'ram')">
+                        <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+                        <div ng-message="limitnumrange">{{"aws.errors.limit_1_4000"|translate}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{"aws.system.flavor.rammax"|translate}}：</label>
+                <div class="controls">
+                    <input type="text" uib-popover='{{"aws.system.flavor.rammaxtip"|translate}}' popover-placement="top-right" popover-trigger="focus" name="ram_max" class="form-controls" ng-model="newFlavorData.ram_max" ng-focus="focusSet()" min="ram.min_max.min" max="4000" required limitnumrange />
+                    <div class="error" ng-messages="flavorForm.ram_max.$error">
+                        <div ng-message="required">{{"aws.errors.required"|translate}}</div>
+                        <div ng-message="limitnumrange">{{"aws.errors.toInput"|translate}}{{ram.min_max.min}}~4000{{"aws.errors.toNum"|translate}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="red text-center" ng-if="ramGtMax">{{"aws.errors.ramGtMax" | translate}}</div>
+            <div class="control-group">
+              <label class="control-label">{{"aws.system.flavor._public"|translate}}：</label>
+              <div class="controls">
+                <ui-select ng-model="newFlavorData.is_public">
+                  <ui-select-match placeholder="{{'aws.system.flavor.chosePublic'|translate}}">{{$select.selected.name}}
+                  </ui-select-match>
+                  <ui-select-choices repeat="option.value as option in isPublic.options">
+                    <div ng-bind-html="option.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirmNewFlavor(newFlavorData,flavorForm)">{{"aws.action.ok"|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+</div>

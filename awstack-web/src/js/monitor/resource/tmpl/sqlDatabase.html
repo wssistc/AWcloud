@@ -1,0 +1,59 @@
+<div class="page-inner sql-database-inner">
+    <div class="sql-title">
+       <h2>实例监控</h2>
+    </div>
+    <div class="clearfix">
+        <div class="control-group pull-left circle-select">
+            <div class="control-label">实例选择：</div>
+            <div class="controls">
+                <ui-select ng-model="instances.selectedInstance" ng-change="changeCluster(instances.selectedInstance)">
+                    <ui-select-match placeholder="{{'aws.monitor.physical.instancesSelect'|translate}}" title="{{$select.selected.clusterName}}">{{$select.selected.clusterName}}</ui-select-match>
+                    <ui-select-choices repeat="item in instancesList">
+                        <div ng-bind-html="item.clusterName" title="{{item.clusterName}}" class="uiSelect-cluster"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="control-group pull-left circle-select">
+            <div class="control-label">{{'aws.monitor.physical.collectCycle'|translate}}：</div>
+            <div class="controls">
+                <ui-select ng-model="filterData.precision">
+                    <ui-select-match placeholder="{{'aws.monitor.physical.collectCycleSelect'|translate}}">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="item.value as item in collectCycleList | propsFilter:{name:$select.search}">
+                        <div ng-bind-html="item.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="control-group pull-left time-select">
+            <div class="control-label">时间筛选：</div>
+            <div class="controls">
+                <div my-daterangepicker filter-data="filterData" time-type="timeType" query="query()" time-precision="'sec'"></div>
+                <!-- <div class="pull-left">
+                   <i class="icon-aw-question-mark question-tip" uib-popover="当采集周期为5分钟时，选择时间超过3天且小于7天时，曲线上显示15分钟一个点，当选择时间大于7天时，曲线上显示30分钟一个点。" popover-trigger="mouseenter" popover-placement="bottom"></i> 
+                </div> -->
+            </div>
+        </div>
+    </div>
+    <div class="col" ng-repeat="item in panels.index_speed | orderBy:'priority' ">
+        <div class="inner">
+            <div class="panels clearfix">
+                <div class="echarts-phy" echarts-line-phy chart-title="写入速度(单位：次/秒)" data="item.data" time-type="filterData.timeStep" unit="item.unit" id="disk_usage_avg{{$index}}"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col" ng-repeat="item in panels.index_total | orderBy:'priority' ">
+        <div class="inner">
+            <div class="panels clearfix">
+                <div class="echarts-phy" echarts-line-phy chart-title="数据当前写入总次数(单位：次)" data="item.data" time-type="filterData.timeStep" unit="item.unit" id="disk_usage_avg{{$index}}"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col" ng-repeat="item in panels.disk_usage_avg | orderBy:'priority' ">
+        <div class="inner">
+            <div class="panels clearfix">
+                <div class="echarts-phy" echarts-line-phy chart-title="平均磁盘使用率(单位：百分比)" data="item.data" time-type="filterData.timeStep" unit="item.unit" id="disk_usage_avg{{$index}}"></div>
+            </div>
+        </div>
+    </div>
+</div>

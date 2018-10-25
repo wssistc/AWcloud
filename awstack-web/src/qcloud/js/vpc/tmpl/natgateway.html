@@ -1,0 +1,422 @@
+<div class="page-inner vpc-view"> 
+  <div class="page-title">
+    <h2>NAT网关</h2>
+      <div class="btn-item-group">
+        <button ng-repeat="region in regions.options" ng-click="changeRegion(region.value)" ng-class="{'active':queryLimit.regionId==region.value}" ng-bind="region.name"></button>
+      </div>
+      <ui-select class="sel-lg" ng-model="queryLimit.vpc" ng-change="changeVpc(queryLimit.vpc);" >
+        <ui-select-match>{{$select.selected.vpcName}}</ui-select-match>
+        <ui-select-choices repeat="vpc in vpcs.options">
+          <div class="subnet-ellips" ng-bind-html="vpc.vpcName | highlight: $select.search"  title="{{vpc.vpcName}}"></div>
+        </ui-select-choices>
+      </ui-select>
+  </div>
+  
+  <div class="table-action">
+    <button type="button" data-toggle="modal" ng-click="creatNatModal()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>新建</button>
+    <!--<button class="btn btn-refresh" ng-click="refreshNatList()"><i class="icon-aw-refresh"></i>刷新</button>-->
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder='搜索' />
+      </form>
+    </div>
+  </div>
+  <div class="table-content">
+    <table ng-table="natGatewayTable" class="table " show-filter="false">
+      <colgroup>
+        <col width="20%">
+        <col width="15%">
+        <col width="15%">
+        <col width="15%">
+        <col width="20%">
+        <col width="15%">
+      </colgroup>
+      <tr ng-repeat="nat in $data">
+        <td data-title="'ID/名称'" sortable="'natName'">
+          <div class="edit-name name-lg">
+            <a ng-class="{'disabled':nat.delLoading }" ng-click="setNatgatewayDetail(nat)">{{nat.natId}}</a>
+            <span class="ycx">{{nat.natName}}</span>
+            <i class="icon-aw-modify blue"  ng-click="editNatModal(nat,'name')"></i>
+          </div>
+        </td>
+        <!-- <td data-title="'监控'" sortable="''">
+        <a href=""><i class="icon-aw-histogram"></i></a>
+        </td> -->
+        <td data-title="'状态'" sortable="'_state'">
+          <span ng-class="{'green':nat.state==0||nat.productionStatus==0,'origin':nat.state==2,'red':nat.state==1&&nat.productionStatus!=0}"><i class="min-loading aw-spin" ng-if="nat.productionStatus==0"></i>{{nat._state}}</span>
+        </td>
+        <td data-title="'带宽上限'" sortable="'bandwidth'">
+        <div>{{nat.bandwidth}}Mbps</div>
+        </td>
+        <td data-title="'绑定弹性IP数'" sortable="'eipSet.length'">
+          <span ng-if="nat.productionStatus==0"><i class="min-loading aw-spin"></i>IP绑定中...</span>
+          <span ng-if="nat.productionStatus!=0">{{nat.eipSet.length}}</span>
+        </td>
+        <td data-title="'所属网络'" sortable="'vpcName'">
+        <div>
+          <a ng-href="#/vpc/vpc?vpcId={{nat.vpcId}}" ng-if="!nat.delLoading">{{nat.unVpcId}}</a>
+          <a ng-if="nat.delLoading"  ng-class="{'disabled':nat.delLoading}" >{{nat.unVpcId}}</a>
+        </div>
+        <div><span class="ycx">{{nat.vpcName}}</span></div>
+        </td>
+        <td data-title="'操作'" sortable="''">
+          <span ng-if="nat.delLoading"><i class="icon-aw-refresh aw-spin green"></i>删除中...</span>
+          <a ng-click="deleteNatGateway(nat)" ng-if="!nat.delLoading" ng-class="{'disabled':nat.productionStatus==0}">删除</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="detail-body" animation="animation">
+    <div class= 'animateContent {{animation}} '>
+      <div class='detailInner'>
+        <div class="detail-tab">
+          <div class="dt-title">
+            <a class="an-close" ng-href="#/vpc/natgateway">返回<i class="icon-aw-angle-left"></i></a>
+            <span>{{natDetailItem.natId}}</span>
+          </div>
+          <div class="dt-box">
+            <ul class="nav nav-tabs">
+              <li ng-class="{'active':basicInfoTab==true}"><a ng-click="choseNatDetailTab('basic')">基本信息</a></li>
+              <li ng-class="{'active':bindEipTab==true}"><a ng-click="choseNatDetailTab('eip')">关联弹性IP</a></li>
+              <!-- <li ng-class="{'active':monitorTab==true}"><a ng-click="choseNatDetailTab('monitor')">监控</a></li> -->
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane " ng-class="{'active':basicInfoTab==true}">
+                <strong>基本信息</strong>
+                <dl class="dl-horizontal">
+                  <dt>网关名称</dt>
+                  <dd>
+                    <span ng-if="natDetailItem.natName">
+                      {{natDetailItem.natName}}
+                      <a  ng-click="editNatModal(natDetailItem,'name')"><i class="icon-aw-modify blue" ></i></a>
+                    </span>
+                  </dd>
+                  <dt>网关ID</dt>
+                  <dd>{{natDetailItem.natId}}</dd>
+                  <dt>网关类型</dt>
+                  <dd>
+                    <span ng-if="natDetailItem.maxConcurrent">
+                      {{"CN.vpc.maxConcurrent." + natDetailItem.maxConcurrent | translate }}
+                      <a  ng-click="editNatModal(natDetailItem,'maxConcurrent')"><i class="icon-aw-modify blue" ></i></a>
+                    </span>
+                  </dd>
+                  <dt>带宽上限</dt>
+                  <dd>
+                    <span ng-if="natDetailItem.bandwidth">
+                      {{natDetailItem.bandwidth}}Mbps
+                      <a  ng-click="editNatModal(natDetailItem,'bandwidth')"><i class="icon-aw-modify blue" ></i></a>
+                    </span>
+                  </dd>
+                  <dt>所属网络</dt>
+                  <dd>
+                    <span ng-if="natDetailItem.vpcId"><a href="#/vpc/vpc?vpcId={{natDetailItem.vpcId}}" class="blue">{{natDetailItem.unVpcId}}</a>( {{natDetailItem.vpcName}} | {{natDetailItem.cidrBlock}})</span>
+                  </dd>
+                  <dt>所在地域</dt>
+                  <dd>{{"CN.vpc.region." + queryLimit.regionId | translate }}</dd>
+                  <dt>创建时间</dt>
+                  <dd>{{natDetailItem.createTime}}</dd>
+                </dl>
+                <strong>相关路由策略</strong>
+                <table class="table">
+                  <colgroup>
+                      <col width="33.3%">
+                      <col width="33.3%">
+                      <col width="33.3%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>路由表ID/名称</th>
+                      <th>目的端</th>
+                      <th>路由表关联子网</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="item in natDetailItem.RouteResult">
+                        <td>{{item.rtbName}} ( <a href="#/vpc/route?routeTableId={{item.routeTableId}}&&unRouteTableId={{item.unRouteTableId}}">{{item.rtbId}}</a> ) </td>
+                        <td><span ng-repeat="cidr in item.destinationCidrBlockSet">{{cidr}}<br/></span></td>
+                        <td><span ng-repeat="sub in item.subnetSet">{{sub.name}} ( <a href="#/vpc/subnet?subnetId={{queryLimit.regionId + '_subnet_' + sub.subnetId}}&&vpcId={{natDetailItem.vpcId}}">{{sub.uniqSubnetId}}</a> ) <br/></span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-pane" ng-class="{'active':bindEipTab==true}">
+                <strong>关联弹性IP</strong>
+                <div class="table-action">
+                  <button type="button" data-toggle="modal" ng-click="bindEip(natDetailItem)" class="btn btn-primary" ng-disabled="bindeipLoading || natDetailItem.productionStatus==0"><i class="icon-aw-add-to2"></i>绑定弹性IP</button>
+                  <div class="loading-tip" ng-if="bindeipLoading || natDetailItem.productionStatus==0">
+                    <span><i class="min-loading aw-spin"></i>IP绑定中...</span>
+                  </div>
+                </div>
+                <div class="table-content">
+                  <table class="table">
+                    <colgroup>
+                      <col width="50%">
+                      <col width="50%">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>IP</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="eip in elasticIPList">
+                          <td>{{eip.eip}}</td>
+                          <td>
+                            <span ng-if="eip.showEipLoading"><i class="icon-aw-refresh aw-spin green"></i>正在解绑...</span>
+                            <a ng-click="unbindElasticIp(eip);" ng-class="{'disabled':elasticIPList.length == 1}" uib-popover={{eip.unbindEipTip}} popover-trigger="mouseenter" ng-if="!eip.showEipLoading">解绑</a>
+                          </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  
+                </div>
+              </div>
+              <div class="tab-pane" ng-class="{'active':monitorTab==true}">
+                <strong>监控page</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/ng-template" id="createNatGatewayModal.html">
+    <div class="modal-common creNat-modal" >
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">创建NAT网关</h3>
+      </div>
+      <div class="modal-body">
+        <form name="natGatewayModalForm" novalidate>
+          <div class="control-group">
+            <label class="control-label">网关名称：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="natgateway" ng-model="natForm.natName" placeholder="请输入网关名称" ng-maxlength="20" required /> <!-- ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"-->
+              <div class="error" ng-messages="natGatewayModalForm.natgateway.$error" ng-if="interacted(natGatewayModalForm.natgateway)">
+                <div ng-message="required">*必填项</div>
+                <div ng-message="maxlength">请至多输入20个字符</div>
+                <!--<div ng-message="pattern">只能输入字母、数字、汉字、横线以及下划线</div>-->
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">网关类型：</label>
+            <div class="controls">
+              <ui-select ng-model="natForm.maxConcurrent" title='请选择网关类型' ng-change="changeNatType(natForm.maxConcurrent)" >
+                  <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="natType.value as natType in natTypesOtions">
+                  <div ng-bind-html="natType.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">所属地域：</label>
+            <div class="controls">{{"CN.vpc.region." + queryLimit.regionId | translate}}</div>
+          </div>  
+          <div class="control-group">
+            <label class="control-label">所属网络：</label>
+            <div class="controls">
+              <ui-select ng-model="natForm.vpcId" title='请选择所属网络' >
+                  <ui-select-match>{{$select.selected.vpcId}} ( {{$select.selected.vpcName}} | {{$select.selected.cidrBlock}} )</ui-select-match>
+                <ui-select-choices repeat="vpc.vpcId as vpc in vpcsOptions">
+                  <div ng-bind-html="vpc.vpcId +' ( ' + vpc.vpcName + ' | ' +vpc.cidrBlock +' ) ' | highlight: $select.search"></div>
+                  </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-if="vpcsOptions.length == 0" >*无可用私有网络</div>
+            </div>
+          </div> 
+          <div class="control-group">
+            <label class="control-label">带宽上限：</label>
+            <div class="controls">
+              <ui-select ng-model="natForm.bandwidth" title='请选择带宽上限' ng-change="choseBWLimit(natForm.BWLimit)" >
+                  <ui-select-match>{{$select.selected}}Mbps</ui-select-match>
+                <ui-select-choices repeat="bwlimit in BWLimitOptions">
+                  <div ng-bind-html="bwlimit + 'Mbps' | highlight: $select.search"></div>
+                  </ui-select-choices>
+              </ui-select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">绑定弹性IP：</label>
+            <div class="controls">
+              <ui-select ng-model="natForm.assignedEipSet" name="assignedEipSet" ng-change="changeEipset(natForm.assignedEipSet)"  title='请选择弹性IP'  multiple required>
+                  <ui-select-match placeholder="请选择弹性IP">{{$item.name}}<span ng-if="$item.name == '默认新建' && natForm.autoAllocEipNum ">{{natForm.autoAllocEipNum}}个</span></ui-select-match>
+                <ui-select-choices repeat="elasticIP.value as elasticIP in EipOptions">
+                  <div ng-bind-html="elasticIP.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-messages="natGatewayModalForm.assignedEipSet.$error" ng-if="interacted(natGatewayModalForm.assignedEipSet)">
+                <div ng-message="required">*必填项</div>
+              </div>
+              <div class="tip warning">
+                提示：最多可绑定10个弹性IP<i class=" icon-aw-prompt" uib-popover="NAT网关配置EIP数限制了NAT网关访问某IP端口的最大并发数， NAT网关绑定单EIP最大连接数为55000，绑定多EIP时最大并发连接数为55000xN。 如需绑定更多EIP请提 工单申请." popover-trigger="mouseenter" tooltip-placement="bottom" ></i>
+              </div>
+            </div>
+          </div> 
+          <div class="control-group"  ng-show="autoAllocEip">
+            <label class="control-label">新建弹性IP：</label>
+            <div class="controls">
+              <ui-select ng-model="natForm.autoAllocEipNum" name="autoAllocEipNum" required>
+                  <ui-select-match placeholder="请选择默认新建弹性IP的个数">{{$select.selected}} 个</ui-select-match>
+                <ui-select-choices repeat="num in autoAllocEipNumOptions">
+                  <div ng-bind-html="num + '个' | highlight: $select.search"></div>
+                  </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-messages="natGatewayModalForm.autoAllocEipNum.$error" ng-if="interacted(natGatewayModalForm.autoAllocEipNum)">
+                <div ng-message="required">*必填项</div>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">网关费用：</label>
+            <div class="controls">
+              <span ng-if="priceIng" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+              <div class="price-tips" ng-class="{'in':!priceIng}">
+                <span class="unit-box">{{natCost}}<span class="unit-txt">元/时</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">网络费用：</label>
+            <div class="controls">
+              <span ng-if="priceIng" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+              <div class="price-tips" ng-class="{'in':!priceIng}">
+                <span class="unit-box">{{networkPrice}}<span class="unit-txt">元/GB</span></span>
+              </div>
+            </div>
+          </div>  
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="createNatConfirm(natGatewayModalForm)">确认</button>
+         <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </div>
+  </script>
+  <script type="text/ng-template" id="editNatModal.html">
+    <div class="vpc-modal modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{editNatModal_title}}</h3>
+      </div>
+      <div class="modal-body">
+        <form name="editNatModalForm" novalidate>
+          <div class="control-group"  ng-if="editType == 'name'">
+            <label class="control-label">网关名称：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="natname" ng-model="editNatForm.natName" placeholder="请输入网关名称" ng-maxlength="20"  required />
+              <div class="error" ng-messages='editNatModalForm.natname.$error' ng-if="interacted(editNatModalForm.natname)">
+                <div ng-message="required">*必填项</div>
+                <div ng-message="maxlength">请至多输入20个字符</div>
+              </div>
+            </div>
+          </div>
+          <div ng-if="editType == 'maxConcurrent'">
+            <div class="control-group">
+              <label class="control-label">网关类型：</label>
+              <div class="controls">
+                <ui-select ng-model="editNatForm.maxConcurrent" title='请选择网关类型' ng-change="changeNatType(editNatForm.maxConcurrent)" >
+                    <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                  <ui-select-choices repeat="natType.value as natType in natTypesOtions">
+                    <div ng-bind-html="natType.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">当前价格：</label>
+              <div class="controls">
+                <span ng-if="currPrice" class="price-loading"><i class="min-loading aw-spin"></i>正在获取当前价格.....</span>
+                <div class="price-tips" ng-class="{'in':!currPrice}">
+                  <span class="unit-box">{{currentNatCost}}<span class="unit-txt">元/小时</span></span>
+                </div>
+              </div>
+            </div>
+            <div class="control-group" >
+              <label class="control-label">修改后的价格：</label>
+              <div class="controls">
+              <span ng-if="priceIng || currPrice" class="price-loading"><i class="min-loading aw-spin"></i>正在计算价格.....</span>
+                <div class="price-tips" ng-class="{'in':!priceIng && !currPrice}">
+                  <span class="unit-box">{{natCost}}<span class="unit-txt">元/小时</span></span>
+                </div>
+              </div>
+            </div>
+            <div class="alert alert-warning">
+              按每小时内最高配置计费
+            </div>
+          </div>
+          <div ng-if="editType == 'bandwidth'">
+            <div class="control-group">
+              <label class="control-label">带宽上限：</label>
+              <div class="controls">
+                <ui-select ng-model="editNatForm.bandwidth" title='请选择带宽上限' ng-change="choseBWLimit(natForm.BWLimit)" >
+                    <ui-select-match>{{$select.selected}}Mbps</ui-select-match>
+                  <ui-select-choices repeat="bwlimit in BWLimitOptions">
+                    <div ng-bind-html="bwlimit + 'Mbps' | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+              </div>
+            </div>
+          </div>
+          <div ng-if="editType == bindEip">
+            
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="editNatConfirm(editNatModalForm)">确认</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </div>
+  </script>
+  <script type="text/ng-template" id="bindEipModal.html">
+    <div class="vpc-modal modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">绑定弹性IP</h3>
+      </div>
+      <div class="modal-body">
+        <form name="bindEipModalForm" novalidate>
+          <div class="control-group">
+            <label class="control-label">绑定弹性IP：</label>
+            <div class="controls">
+              <ui-select ng-model="bindEipForm.assignedEipSet" name="assignedEipSet" ng-change="changeEipset(bindEipForm.assignedEipSet)"  title='请选择弹性IP'  multiple required>
+                  <ui-select-match placeholder="请选择弹性IP">{{$item.name}}<span ng-if="$item.name == '默认新建' && bindEipForm.autoAllocEipNum ">{{bindEipForm.autoAllocEipNum}}个</span></ui-select-match>
+                <ui-select-choices repeat="elasticIP.value as elasticIP in EipOptions">
+                  <div ng-bind-html="elasticIP.name | highlight: $select.search"></div>
+                  </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-messages="bindEipModalForm.assignedEipSet.$error" ng-if="interacted(bindEipModalForm.assignedEipSet)">
+                <div ng-message="required">*必填项</div>
+              </div>
+              <div class="tip warning">
+                提示：最多可绑定10个弹性IP<i class=" icon-aw-prompt" uib-popover="NAT网关配置EIP数限制了NAT网关访问某IP端口的最大并发数， NAT网关绑定单EIP最大连接数为55000，绑定多EIP时最大并发连接数为55000xN。 如需绑定更多EIP请提 工单申请." popover-trigger="mouseenter" tooltip-placement="bottom" ></i>
+              </div>
+            </div>
+          </div> 
+          <div class="control-group"  ng-if="autoAllocEip">
+            <label class="control-label">新建弹性IP：</label>
+            <div class="controls">
+              <ui-select ng-model="bindEipForm.autoAllocEipNum" name="autoAllocEipNum" required>
+                  <ui-select-match placeholder="请选择默认新建弹性IP的个数">{{$select.selected}} 个</ui-select-match>
+                <ui-select-choices repeat="num in autoAllocEipNumOptions">
+                  <div ng-bind-html="num + '个' | highlight: $select.search"></div>
+                  </ui-select-choices>
+              </ui-select>
+              <div class="error" ng-messages="bindEipModalForm.autoAllocEipNum.$error" ng-if="interacted(bindEipModalForm.autoAllocEipNum)">
+                <div ng-message="required">*必填项</div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="bindEipConfirm(bindEipModalForm)">确认</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">取消</button>
+      </div>
+    </div>
+  </script>
+</div>

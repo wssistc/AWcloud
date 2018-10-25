@@ -1,0 +1,312 @@
+<div class="modal-common"  ng-class="{'modal-middle':getQuotaInfo}">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">新建云硬盘</h3>
+    </div>
+    <div class="modal-body">
+        <div class="clearfix">
+            <div class = "left-modal">
+                <div class="alert alert-danger" ng-hide="canVolum">{{'aws.instances.addinstances.volumsTip'|translate}}</div>
+                <uib-alert ng-if="beyondQuota_pro.volumes" type="danger">{{'aws.instances.quota.proVolumes' | translate}}</uib-alert>
+                <uib-alert ng-if="beyondQuota_dep.volumes" type="danger">{{'aws.instances.quota.domVolumes' | translate}}</uib-alert>
+                <uib-alert ng-if="beyondQuota_pro.gigabytes" type="danger">{{'aws.instances.quota.proGigabytes' | translate}}</uib-alert>
+                <uib-alert ng-if="beyondQuota_dep.gigabytes" type="danger">{{'aws.instances.quota.domGigabytes' | translate}}</uib-alert>
+                <form name="createVolumeForm" novalidate class="no-page-absolute">
+                    <domain-project-select domainproject='domainproject' ng-show="singlePassageway"></domain-project-select>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.volumes.cv.name'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="name" ng-model="volumeForm.name" placeholder="{{'aws.volumes.cv.pInputName'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\.)*$/" ng-maxlength="32" required />
+                            <div class="error" ng-messages='(submitted||createVolumeForm.name.$dirty)&&createVolumeForm.name.$error'>
+                                <form-validate pattern-msg="'aws.errors.nameLimit'|translate"></form-validate>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.common.chooseSrc' | translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip1' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <div class="btn-item-group middle">
+                                <button type="button" class="type-btn" ng-class='{"active":src=="blank"}' ng-click="choseSrc('blank')">
+                                    <span>{{'aws.common.blank' | translate}}</span>
+                                </button>
+                                <button type="button" class="type-btn" ng-class='{"active":src=="volume"}' ng-click="choseSrc('volume')">
+                                    <span>{{'aws.common.volume' | translate}}</span>
+                                </button>
+                                <button type="button" class="type-btn" ng-class='{"active":src=="img"}' ng-click="choseSrc('img')">
+                                    <span>{{'aws.common.image' | translate}}</span>
+                                </button>
+                                <button type="button" class="type-btn" ng-class='{"active":src=="snap"}' ng-click="choseSrc('snap')">
+                                    <span>{{'aws.common.snapshot' | translate}}</span>
+                                </button>
+                                <button type="button" class="type-btn" ng-class='{"active":src=="backup"}' ng-click="choseSrc('backup')" service-permit service-name="['backups']">
+                                    <span>{{'aws.common.backup' | translate}}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <fieldset ng-show = "src=='volume'">
+                        <div class="control-group">
+                            <div class="control-label">&nbsp</div>
+                            <div class="controls">
+                                <!-- <empty-tip empty-type="loadVolumeData" tip-id="'volume-tip-msg'"></empty-tip> -->
+                                <div class="table-action">
+                                    <div class="pull-right">
+                                        <search-refresh refresh-fuc="getVolume" context= "context" table-content="'volumeTable'" table-data="addVolumeForm.volumeTabData" btn-type="radio" change-select="changeVolume" ></search-refresh>  
+                                    </div>
+                                </div>
+                                <div class="table-content table-small">
+                                    <table ng-table-dynamic="volumeTable with volumeCols" class="table" show-filter="false">
+                                        <tr ng-repeat="volume in $data track by $index ">
+                                            <td ng-repeat="item in $columns" ng-switch="item.field" >
+                                                <label class="radiobox" ng-switch-when="check">
+                                                    <input name="volume" type="radio" value={{volume.id}} ng-model="addVolumeForm.volume_id" ng-change="changeVolume(volume)">
+                                                    <i class="iconfont"></i>
+                                                </label>
+                                                <div class="edit-name edit-lg" ng-switch-when  ="name">
+                                                    <span title="{{volume[item.field]}}">{{volume[item.field]}}</span>
+                                                </div>
+                                                <span ng-switch-default>{{volume[item.field]}}</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <loading-data data="volumeTable.data"></loading-data>
+                            </div>
+                        </div>
+                    </fieldset>
+        
+                    <fieldset ng-if="src=='img'">
+                        <div class="control-group">
+                            <div class="control-label">&nbsp</div>
+                            <div class="controls">
+                                <!-- <empty-tip empty-type="loadImgData" tip-id="'img-tip-msg'"></empty-tip> -->
+                                <div class="table-action">
+                                    <div class="pull-right">
+                                        <search-refresh refresh-fuc="getImages" context= "context" table-content="'imgTable'"  table-data="addVolumeForm.imgTabData" btn-type="radio" change-select="changeImg"></search-refresh>
+                                    </div>
+                                </div>
+                                <div class="table-content table-small">
+                                    <table ng-table-dynamic="imgTable with imgCols" class="table" show-filter="false">
+                                        <tr ng-repeat="image in $data track by $index ">
+                                            <td ng-repeat="item in $columns" ng-switch="item.field">
+                                                <label class="radiobox" ng-switch-when  ="check">
+                                                    <input name="insImg" type="radio" value="{{image.imageUid}}" ng-model="addVolumeForm.img_id" ng-click="changeImg(image)" required>
+                                                    <i class="iconfont"></i>
+                                                </label>
+                                                <div class="edit-name edit-lg" ng-switch-when  ="name">
+                                                    <span title="{{image[item.field]}}">{{image[item.field]}}</span>
+                                                </div>
+                                                <span ng-switch-default>{{image[item.field]}}</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <loading-data data="imgTable.data"></loading-data>
+                            </div>
+                        </div>
+                    </fieldset>
+        
+                    <fieldset ng-if="src=='snap'">
+                        <div class="control-group">
+                            <div class="control-label">&nbsp</div>
+                            <div class="controls">
+                                <!-- <empty-tip empty-type="loadSnapData" tip-id="'snap-tip-msg'"></empty-tip> -->
+                                <div class="table-action">
+                                    <div class="pull-right">
+                                        <search-refresh refresh-fuc="getSnaps" context= "context" table-content="'snapTable'" table-data="addVolumeForm.snapTabData" btn-type="radio" change-select="changeSnap" ></search-refresh>
+                                    </div>
+                                </div>
+                                <div class="table-content table-small">
+                                    <table ng-table-dynamic="snapTable with snapCols" class="table" show-filter="false">
+                                        <tr ng-repeat="snap in $data track by $index ">
+                                            <td ng-repeat="item in $columns" ng-switch="item.field">
+                                                <label class="radiobox" ng-switch-when  ="check">
+                                                    <input name="snap" type="radio" value="{{snap.id}}" ng-model="addVolumeForm.snap_id" ng-click="changeSnap(snap)" required>
+                                                    <i class="iconfont"></i>
+                                                </label>
+                                                <div class="edit-name edit-lg" ng-switch-when  ="name">
+                                                    <span title="{{snap[item.field]}}" >{{snap[item.field]}}</span>
+                                                </div>
+                                                <span ng-switch-default>{{snap[item.field]}}</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <loading-data data="snapTable.data"></loading-data>
+                            </div>
+                        </div>
+                    </fieldset>
+        
+                    <fieldset ng-if="src=='backup'">
+                        <div class="control-group">
+                            <div class="control-label">&nbsp</div>
+                            <div class="controls">
+                                <!-- <empty-tip empty-type="loadBackupData" tip-id="'backup-tip-msg'"></empty-tip> -->
+                                <div class="table-action">
+                                    <div class="pull-right">
+                                        <search-refresh refresh-fuc="getBackups" context= "context" table-content="'backupTable'" table-data="addVolumeForm.backupTabData" btn-type="radio" change-select="changeBackup"></search-refresh>
+                                    </div>
+                                </div>
+                                <div class="table-content table-small">
+                                    <table ng-table-dynamic="backupTable with backupCols" class="table" show-filter="false">
+                                        <tr ng-repeat="backup in $data track by $index ">
+                                            <td ng-repeat="item in $columns" ng-switch="item.field">
+                                                <label class="radiobox" ng-switch-when  ="check">
+                                                    <input name="backup" type="radio" value="{{backup.id}}" ng-model="addVolumeForm.backup_id" ng-click="changeBackup(backup)" required>
+                                                    <i class="iconfont"></i>
+                                                </label>
+                                                <div class="edit-name edit-lg" ng-switch-when  ="name">
+                                                    <span title="{{backup[item.field]}}">{{backup[item.field]}}</span>
+                                                </div>
+                                                <span ng-switch-default>{{backup[item.field]}}</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <loading-data data="backupTable.data"></loading-data>
+                            </div>
+                        </div>
+                    </fieldset>
+        
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.volumes.cv.storagedevice'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip2' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <ui-select ng-model="storage.storageDeviceSelected" ng-disabled = "src=='volume'|| src=='snap'" ng-change="changeStorage(storage.storageDeviceSelected)" name="device" required>
+                                <ui-select-match>{{$select.selected.disPlayName}}</ui-select-match>
+                                <ui-select-choices repeat="storage in storageDeviceList | filter: {disPlayName: $select.search}">
+                                    <div ng-bind-html="storage.disPlayName | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-if="interacted(createVolumeForm.device)" ng-messages="createVolumeForm.device.$error">
+                                <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div class="control-group" ng-hide="!storage.storagepoolShow " ng-if="roleNumber" >
+                        <label class="control-label">&nbsp</label>
+                        <div class="controls">
+                            <div class="clearfix bar-group top">
+                                <div quota-bar bardata="poolsInfo_data"></div>
+                            </div>
+                        </div>
+                    </div> -->
+                    <div class="control-group" ng-if="storageFeatures.length && (src=='img' || src=='blank' || src=='backup' )">
+                        <label class="control-label">{{"aws.volumes.cv.storagefeatures"|translate}}：</label>
+                        <div class="controls checkbox">
+                            <label class="checkbox" ng-repeat="feature in storageFeatures">
+                                    <input type="checkbox" ng-model="fchk.items[feature]" name="{{feature}}" ng-disabled="fchk.dis[feature]" />
+                                    <i class="iconfont"></i>{{'aws.volumes.cv.'+feature | translate }}&nbsp&nbsp
+                            </label>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-show="nomore_voltype">
+                        <div class="text-center red" >{{'aws.volumes.cv.nomore_volumetype'|translate}}</div>
+                    </div>
+                    
+                    <fieldset ng-if = "src=='blank'">
+                        <div class="control-group">
+                            <label class="control-label"><span class="red">*</span>{{'aws.volumes.cv.config'|translate}}：</label>
+                            <div class="controls">
+                                    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip3' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                                <input type="text" class="form-controls" name="size" ng-model="volumeForm.size" placeholder="{{'aws.volumes.cv.pInputSize'|translate}}" ng-change="changeSize(volumeForm.size)" ng-pattern="/^[1-9]+[0-9]*$/" required />
+                                <div class="error" ng-messages='(submitted||createVolumeForm.size.$dirty)&&createVolumeForm.size.$error'>
+                                    <form-validate pattern-msg="'aws.volumes.cv.pInputNum'|translate"></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">{{'aws.volumes.cv.descMessage'|translate }}：</label>
+                            <div class="controls">
+                                <textarea ng-maxlength="255" class="form-controls" name="description" ng-model="volumeForm.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}">
+                                </textarea>
+                                <div class="error" ng-messages='(submitted||createVolumeForm.description.$dirty)&&createVolumeForm.description.$error'>
+                                    <form-validate  max-num = "255"></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="control-group" ng-if="storage.storageDeviceSelected.capabilities.multiattach">
+                        <label class="control-label">{{'aws.volumes.multiattach'|translate}}：</label>
+                        <div class="controls" class="checkbox">
+                                <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip4' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="form-controls"  ng-model="volumeForm.multiattach" />
+                                    <i class="iconfont"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class= "control-group no-margin">
+                        <label class="control-label">&nbsp</label>
+                        <div class="controls">
+                            <a class="info-right" ng-click="getQuotaInfo =! getQuotaInfo">
+                                <i ng-class="{'icon-aw-angle-double-left':getQuotaInfo,'icon-aw-angle-double-right':!getQuotaInfo}"></i>
+                                {{'aws.common.quotaInfo'|translate }}
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class = "right-modal" ng-show="getQuotaInfo">
+                <div class="control-group">
+                    <div>{{'aws.volumes.gigQuota' | translate}}：</div>
+                    <div class="clearfix bar-group">
+                        <div quota-bar bardata="project_data.gigabytes"></div>
+                        <div quota-bar bardata="domain_data.gigabytes" ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div>{{'aws.volumes.volumesQuota' | translate}}：</div>
+                    <div class="clearfix bar-group">
+                        <div quota-bar bardata="project_data.volumes"></div>
+                        <div quota-bar bardata="domain_data.volumes"ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                    </div>
+                </div>
+                <div class="control-group" ng-hide="!storage.storageDeviceSelected.volumeTypeId " ng-if="roleNumber" >
+                    <div class="clearfix bar-group top">
+                        <div quota-bar bardata="poolsInfo_data"></div>
+                    </div>
+                </div>
+                <div class="control-group" ng-hide="!storage.storageDeviceSelected.volumeTypeId " ng-if="roleNumber" >
+                    <div class="clearfix bar-group top">
+                        <div quota-bar bardata="poolsInfo_data_allocate" id="setting"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <source-price></source-price>
+        <!-- <div class="des-info" ng-if = "showPriceTip">
+            <span>总价格：</span>
+            <strong>¥{{priceHour}}</strong>
+            <span>每小时 × 1 =</span>
+            <strong>¥{{priceHourAbout}}</strong>
+            <span>每小时 (合 ¥{{priceMonth}} 每月)</span>
+        </div> -->
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button"  ng-click="volumeConfirm(createVolumeForm)"
+        ng-disabled="beyondQuota_pro.gigabytes || beyondQuota_dep.gigabytes
+        || beyondQuota_pro.volumes || beyondQuota_dep.volumes 
+        || !canVolum || nomore_voltype || doubleClick
+        || (src=='img' && !addVolumeForm.selectedImg.imageUid) 
+        || (src=='snap' && !addVolumeForm.selectedSnap.id) 
+        || (src=='backup' && !addVolumeForm.selectedBackup.id) 
+        || (src=='volume' &&  !addVolumeForm.selectedVolume.id)">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+    </div>
+</div>
+
+    <script type="text/ng-template" id="headerPublic.html">
+        <table-filter-ele context="tableContent" curent-filter="tableFilterList.public" table-name="imgTable" change-select="changeImg"></table-filter-ele>
+    </script>
+    <script type="text/ng-template" id="headerArch.html">
+        <table-filter-ele context="tableContent" curent-filter="tableFilterList.arch" table-name="imgTable" change-select="changeImg"></table-filter-ele>
+    </script>
+    <script type="text/ng-template" id="headerOs.html">
+        <table-filter-ele context="tableContent" curent-filter="tableFilterList.os" table-name="imgTable" change-select="changeImg"></table-filter-ele>
+    </script>

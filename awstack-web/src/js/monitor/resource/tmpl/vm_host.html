@@ -1,0 +1,499 @@
+<div class="page-inner res-vm-view monitor-view" ng-class="{'open':detailIn}">
+  <div class="box" ng-show="ADMIN">
+    <div class="col-6">
+      <div class="title">{{'aws.monitor.virtual.statedistribution'|translate}}</div>
+      <div class="panels clearfix">
+        <div class="pie-wrap">
+          <div class="pie" chart-pie panel='vmStatusChart.panels'></div>
+          <div class="pie-center" ng-if="vmStatusChart.panels.data.length != 0">
+            <div class="num">{{vmTotal}}</div>
+            <div class="text">{{'aws.monitor.virtual.sum'|translate}}</div>
+          </div>
+        </div>
+        <div class="pie-legend">
+          <dl class="dl-horizontal" ng-repeat="legend in vmStatusChart.panels.data">
+            <dt><i style="background-color:{{vmStatusChart.panels.colors[$index]}}"></i>{{legend.name}}：</dt>
+            <dd>{{legend.value}}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="title">{{"aws.monitor.virtual.insDistribution" | translate}}</div>
+      <div class="panels clearfix">
+        <div class="pie-wrap">
+          <div class="pie" chart-pie panel='vmHostChart.panels'></div>
+          <div class="pie-center" ng-if="vmHostChart.panels.data.length != 0">
+            <div class="num">{{vmTotal}}</div>
+            <!-- <div class="num">{{hostTotal}}</div> -->
+            <div class="text">{{'aws.monitor.virtual.sum'|translate}}</div>
+            <!-- <div class="text">{{"aws.monitor.virtual.insTotal" | translate}}</div> -->
+          </div>
+        </div>
+        <div class="pie-legend">
+          <dl class="dl-horizontal" ng-repeat="insHost in vmHostChart.panels.data">
+            <dt title="{{insHost.name}}"><i style="background-color:{{vmHostChart.panels.colors[$index]}}"></i>{{insHost.name}}：</dt>
+            <dd>{{insHost.value}}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tab-content">
+    <empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="tableParams" class="table" show-filter="false">
+      <tr ng-repeat="item in $data">
+        <td data-title="'aws.monitor.virtual.name'|translate" sortable="'name'">
+          <a ng-href="/monitor/vmhost?id={{item.uid}}">{{item.name}}</a>
+        </td>
+        <td data-title="'aws.monitor.virtual.hostname'|translate" sortable="'hostName'" ng-if="ADMIN">
+          {{item.hostName}}
+        </td>
+        <td data-title="'aws.monitor.virtual.status'|translate" sortable="'status'">
+          <span ng-class="{
+          'bg-green':(item.status=='active'||item.status=='up'),
+          'bg-blue':(item.status=='building'||item.status=='build'||item.status=='powering-off'||item.status=='powering-on'||item.status=='deleting'||item.status=='deleted'||item.status=='soft-deleting'||item.status=='soft-delete'||item.status=='reboot_pending'||item.status=='reboot'||item.status=='pausing'||item.status=='unpausing'||item.status=='suspending'||item.status=='resuming'||item.status=='resize'||item.status=='resize_prep'||item.status=='resize_finish'||item.status=='resize_migrating'||item.status=='image_backup'||item.status=='image_snapshot'||item.status=='spawning'||item.status=='migrating'||item.status=='rebuilding'||item.status=='rebuild'||item.status=='retyping'),
+          'bg-orange':(item.status=='stopped'||item.status=='shutoff'||item.status=='paused'||item.status=='suspended'||item.status=='resized'||item.status=='verify_resize'||item.status=='revert_resize'||item.status=='down'||item.status=='unknow'||item.status=='unrecognized'),'bg-red':(item.status=='error')
+          }">{{'aws.instances.table.status.'+item.status | translate}}<i ng-class="{'icon-aw-refresh':(item.status=='build'||item.status=='building' || item.status=='soft-deleting'|| item.status=='powering-off' ||item.status=='powering-on' ||item.status=='deleting' ||item.status=='reboot'||item.status=='reboot_pending' || item.status=='resuming' || item.status=='suspending' || item.status=='unpausing' || item.status=='pausing'  || item.status =='resize_migrating' || item.status =='resized'  || item.status =='resize_prep' || item.status =='resize_finish'  || item.status =='image_backup' || item.status =='image_snapshot' || item.status =='spawning' || item.status == 'verify_resize' || item.status =='resize' || item.status =='rebuilding' || item.status =='rebuild' || item.status =='migrating')}" class="aw-spin"></i>
+          </span>
+        </td>
+        <td data-title="'aws.monitor.virtual.createtime'|translate" sortable="'createtime'">
+          {{item.createtime | date:'yyyy-MM-dd HH:mm:ss'}}
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div ng-controller="vmHostdetailCtrl" ng-if="false">
+    <div class= 'animateContent {{animation}} '>
+      <div class='detailInner'>
+        <div class="tab-content">
+          <div class="detail-row ins-info">
+            <div class="detail-title">
+              <a class="an-close" ng-href="/monitor/vmhost"><i class=" icon-aw-mail-reply"></i></a>
+              <span>{{insConfigData.name}}</span>
+            </div>
+            <div class="detail-info">
+              <div class="tab-content-line"></div>
+              <div class="pre-text" ng-if="!loadedQueryData">{{"aws.common.loading" | translate}}</div>
+              <div class="pre-text" ng-if="queryMemNull">{{"aws.common.noData" | translate}}</div>
+              <div ng-show="loadedQueryData && !queryMemNull">
+                <div class="col-12">
+                  <div class="col-title">CPU</div>
+                  <!-- <div class="clearfix">
+                    <div class="control-group pull-right">
+                      <div class="calendar-select ">
+                        <input type="text" id="cpu-calendar" class="form-control" placeholder="自定义" >
+                        <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                      </div> 
+                    </div>
+                    <div class="control-group pull-right">
+                      <div class="time-tab">
+                        <span class="btn btn-time" type="button"  ng-repeat="item in timeStepList"  ng-class="{'active':queryLimit.timeRange.cpu.timeStep == item.value }" ng-click="timeSelectTab(item.value,'cpu')" >
+                          {{item.name}}
+                        </span>
+                      </div>
+                    </div>
+                  </div> -->
+                  <div class="box layout-grid areaChart">
+                    <div class="col-4" ng-repeat="item in panels.cpu | orderBy:'priority' " >
+                      <div class="inner">
+                        <div class="panels clearfix">
+                          <div class="area-chart-title">{{item.title}}</div>
+                          <div class="area-chart-wrap" chart-area panel="item"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="col-title">{{"aws.monitor.physical.memory" | translate}}</div>
+                  <!-- <div class="clearfix">
+                    <div class="control-group pull-right">
+                      <div class="calendar-select ">
+                        <input type="text" id="mem-calendar" class="form-control" placeholder="自定义">
+                        <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                      </div> 
+                    </div>
+                    <div class="control-group pull-right">
+                      <div class="time-tab">
+                        <span class="btn btn-time" type="button"  ng-repeat="item in timeStepList"  ng-class="{'active':queryLimit.timeRange.mem.timeStep == item.value }" ng-click="timeSelectTab(item.value,'mem')" >
+                          {{item.name}}
+                        </span>
+                      </div>
+                    </div>
+                  </div> -->
+                  <div class="box layout-grid areaChart" >
+                    <div class="col-4" ng-repeat="item in panels.mem | orderBy:'priority' " >
+                      <div class="inner">
+                        <div class="panels clearfix">
+                          <div class="area-chart-title">{{item.title}}</div>
+                          <div class="area-chart-wrap" chart-area panel="item"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12" ng-show="winSysVmchart">
+                  <div class="col-title">{{"aws.monitor.virtual.system" | translate}}</div>
+                  <!-- <div class="clearfix">
+                    <div class="control-group pull-right">
+                      <div class="calendar-select ">
+                        <input type="text" id="system-calendar" class="form-control" placeholder="自定义">
+                        <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                      </div> 
+                    </div>
+                    <div class="control-group pull-right">
+                      <div class="time-tab">
+                        <span class="btn btn-time" type="button"  ng-repeat="item in timeStepList"  ng-class="{'active':queryLimit.timeRange.system.timeStep == item.value }" ng-click="timeSelectTab(item.value,'system')" >
+                          {{item.name}}
+                        </span>
+                      </div>
+                    </div>
+                  </div> -->
+                  <div class="box layout-grid areaChart" >
+                    <div class="col-4" ng-repeat="item in panels.system | orderBy:'priority' " >
+                      <div class="inner">
+                        <div class="panels clearfix">
+                          <div class="area-chart-title">{{item.title}}</div>
+                          <div class="area-chart-wrap" chart-area panel="item"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div lazy-loading  lazy-parent="window">
+                  <div class="col-12 disk" ng-show="!lazyOnType.linux_disk && linuxSysVmchart">
+                    <div class="col-title">{{"aws.monitor.physical.disk" | translate}}</div>
+                    <!-- <div class="clearfix">
+                      <div class="control-group pull-right">
+                        <div class="calendar-select ">
+                          <input type="text" id="disk-calendar" class="form-control" placeholder="自定义">
+                          <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                        </div> 
+                      </div>
+                      <div class="control-group pull-right">
+                        <div class="time-tab">
+                          <span class="btn btn-time" type="button"  ng-repeat="item in timeStepList"  ng-class="{'active':queryLimit.timeRange.disk.timeStep == item.value }" ng-click="timeSelectTab(item.value,'disk')" >
+                            {{item.name}}
+                          </span>
+                        </div>
+                      </div>
+                    </div> -->
+                    <div class="control-items3">
+                      <div class="control-group path">
+                        <div class="control-label">{{"aws.monitor.physical.diskPartition" | translate}}&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                        <div class="controls">
+                          <ui-select ng-model="queryLimit.selectedDiskpath" ng-change="changeDiskpath(queryLimit.selectedDiskpath,'disk')">
+                            <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat=" diskpath in diskPath.options">
+                              <div ng-bind-html="diskpath | highlight: $select.search"></div>
+                            </ui-select-choices>
+                          </ui-select>
+                        </div>
+                      </div>
+                      <div class="control-group diskio">
+                        <div class="control-label">{{"aws.monitor.physical.diskSpace" | translate}}：</div>
+                        <div class="controls">
+                          <ui-select ng-model="queryLimit.selectedDiskio" ng-change="changeDiskio(queryLimit.selectedDiskio,'disk')">
+                            <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat=" disk in diskio.options">
+                              <div ng-bind-html="disk | highlight: $select.search"></div>
+                            </ui-select-choices>
+                          </ui-select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="box layout-grid areaChart"  >
+                      <div class="col-4">
+                        <div class="inner">
+                          <div class="panels clearfix">
+                            <div class="area-chart-title">{{panels.diskPath[0].title}}</div>
+                            <div class="area-chart-wrap" chart-area panel="panels.diskPath[0]"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-4 " ng-repeat="item in panels.diskio | orderBy:'priority' ">
+                        <div class="inner">
+                          <div class="panels clearfix">
+                            <div class="area-chart-title">{{item.title}}</div>
+                            <div class="area-chart-wrap" chart-area panel="item"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 disk" ng-show="!lazyOnType.win_disk && winSysVmchart">
+                    <div class="col-title">{{"aws.monitor.physical.disk" | translate}}</div>
+                    <!-- <div class="clearfix">
+                      <div class="control-group pull-right">
+                        <div class="calendar-select ">
+                          <input type="text" id="win_disk-calendar" class="form-control" placeholder="自定义">
+                          <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                        </div> 
+                      </div>
+                      <div class="control-group pull-right">
+                        <div class="time-tab">
+                          <span class="btn btn-time" type="button"  ng-repeat="item in timeStepList"  ng-class="{'active':queryLimit.timeRange.win_disk.timeStep == item.value }" ng-click="timeSelectTab(item.value,'win_disk')" >
+                            {{item.name}}
+                          </span>
+                        </div>
+                      </div>
+                    </div> -->
+                    <div class="control-group">
+                      <div class="control-label">{{"aws.monitor.physical.diskPartition" | translate}}</div>
+                      <div class="controls">
+                        <ui-select ng-model="queryLimit.selectedDiskpath" ng-change="changeDiskpath(queryLimit.selectedDiskpath,'win_disk')">
+                          <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                          <ui-select-choices repeat=" diskpath in diskPath.options">
+                            <div ng-bind-html="diskpath | highlight: $select.search"></div>
+                          </ui-select-choices>
+                        </ui-select>
+                      </div>
+                    </div>
+
+                    <div class="box layout-grid areaChart">
+                      <div class="col-4">
+                        <div class="inner">
+                          <div class="panels clearfix">
+                            <div class="area-chart-title">{{panels.diskPath[0].title}}</div>
+                            <div class="area-chart-wrap" chart-area panel="panels.diskPath[0]"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-4" ng-repeat="item in panels.disk | orderBy:'priority' ">
+                        <div class="inner">
+                          <div class="panels clearfix">
+                            <div class="area-chart-title">{{item.title}}</div>
+                            <div class="area-chart-wrap" chart-area panel="item"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 netcard"  ng-show="(!lazyOnType.linux_netcard && linuxSysVmchart) || (!lazyOnType.win_netcard && winSysVmchart)">
+                    <div class="col-title">{{"aws.monitor.physical.netCard" | translate}}</div>
+                    <div class="control-group">
+                      <div class="controls">
+                        <ui-select ng-model="queryLimit.selectedNetCard" ng-change="changeNetCard(queryLimit.selectedNetCard,'netcard')">
+                          <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                          <ui-select-choices repeat=" netCard in netCard.options">
+                            <div ng-bind-html="netCard | highlight: $select.search"></div>
+                          </ui-select-choices>
+                        </ui-select>
+                      </div>
+                    </div>
+                    <!-- <div class="clearfix">
+                      <div class="control-group pull-right">
+                        <div class="calendar-select ">
+                          <input type="text" id="netcard-calendar" class="form-control" placeholder="自定义">
+                          <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                        </div> 
+                      </div>
+                      <div class="control-group pull-right">
+                        <div class="time-tab">
+                          <span class="btn btn-time" type="button"  ng-repeat="item in timeStepList"  ng-class="{'active':queryLimit.timeRange.netcard.timeStep == item.value }" ng-click="timeSelectTab(item.value,'netcard')" >
+                            {{item.name}}
+                          </span>
+                        </div>
+                      </div>
+                    </div> -->
+                    <div class="box layout-grid areaChart"  >
+                      <div class="col-4" ng-repeat="item in panels.netcard | orderBy:'priority' " >
+                        <div class="inner">
+                          <div class="panels clearfix">
+                            <div class="area-chart-title">{{item.title}}</div>
+                            <div class="area-chart-wrap" chart-area panel="item"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='animate-backup'></div>
+  </div>
+  <div ng-controller="vmhostdetailCtrl">
+    <div class= 'animateContent {{animation}} '>
+      <div class='detailInner'>
+        <div class="tab-content">
+          <div class="detail-row ins-info">
+            <div class="detail-title">
+              <a class="an-close" ng-href="/monitor/vmhost"><i class=" icon-aw-mail-reply"></i></a>
+              <span>{{insConfigData.name}}</span>
+            </div>
+            <div class="detail-info">
+              <div class="tab-content-line"></div>
+              <div class="pre-text" ng-if="!loadedQueryData">{{"aws.common.loading" | translate}}</div>
+              <div class="pre-text" ng-if="queryMemNull">{{"aws.common.noData" | translate}}</div>
+              <div ng-show="loadedQueryData && !queryMemNull">
+                <!-- <div table-action filter-data="filterData" query="query()" defined-download-data="downloadData()" time-precision="'sec'" ></div> -->
+                <div class="clearfix">
+                  <div class="control-group pull-left">
+                      <div class="control-label">{{'aws.monitor.physical.collectCycle'|translate}}：</div>
+                      <div class="controls">
+                          <ui-select ng-model="filterData.precision">
+                              <ui-select-match placeholder="{{'aws.monitor.physical.collectCycleSelect'|translate}}">{{$select.selected.name}}</ui-select-match>
+                              <ui-select-choices repeat="item.value as item in collectCycleList | propsFilter:{name:$select.search}">
+                                  <div ng-bind-html="item.name | highlight: $select.search"></div>
+                              </ui-select-choices>
+                          </ui-select>
+                      </div>
+                  </div>
+                  <div class="control-group pull-left">
+                      <div my-daterangepicker filter-data="filterData" time-type="timeType" query="query()" time-precision="'sec'"></div>
+                  </div>
+                  <div class="control-group pull-left">
+                    <i class="icon-aw-question-mark question-tip" uib-popover="当采集周期为5分钟时，选择时间超过3天且小于7天时，曲线上显示15分钟一个点，当选择时间大于7天时，曲线上显示30分钟一个点。" popover-trigger="mouseenter" popover-placement="bottom"></i>   
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="col-title">{{'aws.monitor.physical.calc'|translate}}</div>
+                  <div class="box layout-grid areaChart" >
+                      <div class="col-6" ng-repeat="item in panels.cpu | orderBy:'priority' " >
+                          <div class="inner">
+                              <div class="panels clearfix">
+                                  <!-- <div class="area-chart-title">CPU</div>
+                                  <div class="area-chart-wrap" chart-area panel="item"></div> -->
+                                  <div class="echarts-wrap-line" echarts-line-phy chart-title="CPU" data="item.data" time-type="filterData.timeStep" unit="item.unit" id="cpu{{$index}}"></div>
+                              </div>
+                          </div>
+                      </div>
+                       <div class="col-6"  ng-repeat="item in panels.mem | orderBy:'priority' " >
+                          <div class="inner">
+                              <div class="panels clearfix">
+                                  <!-- <div class="area-chart-title">内存</div>
+                                  <div class="area-chart-wrap" chart-area panel="item" id={{"mem"+$index}}></div> -->
+                                  <div class="echarts-wrap-line" echarts-line-phy chart-title="{{'aws.monitor.physical.memory'|translate}}" data="item.data" time-type="filterData.timeStep" unit="item.unit" id="mem{{$index}}"></div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+                <div class="col-12" ng-if="winSysVmchart">
+                  <div class="col-title">{{"aws.monitor.virtual.system" | translate}}</div>
+                  <div class="box layout-grid areaChart" >
+                    <div class="col-6" ng-repeat="item in panels.system | orderBy:'priority' " >
+                      <div class="inner">
+                        <div class="panels clearfix">
+                          <!-- <div class="area-chart-title"></div>
+                          <div class="area-chart-wrap" chart-area panel="item"></div> -->
+                          <div class="echarts-wrap-line" echarts-line-phy chart-title="" data="item.data" time-type="filterData.timeStep" unit="item.unit" id="system{{$index}}"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 disk" ng-if="linuxSysVmchart"> 
+                  <div class="col-title">{{"aws.monitor.physical.disk" | translate}}</div>
+                  <div class="control-items3">
+                    <!-- <div class="control-group path">
+                      <div class="control-label">{{"aws.monitor.physical.diskPartition" | translate}}：</div>
+                      <div class="controls">
+                        <ui-select ng-model="filterData.selectedDiskpath" ng-change="changeDiskpath(filterData.selectedDiskpath,'disk')">
+                          <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                          <ui-select-choices repeat=" diskpath in diskPath.options">
+                            <div ng-bind-html="diskpath | highlight: $select.search"></div>
+                          </ui-select-choices>
+                        </ui-select>
+                      </div>
+                    </div> -->
+                    <div class="control-group path">
+                       <div class="control-label">{{"aws.monitor.physical.diskSpace" | translate}}：</div>
+                      <div class="controls">
+                        <ui-select ng-model="filterData.selectedDiskio" ng-change="changeDiskio(filterData.selectedDiskio,'disk')">
+                          <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                          <ui-select-choices repeat=" disk in diskio.options">
+                            <div ng-bind-html="disk | highlight: $select.search"></div>
+                          </ui-select-choices>
+                        </ui-select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="box layout-grid areaChart" >
+                    <!-- <div class="col-4 path">
+                        <div class="inner">
+                            <div class="panels clearfix">
+                                <div class="area-chart-wrap" chart-area panel="panels.diskPath[0]" id={{"diskPath"+$index}} ></div>
+                            </div>
+                        </div>
+                    </div> -->
+                    <div class="col-6 diskio" ng-repeat="item in panels.diskio | orderBy:'priority' ">
+                        <div class="inner">
+                            <div class="panels clearfix">
+                                <!-- <div class="area-chart-wrap" chart-area panel="item" id={{"diskio"+$index}}></div> -->
+                              <div class="echarts-wrap-line" echarts-line-phy chart-title="" data="item.data" time-type="filterData.timeStep" unit="item.unit" id="diskio{{$index}}"></div>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 disk" ng-if="linuxSysVmchart || winSysVmchart"> 
+                  <div class="col-title">{{"aws.monitor.physical.disk" | translate}}</div>
+                  <div class="control-group">
+                    <div class="control-label">{{"aws.monitor.physical.diskPartition" | translate}}</div>
+                    <div class="controls">
+                      <ui-select ng-model="filterData.selectedDiskpath" ng-change="changeDiskpath(filterData.selectedDiskpath,'win_disk')">
+                        <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                        <ui-select-choices repeat=" diskpath in diskPath.options">
+                          <div ng-bind-html="diskpath | highlight: $select.search"></div>
+                        </ui-select-choices>
+                      </ui-select>
+                    </div>
+                  </div>
+
+                  <div class="box layout-grid areaChart">
+                    <!-- <div class="col-4">
+                      <div class="inner">
+                        <div class="panels clearfix">
+                          <div class="area-chart-title">{{panels.diskPath[0].title}}</div>
+                          <div class="area-chart-wrap" chart-area panel="panels.diskPath[0]"></div>
+                        </div>
+                      </div>
+                    </div> -->
+                    <div class="col-6" ng-repeat="item in panels.diskPath | orderBy:'priority' ">
+                      <div class="inner">
+                        <div class="panels clearfix">
+                          <!-- <div class="area-chart-title">{{item.title}}</div>
+                          <div class="area-chart-wrap" chart-area panel="item"></div> -->
+                          <div class="echarts-wrap-line" echarts-line-phy chart-title="{{item.title}}" data="item.data" time-type="filterData.timeStep" unit="item.unit" id="diskPath{{$index}}"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 netcard"  ng-if="linuxSysVmchart || winSysVmchart"> 
+                  <div class="col-title">{{"aws.monitor.physical.netCard" | translate}}</div>
+                  <div class="control-group">
+                    <div class="controls">
+                      <ui-select ng-model="filterData.selectedNetCard" ng-change="changeNetCard(filterData.selectedNetCard,'netcard')">
+                        <ui-select-match placeholder="">{{$select.selected}}</ui-select-match>
+                        <ui-select-choices repeat=" netCard in netCard.options">
+                          <div ng-bind-html="netCard | highlight: $select.search"></div>
+                        </ui-select-choices>
+                      </ui-select>
+                    </div>
+                  </div>
+                  <div class="box layout-grid areaChart"  >
+                    <div class="col-6" ng-repeat="item in fliterCard(panels.netcard) | orderBy:'priority' " >
+                      <div class="inner">
+                        <div class="panels clearfix">
+                          <div class="echarts-wrap-line" echarts-line-phy chart-title="" data="item.data" time-type="filterData.timeStep" unit="item.unit" id="netCard{{$index}}"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='animate-backup'></div>
+  </div>
+</div>

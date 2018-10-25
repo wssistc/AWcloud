@@ -1,0 +1,138 @@
+<div class="modal-common" ng-class="{'modal-middle':getQuotaInfo}">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+        <h3 class="modal-title">{{volumeModal_title}}</h3>
+    </div>
+    <div class="modal-body">
+        <div class="clearfix">
+            <div class="left-modal">
+                <div class="alert alert-danger" ng-if="isShowDep">{{errorMessageDep}}</div>
+                <div class="alert alert-danger" ng-if="isShowPro">{{errorMessagePro}}</div>
+                <div class="alert alert-danger" ng-if="isShowDepVolumes">{{errorMessageDepVolumes}}</div>
+                <div class="alert alert-danger" ng-if="isShowProVolumes">{{errorMessageProVolumes}}</div>
+                <div class="alert alert-danger" ng-if="centralizedtip">{{'aws.volumes.cv.centralizedtip'|translate}}</div>
+                <div class="alert alert-danger" ng-hide="canVolum">{{'aws.instances.addinstances.volumsTip'|translate}}</div>
+                <!-- <uib-alert type="danger" ng-show="isShowDep">{{errorMessage}}</uib-alert> -->
+                <form name="createVolumeForm" novalidate>
+                    <div class="control-group">
+                        <label class="control-label"><span class="red">*</span>{{'aws.volumes.cv.name'|translate}}：</label>
+                        <div class="controls">
+                            <input type="text" class="form-controls" name="name" ng-model="volumeForm.name" placeholder="{{'aws.volumes.cv.pInputName'|translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\.)*$/" ng-maxlength="32" required />
+                            <div class="error" ng-if="interacted(createVolumeForm.name)" ng-messages="createVolumeForm.name.$error" >
+                                <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+                                <div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.nameLimit'|translate}}</div>
+                                <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{'aws.volumes.cv.storagedevice'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip2' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <ui-select ng-model="storage.storageDeviceSelected" ng-change="changeStorage(storage.storageDeviceSelected)" name="device" required>
+                                <ui-select-match>{{$select.selected.disPlayName}}</ui-select-match>
+                                <ui-select-choices repeat="storage in storageDeviceList | filter: {disPlayName: $select.search}">
+                                    <div ng-bind-html="storage.disPlayName | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="error" ng-if="interacted(createVolumeForm.device)" ng-messages="createVolumeForm.device.$error">
+                                <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group"  ng-hide="hidePools" ng-if="roleNumber" >
+                        <label class="control-label">&nbsp</label>
+                        <div class="controls">
+                            <div class="clearfix bar-group top">
+                                <div quota-bar bardata="poolsInfo_data"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-if="storage.storagepoolShow && storageFeatures.length">
+                            <label class="control-label">{{"aws.volumes.cv.storagefeatures"|translate}}：</label>
+                            <div class="controls checkbox">
+                                <label class="checkbox" ng-repeat="feature in storageFeatures">
+                                        <input type="checkbox" ng-model="fchk.items[feature]" name="{{feature}}" ng-disabled="fchk.dis[feature]" />
+                                        <i class="iconfont"></i>{{'aws.volumes.cv.'+feature | translate }}&nbsp&nbsp
+                                </label>
+                            </div>
+                    </div>
+                    <div class="control-group" ng-show="nomore_voltype">
+                        <div class="text-center red" >{{'aws.volumes.cv.nomore_volumetype'|translate}}</div>
+                    </div>
+                    <div class="control-group" ng-if="type != 'backup'">
+                        <label class="control-label"><span class="red">*</span>{{'aws.volumes.cv.config'|translate}}：</label>
+                        <div class="controls">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip3' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <input type="text" class="form-controls" name="size" ng-model="volumeForm.size" placeholder="{{'aws.volumes.cv.pInputSize'|translate}}" ng-change="isShowError(volumeForm.size)" ng-pattern="/^[1-9]+[0-9]*$/" required />
+                            <div class="error" ng-if="interacted(createVolumeForm.size)" ng-messages="createVolumeForm.size.$error" >
+                                <div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+                                <div ng-message="pattern" class="volume-form-name-error">{{'aws.volumes.cv.pInputNum'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="control-group" ng-if="type != 'backup'">
+                        <label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}：</label>
+                        <div class="controls">
+                            <textarea ng-maxlength="255" class="form-controls" name="description" ng-model="volumeForm.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}">
+                            </textarea>
+                            <div class="error" ng-if="interacted(createVolumeForm.description)" ng-messages="createVolumeForm.description.$error" >
+                                <div ng-message="maxlength">{{'aws.errors.maxlength_255'|translate}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group" ng-if="storage.storageDeviceSelected.capabilities.multiattach">
+                        <label class="control-label">{{'aws.volumes.multiattach'|translate}}：</label>
+                        <div class="controls" class="checkbox">
+                            <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.helpTip.volumes.tip4' | translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="form-controls" ng-model="volumeForm.multiattach" />
+                                    <i class="iconfont"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class= "control-group no-margin">
+                        <label class="control-label">&nbsp</label>
+                        <div class="controls">
+                            <a class="info-right" ng-click="getQuotaInfo =! getQuotaInfo">
+                                <i ng-class="{'icon-aw-angle-double-left':getQuotaInfo,'icon-aw-angle-double-right':!getQuotaInfo}"></i>
+                                {{'aws.common.quotaInfo'|translate}}
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="right-modal" ng-show="getQuotaInfo">
+                <div class="control-group">
+                    <div>{{'aws.volumes.gigQuota'|translate}}：</div>
+                    <div class="clearfix bar-group">
+                        <div quota-bar bardata="project_data"></div>
+                        <div quota-bar bardata="domain_data" ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div>{{'aws.volumes.volumesQuota'|translate}}：</div>
+                    <div class="clearfix bar-group">
+                        <div quota-bar bardata="project_data_volumes"></div>
+                        <div quota-bar bardata="domain_data_volumes" ng-show="ADMIN || DOMAIN_ADMIN"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="des-info" ng-if = "showPriceTip">
+            <span>{{'aws.networks.price.totalPrice' | translate}}：</span>
+            <strong>¥{{priceHour}}</strong>
+            <span>{{'aws.networks.price.perHour' | translate}} × 1 =</span>
+            <strong>¥{{priceHourAbout}}</strong>
+            <span>{{'aws.networks.price.perHour' | translate}} ({{'aws.networks.price.count' | translate}} ¥{{priceMonth}} {{'aws.networks.price.perMonth' | translate}})</span>
+        </div>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-disabled="!canConfirm() || !canVolum" ng-click="volumeConfirm()">{{'aws.action.ok'|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="cancel()">{{'aws.action.cancel'|translate}}</button>
+    </div>
+</div>

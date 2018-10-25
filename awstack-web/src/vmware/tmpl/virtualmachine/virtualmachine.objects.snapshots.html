@@ -1,0 +1,38 @@
+<div class="view-content">
+  <div class="table-action">
+    <!-- <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="搜索" />
+      </form>
+    </div> -->
+  </div>
+  <div class="table-content">
+    <!-- <empty-tip empty-type="loadData"></empty-tip> -->
+    <table ng-table="tableParams" class="table">
+      <tr ng-repeat="item in $data">
+        <td header="'headerCheckbox.html'" class="check-td">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[item.instanceUuid]" />
+            <i class="iconfont"></i>
+          </label>
+        </td>
+        <td data-title="'名称'" sortable="'name'">
+          <span><a ng-click="goToVMDetail(item.name)">{{item.name}}</a></span>
+        </td>
+        <td data-title="'状况'" sortable="'powerStatus'">{{"vmware.vm.table.powerStatus."+item.powerStatus | translate}}</td>
+        <td data-title="'状态'" sortable="'overallStatus'">{{"vmware.vm.table.overallStatus."+item.overallStatus | translate}}</td>
+        <td data-title="'置备的空间（MB）'" sortable="'diskSize'">{{item.diskSize}}</td>
+        <td data-title="'已用空间（MB）'" sortable="'diskSizeUsage'">{{item.diskSizeUsage}}</td>
+        <td data-title="'主机CPU（MHz）'" sortable="'hostCpuMHz'">{{item.hostCpuMHz}}</td>
+        <td data-title="'主机内存（MB）'" sortable="'hostMemoryUsage'">{{item.hostMemoryUsage}}</td>
+        <td data-title="'客户机内存 - %'" sortable="'guestMemoryUsage'">{{item.guestMemoryUsage}}</td>
+      </tr>
+    </table> 
+</div>
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>

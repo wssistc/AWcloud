@@ -1,0 +1,180 @@
+<div class="page-inner shortcuts-ins-page">
+    <div class="ins-header">
+        <div class="reply-link">
+            <a href="#{{source.urlTable}}"><i class="icon-aw-angle-left"></i>返回</a>
+        </div>
+    </div>
+    <form name="tdsqlForm">
+    <div class="shortcuts-ins-page-inner create-tdsql">
+        <div class="first-part">
+            <div class="control-group">
+                <label class="control-label">实例类型：</label>
+                <div class="controls">
+                    <div class="radio-item clearFix">
+                        <label class="radio" ng-repeat="item in instanceType"><input type="radio" ng-model="options.instanceType" name="character"  value="{{item.value}}" /><i class="iconfont"></i>{{item.text}}</label>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">可用集群：</label>
+                <div class="controls">
+                    <div class="control-creates clearFix">
+                        <div class="control-group">
+                            <div class="controls base-net">
+                                <ui-select ng-model="availableDataSet.clusterSelect" name="cluster" ng-change="getSpecificationList(availableDataSet.clusterSelect.clusterKey)"  required>
+                                    <ui-select-match>{{$select.selected.clusterName}}</ui-select-match>
+                                    <ui-select-choices repeat="cluster in availableDataSet.clusterList | filter: {clusterName: $select.search}">
+                                        <div ng-bind-html="cluster.clusterName | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <div class="error" ng-messages="(submitInValid ||tdsqlForm.cluster.$dirty) && tdsqlForm.cluster.$error">
+                                    <form-validate></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="create-tips">购买实例后，您可以在实例详情页面查看当前主从详情。</div>
+                    </div>
+              </div>
+            </div>
+        </div>
+        <div class="second-part">
+            <div class="control-group">
+              <label class="control-label">实例版本：</label>
+              <div class="controls">
+                <div class="btn-item-group">
+                    <div class="btn-small">
+                        <button type="button" class="type-btn"  ng-class='{"active":item.value === options.edition}' ng-click="chooseEdition(item)" ng-repeat="item in editionType"><span>{{item.text}}</span></button>    
+                    </div>
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">数据库版本：</label>
+                <div class="controls">
+                    <div class="control-creates clearFix">
+                        <div class="control-group">
+                            <div class="controls">
+                                <ui-select ng-model="availableDataSet.databaseSelect" name="database"required>
+                                    <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="database in availableDataSet.databaseList | filter: {name: $select.search}">
+                                        <div ng-bind-html="database.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <div class="error" ng-messages="(submitInValid ||tdsqlForm.database.$dirty) && tdsqlForm.database.$error">
+                                    <form-validate></form-validate>
+                                </div>
+                            </div>
+                            <div class="control-group"><a class="con-help" href="https://cloud.tencent.com/document/product/237/6988" target="_blank">MariaDB与MySQL兼容性说明</a></div>
+                        </div>
+                    </div>
+              </div>
+            </div> 
+            <div class="control-group">
+                <label class="control-label">实例规格：</label>
+                <div class="controls">
+                    <div class="control-creates clearFix">
+                        <div class="control-group control-group-top">
+                            <div class="controls">
+                                <ui-select ng-model="availableDataSet.specificationSelect" name="specification" required ng-change="changeQueryspec(availableDataSet.specificationSelect)">
+                                    <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="specification in availableDataSet.specificationList | filter: {name: $select.search}">
+                                        <div ng-bind-html="specification.name | highlight: $select.search" ></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <div class="error" ng-messages="(submitInValid ||tdsqlForm.specification.$dirty) && tdsqlForm.specification.$error">
+                                    <form-validate></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+               </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">CPU：</label>
+                <div class="controls">
+                    <div class="control-creates clearFix">
+                        <div class="control-group control-group-top">
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="cpu" ng-model="options.cpuCore" placeholder="填写核数不大于实例规格核数"  min="0" max="limit.maxCore" limitnumrange required/>
+                                <div class="error" ng-messages="(submitInValid ||tdsqlForm.cpu.$dirty) && tdsqlForm.cpu.$error">
+                                    <div ng-message="limitnumrange">填写核数不小于0且不大于实例规格核数</div>
+                                    <div ng-message="required">必填项</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+               </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">内存：</label>
+                <div class="controls">
+                    <div class="control-creates clearFix">
+                        <div class="control-group control-group-top">
+                            <div class="controls">
+                                <input type="text" class="form-controls" name="mem" ng-model="options.memSize" placeholder="填写内存不大于实例规格内存"  min="0" max="limit.maxMem" limitnumrange required/>
+                                <div class="error" ng-messages="(submitInValid ||tdsqlForm.mem.$dirty) && tdsqlForm.mem.$error">
+                                    <div ng-message="limitnumrange">填写内存取值范围不小于0且不大于实例规格内存</div>
+                                    <div ng-message="required">必填项</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+               </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">硬盘：</label>
+                <div class="controls">
+                    <div class="bind-bar">
+                        <input type="text" id="bindBar">
+                    </div>
+                    <div class="bind-input">
+                        <button ng-click="changeSize('subtraction')">-</button>
+                        <input class="input-text" type="text" ng-model="options.disksize" name="bindValue" ng-change="changeDiskSize(options.disksize)" num-range min="1" max="3000" ng-model-options="{ updateOn: 'blur' }">
+                        <button ng-click="changeSize('add')">+</button>
+                        <span class="input-tips">（步长为5GB）</span>
+                        <span class="unit">GB</span>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group radio-wrap">
+                <label class="control-label">开启强同步：</label>
+                <div class="controls">
+                    <div class="radio-item clearFix">
+                        <label class="radio" ng-repeat="item in synType"><input type="radio" ng-model="options.mode" name="synType"  value="{{item.type}}" /><i class="iconfont"></i>{{item.name}}</label>
+                    </div>
+                    <div class="create-tip">仅存活1个节点时，集群将自动退化为异步同步</div>
+                </div>
+            </div>
+            <div class="control-group" ng-if="options.instanceType==0">
+                <label class="control-label">分片数量：</label>
+                <div class="controls">
+                    <div class="tdsql-num">
+                        <div class="bind-inputs">
+                            <button ng-click="changeFragmentNum('subtraction')">-</button>
+                            <input type="text" ng-model="options.fragmentnum" name="FragmentNum" min="2" max="8" num-range ng-model-options="{ updateOn: 'blur' }">
+                            <button ng-click="changeFragmentNum('add')">+</button>
+                        </div>
+                    </div>
+                    <div class="create-tip">这个“分片数量”的限制为“2~8”个。</div>
+                </div>
+            </div>
+            <!-- <div class="control-group"  ng-if="options.instanceType==2">
+                <label class="control-label">数量：</label>
+                <div class="controls">
+                    <div class="tdsql-num">
+                        <div class="bind-inputs">
+                            <button ng-click="changeNum('subtraction')">-</button>
+                            <input type="text" ng-model="options.chasesnum" name="chasesNum" min="1" max="10" num-range ng-model-options="{ updateOn: 'blur' }">
+                            <button ng-click="changeNum('add')">+</button>
+                        </div>
+                    </div>
+                    <div class="create-tips">这个“数量”的限制为“1~10”个。</div>
+                </div>
+            </div> -->
+        </div>
+    </div>
+    <div class="foot-case">
+        <button class="btn btn-new" ng-click="confirmCreate(tdsqlForm)" type="button">确认</button>
+    </div>
+    </form>
+</div>

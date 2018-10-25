@@ -1,0 +1,146 @@
+<div ng-controller="dockerClusterReplicaDetailCtrl">
+    <uib-tabset active="0" justified="true">
+        <uib-tab index="0" heading='{{"aws.k8s.dockerClusters.clusterReplicaOverview"|translate}}'>
+            <div>
+            <table class="table table-info">
+                <tr>
+                <td>{{"aws.k8s.dockerClusters.clusterReplicaName"|translate}}</td>
+                <td>{{clusterDetailsData.name}}</td>
+                <td>{{"aws.k8s.dockerClusters.clusterReplicaCreationTimestamp"|translate}}</td>
+                <td>{{clusterDetailsData.metadata.creationTimestamp | localDate}}</td>
+                </tr>
+                <tr>
+                <td>{{"aws.k8s.dockerClusters.clusterReplicaStatus"|translate}}</td>
+                <td>{{clusterDetailsData.status.phase}}</td>
+                <td>{{"aws.k8s.dockerClusters.clusterReplicaStartTime"|translate}}</td>
+                <td>{{clusterDetailsData.status.startTime | localDate}}</td>
+                </tr>
+                <tr>
+                <td>{{"aws.k8s.dockerClusters.clusterReplicaIp"|translate}}</td>
+                <td>{{clusterDetailsData.status.podIP}}</td>
+                <td>{{"aws.k8s.dockerClusters.clusterReplicaTerminationGracePeriodSeconds"|translate}}</td>
+                <td>{{clusterDetailsData.spec.terminationGracePeriodSeconds}}s</td>
+                </tr>
+                <tr>
+                <td>{{"aws.k8s.dockerClusters.clusterReplicaHostIp"|translate}}</td>
+                <td>{{clusterDetailsData.status.hostIP}}</td>
+                <td>{{"aws.k8s.dockerClusters.clusterReplicaHostName"|translate}}</td>
+                <td>{{clusterDetailsData.spec.nodeName}}</td>
+                </tr>
+                <tr>
+                <td>{{"aws.k8s.dockerClusters.clusterReplicaRestartPolicy"|translate}}</td>
+                <td>{{clusterDetailsData.spec.restartPolicy}}</td>
+                <td>{{"aws.k8s.dockerClusters.clusterReplicaDNSPolicy"|translate}}</td>
+                <td>{{clusterDetailsData.spec.dnsPolicy}}</td>
+                </tr>
+            </table>
+            </div>
+        </uib-tab>
+        <uib-tab index="1" heading='{{"aws.k8s.dockerClusters.clusterReplicaContainers"|translate}}'>
+            <div class="table-action">
+                <div class="pull-right">
+                    <div type="button" class="btn btn-renovat right-ports" ng-click="refresh()">
+                        <i class="icon-aw-refresh"></i>
+                    </div>
+                    <div class="search-box">
+                        <form name="searchForm" novalidate ng-keyup="applyGlobalSearchReplica()">
+                            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="dockerClusters_search_replica.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="table-content">
+            <table ng-table="tableParams" class="table" show-filter="false">
+                <colgroup>
+                <col width="20%">
+                <col width="35%">
+                <col width="15%">
+                <col width="20%">
+                <col width="10%">
+                </colgroup>
+                <tr ng-repeat="item in $data">
+                <td data-title='"aws.k8s.dockerClusters.containerName"|translate' sortable="'name'">
+                        <!-- ng-href="#/k8s/clusters/{{clusterName}}/replicas/{{replicaName}}/containers/{{item.name}}" -->
+                    <a ng-click="modifyContainerData(item.name)">{{item.name}}</a>
+                </td>
+                <td data-title='"aws.k8s.dockerClusters.containerImage"|translate' sortable="'image'">
+                    <span>{{item.image}}</span>
+                </td>
+                <td data-title='"aws.k8s.dockerClusters.containerRestartCounts"|translate'
+                    sortable="'status.restartCount'">
+                    <span>{{item.status.restartCount}}</span>
+                </td>
+                <!--<td data-title='"aws.k8s.dockerClusters.containerImagePullPolicy"|translate'-->
+                <!--sortable="'imagePullPolicy'">-->
+                <!--<span>{{item.imagePullPolicy}}</span>-->
+                <!--</td>-->
+                <td data-title='"aws.k8s.dockerClusters.containerStartedAt"|translate'
+                    sortable="'status.state.running.startedAt'">
+                <span>
+                    {{item.status.ready ? item.status.state.running.startedAt : "None"
+                    | localDate}}
+                </span>
+                </td>
+                <td data-title='"aws.k8s.dockerClusters.containerStatus"|translate'>
+                    <span>{{item.status.ready ? "running" : "error" }}</span>
+                </td>
+                </tr>
+            </table>
+            </div>
+        </uib-tab>
+        <uib-tab index="2" heading='{{"aws.k8s.dockerClusters.clusterReplicaVolumes"|translate}}'>
+
+            <div class="table-action">
+                <div class="pull-right">
+                    <div type="button" class="btn btn-renovat right-ports" ng-click="refresh()">
+                        <i class="icon-aw-refresh"></i>
+                    </div>
+                    <div class="search-box">
+                        <form name="searchForm" novalidate ng-keyup="applyGlobalSearchVolumes()">
+                            <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                            <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="dockerClusters_search_volumes.globalSearchTerm" placeholder="{{'aws.action.search'|translate}}" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="table-content">
+            <table ng-table="tableParamsVolumes" class="table" show-filter="false">
+                <tr ng-repeat="volume in volumes">
+                <td data-title='"aws.k8s.dockerClusters.clusterReplicaVolumeName"|translate' sortable="'name'">
+                    <span>{{volume.name}}</span>
+                </td>
+                <td data-title='"aws.k8s.dockerClusters.clusterReplicaVolumeImage"|translate'
+                    sortable="'rbd.image'">
+                    <span>{{volume.rbd.image}}</span>
+                </td>
+                <td data-title='"aws.k8s.dockerClusters.clusterReplicaVolumefsType"|translate'
+                    sortable="'rbd.fsType'">
+                    <span>{{volume.rbd.fsType}}</span>
+                </td>
+                <td data-title='"aws.k8s.dockerClusters.clusterReplicaVolumePool"|translate' sortable="'rbd.pool'">
+                    <span>{{volume.rbd.pool}}</span>
+                </td>
+                <td data-title='"aws.k8s.dockerClusters.clusterReplicaVolumeUser"|translate' sortable="'rbd.user'">
+                    <span>{{volume.rbd.user}}</span>
+                </td>
+                <!--<td data-title='"aws.k8s.dockerClusters.clusterReplicaVolumeMonitors"|translate'>-->
+                <!--<span>{{volume.rbd.monitors.join("\n")}}</span>-->
+                <!--</td>-->
+                </tr>
+            </table>
+            </div>
+        </uib-tab>
+    </uib-tabset>
+</div>
+    
+
+          
+       
+
+<script type="text/ng-template" id="headerCheckbox.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value=""/>
+    <i class="icon-aw-square"></i>
+  </label>
+</script>

@@ -1,0 +1,458 @@
+<div class=" page-inner monitor-view flowManage-view">
+    <div class="tab-offset-right">
+       <ul class="nav nav-tabs">
+        <li ng-class="{active: showView }">
+            <a ng-click="showView = true">工作流管理</a>
+        </li>
+        <li ng-class="{active: !showView}">
+            <a ng-click="showView  = false">自定义流程</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane" ng-class="{active:showView}" ng-controller="flowManageCtrl">
+            <div class="table-action">
+                       
+                <div class="btn-box">
+                    <button type="button" class="btn btn-new" ng-click="createFlow()"  licence-type="btn" id="system-flow-workFlowManager-create">
+                        <i class="icon-aw-add-to2"></i> {{"aws.action.create"|translate}}</button>
+                    <button type="button" data-toggle="modal" ng-click="editWorkflow()" ng-disabled="isDisabled" class="btn btn-normal"  licence-type="btn" id="system-flow-workFlowManager-edit">
+                        <i class="icon-aw-modify"></i> {{"aws.action.edit"|translate}}</button>
+                    <button type="button" data-toggle="modal" ng-click="delFlow(checkedItems)" ng-disabled="delisDisabled"  class="btn btn-normal"  licence-type="btn" id="system-flow-workFlowManager-del">
+                        <i class="icon-aw-delete"></i> {{"aws.action.del"|translate}}</button>
+
+                </div>
+                <div class="pull-right">
+                        <into-information modular="'flowManageCustom'"></into-information>
+                        <!-- <setting title-data="titleData" site-title="titleName" table-data="networksTableData" search-tearm="networkSearchTearm(obj)"></setting> -->
+                        <setting title-data="titleData" site-title="titleName" table-data="tableData" search-tearm="portSearchTerm(obj)"></setting>
+                        <button class="btn btn-renovat right-ports" ng-click="refreshTable()"><i class="icon-aw-refresh"></i></button>
+                        <div class="search-box right-ports">
+                            <form name="searchForm" novalidate ng-keyup="applyGlobalSearch_(globalSearchTerm_)">
+                                    <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+                                        <i class="icon-aw-search"></i>
+                                    </button>
+                                    <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm_"
+                                        placeholder="{{'aws.img.search'|translate}}" />
+                                </form>
+                        </div>
+                    </div>
+            </div>
+            <empty-tip empty-type="workFlowData" tip-id="'workflow-tip-msg'"></empty-tip>
+            <table ng-table="workFlowTable" class="table">
+                <tr ng-repeat="data in $data">
+                    <td header="'headerCheckbox.html'">
+                        <label class="checkbox">
+                            <input type="checkbox" ng-model="checkboxes.items[data.deploymentId]" value="{{data.deploymentId}}" />
+                            <i class="iconfont"></i>
+                        </label>
+                    </td>
+                    <td data-title="'工作流名称'" sortable="'wfName'" ng-if="titleData[0].value" >
+                        <a ng-href="system/flowManage?id={{data.deploymentId}}_workflow">{{data.wfName}}</a>
+                    </td>
+                    <td data-title="'流程名称'" sortable="'wfProcessName'" ng-if="titleData[1].value">{{data.wfProcessName}}</td>
+                    <td data-title="'工单类型'" sortable="'ticketType'" ng-if="titleData[2].value">{{data.ticketType}}
+                    </td>
+                    <td data-title="'适用范围'" ng-if="titleData[3].value" sortable="'range'">
+                            {{data.range}}
+                    </td>
+                    <td data-title="'邮件通知'" sortable="'emailFlag'" ng-if="titleData[4].value">{{data.emailFlag}}</td>
+                    <td data-title="'描述信息'"  ng-if="titleData[5].value">{{data.wfDescription}}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="tab-pane" ng-class="{active:!showView}" ng-controller="customCtrl">
+            <div class="btn-box">
+                <button type="button" class="btn btn-new" ng-click="createCoustomFlow()" licence-type="btn" id="system-flow-customFlow-create">
+                <i class="icon-aw-add-to2"></i> {{"aws.action.create"|translate}}</button>
+                <button type="button" data-toggle="modal" ng-click="deleteCoustomFlow(checkedItems)" ng-disabled="delisDisabled" class="btn btn-normal" licence-type="btn" id="system-flow-customFlow-del">
+                <i class="icon-aw-delete"></i> {{"aws.action.del"|translate}}</button>
+            </div>
+            <div class='filter-box table-action'>
+                <div class="search-box">
+                    <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(globalSearchTerm_)">
+                        <button class="btn" type="submit" ng-disabled="searchForm.$invalid">
+                            <i class="icon-aw-search"></i>
+                        </button>
+                        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm_"
+                            placeholder="{{'aws.img.search'|translate}}" />
+                    </form>
+                </div>
+                <button class="btn btn-renovat right-ports" ng-click="refresh()"><i class="icon-aw-refresh"></i></button>
+            </div>
+            <empty-tip empty-type="customFlowData" tip-id="'tip-msg'"></empty-tip>
+            <table ng-table="customFlowTable" class="table">
+                <tr ng-repeat="item in $data">
+                    <td header="'headerCheckbox_.html'">
+                        <label class="checkbox">
+                            <input type="checkbox" ng-model="checkboxes.items[item.id]" value="{{item.id}}" />
+                            <i class="iconfont"></i>
+                        </label>
+                    </td>
+                    <td data-title="'流程名称'" sortable="'name'">
+                        <a ng-href="system/flowManage?id={{item.id}}_coustomflow" title="{{item.name}}">{{item.name}}</a>
+                    </td>
+                    <td data-title="'描述信息'" sortable="'description'">{{item.description}}</td>
+                    <td data-title="'创建时间'" sortable="'createTime'">{{item.createTime}}
+                    </td>
+                   
+
+                </tr>
+            </table>
+        </div>
+        <div ng-controller="detailCtrl">
+            <pane class="detail-body" animation="animation">
+                <div class="tab-content">
+                    <div class="detail-row">
+                        <div class="detail-title">
+                            <a class="an-close" ng-href="/system/flowManage">
+                                <i class="icon-aw-mail-reply"></i>
+                            </a>
+                            <span>流程详情</span>
+                        </div>
+                        <div class="detail-info" ng-if="showCoustomflowInfo">
+                            <div class="tab-content-line"></div>
+                            <h4>基本信息</h4>
+                            <table class="table table-info column">
+                                <tr>
+                                    <td>流程</td>
+                                    <td>{{coustomDetailData.name}}</td>
+                                    <td>描述信息</td>
+                                    <td>{{coustomDetailData.desc}}</td>
+                                </tr>
+                                <tr>
+                                    <td>创建时间</td>
+                                    <td>{{coustomDetailData.createTime}}</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                            <h4>流程图</h4>
+                            <div class="img-detail">
+                                <img ng-src="{{modelImgUrl}}" alt=""/>
+                            </div>
+                        </div>
+                        <div class="detail-info" ng-if="!showCoustomflowInfo">
+                            <div class="tab-content-line"></div>
+                            <h4>基本信息</h4>
+                            <table class="table table-info column">
+                                <tr>
+                                    <td>工作流名称</td>
+                                    <td>{{workflowlData.detail.wfName}}</td>
+                                    <td>流程</td>
+                                    <td>{{workflowlData.detail.wfProcessName}}</td>
+                                </tr>
+                               <tr>
+                                    <td>工单类型</td>
+                                    <td>{{workflowlData.detail.wfType.name}}</td>
+                                    <td>适用范围</td>
+                                    <td>{{workflowlData.detail.range}}</td>
+                                </tr>
+                                <tr>
+                                    <td>描述信息</td>
+                                    <td>{{workflowlData.detail.wfDescription}}</td>
+                                    <td>邮件通知</td>
+                                    <td>{{workflowlData.detail.emailCtrl}}</td>
+                                </tr>
+                            </table>
+                            <h4>审批人信息</h4>
+                            <table class="appeover-table table-info table column" style="width:50%" >
+                                <tr ng-repeat=" data in workflowlData.assignment.allUsers">
+                                    <td>{{'aws.workflow.'+$index|translate}}</td>
+                                    <td>{{data.Assign.name}}</td>
+                                </tr>  
+                            </table>
+                            <h4>流程图</h4>
+                            <div class="img-detail">
+                                <img ng-src="{{modelImgUrl}}" alt=""/>
+                            </div>
+                        </div>
+                        <!-- <div class="detail-info">
+                            <h4>流程图</h4>
+                            <div class="img-detail">
+                                <img ng-src="{{modelImgUrl}}" alt=""/>
+                            </div>
+                        </div> -->
+                    </div>
+                    
+                </div>
+            </pane>
+        </div>
+    </div> 
+    </div>
+
+    <script type="text/ng-template" id="headerCheckbox_.html">
+        <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+            <i class="iconfont"></i>
+        </label>
+    </script>
+    <script type="text/ng-template" id="headerCheckbox.html">
+        <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+            <i class="iconfont"></i>
+        </label>
+    </script>
+    <script type="text/ng-template" id="createflow.html">
+        <div class="modal-common lg-modal flow-moadl modal-step" ng-class="{'flow-modal-lg':showApprover}">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="$dismiss()">×</button>
+                <h3 class="modal-title  clearfix" ng-if="!editViewShow">配置流程</h3>
+                <h3 class="modal-title  clearfix" ng-if="editViewShow">编辑流程</h3>
+                <!-- <ul class="steps-item clearfix">
+                    <li class="clearfix step-start" ng-class="{'active':inStepOneBar<inStep}">
+                        <div class=" clearfix">
+                            <span>流程类型</span>
+                            <i ng-class="{'active':inStepOneBar<inStep}">1</i>
+                        </div>
+                    </li>
+                    <li class="clearfix step-middle" ng-class="{'active':inStepTwoBar<inStep}">
+                        <div class="clearfix">
+                            <span>适用范围</span>
+                            <i ng-class="{'active':inStepTwoBar<inStep}">2</i>
+                        </div>
+                    </li>
+                    <li class="clearfix step-end" ng-class="{'active':inStepThreeBar<inStep}">
+                        <div class="clearfix">
+                            <span>审批人</span>
+                            <i ng-class="{'active':inStepThreeBar<inStep}">3</i>
+                        </div>
+                    </li>
+                </ul> -->
+                <ul class="steps-sytle-ver clearfix">
+                    <li class="clearfix step-start" ng-class="{'active':inStepOneBar<inStep}">
+                        <div class="inner">
+                            <span>流程类型</span>
+                            <i>1</i>
+                        </div>
+                    </li>
+                    <li class="clearfix step-middle" ng-class="{'active':inStepTwoBar<inStep}">
+                        <div class="inner">
+                            <span>适用范围</span>
+                            <i>2</i>
+                        </div>
+                    </li>
+                    <li class="clearfix step-end" ng-class="{'active':inStepThreeBar<inStep}">
+                        <div class="inner">
+                            <span>审批人</span>
+                            <i>3</i>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-body ">
+                <form name="flowTypeForm" novalidate>
+                    <div class="control-group" ng-show="inStep=='1'">
+                        <div class="control-group">
+                            <label class="control-label"> 工作流名称：</label>
+                            <div class="controls">
+                                <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                                <input type="text" class="form-controls" name="name" ng-model="createData.name" placeholder="请输入名称" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"
+                                    ng-maxlength="32" required />
+                                <div class="error" ng-messages="(submitValid ||flowTypeForm.name.$dirty) && flowTypeForm.name.$error">
+                                    <form-validate></form-validate>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">选择流程：</label>
+                            <div class="controls">
+                                <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                                <ui-select ng-model="createData.flow" required name="flow" ng-change="changeflow()" ng-disabled="editViewShow">
+                                    <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="flow in checkData.flowList | propsFilter: {name: $select.search}">
+                                        <div ng-bind-html="flow.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <div class="error" ng-messages="(submitValid ||flowTypeForm.flow.$dirty) && flowTypeForm.flow.$error">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                </div>
+                                <div class="error" ng-if="errorflow">
+                                    该流程无审批人信息，无法部署
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">选择工单类型：</label>
+                            <div class="controls">
+                                <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                                <ui-select ng-model="createData.ticketType"  required name="ticket" ng-disabled="editViewShow">
+                                    <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="type in  checkData.ticketTypeList | propsFilter: {name: $select.search}">
+                                        <div ng-bind-html="type.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <div class="error" ng-messages="(submitValid ||flowTypeForm.ticket.$dirty) && flowTypeForm.ticket.$error">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">描述信息：</label>
+                            <div class="controls">
+                                <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                                <textarea type="text" class="form-controls min" name="desc" ng-model="createData.desc" placeholder='请输入描述' ng-maxlength="80"></textarea>
+                                <div class="error" ng-messages="(submitValid ||flowTypeForm.desc.$dirty) && flowTypeForm.desc.$error">
+                                        <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <form name="flowRangeForm" novalidate>
+                    <div class="control-group" ng-show="inStep==2">
+                        <div class="control-group">
+                            <label class="control-label">范围选择：</label>
+                            <div class="controls">
+                                <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                                <ui-select ng-model="createData.range" ng-change="changeRange()">
+                                    <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="range in checkData.ranges | propsFilter: {name: $select.search}">
+                                        <div ng-bind-html="range.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="createData.range.id">
+                            <label class="control-label">部门选择：</label>
+                            <div class="controls">
+                                <!--<i class="icon-aw-question-mark question-tip" uib-popover="提示提示"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>-->
+                                <ui-select ng-model="createData.department" multiple close-on-select="false" required name="department" ng-change="changeDepoartmentRange()" class="departSelect">
+                                    <ui-select-match>{{$item.name}}</ui-select-match>
+                                    <ui-select-choices repeat="department in checkData.departments | propsFilter: {name: $select.search}">
+                                        <div ng-bind-html="department.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <div class="error" ng-messages="(submitValid ||flowRangeForm.department.$dirty) && flowRangeForm.department.$error">
+                                        <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group" ng-if="checkFlowRepeatFlag">
+                                <label class="control-label">&nbsp;</label>
+                                <div class="controls">
+                                    <div class="error" >
+                                         所选部门已存在该类型申请
+                                    </div>
+                                </div>
+                         </div>
+                    </div>
+                  
+                </form>
+                 <form name="appproverForm">
+                    <div Class="" ng-show="inStep=='3'">
+                        <div class="createFlow-step3-view" style="height:300px;">
+                                <div class="flow-img-box">
+                                        <img ng-src="{{imgUrl}}" alt="" />
+                                    </div>
+                                    <div  class="flow-approver-box" >
+                                        <div ng-repeat="data in modeNodes" class="approver-click-box">
+                                            <span>{{data.name}}：</span>
+                                            <span class="approver-add-btn" ng-click="addApprover(data,$index)">{{addApprover_text}}</span>   
+                                            <div class="approver-checked-box"  ng-if="haveAppover($index)">
+                                                    <!-- ["approverList"]["approver_"+ scope.node]["name"] -->
+                                                <span class="approver-show-box" ng-bind={{'approver_'+$index+"_name"}} title={{approverList['approver_'+$index]["name"]}}>
+                                                   
+                                                </span>
+                                                <i ng-click="delApprover($index)">×</i>    
+                                            </div> 
+                                        </div> 
+                                        <div class="error" ng-if="errorApprover">
+                                                  请完善审批人信息
+                                        </div>
+                                        <div class="approver-click-box emailCtrl"> 
+                                            <span class="email-ctrl-box">邮件功能：</span>
+                                            <span class="approver-add-btn"> 
+                                                <div class="controls">
+                                                    <div class="checkbox switch-btn">
+                                                        <label>
+                                                            <input type="checkbox" class="form-controls" ng-model="emailActive">
+                                                            <i class="iconfont"></i>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </span>
+                                                       
+                                                
+                                        </div>
+                                    </div>
+                                    <div  class="flow-approver-box approver-list-box" ng-if="showApprover">
+                                        <div class="tree-nav-box">
+                                            <span  ng-click="backInfo('all')">全部</span>
+                                            <span ng-if="approver_domain" ng-click="backInfo('domain')"><i> > </i>{{approver_domain}}</span>
+                                            <span ng-if="approver_project" ng-click="backInfo('project')"> >{{approver_project}}</span>
+                                        </div>
+
+                                        <ul>
+                                            <li ng-repeat="user in approverGroup.user">
+                                                <div>
+                                                    <label class="radiobox">
+                                                          <input name="radio{{approverGroup.context?approverGroup.context:'all'}}" type="radio" ng-model="user.checkedId" ng-click="change(user)" ng-disabled="user.managementRole==5" value={{user.userId?user.userId:user.id}}>
+                                                          <i class="iconfont"></i>
+                                                    </label>
+                                                    <!-- <input type="radio" name="radio{{approverGroup.context?approverGroup.context:'all'}}" value="{{user.userId?user.userId:user.id}}"  ng-model="user.checkedId" ng-click="change(user)" > -->
+                                                    <span title={{user.name}}>{{user.name}}</span>
+                                                </div> 
+                                                <span title='{{"aws.users.roles."+user.managementRole|translate}}'>{{'aws.users.roles.'+user.managementRole|translate}}</span> 
+                                            </li>
+                                            <li ng-repeat="child in approverGroup.child">
+                                                <div>
+                                                    <label class="radiobox">
+                                                          <input name="radio{{approverGroup.context?approverGroup.context:'all'}}" type="radio" ng-model="child.checkedId" ng-click="change(child)" value={{child.domainUid?child.domainUid:child.projectUid}}>
+                                                          <i class="iconfont"></i>
+                                                    </label>
+                                                    <!-- <input type="radio" name="radio{{approverGroup.context?approverGroup.context:'all'}}" ng-model="child.checkedId"  value="{{child.domainUid?child.domainUid:child.projectUid}}"  ng-click="change(child)"> -->
+                                                    <span title={{child.name}}>{{child.name}}</span>
+                                                </div>
+                                                <span>{{child.total}}人</span>    
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                        </div>
+                        
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div ng-show="inStep=='1'">
+                    <button class="btn btn-info" type="button" ng-click="stepTo(2,flowTypeForm)">
+                        {{'aws.action.nextStep'|translate}}
+                    </button>
+                    <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                         {{'aws.action.cancel'|translate}}
+                    </button>
+                </div>
+                <div ng-show="inStep=='2'">
+                    <div>
+                       
+                        <button class="btn btn-default" type="button" ng-click="stepTo(1)">
+                            {{'aws.action.lastStep'|translate}}
+                        </button>
+                        <button class="btn btn-info" type="button" ng-click="stepTo(3,flowRangeForm)">
+                            {{'aws.action.nextStep'|translate}}
+                        </button>
+                        <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                                {{'aws.action.cancel'|translate}}
+                        </button>
+                    </div>
+                </div>
+
+                <div ng-show="inStep=='3'">
+                    <div>
+                        <button class="btn btn-default" type="button" ng-click="stepTo(2)">
+                            {{'aws.action.lastStep'|translate}}
+                        </button>
+                        <button class="btn btn-info" type="button" ng-click="createFlow(createNetwork_subnetInfoForm)"  >
+                           完成
+                        </button>
+                        <button class="btn btn-default" type="button" ng-click="$dismiss()">
+                            {{'aws.action.cancel'|translate}}
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+    </script>
+
+    </div>

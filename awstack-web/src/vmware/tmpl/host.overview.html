@@ -1,0 +1,401 @@
+<div class="page-inner">
+    <div class="box">
+        <div class="col-4">
+            <div class="user-box">
+                <ul class="text-list clearfix">
+                  <li class="copy-li"><span class="font"><i class="icon-aw-adjust"></i></span></li>
+                  <li class="copy-text">
+                    <a><em>IP：</em><span>192.168.140.23</span></a>
+                  </li>
+                </ul> 
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="user-box">
+                <ul class="text-list clearfix">
+                  <li class="copy-li"><span class="font"><i class="icon-aw-cloud-server"></i></span></li>
+                  <li class="copy-text">
+                    <a><em>虚拟机：</em><span></span>1</a>
+                  </li>
+                </ul> 
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="user-box">
+                <ul class="text-list clearfix">
+                  <li class="copy-li"><span class="font"><i class="icon-aw-load"></i></span></li>
+                  <li class="copy-text">
+                    <a><em>状态：</em><span>已连接</span></a>
+                  </li>
+                </ul> 
+            </div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="col-4">
+            <div class="title">CPU</div>
+            <div class="panels clearfix">
+                <div class="pie-wrap">
+                    <div class="pie ng-isolate-scope" chart-pie="" panel="cpuUseChart.panels"><svg width="160" height="160"><g transform="translate(80,80)"><path class="background" fill="#e5e5e5" d="M0,78A78,78 0 1,1 0,-78A78,78 0 1,1 0,78M0,58A58,58 0 1,0 0,-58A58,58 0 1,0 0,58Z"></path><path class="portion" fill="#1abc9c" d="M4.898587196589413e-15,-80A80,80 0 0,1 80,0L56,0A56,56 0 0,0 3.429011037612589e-15,-56Z"></path></g></svg>
+                        <div class="tooltip" style="display: none;"></div>
+                        <div class="pie-center"><span>25.0%</span></div>
+                    </div>
+                </div>
+                <div class="pie-legend">
+                    <span class="orange">暂无数据</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="title">内存</div>
+            <div class="panels clearfix">
+                <div class="pie-wrap">
+                    <div class="pie ng-isolate-scope" chart-pie="" panel="cpuUseChart.panels"><svg width="160" height="160"><g transform="translate(80,80)"><path class="background" fill="#e5e5e5" d="M0,78A78,78 0 1,1 0,-78A78,78 0 1,1 0,78M0,58A58,58 0 1,0 0,-58A58,58 0 1,0 0,58Z"></path><path class="portion" fill="#1abc9c" d="M4.898587196589413e-15,-80A80,80 0 0,1 80,0L56,0A56,56 0 0,0 3.429011037612589e-15,-56Z"></path></g></svg>
+                        <div class="tooltip" style="display: none;"></div>
+                        <div class="pie-center"><span>25.0%</span></div>
+                    </div>
+                </div>
+                <div class="pie-legend">
+                    <dl class="dl-horizontal">
+                        <dt class="ng-binding">总核数：</dt>
+                        <dd><span class="total ng-binding">15.98 GB</span></dd>
+                    </dl>
+                    <dl class="dl-horizontal">
+                        <dt><i style="background-color:#1abc9c"></i>已使用：</dt>
+                        <dd><span class=" num" style="color: rgb(26, 188, 156);">4.65 GB</span></dd>
+                    </dl>
+                    <dl class="dl-horizontal">
+                        <dt><i style="background-color:#e5e5e5"></i>未使用：</dt>
+                        <dd><span style="color: inherit;">11.34 GB</span></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="title">存储</div>
+            <div class="panels clearfix">
+                <div class="pie-wrap">
+                    <div class="pie ng-isolate-scope" chart-pie="" panel="cpuUseChart.panels"><svg width="160" height="160"><g transform="translate(80,80)"><path class="background" fill="#e5e5e5" d="M0,78A78,78 0 1,1 0,-78A78,78 0 1,1 0,78M0,58A58,58 0 1,0 0,-58A58,58 0 1,0 0,58Z"></path><path class="portion" fill="#1abc9c" d="M4.898587196589413e-15,-80A80,80 0 0,1 80,0L56,0A56,56 0 0,0 3.429011037612589e-15,-56Z"></path></g></svg>
+                        <div class="tooltip" style="display: none;"></div>
+                        <div class="pie-center"><span>25.0%</span></div>
+                    </div>
+                </div>
+                <div class="pie-legend">
+                    <dl class="dl-horizontal">
+                        <dt class="ng-binding">总核数：</dt>
+                        <dd><span class="total ng-binding">15.98 GB</span></dd>
+                    </dl>
+                    <dl class="dl-horizontal">
+                        <dt><i style="background-color:#1abc9c"></i>已使用：</dt>
+                        <dd><span class=" num" style="color: rgb(26, 188, 156);">4.65 GB</span></dd>
+                    </dl>
+                    <dl class="dl-horizontal">
+                        <dt><i style="background-color:#e5e5e5"></i>未使用：</dt>
+                        <dd><span style="color: inherit;">11.34 GB</span></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- tab切换 start-->
+    <uib-tabset active="" justified="true" class="vm-ngtable">
+        <uib-tab heading="硬件" index="0">
+            <div class="table-action">
+                <button type="button" data-toggle="modal" data-target="#myModal" class="btn btn-default">按钮</button>
+                <!-- 高级搜索 start -->
+                <div class="advanced_search-box pull-right">
+                    <button type="button" class="btn btn-sm"><i class="icon-aw-gear"></i></button>
+                </div>
+                <!-- 搜索结果 start -->
+                <ul class="advanced_search-choose clearfix hide">
+                    <li>
+                        <h5>状态</h5>
+                        <div class="checkbox clearfix">
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>已打开电源
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>已关闭电源
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>已挂起
+                            </label>
+                        </div>
+                        <h5>VMware Tools版本状态</h5>
+                        <div class="checkbox clearfix">
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>当前版本
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>未安装
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>第三方
+                            </label>
+                        </div>
+                        <h5>CPU 计数</h5>
+                        <div class="checkbox clearfix">
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>1
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>2
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>4
+                            </label>
+                        </div>
+                    </li>
+                    <li>
+                        <h5>需要整合</h5>
+                        <div class="checkbox clearfix">
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>是
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>否
+                            </label>
+                        </div>
+                        <h5>VMware Tools运行状态</h5>
+                        <div class="checkbox clearfix">
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>未运行
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>正在运行
+                            </label>
+                        </div>
+                        <h5>网卡计数</h5>
+                        <div class="checkbox clearfix">
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>1
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>2
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>3
+                            </label>
+                        </div>
+                    </li>
+                    <li>
+                        <h5>按问题阻止</h5>
+                        <div class="checkbox clearfix">
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>是
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>否
+                            </label>
+                        </div>
+                        <h5>客户机操作系统</h5>
+                        <div class="checkbox vertical">
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>Other
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>Red Hat Enterprise Linux6（64-bit）
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>SUSE Linux Enterprise 11（64-bit）
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>Ubuntu Linux（64-bit）
+                            </label>
+                        </div>
+                    </li>
+                    <li>
+                        <h5>FT角色</h5>
+                        <div class="checkbox clearfix">
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>未配置
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>主
+                            </label>
+                        </div>
+                        <h5>兼容性</h5>
+                        <div class="checkbox clearfix">
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>vmx-07
+                            </label>
+                            <label>
+                                <input type="checkbox" name="">
+                                <i class="iconfont"></i>vmx-08
+                            </label>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>制造商</th>
+                        <th>型号</th>
+                        <th>CPU</th>
+                        <th>内存</th>
+                        <th>虚拟闪存资源</th>
+                        <th>网络</th>
+                        <th>存储器</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1个CPU，已使用 0 MHz</td>
+                        <td>PowerEdge R610</td>
+                        <td>8个CPU x 2.26 GHz</td>
+                        <td>10,294 MB / 16,364 MB</td>
+                        <td>0.00B / 0.00B</td>
+                        <td>localhost</td>
+                        <td>2个数据存储</td>
+                    </tr>
+                </tbody>
+            </table>
+        </uib-tab>
+        <uib-tab heading="配置" index="1">44</uib-tab>
+        <uib-tab heading="高级配置" index="2">33</uib-tab>
+        <uib-tab heading="Fault Tolerance" index="3">2</uib-tab>
+        <uib-tab heading="相关对象" index="4">1</uib-tab>
+        <uib-tab heading="许可" index="5">03</uib-tab>
+    </uib-tabset>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="myModal" style="display: none;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-common modal-lg">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fa fa-close" aria-hidden="true"></i></button>
+                    <h3 class="modal-title">分配许证可密钥</h3>
+                </div>
+
+                <div class="modal-body">
+                    <fieldset>
+                    <uib-tabset justified="true">
+                        <uib-tab heading="分配现有许可证密钥" index="0">
+                            <table class="table table-check">
+                                <thead>
+                                    <tr>
+                                        <th>&nbsp;</th>
+                                        <th>许可证密钥</th>
+                                        <th>产品</th>
+                                        <th>使用情况</th>
+                                        <th>容量</th>
+                                        <th>标签</th>
+                                        <th>过期</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="radio">
+                                                    <i class="iconfont"></i>
+                                                </label>
+                                            </div>
+                                        </td>
+                                        <td>（无许可证密钥）</td>
+                                        <td>评估模式</td>
+                                        <td>3</td>
+                                        <td>不受限制</td>
+                                        <td>&nbsp;</td>
+                                        <td>2017-04-22</td>
+                                    </tr>
+                                </tbody>
+                            </table><br><br>
+
+                            <div class="control-items2">
+                                <div class="control-group">
+                                    <div class="form-title">主机详细信息</div>
+                                    <table class="table table-border">
+                                        <colgroup>
+                                            <col width="50%">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <td>CPU总数</td>
+                                                <td>2</td>
+                                            </tr>
+                                            <tr>
+                                                <td>虚拟机总数</td>
+                                                <td>8</td>
+                                            </tr>
+                                            <tr>
+                                                <td>每个CPU的最大内核数</td>
+                                                <td>4</td>
+                                            </tr>
+                                            <tr>
+                                                <td>每个资产的最大CPU数</td>
+                                                <td>5</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="control-group">
+                                    <div class="form-title">许可证密钥（无许可证密钥）</div>
+                                    <table class="table table-border">
+                                        <colgroup>
+                                            <col width="50%">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <td>产品</td>
+                                                <td>评估模式</td>
+                                            </tr>
+                                            <tr>
+                                                <td>容量 / 可用</td>
+                                                <td>不受限制 / 不受限制</td>
+                                            </tr>
+                                            <tr>
+                                                <td>过期</td>
+                                                <td>2017-04-22</td>
+                                            </tr>
+                                            <tr>
+                                                <td>标签</td>
+                                                <td>--</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </uib-tab>
+                        <uib-tab heading="分配新的许可证密钥" index="1">2</uib-tab>
+                    </uib-tabset>
+                    </fieldset>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" disabled="">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

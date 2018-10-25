@@ -1,0 +1,130 @@
+migrationCtrl.$inject=["$scope", "$rootScope", "$translate","$uibModalInstance","selectedvm","vmService","checkboxes","alertSrv"];
+export function migrationCtrl($scope, $rootScope, $translate,$uibModalInstance,selectedvm,vmService,checkboxes,alertSrv){
+    var self=$scope;
+    //初始化设置
+    self.selectedvm=selectedvm;
+    self.postdata={};
+    self.postdata.mor=self.selectedvm.mor;
+    //页面纯逻辑部分
+    self.show_page=[true,false,false,false];
+    self.select_page=function(page,flag){
+        if(flag){
+            self.show_page.fill(false);
+            self.show_page.fill(true,Number(page),Number(page)+1);
+        }
+    };
+    self.forwardPage=function(){
+        let true_index=self.show_page.findIndex((n)=>n==true);
+        self.select_page(true_index-1,true);
+        //self.can_back=true;
+    };
+    self.backPage=function(){
+        let true_index=self.show_page.findIndex((n)=>n==true);
+        self.select_page(true_index+1,true);
+        //self.can_back=false;
+    };
+    //判断下一步按钮是否可以使用
+    self.$watch(function(){
+        let true_index=self.show_page.findIndex((n)=>n==true);
+        return true_index
+    },function(value){
+        if(value==0){
+            if(self.two_step){
+                self.can_back=true;
+            }else{
+                self.can_back=false;
+            }
+        }
+        if(value==1){
+            if(self.three_step){
+                self.can_back=true;
+            }else{
+                self.can_back=false;
+            }
+        }
+        if(value==2){
+            if(self.four_step){
+                self.can_back=true;
+            }else{
+                self.can_back=false;
+            }
+        }
+    })
+    self.can_back=false;
+    //two_step=true表示第二步的验证条件已经满足。
+    self.two_step=false;
+    self.three_step=false;
+    self.four_step=false;
+    self.class_2="done";
+    self.class_3="done";
+    self.class_4="done";
+    //选择迁移类型页面逻辑
+    self.migMethod=function(method){
+        self.can_back=true;
+        self.two_step=true;
+        self.class_2="";
+        self.postdata.relocateType=method;
+    };
+    //选择目标资源
+    vmService.getDCList().then(function(result){
+        if(result){
+            result.data.forEach((x)=>{
+                x.childs=[];
+            });
+            self.resource_list=result.data;
+        }
+    });
+    self.toggle_dc=function(node,scope){
+        vmService.getClusterListByDCName(node.name).then(function(result){
+            if(result){
+                result.data.forEach((x)=>{
+                    x.childs=[];
+                });
+                node.childs=result.data;
+            }
+        })
+        scope.toggle();
+    };
+    //搜索功能
+    self.query={};
+    self.query.cluster="";
+    self.findNodes=function(){}
+    self.visible = function (item) {
+        return !($scope.query.cluster && $scope.query.cluster.length > 0
+        && item.name.indexOf($scope.query.cluster) == -1);
+    };
+    self.select_cluster=function(node){
+        if(node.type=="ClusterComputeResource"){
+            self.can_back=true;
+            self.three_step=true;
+            self.class_3="";
+            self.selected_cluster=node;
+            self.postdata.pool=node.resourcePool;
+            self.pool_name=node.name;
+            vmService.getHostListByClusterName(node.name).then(function(result){
+                if(result){
+                    self.host_list=result.data;
+                }
+            })
+        }
+    };
+    self.selecte_host=function(host){
+        self.can_back=true;
+        self.four_step=true;
+        self.class_4="";
+        self.postdata.host=host.mor;
+        self.host_name=host.name;
+    };
+    //迁移API
+    self.migration=function(){
+        vmService.relocateVM(self.postdata).then(function(result){
+            $uibModalInstance.dismiss("cancel");
+            checkboxes.items={};
+
+        })
+    };
+    self.cancel = function() {
+        $uibModalInstance.dismiss("cancel");
+        checkboxes.items={};
+    };
+}

@@ -1,0 +1,440 @@
+<div class="page-inner">
+	<h3 class="page-title">{{'aws.cluster.configure'|translate}}</h3>
+	<div class="table-action">
+	<button type="button" data-toggle="modal" ng-click="createRegion()" class="btn btn-primary"><i class="icon-aw-add-to2"></i>{{'aws.action.create'|translate}}</button>
+	<button type="button" data-toggle="modal" ng-disabled="!canDel" ng-click="del(checkedItems)" class="btn btn-warning" > <i class="icon-aw-delete"></i>{{'aws.action.del' | translate}}</button>
+	<button ng-click="deployRegion(editData)" ng-disabled="!canDeploy"  class="btn btn-info" > <i class="icon-process"></i>部署</button>
+		<div class="search-box">
+			<form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+				<button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+				<input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder="{{'aws.action.search' | translate}}" />
+			</form>
+		</div>
+	</div>
+	<div class="table-content">
+		<table ng-table="tableParams" class="table " show-filter="false">
+			<colgroup>
+				<col width="5%">
+				<col width="19%">
+				<col width="19%">
+				<col width="19%">
+				<col width="19%">
+				<col width="19%">
+			</colgroup>
+			<tr ng-repeat="cluster in $data">
+				<td header="'headerCheckbox.html'">
+					<label class="checkbox">
+						<input type="checkbox" name="r" ng-model="checkboxes.items[cluster.id]" value="{{cluster.id}}" />
+						<i class="iconfont"></i>
+					</label>
+				</td>
+				<td data-title="headers.name" sortable="'regionName'">
+					<div class="edit-name edit-lg">
+						<a ng-href="/configure/cluster?id={{cluster.id}}" title="{{cluster.regionName}}">{{cluster.regionName}}</a>
+					</div>
+				</td>
+				<td data-title="headers.regionKey" sortable="'id'">
+					{{cluster.regionKey}}
+				</td>
+				<td data-title="headers.status" sortable="'status'">
+					{{'aws.cluster.status.'+cluster.status|translate}}
+				</td>
+				<td data-title="headers.description" sortable="'description'">
+					<span class="des des-lg" title="{{cluster.description}}">{{cluster.description}}</span>
+				</td>
+				<td data-title="headers.lastTime" sortable="'lastTime'">
+					{{cluster.lastTime| date:'yyyy-MM-dd HH:mm:ss'}}
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div ng-controller="detailCtrl">
+		<pane class="detail-body" animation="animation">
+			<div class="tab-content">
+				<div class="detail-row">
+					<div class="detail-title">
+						<a class="an-close" ng-href="/configure/cluster"><i class="icon-aw-mail-reply"></i></a>
+						<span>{{'aws.cluster.detailMessage' | translate}}</span>
+					</div>
+					
+					<div class="detail-info">
+						<div class="control-items2 clearfix" ng-show="isShow">
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.registeredHosts' | translate}}：</label>
+								<div class="controls"><span class="val">{{detailData.new_registered_hosts}}</span></div>
+							</div>
+						</div>
+						<!-- <div class="control-items2 clearfix" ng-show="isShow">
+							<div class="control-group" ng-repeat="item in user_list">
+								<label class="control-label">{{'aws.region.detail.'+item.name| translate}}：</label>
+								<div class="controls">
+									<strong>{{'aws.cluster.iprange' | translate}}</strong> {{item.iprange[0].start+"~"+item.iprange[0].end}} 
+									<strong>CIDR</strong> {{item.cidr}}
+									<div ng-show="item.vlan!=''">
+										<strong>{{'aws.cluster.vlanrange' | translate}}</strong> {{item.vlan}}
+									</div>
+								</div>
+							</div>
+						</div> -->
+						<div class="control-items3 clearfix">
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.nova_api_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.nova_api_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.nova_scheduler_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.nova_scheduler_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.cinder_scheduler_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.cinder_scheduler_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.nova_consoleauth_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.nova_consoleauth_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.nova_novncproxy_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.nova_novncproxy_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.nova_conductor_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.nova_conductor_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.cinder_api_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.cinder_api_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.glance_api_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.glance_api_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.ceilometer_service_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.ceilometer_service_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.keystone_service_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.keystone_service_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.neutron_server_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.neutron_server_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.rabbitmq_service_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.rabbitmq_service_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.haproxy_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.haproxy_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.glance_registry_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.glance_registry_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.cinder_volume_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.cinder_volume_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.haproxy_galera_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.haproxy_galera_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.computeha_monitor_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.computeha_monitor_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.nova_metadata_instances' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.nova_metadata_instances}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.nova_api_workers' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.nova_api_workers}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.nova_metadata_workers' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.nova_metadata_workers}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.nova_conductor_workers' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.nova_conductor_workers}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.neutron_api_workers' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.neutron_api_workers}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.neutron_rpc_workers' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.neutron_rpc_workers}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.cinder_api_workers' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.cinder_api_workers}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.glance_api_workers' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.glance_api_workers}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.glance_registry_workers' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.glance_registry_workers}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.keystone_workers' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.keystone_workers}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.ceilometer_notification_workers' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.ceilometer_notification_workers}}></input>
+								</div>
+							</div>
+							<!-- <div class="control-group">
+								<label class="control-label">{{'aws.cluster.database_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.database_password}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.keystone_database_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.keystone_database_password}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.glance_database_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.glance_database_password}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.nova_database_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.nova_database_password}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.nova_api_database_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.nova_api_database_password}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.neutron_database_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.neutron_database_password}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.cinder_database_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.cinder_database_password}}></input>
+								</div>
+							</div> -->
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.keystone_admin_user' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.keystone_admin_user}}></input>
+								</div>
+							</div>
+							<!-- <div class="control-group">
+								<label class="control-label">{{'aws.cluster.keystone_admin_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.keystone_admin_password}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.glance_keystone_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.glance_keystone_password}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.nova_keystone_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.nova_keystone_password}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.neutron_keystone_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.neutron_keystone_password}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.cinder_keystone_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.cinder_keystone_password}}></input>
+								</div>
+							</div> 
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.metadata_secret' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.metadata_secret}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.horizon_secret_key' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.horizon_secret_key}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.haproxy_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.haproxy_password}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.memcache_secret_key' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.memcache_secret_key}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.rabbitmq_password' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.rabbitmq_password}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.rabbitmq_cluster_cookie' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.rabbitmq_cluster_cookie}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.new_tenant_vlan_range' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.new_tenant_vlan_range}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.tunnel_ssh_port' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.tunnel_ssh_port}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.tunnel_remote_port' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.tunnel_remote_port}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.tunnel_remote_address' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.tunnel_remote_address}}></input>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label">{{'aws.cluster.cloud_event_uri' | translate}}：</label>
+								<div class="controls">
+									<input type="text" class="form-controls" value={{detailData.cloud_event_uri}}></input>
+								</div>
+							</div> -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</pane>
+	</div>
+	<script type="text/ng-template" id="headerCheckbox.html">
+		<label class="checkbox">
+			<input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+			<i class="iconfont"></i>
+		</label>
+	</script>
+<script type="text/ng-template" id="createRegion.html">
+	<div class="modal-common">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+				<h3 class="modal-title">{{'aws.cluster.new' | translate}}</h3>
+			</div>
+			<div class="modal-body">
+				<form name="createRegion" novalidate>
+					<div class="control-group">
+						<label class="control-label">{{'aws.cluster.regionName' | translate}}：</label>
+						<div class="controls">
+							<input type="text" class="form-controls" name="name" ng-model="postParams.regionName" placeholder="{{'aws.cluster.pleaseInputName' | translate}}" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/" ng-maxlength="32" required />
+							<div class="error" ng-if="interacted(createRegion)" ng-messages="createRegion.name.$error" >
+								<div ng-message="required" class="volume-form-name-error">{{'aws.errors.required'|translate}}</div>
+								<div ng-message="pattern" class="volume-form-name-error">{{'aws.errors.noSpecial'|translate}}</div>
+								<div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+							</div>
+						</div>
+					</div>
+			
+					<div class="control-group">
+						<label class="control-label">{{'aws.volumes.cv.descMessage'|translate}}：</label>
+						<div class="controls">
+							<textarea type="text" class="form-controls volume-text " name="description"  ng-model="postParams.description" placeholder="{{'aws.volumes.cv.pDescMessage'|translate}}" ng-maxlength="100" />
+							<div class="error" ng-if="interacted(createRegion)" ng-messages="createRegion.description.$error" >
+								<div ng-message="maxlength">{{'aws.errors.maxlength100'|translate}}</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-info" type="button" ng-click="confirm()">{{"aws.action.ok"|translate}}</button>
+				<button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+			</div>
+		</div>
+</script>

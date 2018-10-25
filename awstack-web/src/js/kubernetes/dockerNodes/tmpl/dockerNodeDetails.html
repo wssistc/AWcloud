@@ -1,0 +1,162 @@
+<div class="page-inner">
+  <pane class="detail-body" animation="animation">
+    <div class="tab-content">
+      <div class="detail-row">
+        <div class="detail-title">
+          <a class="an-close" ng-href="/k8s/nodes">
+            <i class="icon-aw-mail-reply"></i>
+          </a>
+          <span>{{'aws.k8s.dockerNodes.details' | translate}}</span>
+        </div>
+        <div class="detail-info">
+           <div ng-include="detailpart.html"></div>
+        </div>
+      </div>
+    </div>
+  </pane>
+</div>
+
+<script type="text/ng-template" id="addNodeLabels.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.k8s.dockerNodes.addNodeLabels" |translate}}</h3>
+    </div>
+    <div class="modal-body k8s-modal">
+      <form name="addNodeLabelsForm">
+        <div class="control-group node-label-group" ng-repeat="nodeLabel in nodeLabelsData">
+          <div class="left">
+            <div class="control-group">
+              <label class="control-label" style="width: 28%;">标签名称{{$index + 1}}:&nbsp;</label>
+              <div class="controls" style="width: 70%;">
+                <!-- https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ -->
+                <input class="form-controls" name="key{{$index + 1}}"
+                       type="text" ng-model="nodeLabel.key" required
+                       ng-pattern="/^(?:(?=.{4,254}\/)((?:[a-z0-9A-Z]+\.)+[a-z0-9A-Z]+\/))?(?=.{1,63}$)([a-z0-9A-Z](?:[a-z0-9A-Z\.\-\_]*[a-z0-9A-Z])?)$/"/>
+                <div class="error" ng-show="addNodeLabelsForm['key{{$index + 1}}'].$invalid &&
+                                               addNodeLabelsForm['key{{$index + 1}}'].$dirty">
+                    <span ng-show="addNodeLabelsForm['key{{$index + 1}}'].$error.required">
+                      {{"aws.k8s.createCluster.labelKeyRequired"|translate}}
+                    </span>
+                  <span ng-show="addNodeLabelsForm['key{{$index + 1}}'].$error.pattern">
+                      {{"aws.k8s.createCluster.labelKeyMismatch"|translate}}
+                    </span>
+                </div>
+                <div class="error" ng-show="addNodeLabelsForm['key{{$index + 1}}'].$invalid">
+                    <span ng-show="addNodeLabelsForm['key{{$index + 1}}'].$viewValue.indexOf('/') > -1 ?
+                                    addNodeLabelsForm['key{{$index + 1}}'].$viewValue.split('/')[0].length > 10 : false">
+                      {{"aws.k8s.createCluster.labelKeyDomainToLong"|translate}}
+                    </span>
+                </div>
+                <div class="error" ng-show="addNodeLabelsForm['key{{$index + 1}}'].$invalid">
+                    <span ng-show="addNodeLabelsForm['key{{$index + 1}}'].$viewValue.indexOf('/') > -1 ?
+                                    addNodeLabelsForm['key{{$index + 1}}'].$viewValue.split('/')[1].length > 10 :
+                                    addNodeLabelsForm['key{{$index + 1}}'].$viewValue.length > 10">
+                      {{"aws.k8s.createCluster.labelKeyNameToLong"|translate}}
+                    </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          &nbsp;&nbsp;
+          <div class="right">
+            <div class="control-group">
+              <label class="control-label" style="width: 28%;">标签值{{$index + 1}}:&nbsp;</label>
+              <div class="controls" style="width: 70%;">
+                <input class="form-controls" name="value{{$index + 1}}"
+                       type="text" ng-model="nodeLabel.value" required
+                       ng-pattern="/^(?=.{1,63}$)([a-z0-9A-Z](?:[a-z0-9A-Z\.\-\_]*[a-z0-9A-Z])?)$/"
+                       ng-minlength="2" ng-maxlength="63"/>
+                <div class="error" ng-show="addNodeLabelsForm['value{{$index + 1}}'].$invalid &&
+                                               addNodeLabelsForm['value{{$index + 1}}'].$dirty">
+                    <span ng-show="addNodeLabelsForm['value{{$index + 1}}'].$error.required">
+                      {{"aws.k8s.createCluster.labelValueRequired"|translate}}
+                    </span>
+                  <span ng-show="addNodeLabelsForm['value{{$index + 1}}'].$error.pattern">
+                      {{"aws.k8s.createCluster.labelValueMismatch"|translate}}
+                    </span>
+                  <span ng-show="addNodeLabelsForm['value{{$index + 1}}'].$error.minlength">
+                      {{"aws.k8s.createCluster.labelValueMinLength"|translate}}
+                    </span>
+                  <span ng-show="addNodeLabelsForm['value{{$index + 1}}'].$error.maxlength">
+                      {{"aws.k8s.createCluster.labelValueMaxLength"|translate}}
+                    </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span title="{{'aws.k8s.createCluster.deleteLabel'|translate}}" class="delete"
+                ng-if="$index > 0">
+            <i ng-click="deleteNodeLabel(nodeLabel)" class="icon-aw-1shut-down"></i>
+          </span>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button"
+              ng-click="addNewNodeLabel()">{{"aws.k8s.dockerNodes.addNewNodeLabel" |translate}}
+      </button>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <button class="btn btn-primary" type="button"
+              ng-disabled="addNodeLabelsForm.$invalid"
+              ng-click="$close(nodeLabelsData)">{{"aws.action.ok" |translate}}
+      </button>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <button class="btn btn-primary" type="button" ng-click="$dismiss()">{{"aws.action.cancel" |translate}}</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="modifyNodeLabel.html">
+  <div class="modal-common">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{"aws.k8s.dockerNodes.modifyNodeLabel" |translate}}</h3>
+    </div>
+    <div class="modal-body k8s-modal">
+      <form name="modifyNodeLabelForm">
+        <div class="control-group">
+          <label class="control-label">{{"aws.k8s.dockerNodes.labelKey" |translate}}：</label>
+          <div class="controls">
+            <!-- https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ -->
+            <input class="form-controls" name="key" disabled
+                   type="text" ng-model="currentNodeLabel.key"/>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">{{"aws.k8s.dockerNodes.labelValue" |translate}}：</label>
+          <div class="controls">
+            <input class="form-controls" name="value"
+                   type="text" ng-model="currentNodeLabel.value" required
+                   ng-pattern="/^(?=.{1,63}$)([a-z0-9A-Z](?:[a-z0-9A-Z\.\-\_]*[a-z0-9A-Z])?)$/"
+                   ng-minlength="2" ng-maxlength="63"/>
+            <div class="error" ng-show="modifyNodeLabelForm['value'].$invalid &&
+                                               modifyNodeLabelForm['value'].$dirty">
+                    <span ng-show="modifyNodeLabelForm['value'].$error.required">
+                      {{"aws.k8s.createCluster.labelValueRequired"|translate}}
+                    </span>
+              <span ng-show="modifyNodeLabelForm['value'].$error.pattern">
+                      {{"aws.k8s.createCluster.labelValueMismatch"|translate}}
+                    </span>
+              <span ng-show="modifyNodeLabelForm['value'].$error.minlength">
+                      {{"aws.k8s.createCluster.labelValueMinLength"|translate}}
+                    </span>
+              <span ng-show="modifyNodeLabelForm['value'].$error.maxlength">
+                      {{"aws.k8s.createCluster.labelValueMaxLength"|translate}}
+                    </span>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button"
+              ng-disabled="modifyNodeLabelForm.$invalid"
+              ng-click="$close(currentNodeLabel)">{{"aws.action.ok" |translate}}
+      </button>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <button class="btn btn-primary" type="button" ng-click="$dismiss()">{{"aws.action.cancel" |translate}}</button>
+    </div>
+  </div>
+</script>
+

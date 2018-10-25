@@ -1,0 +1,57 @@
+<div class="page-inner shortcuts-ins-page">
+    <div class="ins-header">
+        <div class="reply-link">
+            <a href="#{{source.urlTable}}"><i class="icon-aw-angle-left"></i>返回</a>
+        </div>
+        
+        <div class="region-dp tab-offset-right clearfix">
+            <ul class="nav nav-tabs nav-justified">
+                <li ng-class="{active:currTab=='defined'}" class="uib-tab nav-item " ng-click="createInsTab('defined')">
+                        <a href=""> 自定义配置 </a>
+                </li>
+                <li ng-class="{active:currTab=='quick'}" class="uib-tab nav-item"  ng-click="createInsTab('quick')">
+                        <a href=""> 快捷配置 </a> 
+                </li>
+                <li ng-class="{active:currTab=='iso'}" class="uib-tab nav-item" ng-show="source.new" ng-click="createInsTab('iso')">
+                    <a href=""> ISO安装 </a> 
+                </li>
+            </ul>
+            <!-- <region-domain-project ng-if="source.isQuickEnter"></region-domain-project> -->
+        </div>
+    </div>
+    <div class="shortcuts-ins-page-inner">
+            <div ng-include="currTabTemp"></div>
+    </div>
+</div>
+
+
+<!-- <div class="control-items2 clearFix">
+    <div class="control-group">
+        <label class="control-label">部门</label>
+        <div class="controls">
+            <ui-select ng-model="createInsForm.domain" name="domain" ng-change="changeDomain(createInsForm.domain)" ng-disabled="!ADMIN || !source.new" required>
+                <ui-select-match placeholder="请选择部门" title="{{$select.selected.disDomainName}}">{{$select.selected.disDomainName}}</ui-select-match>
+                <ui-select-choices repeat="domain as domain in options.domainList">
+                    <div ng-bind-html="domain.disDomainName | highlight: $select.search" title="{{domain.disDomainName}}"></div>
+                </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="(submitInValid ||step1InsForm.domain.$dirty) && step1InsForm.domain.$error">
+                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">项目</label>
+        <div class="controls">
+            <ui-select ng-model="createInsForm.project" name="project" ng-change="changeProject(createInsForm.domain,createInsForm.project)" ng-disabled="!source.new" required>
+                <ui-select-match placeholder="请选择项目" title="{{$select.selected.disProjectName}}">{{$select.selected.disProjectName}}</ui-select-match>
+                <ui-select-choices repeat="project as project in createInsForm.domain.projects">
+                    <div ng-bind-html="project.disProjectName | highlight: $select.search" title="{{project.disProjectName}}"></div>
+                </ui-select-choices>
+            </ui-select>
+            <div class="error" ng-messages="(submitInValid ||step1InsForm.project.$dirty) && step1InsForm.project.$error">
+                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+            </div>
+        </div>
+    </div>
+</div> -->

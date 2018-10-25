@@ -1,0 +1,48 @@
+<div  ng-controller="cephViewTableCtrl">
+	<div class="table-action">
+        <div class="btn-box">
+            <button type="button" class="btn btn-new" ng-disabled="disabled_btn" ng-click="balanceData()">{{'aws.cephView.clustbalance' | translate}}</button>
+            <button type="button" ng-class="{'btn-default disabled':view.osd_btn,'btn-normal':!view.osd_btn}" class="btn"
+            uib-popover="{{isDisabled?('aws.cephView.tips.tip7' | translate):('aws.cephView.tips.tip8' | translate)}}"
+            popover-enable="view.osd_btn" popover-trigger="mouseenter" popover-placement = "bottom" 
+            ng-click="rebootOSD(editData)" >{{'aws.cephView.rebootOsd' | translate}}</button>
+        </div>
+        <div class="pull-right">
+            <into-information modular="'cephManage'"></into-information>
+            <search-refresh  class="rs" refresh-fuc="refreshTable" context= "context" table-data = "cephViewtabledata" table-content="'cephViewTable'" status-list="table.searchList" btn-type="checkbox"></search-refresh>  
+            <setting-col  title-data="tableCols" site-title="titleName" table-data="cephViewtabledata" config-search="configSearch" ></setting-col>
+        </div>
+    </div>
+	<div class="table-content">
+        <table ng-table-dynamic="cephViewTable with tableCols" class="table" show-filter="false">
+            <tr ng-repeat="osd in $data track by $index ">
+                <td ng-repeat="item in $columns" ng-switch="item.field" >
+                    <label class="checkbox" ng-switch-when="check">
+                        <input name="osd" type="checkbox" value={{osd.id}} ng-model="checkboxescephViewTable.items[osd.byId]" >
+                        <i class="iconfont"></i>
+                    </label>
+                    <span ng-switch-when="osdStatusCopy" ng-class="{
+                        'bg-green':(osd.osdStatus=='up'),
+                        'bg-blue':(osd.osdStatus=='rebooting'),
+                        'bg-red':(osd.osdStatus=='down'),
+                        'bg-grey':(osd.osdStatus=='out' || osd.osdStatus=='miss')
+                        }">{{"aws.cephView.chart.status." + osd.osdStatus | translate}}<i ng-class="{'icon-aw-refresh':(osd.osdStatus=='rebooting')}" class="aw-spin"></i>
+                    </span>
+                    <span ng-switch-default>{{osd[item.field]}}</span>
+                </td>
+            </tr>
+        </table>
+        <service-tip service = "'ceph'"  menus="menuGuide"  menu-href="'/system/storageManagement'"></service-tip>
+	</div>
+	
+</div>
+<script type="text/ng-template" id="headerCheckboxCephViewTable.html">
+	<label class="checkbox">
+		<input type="checkbox" ng-model="checkboxescephViewTable.checked" class="select-all-cephViewTable" value="" />
+		<i class="iconfont"></i>
+	</label>
+</script>
+
+
+
+

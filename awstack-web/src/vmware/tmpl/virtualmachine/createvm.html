@@ -1,0 +1,690 @@
+<div class="view-content">
+	<div class="page-title clearfix">
+		<h3>新建虚拟机</h3>
+		<a class="btn btn-default" href="#/virtualmachine">返回</a>
+	</div>
+	<div class="vm-create tab-offset-right">
+        <form name="" novalidate>
+          	<uib-tabset active=active justified="true">
+	            <uib-tab index="0" heading="1.选择创建类型" class="done" >
+	              	<div class="panel-group step-one" role="tablist">
+              			<h5>您要如何创建虚拟机？</h5>
+              			<div class="radio">
+              				<label>
+	                            <input type="radio" name="method" checked>
+	                            <i class="iconfont"></i>创建新虚拟机
+	                        </label>
+	                        <label style="display:none" >
+	                            <input type="radio" name="method" ng-disabled="true">
+	                            <i class="iconfont"></i>从模板部署
+	                        </label>
+	                        <label style="display:none">
+	                            <input type="radio" name="method" ng-disabled="true">
+	                            <i class="iconfont"></i>克隆现有虚拟机
+	                        </label>
+	                        <label style="display:none">
+	                            <input type="radio" name="method" ng-disabled="true">
+	                            <i class="iconfont"></i>将虚拟机克隆为模板
+	                        </label>
+	                        <label style="display:none">
+	                            <input type="radio" name="method" ng-disabled="true">
+	                            <i class="iconfont"></i>将模板克隆为模板
+	                        </label>
+	                        <label style="display:none">
+	                            <input type="radio" name="method" ng-disabled="true">
+	                            <i class="iconfont"></i>将模板转换成虚拟机
+	                        </label>
+              			</div> 
+		                <div class="help-tips">此选项将指导您完成创建新虚拟机的过程。您将可以自定义处理器、内存、网络连接和存储器。创建之后将需要安装客户机操作系统。</div>
+	              </div>
+	            </uib-tab>
+	            <uib-tab index="1" heading="2.编辑设置" class="{{class_page2}}" >
+	            	<div class="panel-group step-two" role="tablist">
+	            		<div class="panel panel-default active" >
+	            			<div class="panel-heading" role="tab" id="edithead1">
+	            				<h4 class="panel-title">
+					          		<a class="" role="button" data-toggle="collapse" href="#editfooter1" aria-expanded="true" aria-controls="editfooter1"><i class="icon-aw-angle-down"></i> 选择名称和文件</a>
+					        		</h4>
+	            			</div>
+	            			<div id="editfooter1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="edithead1" aria-expanded="true" >
+	            				<div class="control-group" >
+	                   		<label class="control-label">虚拟机名称：</label>
+		                   	<div class="controls">
+		                   		<div class="half">
+		                        	<input type="text" class="form-controls" name="name" placeholder="输入要添加至vCenter Server的主机的名称或IP地址" ng-model="params.config.name" maxlength="80" required ng-blur="name_repeat_func()"/>
+		                        	<span class="error" ng-show="name_error">请输入虚拟机名称</span>
+		                        	<span class="error" ng-show="name_repeat_error">该虚拟机名称已经存在</span>
+		                        </div>
+		                        <div class="half">虚拟机名称名称最多可包含80个字符，且名称在每个vCenter Server虚拟机文件夹中必须是唯一的</div>
+		                  	</div>
+	                		</div>
+	                		<div class="control-group">
+	                  			<label class="control-label">虚拟机位置：</label>
+	                  			<div class="controls">
+	                    			<div class="search-box">
+	                    				<button class="btn" type="submit"><i class="icon-aw-search"></i></button>
+	                    				<input type="text" class="form-control" autocomplete="off" ng-change="findNodes()" ng-model="query.vm_location" placeholder="根据数据中心folder进行搜索">
+	                    			</div>
+	                  			</div>
+	                		</div>
+	                		<div class="control-group">
+	                			<label class="control-label">&nbsp;</label>
+	                  			<div class="controls">
+	                  				<div class="half">
+		                  				<div ui-tree id="tree-root">
+		                      				<ol ui-tree-nodes="" ng-model="folderList">
+		                        				<li ng-repeat="node in folderList" ui-tree-node ng-include="'nodes_renderer_vm.html'"  ></li>
+		                      				</ol>
+		                    			</div>
+	                    			</div>
+	                    			<span class="form-tips">选择一个数据中心或虚拟机文件夹用于在其中创建新虚拟机</span>
+	                  			</div>
+	                		</div>
+	            			</div>
+	            		</div>
+
+	            		<div class="panel panel-default" ng-class="{'active':show2}">
+	            			<div class="panel-heading" role="tab" id="edithead2">
+	            				<h4 class="panel-title">
+					          		<a class="{{class_icon_2}}" role="button" data-toggle="collapse" href="{{href_2}}" aria-expanded="false" aria-controls="editfooter2" ng-disabled="true" disable="true"><i class="icon-aw-angle-down"></i> 选择计算资源</a>
+					        	</h4>
+	            			</div>
+	            			<div id="editfooter2" ng-show="show2" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="edithead2" aria-expanded="false">
+	            			<div class="control-group">
+		                  			<label class="control-label">计算资源：</label>
+		                  			<div class="controls">
+		                    			<div class="search-box">
+		                    				<button class="btn" type="submit"><i class="icon-aw-search"></i></button>
+		                    				<input type="text" class="form-control" autocomplete="off" ng-change="findNodes()" ng-model="query.resource" placeholder="根据集群名称进行搜索">
+		                    			</div>
+		                  			</div>
+		                		</div>
+		                		<div class="control-group">
+		                			<label class="control-label">&nbsp;</label>
+		                  			<div class="controls">
+		                  				<div class="half">
+			                  				<div ui-tree id="tree-root">
+			                      				<ol ui-tree-nodes="" ng-model="computeLoc">
+			                        				<li ng-repeat="node in computeLoc" ui-tree-node data-collapsed="true" data-expand-on-hover="true" ng-include="'nodes_renderer.html'" ng-show="visible(node)"></li>
+			                      				</ol>
+			                    			</div>
+		                    			</div>
+		                    			<span class="form-tips">选择群集、主机、vAPP或资源池来运行该虚拟机。</span>
+		                  			</div>
+		                		</div>
+		                		<!-- <div class="control-group">
+		            					<label class="control-label">兼容性：</label>
+		            					<div class="controls">
+		            						<span class="val" ng-show="no_host">群集不包含任何主机。</span>
+		            						<span class="val" ng-show="no_available_host">此群集中的所有主机都已断开连接、处于维护模式或者正在更改其维护模式状态。</span>
+		            						<span class="val" ng-show="no_available_host">此群集中的所有主机都已断开连接、处于维护模式或者正在更改其维护模式状态。</span>
+		            					</div>
+		            				</div> -->
+	            			</div>
+	            		</div>
+
+	            		<div class="panel panel-default" ng-class="{'active':show3}">
+	            			<div class="panel-heading" role="tab" id="edithead3">
+	            				<h4 class="panel-title">
+					          		<a class="{{class_icon_3}}" role="button" data-toggle="collapse" href="{{href_3}}" aria-expanded="true" aria-controls="editfooter3"><i class="icon-aw-angle-down"></i> 选择存储器</a>
+					        	</h4>
+	            			</div>
+	            			<div id="editfooter3" ng-show="show3" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="edithead3" aria-expanded="true">
+	            				<!-- <div class="control-group">
+	            					<label class="control-label" >虚拟机存储策略：</label>
+	            					<div class="controls">
+	            						
+	            						<div class="half">
+						                    <ui-select ng-model="strategy" ng-change="changeStrategy(strategy)" >
+						                      	<ui-select-match placeholder="请选择虚拟机存储策略">{{$select.selected.name}}</ui-select-match>
+						                      	<ui-select-choices repeat="strategy in strategyList | propsFilter: {name: $select.search}">
+						                        	<div ng-bind-html="strategy.name | highlight: $select.search"></div>
+						                      	</ui-select-choices>
+						                    </ui-select>
+					                    </div>
+					                    <div class="half"></div>
+					                </div>
+	            				</div> -->
+	            				<div class="control-group">
+	            					<label class="control-label">&nbsp;</label>
+	            					<div class="controls">
+	            						<p class="help-tips">可从您选择的目标资源中访问以下数据存储。为虚拟机配置文件和所有虚拟磁盘选择目标数据存储。</p>
+		            					<table class="table  table-check">
+		            						<thead>
+		            							<tr>
+		            								<th></th>
+		            								<th>名称</th>
+			                      		<th>容量</th>
+			                      		<th>已制备</th>
+			                      		<th>可用空间</th>
+			                      		<th>类型</th>
+		            							</tr>
+		            						</thead>
+		            						<tbody>
+		            								<tr ng-repeat="item in datastoreList" >
+		            								<td>
+		            									<div class="radio">
+		                                <label>
+	                                    <input type="radio" name="radio" ng-click=selectedDSFunc(item)>
+	                                    <i class="iconfont"></i>
+		                                </label>
+		                              </div>
+		            								</td>
+		            								<td>{{item.name}}</td>
+			                      		<td>{{item.capacity}}</td>
+			                      		<td>{{item.usage}}</td>
+			                      		<td>{{item.freeSpace}}</td>
+			                      		<td>{{item.type}}</td>
+		            							</tr>
+		            						</tbody>
+		            					</table>
+	            					</div>
+	            				</div>
+	            				<!-- <div class="control-group">
+	            					<label class="control-label">兼容性：</label>
+	            					<div class="controls"><span class="val">兼容性检查成功。</span></div>
+	            				</div> -->
+	            			</div>
+	            		</div>
+
+	            		<div class="panel panel-default" ng-class="{'active':show4}" style="display: none">
+	            			<div class="panel-heading" role="tab" id="edithead4">
+	            				<h4 class="panel-title">
+					          		<a class="{{class_icon_4}}" role="button" data-toggle="collapse" href="{{href_4}}" aria-expanded="false" aria-controls="editfooter4"><i class="icon-aw-angle-down"></i> 选择兼容性</a>
+					        	</h4>
+	            			</div>
+	            			<div id="editfooter4" ng-show="show4" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="edithead4" aria-expanded="false">
+	            				<div class="control-group">
+	            					<label class="control-label">&nbsp;</label>
+	            					<div class="controls">
+	            						<span class="val">主机或群集支持多个 VMware 虚拟机版本。请选择虚拟机的兼容性</span>
+	            					</div>
+	            				</div>
+	            				<div class="control-group">
+		                  			<label class="control-label" >兼容：</label>
+		                  			<div class="controls">
+		                  				<div class="half">
+		                  					<ui-select ng-model="compatibility" ng-change="changeCom(compatibility)" >
+				                      			<ui-select-match >{{$select.selected.name}}</ui-select-match>
+				                      			<ui-select-choices repeat="compatibility in compatibilityList | propsFilter: {name: $select.search}">
+				                        			<div ng-bind-html="compatibility.name | highlight: $select.search"></div>
+				                      			</ui-select-choices>
+				                    		</ui-select>
+		                  				</div>
+		                    			<div class="half">次虚拟机（虚拟机版本4）还与ESXi 4x、ESXi 5.0、ESXi 5.1和ESXi 5.5兼容。某些虚拟机硬件功能在使用此选项时不可用</div>
+		                  			</div>
+		                		</div>
+	            			</div>
+	            		</div>
+
+	            		<div class="panel panel-default" ng-class="{'active':show5}">
+	            			<div class="panel-heading" role="tab" id="edithead5">
+	            				<h4 class="panel-title">
+					          		<a class="{{class_icon_5}}" role="button" data-toggle="collapse" href="{{href_5}}" aria-expanded="false" aria-controls="editfooter5"><i class="icon-aw-angle-down"></i> 选择客户机操作系统</a>
+					        	</h4>
+	            			</div>
+	            			<div id="editfooter5" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="edithead5" ng-show="show5" aria-expanded="false">
+	            				<div class="control-group">
+	            					<label class="control-label">&nbsp;</label>
+	            					<div class="controls">
+	            						<span class="val">在此处标识客户机操作系统可使此向导为操作系统安装提供适当的默认值。</span>
+	            					</div>
+	            				</div>
+	            				<div class="control-group" >
+		                  			<label class="control-label">操作系统系列：</label>
+		                  			<div class="controls">
+		                  				<div class="half">
+			                    			<ui-select ng-model="os_map.osSeries" ng-change="changeSeries(os_map.osSeries)">
+			                      				<ui-select-match >{{$select.selected.name}}</ui-select-match>
+			                      				<ui-select-choices repeat="osSeries in osSeriesList | propsFilter: {name: $select.search}">
+			                        				<div ng-bind-html="osSeries.name | highlight: $select.search"></div>
+			                      				</ui-select-choices>
+			                    			</ui-select>
+		                    			</div>
+		                    			<div class="half">&nbsp;</div>
+		                  			</div>
+		                		</div>
+		                		<div class="control-group" >
+		                  			<label class="control-label" >操作系统版本：</label>
+		                  			<div class="controls">
+			                  			<div class="half">
+			                    			<ui-select ng-model="os_map.osVersion" ng-change="changeVersion(os_map.osVersion)">
+			                      				<ui-select-match >{{$select.selected.name}}</ui-select-match>
+			                      				<ui-select-choices repeat="osVersion in osVersionList | propsFilter: {name: $select.search}">
+			                        				<div ng-bind-html="osVersion.name | highlight: $select.search"></div>
+			                      				</ui-select-choices>
+			                    			</ui-select>
+		                    			</div>
+		                    			<div class="half"></div>
+		                    			<!-- <span class="val form-tips">兼容性：ESX/ESXi 3.5 及更高版本 (虚拟机版本 4)</span> -->
+		                  			</div>
+		                		</div>
+	            			</div>
+	            		</div>
+
+	            		<div class="panel panel-default" ng-class="{'active':show6}">
+	            			<div class="panel-heading" role="tab" id="edithead6">
+	            				<h4 class="panel-title">
+					          		<a class="{{class_icon_6}}" role="button" data-toggle="collapse" href="{{href_6}}" aria-expanded="true" aria-controls="editfooter6"><i class="icon-aw-angle-down"></i> 自定义硬件</a>
+					        	</h4>
+	            			</div>
+	            			<div id="editfooter6" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="edithead6" ng-show="show6" aria-expanded="">
+	            				<!-- <uib-tabset active=active1 justified="true" > -->
+				                  	<!-- <uib-tab index="0" heading='虚拟硬件'> -->
+					                    <!-- <div class="control-group">
+					                      	<label class="control-label" >新设备：</label>
+					                      	<div class="controls">
+					                      		<div class="half">
+					                      			<ui-select ng-model="equipment" ng-change="changeEqu(equipment)" >
+							                          	<ui-select-match >{{$select.selected.name}}</ui-select-match>
+							                          	<ui-select-choices repeat="equipment in equipmentList | propsFilter: {name: $select.search}">
+							                            	<div ng-bind-html="equipment.name | highlight: $select.search"></div>
+							                          	</ui-select-choices>
+							                        </ui-select>
+					                      		</div>
+					                      		<div class="half"><button type="button" data-toggle="modal" ng-disabled="!can_add_equipment" ng-click="add_equipment(equipment)" class="btn btn-info">添加</button></div>
+					                      </div>
+					                    </div> -->
+					                    <div class="control-group">
+					                    	<label class="control-label">CPU(个)：</label>
+					                    	<div class="controls">
+					                    		<div class="half">
+						                    		<ui-select ng-model="cpuNum" ng-change="changeCPUNum(cpuNum)" >
+						                            	<ui-select-match >{{$select.selected.name}}</ui-select-match>
+						                            	<ui-select-choices repeat="cpuNum in cpuNumList | propsFilter: {name: $select.search}">
+						                              		<div ng-bind-html="cpuNum.name | highlight: $select.search"></div>
+						                            	</ui-select-choices>
+						                          	</ui-select>
+					                          	</div>
+					                          	<div class="half">&nbsp;</div>
+					                    	</div>
+					                    </div>
+					                    <div class="control-group">
+					                    	<label class="control-label">内存(MB)：</label>
+					                    	<!-- <div class="controls">
+					                         <span class="val form-tips">MB</span>
+					                    	</div> -->
+					                    	<div class="controls">
+					                    		<div class="half unit clearfix">
+													<input type="text" class="form-controls" name="" ng-model="params.config.memoryMB" placeholder="内存大小必须是4的倍数" ng-blur="multiple_of_four()" required />
+													<ui-select ng-model="unit.memoryUnit" >
+						                            	<ui-select-match >{{$select.selected}}</ui-select-match>
+						                            	<ui-select-choices repeat="unit in unitsList">
+						                              		<div ng-bind-html="unit | highlight: $select.search"></div>
+						                            	</ui-select-choices>
+						                          	</ui-select>
+												</div>
+												<div class="half">&nbsp;</div>
+											</div>
+					                    </div>
+					                    <div class="control-group" ng-repeat="disk in newDiskList">
+					                    	<label class="control-label">新硬盘(MB)：</label>
+					                    	<div class="controls">
+					                    		<div class="half unit clearfix">
+													<input  class="form-controls" ng-model="disk.size" placeholder="请输入硬盘大小" ng-change="change_disk_size(disk,disk.size)" ng-blur="number_func(disk.size)"  required />
+													<ui-select ng-model="unit.diskUnit" >
+						                            	<ui-select-match >{{$select.selected}}</ui-select-match>
+						                            	<ui-select-choices repeat="unit in unitsList">
+						                              		<div ng-bind-html="unit | highlight: $select.search"></div>
+						                            	</ui-select-choices>
+						                          	</ui-select>
+												</div>
+												<div class="half">&nbsp;</div>
+											</div>
+					                    </div>
+					                    <!-- <div class="control-group">
+					                    	<label class="control-label">新SCSI控制器：</label>
+					                    	<div class="controls">
+					                    		<div class="half">
+																		<span class="form-controls">VMware准虚拟</span>
+																	</div>
+																</div>
+					                    </div> -->
+					                    <div class="control-group" ng-repeat="net in newNetworkList">
+					                    	<label class="control-label">新网络：</label>
+					                    	<div class="controls">
+					                    		<div class="half">
+																		<ui-select ng-model="net.network" ng-change="changeNetwork(net,net.network)" >
+						                          <ui-select-match >{{$select.selected.name}}</ui-select-match>
+						                          <ui-select-choices repeat="item in networkList | propsFilter: {name: $select.search}">
+						                             <div ng-bind-html="item.name | highlight: $select.search"></div>
+						                          </ui-select-choices>
+						                        </ui-select>
+					                        </div>
+					                        <div class="half">
+																			<label class="control-label">连接：</label>
+														          <div class="controls" class="checkbox">
+														            <div class="checkbox">
+														              <label>
+														                <input type="checkbox" class="form-controls" ng-model="net.network.connectInfo.startConnected" />
+														                <i class="iconfont"></i>
+														              </label>
+														            </div>
+														          </div>
+														        
+					                        </div>
+																</div> 
+					                    </div>
+					                    <div class="control-group" ng-if="show_port_keys">
+					                    	<label class="control-label">端口：</label>
+					                    	<div class="controls">
+					                    		<div class="half">
+																		<ui-select ng-model="port" ng-change="changePort(port)" >
+						                          <ui-select-match >{{$select.selected.name}}</ui-select-match>
+						                          <ui-select-choices repeat="item in portList | propsFilter: {name: $select.search}">
+						                             <div ng-bind-html="item.name | highlight: $select.search"></div>
+						                          </ui-select-choices>
+						                        </ui-select>
+					                        </div>
+					                        <div class="half">&nbsp;</div>
+																</div> 
+					                    </div>
+					                    <div class="control-group">
+					                    	<label class="control-label">适配器：</label>
+					                    	<div class="controls">
+					                    		<div class="half">
+																		<ui-select ng-model="adapter" ng-change="changeAdapter(adapter)" >
+						                          <ui-select-match >{{$select.selected.name}}</ui-select-match>
+						                          <ui-select-choices repeat="item in adapterList | propsFilter: {name: $select.search}">
+						                             <div ng-bind-html="item.name | highlight: $select.search"></div>
+						                          </ui-select-choices>
+						                        </ui-select>
+					                        </div>
+					                        <div class="half">&nbsp;</div>
+																</div> 
+					                    </div>
+					                    <div class="control-group">
+					                    	<label class="control-label">CD/DVD驱动器：</label>
+					                    	<div class="controls">
+					                    		<div class="half">
+																		<!-- <ui-select ng-model="selected_drive" ng-change="changeDrive(selected_drive)">
+						                          <ui-select-match >{{$select.selected.name}}</ui-select-match>
+						                          <ui-select-choices repeat="item in driveList | propsFilter: {name: $select.search}">
+						                             <div ng-bind-html="item.name | highlight: $select.search"></div>
+						                          </ui-select-choices>
+						                        </ui-select> -->
+						                        <button type="button" class="btn btn-info"  ng-click="changeDrive(selected_drive)">选择ISO</button>
+					                        </div>
+					                        <div class="half">&nbsp;</div>
+																</div> 
+					                    </div>
+					                    <!-- <div class="control-group" ng-repeat="floppy in newFloppyList">
+					                    	<label class="control-label">新软盘驱动器：</label>
+					                    	<div class="controls">
+					                    		<div class="half">
+																		<ui-select ng-model="floppy.floppy" ng-change="changeFloppy(floppy,floppy.floppy)" >
+						                          <ui-select-match >{{$select.selected.name}}</ui-select-match>
+						                          <ui-select-choices repeat="item in floppyList | propsFilter: {name: $select.search}">
+						                             <div ng-bind-html="item.name | highlight: $select.search"></div>
+						                          </ui-select-choices>
+						                        </ui-select>
+					                        </div>
+					                        <div class="half">&nbsp;</div>
+																</div> 
+					                    </div> -->
+					                    <!-- <div class="control-group" >
+					                    	<label class="control-label">显卡：</label>
+					                    	<div class="controls">
+					                    		<div class="half">
+																		<ui-select ng-model="dispalycard.type" ng-change="changeDispCard(dispalycard.type)" >
+						                          <ui-select-match >{{$select.selected.name}}</ui-select-match>
+						                          <ui-select-choices repeat="item in dispalycardList | propsFilter: {name: $select.search}">
+						                             <div ng-bind-html="item.name | highlight: $select.search"></div>
+						                          </ui-select-choices>
+						                        </ui-select>
+					                        </div>
+					                        <div class="half"><div ng-include="'dispalycard.html'"></div></div>
+																</div> 
+					                    </div> -->
+				                  	<!-- </uib-tab> -->
+				                  	<!-- <uib-tab index="1" heading='虚拟机选项'>
+				                  	</uib-tab>
+				                  	<uib-tab index="2" heading='SDRS规则' >
+				                  	</uib-tab> -->
+				                <!-- </uib-tabset> -->
+	            			</div>
+	            		</div>
+
+	            	</div>
+
+	            </uib-tab>
+	            <uib-tab index="2" heading="3.即将完成" disable="!can_two_step">
+	            	<div class="panel-group step-three" role="tablist">
+	            		<table class="table table-border">
+	            			<tbody>
+	            				<tr>
+	            					<td>置备类型</td>
+	            					<td>创建新虚拟机</td>
+	            				</tr>
+	            				<tr>
+	            					<td>虚拟机名称</td>
+	            					<td>{{params.config.name}}</td>
+	            				</tr>
+	            				<tr>
+	            					<td>文件夹</td>
+	            					<td>{{select_folderMor}}</td>
+	            				</tr>
+	            				<tr>
+	            					<td>集群</td>
+	            					<td>{{select_cluster_name}}</td>
+	            				</tr>
+	            				<tr>
+	            					<td>主机</td>
+	            					<td>{{select_host_name}}</td>
+	            				</tr>
+	            				<tr>
+	            					<td>数据存储</td>
+	            					<td>{{select_datastore_name}}</td>
+	            				</tr>
+	            				<tr>
+	            					<td>客户机操作系统名称</td>
+	            					<td>{{params.config.guestName}}</td>
+	            				</tr>
+	            				<tr>
+	            					<td>CPU (个)</td>
+	            					<td>{{params.config.numCPUs}}</td>
+	            				</tr>
+	            				<tr>
+	            					<td>内存 (MB)</td>
+	            					<td>{{params.config.memoryMB}}</td>
+	            				</tr>
+	            				<tr>
+	            					<td>容量 (MB)</td>
+	            					<td>{{params.config.diskSizeMB}}</td>
+	            				</tr>
+	            			</tbody>
+		            	</table>
+		            	<div class="text-right">兼容性：ESX/ESXi 3.5 及更高版本 (虚拟机版本 4)</div>
+	            	</div>
+	            </uib-tab>
+          </uib-tabset>
+        </form>
+        <div class="btn-items">
+	        <button class="btn btn-default" type="button" ng-show="active===1||active===2" ng-click="forwardPage()">上一步</button>
+	        <button class="btn btn-default" type="button" ng-show="active===0" ng-click="backPage()">下一步</button>
+	        <button class="btn btn-default" type="button" ng-show="active===1" ng-click="backPage()" ng-disabled="!can_two_step">下一步</button>
+	        <button class="btn btn-default" type="button" ng-disabled="!canConfirm" ng-if="active===2" ng-click="vmConfirm()">完成</button>
+	    </div>
+    </div>
+</div>
+<script type="text/ng-template" id="nodes_renderer.html">
+  <div ui-tree-handle class="clearfix" ng-class="{active:node.name===selected_host_vm}">
+    <div class="tree-name">
+      <a class="btn btn-success" data-nodrag>
+        <span class="glyphicon"
+              ng-class="{'glyphicon-chevron-right': collapsed, 'glyphicon-chevron-down': !collapsed}"  ng-click="toggles(this,node)">
+        </span>
+        <span ng-click="change_comp_resc(node)">{{node.name}}</span>
+      </a>
+    </div>
+  </div>
+  <ol ui-tree-nodes="" ng-model="node.childs" ng-class="{hidden: collapsed}">
+    <li ng-repeat="node in node.childs" ui-tree-node data-collapsed="true" data-expand-on-hover="true" ng-include="'nodes_renderer.html'" ng-show="visible_resource(node)">
+    </li>
+  </ol>
+</script>
+<script type="text/ng-template" id="nodes_renderer_vm.html">
+  <div ui-tree-handle class="clearfix" ng-class="{active:node.name===selected_folder_name}">
+    <div class="tree-name" >
+      <a class="btn btn-success" data-nodrag >
+        <span class="glyphicon"
+              ng-class="{'glyphicon-chevron-right': collapsed, 'glyphicon-chevron-down': !collapsed}" ng-click="toggle(this)">
+        </span>
+        <span ng-click="get_folder_func(node)">{{node.name}}</span>
+      </a>
+    </div>
+  </div>
+  <ol ui-tree-nodes="" ng-model="node.childs" ng-class="{hidden: collapsed}">
+    <li ng-repeat="node in node.childs" ui-tree-node ng-include="'nodes_renderer_vm.html'" ng-show="visible(node)">
+    </li>
+  </ol>
+</script>
+<script type="text/ng-template" id="dispalycard.html">
+	<table>
+		<tr>
+			<td>显示器数量</td>
+			<td>
+				<ui-select ng-model="dispalycard.num" ng-change="changeDispCardNum(dispalycard.num)" >
+            <ui-select-match >{{$select.selected.name}}</ui-select-match>
+            <ui-select-choices repeat="item in dispalycardNumList | propsFilter: {name: $select.search}">
+               <div ng-bind-html="item.name | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+			</td>
+		</tr>
+		<tr>
+			<td>总视频内存(MB)</td>
+			<td>
+				<input type="text" ng-model="Total_video_memory"></input>
+				<button ng-click="compute_memory()">视频内存计算器</button>
+			</td>
+		</tr>
+		<tr>
+			<td>显示器数量</td>
+			<td>hahha</td>
+		</tr>
+	</table> 
+</script>
+<script type="text/ng-template" id="computememory.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<h3>根据客户机需要支持的最大显示器数和最高分辨率，计算所需视频内存。</h3>
+		</div>
+		
+		<div class="modal-body"> 
+			<div class="control-group">
+				<label class="control-label">显示器数量</label>
+				<div class="controls">
+					<ui-select ng-model="data.card_number" ng-change="change_card_number(data.card_number)" >
+            <ui-select-match >{{$select.selected.name}}</ui-select-match>
+            <ui-select-choices repeat="item in data.card_number_list | propsFilter: {name: $select.search}">
+               <div ng-bind-html="item.name | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+        </div>
+			</div> 
+			<div class="control-group">
+				<label class="control-label">屏幕分辨率</label>
+				<div class="controls">
+					<ui-select ng-model="data.screen_resolution" ng-change="change_screen_resolution(data.screen_resolution)" >
+            <ui-select-match >{{$select.selected.name}}</ui-select-match>
+            <ui-select-choices repeat="item in data.screen_resolution_list | propsFilter: {name: $select.search}">
+               <div ng-bind-html="item.name | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+         </div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">总视频内存</label>
+				<div class="controls">
+					<input class="form-controls" type="text" ng-model="data.total_memory"></input>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" ng-click="confirm_card()">{{'aws.action.ok'|translate}}</button>
+			<button class="btn btn-default" type="button" ng-click="$close()">{{'aws.action.cancel'|translate}}</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="selectISO.html">
+	<div class="modal-common">
+		<div class="modal-header">
+			<h3>选择ISO</h3>
+		</div>
+		<div class="modal-body">
+			<div class="control-items3 clearfix">
+				<div class="control-group">
+					<div class="table-box">
+						<div class="title">数据存储</div>
+						<div class="text-box">
+							<div ui-tree id="tree-root">
+		        				<ol ui-tree-nodes="" ng-model="rootDSList">
+		          					<li ng-repeat="node in rootDSList" ui-tree-node collapsed="true" data-expand-on-hover="true"  ng-include="'nodes_renderer_ds.html'" ng-show="visible(node)"></li>
+		        				</ol>
+		      				</div>
+						</div>
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="table-box">
+						<div class="title">内容</div>
+						<ul class="text-list">
+							<li ng-repeat="item in child_folder" ng-click="middle_box(item)" ng-class="{blue:item.path===active_item.path}" ng-class="{active:item.path===active_item.path}" title="{{item.path}}">{{item.path}}</li>
+						</ul>
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="table-box">
+						<div class="title">信息</div>
+						<ul class="text-list">
+							<li>
+								<span class="name">名称：</span>
+								<span class="text" title="{{folder_info.path}}">{{folder_info.path}}</span>
+							</li>
+							<li ng-if="folder_info.folder==false">
+								<span class="name">大小：</span>
+								<span class="text" title="{{folder_info.fileSize}}">{{folder_info.fileSize}} MB</span>
+							</li>
+							<li>
+								<span class="name">修改时间：</span>
+								<span class="text" title="{{folder_info.modification| date:'yyyy-MM-dd HH:mm:ss'}}">{{folder_info.modification| date:'yyyy-MM-dd HH:mm:ss'}}</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="control-group">
+  				<label class="control-label">文件类型：</label>
+	  			<div class="controls">
+	  				<ui-select ng-model="file_type" ng-change="change_file_type(file_type)" >
+              	<ui-select-match placeholder="请选择虚拟机存储策略">{{$select.selected.name}}</ui-select-match>
+              	<ui-select-choices repeat="file_type in file_type_list | propsFilter: {name: $select.search}">
+                	<div ng-bind-html="file_type.name | highlight: $select.search"></div>
+              	</ui-select-choices>
+            </ui-select>
+	  			</div>
+  			</div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" type="button" title="{{error_message}}" ng-click="confirmISO()" ng-disabled="!isISO">确定</button>
+			<button class="btn btn-default" type="button" ng-click="$close()">取消</button>
+		</div>
+	</div>
+</script>
+<script type="text/ng-template" id="nodes_renderer_ds.html">
+  <div ui-tree-handle class="clearfix" ng-class="{active:node.path===folder_info_left.path}">
+    <div class="tree-name" >
+      <a class="btn btn-success" data-nodrag >
+        <span class="glyphicon"
+              ng-class="{'glyphicon-chevron-right': collapsed, 'glyphicon-chevron-down': !collapsed}" ng-click="get_ds_path(node,this,'collapsed')">
+        </span>
+        <span ng-click="selectISOFunc(node)" ng-disabled="true">{{node.path}}</span>
+      </a>
+    </div>
+  </div>
+  <ol ui-tree-nodes="" ng-model="node.childs" ng-class="{hidden: collapsed}">
+    <li ng-repeat="node in node.childs" ui-tree-node data-collapsed="true" data-expand-on-hover="true" ng-include="'nodes_renderer_ds.html'" ng-show="visible(node)">
+    </li>
+  </ol>
+</script>

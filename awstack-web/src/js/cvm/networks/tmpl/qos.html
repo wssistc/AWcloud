@@ -1,0 +1,190 @@
+<div class="page-inner">
+  <div class="table-action">
+    <button type="button"  data-toggle="modal" ng-click="qosPolicy('new')" class="btn btn-primary"> 
+      <i class="icon-aw-add-to2"></i>{{"aws.action.create"|translate}}</button>
+    <button type="button"  data-toggle="modal" ng-click="qosPolicy('edit',editData)" ng-disabled="isDisabled" class="btn btn-info"> 
+      <i class="iconfont icon-aw-modify"></i>{{"aws.action.edit"|translate}}</button>
+    <button type="button"  data-toggle="modal" ng-click="deleteQosPolicy(checkedItems)" ng-disabled="delisDisabled" class="btn btn-info"><i class="iconfont icon-aw-delete"></i>{{"aws.action.del"|translate}}</button>
+    <button type="button" class="btn btn-refresh" ng-click="refreshQosPolicy()">
+      <i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}
+    </button>
+    <div class="search-box">
+      <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+        <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+        <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder={{"aws.action.search"|translate}} />
+      </form>
+    </div>
+  </div>
+
+  <script type="text/ng-template" id="headerCheckbox.html">
+    <label class="checkbox">
+      <input type="checkbox" ng-model="checkboxes.checked" class="select-all" value="" />
+      <i class="iconfont"></i>
+    </label>
+  </script>
+
+  <div class="table-content">
+    <empty-tip empty-type="loadData"></empty-tip>
+    <table ng-table="qosPolicyTable" class="table " show-filter="false">
+      <colgroup>
+        <col width="5%">
+        <col width="30%">
+        <col width="30%">
+        <col width="35%">
+      </colgroup>
+      <tr ng-repeat="qosPolicy in $data | filter:globalSearchTerm">
+        <td header="'headerCheckbox.html'">
+          <label class="checkbox">
+            <input type="checkbox" ng-model="checkboxes.items[qosPolicy.id]" />
+            <i class="iconfont"></i>
+          </label>
+        </td>
+        <td data-title="'名称'" sortable="'name'">
+          <div class="edit-name edit-lg">
+            <a ng-href="/cvm/qos?id={{qosPolicy.id}}" title="{{qosPolicy.name}}">{{qosPolicy.name}}</a>
+          </div>
+        </td>
+        <td data-title="'共享'" sortable="'shared'">{{qosPolicy.shared}}</td>
+        <td data-title="'描述'" sortable="'description'">
+          <span class="des des-lg">{{qosPolicy.description}}</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div ng-controller="qosDetailCtrl">
+    <pane class="detail-body" animation="animation" >
+      <div class="tab-content">
+        <div class ="detail-row">
+          <div class="detail-header">
+            <table class="table">
+              <tr>
+                <td></td>
+                <td></td>
+              </tr>
+            </table>
+          </div>
+          <div class="detail-title">
+            <a class = "an-close" ng-href="/cvm/qos"><i class="icon-aw-mail-reply"></i></a>
+            <span>带宽策略详情</span>
+          </div>            
+          <div class="detail-info">
+            <div class="table-action">
+              <button type="button"  data-toggle="modal" ng-click="qosPolicyRule('new')" class="btn btn-primary">
+                <i class="icon-aw-add-to2"></i>新建规则</button>
+              <button type="button"  data-toggle="modal" ng-click="qosPolicyRule('edit',editData)" ng-disabled="isDisabled" class="btn btn-default">修改规则</button>
+              <button type="button"  data-toggle="modal" ng-click="delQosPolicyRule(checkedItems)" ng-disabled="delisDisabled" class="btn btn-default">删除</button>
+              <button class="btn btn-refresh" ng-click="refreshQosPolicyRule()"><i class="icon-aw-refresh"></i>{{'aws.action.refresh'|translate}}</button>
+              <div class="search-box">
+                <form name="searchForm" novalidate ng-keyup="applyGlobalSearch()">
+                  <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                  <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="globalSearchTerm" placeholder={{"aws.action.search"|translate}} />
+                </form>
+              </div>
+            </div>
+            <table ng-table="qosPolicyRulesTable" class="table">
+              <colgroup>
+                <col width="5%">
+                <col span="45">
+                <col width="50%">
+              </colgroup>
+              <tr ng-repeat="qosPolicyRule in $data | filter:globalSearchTerm">
+                <td header="'headerCheckbox.html'">
+                  <label class="checkbox">
+                    <input type="checkbox" ng-model="checkboxes.items[qosPolicyRule.id]" />
+                    <i class="iconfont"></i>
+                  </label>
+                </td>
+                <td data-title="'max_kbps'"  sortable="'max_kbps'">{{qosPolicyRule.max_kbps}}</td>
+                <td data-title="'max_burst_kbps'" sortable="'max_burst_kbps'">{{qosPolicyRule.max_burst_kbps}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </pane>
+  </div>
+  <script type="text/ng-template" id="qosPolicyModal.html">
+    <div class="modal-common">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{qosPolicyModal_title}}</h3>
+    </div>
+    <div class="modal-body">
+      <form name="qospolicyForm">
+        <div class="control-group" >
+          <label class="control-label"><span class="red">*</span>&nbsp;名称：</label>
+          <div class="controls">
+            <input type="text" class="form-controls" name="qosPolicyName"
+               ng-model="qosPolicyForm.name"
+               ng-maxlength="32"
+               ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-)*$/"
+               placeholder="请输入带宽策略名称" required />
+             <div class="error" ng-messages='qospolicyForm.qosPolicyName.$error' ng-if="interacted(qospolicyForm.qosPolicyName)" >
+              <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              <div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+              <div ng-message="pattern">{{'aws.errors.noSpecial'|translate}}</div>
+             </div>
+          </div>
+        </div>
+        <div class="control-group" >
+          <label class="control-label">共享：</label>
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" class="form-controls chk" name="shared" ng-model="qosPolicyForm.shared" />
+              <i class="iconfont"></i>
+            </label>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">描述：</label>
+          <div class="controls">
+            <textarea type="text" class="form-controls" ng-maxlength="80" name="description" ng-model="qosPolicyForm.description " />
+            <div class="error" ng-messages="qospolicyForm.description.$error"  ng-if="interacted(qospolicyForm.description)" >
+              <div ng-message="maxlength">{{'aws.errors.description'|translate}}</div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="qosPolicyConfirm(qospolicyForm)">{{"aws.action.ok"|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+    </div>
+    </div>
+  </script>
+  <script type="text/ng-template" id="qosPolicyRuleModal.html">
+    <div class="modal-common">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+        <h3 class="modal-title">{{qosPolicyRuleModal_title}}</h3>
+      </div>
+      <div class="modal-body">
+        <form name="qospolicyruleForm">
+          <div class="control-group">
+            <label class="control-label"><span class="red">*</span>&nbsp;max_kbps：</label>
+            <div class="controls">
+               <input type="text" class="form-controls" name="max_kbps" ng-model="qosPolicyRuleForm.max_kbps" required />
+               <div class="error" ng-messages="qospolicyruleForm.max_kbps.$error"  ng-if="interacted(qospolicyruleForm.max_kbps)" >
+                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label"><span class="red">*</span>&nbsp; max_burst_kbps：</label>
+            <div class="controls">
+              <input type="text" class="form-controls" name="max_burst_kbps" ng-model="qosPolicyRuleForm.max_burst_kbps" required />
+               <div class="error" ng-messages="qospolicyruleForm.max_burst_kbps.$error"  ng-if="interacted(qospolicyruleForm.max_burst_kbps)" >
+                <div ng-message="required">{{'aws.errors.required'|translate}}</div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="qosPolicyRuleConfirm(qospolicyruleForm)">{{"aws.action.ok"|translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$dismiss()">{{"aws.action.cancel"|translate}}</button>
+      </div>
+    </div>
+  </script>
+</div>

@@ -1,0 +1,81 @@
+
+<div class="modal-common">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$dismiss()">×</button>
+		<h3 class="modal-title">创建伸缩规则</h3>
+	</div>
+	<div class="modal-body">
+		<form name="ruleForm" novalidate>
+			<div class="control-group">
+				<label class="control-label">规则名称：</label>
+				<div class="controls">
+					<input type="text" class="form-controls" name="name" ng-model="newObj.name" placeholder="请输入规则名称" ng-pattern="/^(\w|[\u4E00-\u9FA5]|\-|\_)*$/" ng-maxlength="32" required />
+					<div class="error" ng-if="interacted(ruleForm.name)" ng-messages="ruleForm.name.$error" >
+							<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+							<div ng-message="pattern">只能输入中文、字母、数字、横线以及下划线</div>
+							<div ng-message="maxlength">{{'aws.errors.maxlength'|translate}}</div>
+						</div>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">规则：</label>
+				<div class="controls">
+					
+					<div class="control-items3 half">
+						<div class="control-group">
+							<ui-select ng-model="newObj.option" ng-change="change_option(newObj.option)">
+								<ui-select-match placeholder="请选择系统架构">{{$select.selected.name}}</ui-select-match>
+								<ui-select-choices repeat="option in newObj.option_list | propsFilter: {name: $select.search}">
+									<div ng-bind-html="option.name | highlight: $select.search"></div>
+								</ui-select-choices>
+							</ui-select>
+						</div>
+						<div class="control-group">
+							<ui-select ng-model="newObj.number" ng-change="change_number(newObj.number)">
+								<ui-select-match placeholder="请选择系统架构">{{$select.selected.name}}</ui-select-match>
+								<ui-select-choices repeat="number in newObj.number_list | propsFilter: {name: $select.search}">
+									<div ng-bind-html="number.name | highlight: $select.search"></div>
+								</ui-select-choices>
+							</ui-select>
+						</div>
+						<div class="control-group">
+							<ui-select ng-model="newObj.unit" ng-change="change_unit(newObj.unit)">
+								<ui-select-match placeholder="请选择镜像类型：">{{$select.selected.name}}</ui-select-match>
+								<ui-select-choices repeat="unit in newObj.unit_list | propsFilter: {name: $select.search}">
+									<div ng-bind-html="unit.name | highlight: $select.search"></div>
+								</ui-select-choices>
+							</ui-select>
+						</div>
+					</div>
+				</div>
+			</div>
+            <div class="control-group">
+				<label class="control-label" title="默认冷却时间（秒）">默认冷却时间（秒）：</label>
+				<div class="controls">
+					<input type="text" class="form-controls" name="defaultCooldown" ng-model="newObj.defaultCooldown" placeholder="请输入默认冷却时间" ng-pattern="/^[0-9]*$/" min="0" max="86400" limitnumrange required />
+					<div class="error" ng-if="interacted(eeForm.defaultCooldown)" ng-messages="eeForm.defaultCooldown.$error" >
+						<div ng-message="required">{{'aws.errors.required'|translate}}</div>
+						<div ng-message="pattern">{{'aws.errors.integer'|translate}}</div>
+						<div ng-message="limitnumrange">请输入0~86400之间的整数</div>
+					</div>  
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">告警模板</label>
+				<div class="controls">
+					<ui-select ng-model="newObj.template" ng-change="change_template(newObj.template)">
+						<ui-select-match placeholder="请选择镜像：">{{$select.selected.name}}</ui-select-match>
+						<ui-select-choices repeat="template in newObj.template_list | propsFilter: {name: $select.search}">
+							<div ng-bind-html="template.name | highlight: $select.search"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</div>	
+		</form>
+	</div>
+	
+	<div class="modal-footer">
+		<button class="btn btn-info" type="button" ng-disabled="!can_confirm()" ng-click="create()">{{'aws.action.ok' | translate}}</button>
+		<button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel' | translate}}</button>
+	</div>
+</div>

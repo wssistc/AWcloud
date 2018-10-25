@@ -1,0 +1,431 @@
+<div class="page-inner">
+ <div class="tab-offset-right">
+   <ul class="nav nav-tabs nav-justified">
+      <li ng-class="{active:regionTab.isNodeShow}" class="uib-tab nav-item " ng-click="chooseNode(0)">
+        <a href="">{{'aws.node.clusterNode.virtualNode'| translate}}</a>
+      </li>
+      <li ng-class="{active:!regionTab.isNodeShow}" class="uib-tab nav-item" ng-click="chooseDocker(0)" licence-type="btn" id="system-dataCenter-containerNode">
+        <a href="">{{'aws.node.clusterNode.containerNode'| translate}}</a>
+      </li>
+   </ul>
+   <div class="tab-content" ng-if="regionTab.isNodeShow">
+     <div class="alert alert-warning multi-mes alert-no-close" ng-if="joinClustertips">
+      <div class="alert-content">
+          <div class="alert-text">
+            {{'aws.node.clusterNode.accessStorage'| translate}}
+          </div>
+        </div>
+     </div>
+     <div>        
+        <div class="table-action node-action">
+          <button type="button" ng-click="initConfig(checkedItems)" class="btn btn-new" ng-disabled="!canInitConfig||!canInsert">{{'aws.node.clusterNode.addCluster'| translate}}</button>
+          <button class="btn btn-normal" type="button" ng-click="nodesUsefulFrame()" ng-if="isShowNodeUserfulFrame" ng-disabled="!canNodeUsefulFrame">{{'aws.node.clusterNode.enableHa'| translate}}</button>
+          <button type="button" ng-disabled="isDisabled" ng-click="importHardware(checkedItems)" class="btn btn-normal">{{'aws.node.import'| translate}}</button>
+          <div class="dropdown" licence-type="btn-group">
+            <button type="button" class="btn btn-normal dropdown-toggle" data-toggle="dropdown" ng-disabled="delisDisabled">{{'aws.action.moreAction'|translate}}<i class=" icon-aw-angle-down"></i></button>
+            <ul class="dropdown-menu">
+              <li licence-type="btn">
+                <button ng-click="activation(checkedItems)" btn-right-info ng-class="{'disabled':(!canActive||actionCan)}">{{'aws.node.activation'| translate}}</button>
+                <div ng-show="checkedItems.length==1">
+                   <div class="btn-info">
+                       <div class="arrow"></div>
+                       <div class="info-inner">
+                          <div>激活节点的条件：当前节点的状态为维护中</div>
+                       </div>
+                   </div>
+                </div>
+              </li>
+              <li licence-type = "btn">
+                <button ng-click="maintenance(checkedItems)" btn-right-info ng-class="{'disabled':((!canMaintenance)||(!canMaintenanceTwo))}">{{'aws.node.repair'| translate}}</button>
+                <div ng-show="checkedItems.length==1">
+                   <div class="btn-info">
+                       <div class="arrow"></div>
+                       <div class="info-inner">
+                          <div>维护节点的条件：</div>
+                          <div>1.此节点处于使用中且为配置成功状态</div>
+                          <div>2.当前集群中不存在过程状态的节点</div>
+                          <div>3.除去勾选节点的剩余节点中，处于使用中且状态为配置成功的节点的个数需大于或者等于3</div>
+                       </div>
+                   </div>
+                </div>
+              </li>
+              <li licence-type = "btn">
+                <button ng-click="deleteNode(checkedItems)" btn-right-info ng-class="{'disabled':(!canDel||!canDelTwo)}">{{'aws.action.del'|translate}}</button>
+                <div ng-show="checkedItems.length==1">
+                   <div class="btn-info">
+                       <div class="arrow"></div>
+                       <div class="info-inner">
+                           <div ng-if="small_3">
+                              <div>{{'aws.node.clusterNode.nodeTips1'| translate}}</div>
+                              <div>{{'aws.node.clusterNode.nodeTips2'| translate}}</div>
+                              <div>{{'aws.node.clusterNode.nodeTips3'| translate}}</div>
+                              <div>{{'aws.node.clusterNode.nodeTips5'| translate}}</div>
+                           </div>
+                           <div ng-if="!small_3&&!notDelNode1">
+                              <div>{{'aws.node.clusterNode.nodeTips1'| translate}}</div>
+                              <div>{{'aws.node.clusterNode.nodeTips4'| translate}}</div>
+                              <div>{{'aws.node.clusterNode.nodeTips6'| translate}}</div>
+                           </div>
+                           <div ng-if="!small_3&&notDelNode1">
+                              <div>{{'aws.node.clusterNode.currentDelivery'| translate}}
+                                  <span ng-if="volumeImageData.cinderVolume<1">{{('aws.node.clusterNode.buttedStorage'| translate)+checkedItems[0].hostName+('aws.node.clusterNode.canNotDel'| translate)}}</span>
+                                  <span ng-if="(volumeImageData.cinderVolume>0)&&(volumeImageData.image!=2)">{{('aws.node.clusterNode.mirror'| translate)+checkedItems[0].hostName+('aws.node.clusterNode.canNotDel'| translate)}}</span>
+                              </div>
+                           </div>
+                       </div>
+                   </div>
+                </div>
+              </li>
+              <li licence-type = "btn">
+                <button ng-click="forceDeleteNode(checkedItems)" btn-right-info ng-class="{'disabled':(!canForceDeleteNode)}">{{'aws.action.forceDel'|translate}}</button>
+                <div ng-show="checkedItems.length==1">
+                   <div class="btn-info">
+                       <div class="arrow"></div>
+                       <div class="info-inner">
+                          <div>强制删除节点的条件：当前处于多数据中心，数据中心个数大于1，且当前数据中心集群中的节点数小于或者等于3</div>
+                       </div>
+                   </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="pull-right">
+            <into-information modular="'node'"></into-information>
+            <setting title-data="nodeTitleData" site-title="nodeTitleName" table-data="nodeListData" search-tearm="nodesSearchTerm(obj)"></setting>
+            <button class="btn btn-renovat right-ports" ng-click="refreshNodes(search.nodeSearchTerm)">
+              <i class="icon-aw-refresh"></i>
+            </button>
+            <div class="search-box right-ports">
+              <form name="searchForm" novalidate ng-keyup="applyGlobalSearch(search.nodeSearchTerm)">
+                <button class="btn" type="submit" ng-disabled="searchForm.$invalid"><i class="icon-aw-search"></i></button>
+                <input type="text" class="form-control" autocomplete="off" maxlength="128" name="searchTerm" ng-model="search.nodeSearchTerm" placeholder="{{'aws.action.search' | translate}}" />
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="table-content">
+            <table ng-table="tableNodes" class="table" show-filter="false">
+                <colgroup>
+                    <col width="4%">
+                </colgroup>
+                <tr ng-repeat="item in $data" ng-class="{true:'deleteNode',false:'none'}[item.status==21]">
+                    <td header="'headerCheckboxtableNodes.html'">
+                        <label class="checkbox">
+                            <input type="checkbox" ng-model="checkboxestableNodes.items[item.nodeUid]" />
+                            <i class="iconfont"></i>
+                        </label>
+                    </td>
+                    <td data-title="'aws.node.hypervisorHostname'|translate" sortable="'hostName'" ng-if="nodeTitleData[0].value">
+                        <div class="edit-name">
+                            <a ng-href="configure/node?id={{item.nodeUid}}&name={{item.hostName}}&nodeType=node" title="{{item.hostName}}">{{item.hostName}}</a>
+                        </div>
+                    </td>
+                    <td data-title="'aws.node.regionName'|translate" sortable="'regionName'" ng-if="nodeTitleData[1].value">
+                        {{item.regionName}}
+                    </td>
+                    <td data-title="'aws.node.management_IP'|translate" sortable="'hostInfoMap.ip'" ng-if="nodeTitleData[2].value">
+                        {{item.hostInfoMap.ip}}
+                    </td>
+                    <td data-title="'aws.node.lastTime'|translate" sortable="'lastTime'" ng-if="nodeTitleData[3].value">
+                        <span class="date">{{item.lastTime| date:'yyyy-MM-dd HH:mm:ss'}}</span>
+                    </td>
+                    <td data-title="'aws.node.roles'|translate" sortable="'roles'" ng-if="nodeTitleData[4].value">
+                        {{item.roles}}
+                    </td>
+                    <td data-title="'aws.node.useStatus'|translate" sortable="'useStatus'" ng-if="nodeTitleData[5].value">
+                        {{'aws.node.useStatusValues.'+item.useStatus| translate}}
+                    </td>
+                    <td data-title="'aws.node.healthStaus.status'|translate" sortable="'healthStatus'" ng-if="nodeTitleData[6].value">
+                        <span ng-class="{'bg-green':(item.healthStatus=='status' || item.healthStatus==true),'bg-orange':(item.healthStatus=='repair')}" class="orange">{{'aws.node.healthStaus.'+item.healthStatus| translate}}
+                        </span>
+                    </td>
+                    <td data-title="'aws.node.Status'|translate" sortable="'status'" ng-if="nodeTitleData[7].value">
+                        <span>{{'aws.node.status.'+item.status| translate}}</span>
+                        <span><button type="button"  ng-show="item.canActivation" ng-click="retryActivation(item)" class="btn btn-info" ng-disabled="actionCan">{{'aws.node.activation'| translate}}</button></span>
+                        <span><button type="button"  ng-show="item.canRetry" ng-click="retry(item)" ng-disabled="retryCan" class="btn btn-info">{{'aws.node.retry'| translate}}</button></span>
+                    </td>
+                    <td data-title="'aws.node.errorArea'|translate" class="td-fault" ng-if="nodeTitleData[8].value&&isShowErrorMsg">
+                        <input class="form-controls fault-item" type="text" ng-model="item.fault_domain" ng-disabled="item.useStatus||!canEditErrorArea" ng-change="editFault(item)">
+                        <div class="node-help-block">{{item.errorMessage}}</div>
+                      </td>
+                </tr>
+            </table>
+        </div>
+     </div>
+   </div>
+   <div class="tab-content" ng-if="regionTab.isdockerShow">
+    <div ng-include="'js/kubernetes/dockerNodes/tmpl/dockerNodes.html'" class="kubernets-container"></div>
+   </div>
+ </div>
+   <div ng-controller="detailCtrl">
+    <pane class="detail-body" animation="animation">
+      <div class="cluster-box">
+         <div class="clearfix">
+              <div class="tab-content" ng-if="regionTab.isNodeShow">
+                <div class="detail-row">
+                  <div class="detail-header">
+                    <table class="table">
+                      <tr>
+                        <td>{{'aws.register.info.hostName'| translate}}：<a>{{detailHead.hostName}}</a></td>
+                        <td>{{detailHead.regionName}}</td>
+                        <td>{{detailHead.lastTime}}</td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div class="detail-title">
+                    <a class="an-close" ng-href="configure/node"><i class="icon-aw-mail-reply"></i></a>
+                    <span>{{nodename}}{{'aws.node.nodeMessage'| translate}}</span>
+                  </div>
+                  <div ng-if="usedNode==false">
+                     <div class="detail-info">
+                       <div class="tab-content-line"></div>
+                       {{'aws.node.clusterNode.addClusterTip'| translate}}
+                     </div>
+                  </div>
+                  <div ng-if="usedNode!=false">
+                      <div class="detail-info node-info" >
+                        <div class="tab-content-line"></div>
+                        <table class="table border" ng-show="isShowNet">
+                          <thead>
+                            <tr>
+                              <th>{{'aws.system.hypervisor.netName'|translate}}</th>
+                              <th>IP</th>
+                              <th>{{'aws.system.hypervisor.subnetMask'|translate}}</th>
+                              <th ng-if="!isVxlan">{{'aws.system.hypervisor.vlanRange'|translate}}</th>
+                              <th ng-if="isVxlan">{{'aws.system.hypervisor.vxlanRange'|translate}}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr ng-repeat="net in NodedetailData.network">
+                              <td class="col-2">
+                                <span>{{'aws.node.node_detail.'+net.role| translate}}</span>
+                              </td>
+                              <td>{{net.ip}}</td>
+                              <td>{{net.netmask}}</td>
+                              <td><span ng-show="net.isShow">{{net["vlan-start"]}} ~ {{net["vlan-end"]}}</span></td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-info column">
+                          <tr>
+                            <td>{{'aws.node.clusterNode.physicalHostName'| translate}}</td>
+                            <td>{{hypervisor.hypervisorHostname}}</td>
+                            <td>{{'aws.node.clusterNode.ipmiAddress'| translate}}</td>
+                            <td>{{detail_ipmi_address}}</td>
+                          </tr>
+                          <tr>
+                            <td>{{'aws.node.clusterNode.virtualNumber'| translate}}</td>
+                            <td>{{isNodeHealth?hypervisor.runningVM:'N/A'}}</td>
+                            <td>{{'aws.node.clusterNode.virtualType'| translate}}</td>
+                            <td>{{hypervisor.type}}</td>
+                          </tr>
+                          <tr>
+                            <td>{{'aws.node.clusterNode.usedPhysicalCPU'| translate}}</td>
+                            <td>{{hypervisor.virtualUsedCPU}}</td>
+                            <td>{{'aws.node.clusterNode.totalPhysicalCPU'| translate}}</td>
+                            <td>{{hypervisor.virtualCPU}}</td>
+                          </tr>
+                          <tr>
+                            <td>{{'aws.node.clusterNode.usedMemory'| translate}}</td>
+                            <td>{{hypervisor.localMemoryUsed}}</td>
+                            <td>{{'aws.node.clusterNode.totalMemory'| translate}}</td>
+                            <td>{{hypervisor.localMemory}}</td>
+                          </tr>
+                          <tr>
+                            <td>{{'aws.node.clusterNode.totalDisk'| translate}}</td>
+                            <td>{{hypervisor.localDisk}}</td>
+                            <td>{{'aws.node.clusterNode.freeMemory'| translate}}</td>
+                            <td>{{hypervisor.freeRam}}</td>
+                          </tr>
+                          <tr>
+                            <td>{{'aws.node.clusterNode.usedDisk'| translate}}</td>
+                            <td>{{hypervisor.localDiskUsed}}</td>
+                            <td>{{'aws.node.clusterNode.currentTask'| translate}}</td>
+                            <td>{{hypervisor.currentWorkload}}</td>
+                          </tr>
+                          <tr>
+                            <td>{{'aws.node.clusterNode.minAvailableDisk'| translate}}</td>
+                            <td>{{hypervisor.leastDiskAvailable}}</td>
+                            <td>{{'aws.node.clusterNode.freeDisk'| translate}}</td>
+                            <td>{{hypervisor.freeDisk}}</td>
+                          </tr>
+                        </table>
+                      </div>
+                  </div>
+                </div>
+              </div>
+              <!-- <div class="detail-content" ng-if="regionTab.isdockerShow" >
+                <div class="detail-row">
+                   <div class="detail-title">
+                    <a class="an-close" ng-href="configure/node"><i class="icon-aw-mail-reply"></i></a>
+                    <span>{{selectedNode.name}}详情</span>
+                   </div>
+                   <div ng-include="'js/kubernetes/dockerNodes/tmpl/detailpart.html'"></div>
+                </div>
+              </div> -->
+              <div class="" ng-if="regionTab.isdockerShow" >
+                <div class="node-detail">
+                  <div class="node-detail-title detail-title">
+                    <a class="an-close" ng-href="configure/node"><i class="icon-aw-mail-reply"></i></a>
+                    <span class="title-node">{{selectedNode.name}}{{'aws.node.clusterNode.detail'| translate}}</span>
+                  </div>
+                  <div ng-include="'js/kubernetes/dockerNodes/tmpl/detailpart.html'" class="detail-info"></div>
+                </div>
+              </div> 
+         </div>
+      </div>
+    </pane>
+  </div>
+</div>
+<script type="text/ng-template" id="headerCheckboxtableNodes.html">
+  <label class="checkbox">
+    <input type="checkbox" ng-model="checkboxestableNodes.checked" class="select-all-tableNodes" value="" />
+    <i class="iconfont"></i>
+  </label>
+</script>
+<script type="text/ng-template" id="warningtableNodes.html">
+    <span>{{'aws.node.errorArea'|translate}}</span>
+    <i class="icon-aw-question-mark question-tip" uib-popover="{{'aws.node.clusterNode.falutTips'| translate}}"  popover-trigger="mouseenter" popover-placement = "bottom" ></i>
+</script>
+<script type="text/ng-template" id="delMsg.html">
+   <div ng-if="small_3">
+      <div>{{'aws.node.clusterNode.nodeTips1'| translate}}</div>
+      <div>{{'aws.node.clusterNode.nodeTips2'| translate}}</div>
+      <div>{{'aws.node.clusterNode.nodeTips3'| translate}}</div>
+   </div>
+   <div ng-if="!small_3&&!notDelNode1">
+      <div>{{'aws.node.clusterNode.nodeTips1'| translate}}</div>
+      <div>{{'aws.node.clusterNode.nodeTips4'| translate}}</div>
+   </div>
+   <div ng-if="!small_3&&notDelNode1">
+      <div>{{'aws.node.clusterNode.currentDelivery'| translate}}<span ng-if="volumeImageData.cinderVolume<1">{{'aws.node.clusterNode.buttedStorage'| translate}}</span><span ng-if="(volumeImageData.cinderVolume>0)&&(volumeImageData.image!=2)">{{'aws.node.clusterNode.mirror'| translate}}</span></div>
+   </div>
+</script>
+<script type="text/ng-template" id="deleteNode.html">
+  <div class=" modal-common deletNode-modal">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$dismiss()">×</button>
+      <h3 class="modal-title">{{'aws.node.delNodes'|translate}}</h3>
+    </div>
+    <div class="modal-body ">
+      <uib-alert  type="danger" >
+        <div>
+          <span class='configure'>{{"aws.node.confirmDel" | translate}}</span></br>
+          <span class='configure'>{{"aws.node.confirmDel2" | translate}}</span></br>
+          <span class='configure'>{{"aws.node.confirmDel3" | translate}}</span></br>
+          <span class='configure'>{{"aws.node.confirmDel4" | translate}}</span></br>
+          <span class='configure'>{{"aws.node.confirmDel5" | translate}}</span></br>
+          <span class='configure'>{{"aws.node.confirmDel6" | translate}}</span></br>
+        </div>
+      </uib-alert>
+      <form name="nodeForm" novalidate>
+        <div class="control-group">
+          <label class="control-label">{{'aws.auth.user'|translate}}：</label>
+          <div class="controls">
+            <input class="form-controls" 
+                 autocomplete="off"
+                       type="text"
+                       name="username"
+                       ng-model="node.username"
+                       required 
+                       />
+            <div  class="error" ng-messages="(submitInValid ||nodeForm.username.$dirty) && nodeForm.username.$error">
+              <form-validate ></form-validate>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" ng-class="{'focus':passwordfocus}">
+          <label class="control-label">{{'aws.auth.passwd'|translate}}：</label>
+          <div class="controls">
+            <input class="form-controls"
+                        type="password"
+                        name="password"
+                        ng-model="node.password"
+                        required
+                        />
+            <div  class="error" ng-messages="(submitInValid ||nodeForm.password.$dirty) && nodeForm.secName.$error">
+              <form-validate ></form-validate>
+            </div>
+          </div> 
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+          <button class="btn btn-info" type="button" ng-click="confirm(nodeForm)">{{'aws.instances.addinstances.ok'|translate}}</button>
+      <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="forceDeleteNode.html">
+    <div class=" modal-common deletNode-modal">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$dismiss()">×</button>
+            <h3 class="modal-title">{{'aws.node.forceDelNodes'|translate}}</h3>
+        </div>
+        <div class="modal-body ">
+            <uib-alert  type="danger" >
+                <div>
+                    <span class='configure'>{{"aws.node.confirmDel8" | translate}}</span></br>
+                </div>
+            </uib-alert>
+            <uib-alert  type="danger" >
+                <div>
+                    <span class='configure'>{{"aws.node.confirmDel7" | translate}}</span></br>
+                </div>
+            </uib-alert>
+            <form name="nodeForm" novalidate>
+                <div class="control-group">
+                    <label class="control-label">{{'aws.auth.user'|translate}}：</label>
+                    <div class="controls">
+                        <input class="form-controls" 
+                            autocomplete="off"
+                                    type="text"
+                                    name="username"
+                                    ng-model="node.username"
+                                    required 
+                                    />
+                        <div  class="error" ng-messages="(submitInValid ||nodeForm.username.$dirty) && nodeForm.username.$error">
+                            <form-validate ></form-validate>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="{'focus':passwordfocus}">
+                    <label class="control-label">{{'aws.auth.passwd'|translate}}：</label>
+                    <div class="controls">
+                        <input class="form-controls"
+                                type="password"
+                                name="password"
+                                ng-model="node.password"
+                                required
+                                />
+                        <div  class="error" ng-messages="(submitInValid ||nodeForm.password.$dirty) && nodeForm.secName.$error">
+                            <form-validate ></form-validate>
+                        </div>
+                    </div> 
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-info" type="button" ng-click="confirm(nodeForm)">{{'aws.instances.addinstances.ok'|translate}}</button>
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.instances.addinstances.cancel'|translate}}</button>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="errorAreaWarning.html">
+    <div class=" modal-common modal-del">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="$close()">×</button>
+        </div>
+        <div class="modal-body ">
+            <div class="box">
+                <span class = "Warning"> 
+                {{'aws.node.clusterNode.falutTips'| translate}}
+                </span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" type="button" ng-click="$dismiss()">{{'aws.action.cancel'|translate}}</button>
+        </div> 
+    </div>
+</script>

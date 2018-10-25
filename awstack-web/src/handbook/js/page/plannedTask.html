@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<body class="articleview">
+
+<!-- /header -->
+<div class="w960 center clear mt1">
+<div class="pleft">
+
+ <!-- /place -->
+ <div class="viewbox">
+  <div class="title">
+   <h2>计划任务</h2>
+  </div>
+  <!-- /title -->
+
+ 
+  <div class="content">
+   <table width='100%'>
+    <tr>
+     <td><div id="contentMidPicAD" style="float:right; clear:both; top:0; vertical-align:top;"></div>
+      <h3>
+	定时快照</h3>
+<p>
+	数据被写入了云硬盘之后，可以定期创建快照作为数据备份使用。定时快照使用增量的方式创建快照，即仅创建与上一次快照相比更改了的数据，因此在数据量改动不大的情况下能够在较快的时间内完成快照的创建。尽管快照是以增量方式保存的，但是快照删除流程不会互相制约：未删除的快照均能将云硬盘恢复至该快照状态。</p>
+<p>
+	常见的策略如下：</p>
+<ul>
+	<li>
+		非核心业务数据盘，可设定每周一零点进行一次自动快照备份，保存1个月后自动删除。</li>
+	<li>
+		核心业务数据盘，每隔12小时进行一次快照备份，保存1周后删除。</li>
+</ul>
+<h3>
+	修改定时快照任务</h3>
+<ol>
+	<li>
+		在计划任务列表页，勾选要编辑的定时快照任务，单击&ldquo;编辑任务&rdquo;按钮。</li>
+	<li>
+		除了&ldquo;任务类型&rdquo;和&ldquo;云主机名称&rdquo;，其他参数都可以修改。<br />
+		<strong>注意：</strong><br />
+		&ldquo;保留份数&rdquo;，只允许调大，不允许调小。以防止调小保留份数时，无法保证整体的快照数量。</li>
+	<li>
+		修改完之后，单击&ldquo;确定&rdquo;按钮使参数生效。</li>
+</ol>
+<h3>
+	新建定时备份任务</h3>
+<p>
+	<strong>前提条件</strong></p>
+<ul>
+	<li>
+		云主机备份存储设备信息已配置完成，存储设备剩余容量必须满足备份需求。<br />
+		备份存储设备在&ldquo;系统管理&gt;运营管理 &gt;存储管理&rdquo;中进行配置。</li>
+	<li>
+		云主机挂载的云硬盘状态为&ldquo;可用&rdquo;或&ldquo;使用中&rdquo;时才能进行备份创建。<br />
+		云硬盘状态在&ldquo;虚拟资源管理&gt;计算 &gt;存储&rdquo;中查看。</li>
+</ul>
+<p>
+	<strong>操作步骤</strong></p>
+<ol>
+	<li>
+		在云管平台的Web控制台上，选择&ldquo;产品和服务 &gt;系统管理 &gt;运维管理&rdquo;，进入运维管理导航菜单。</li>
+	<li>
+		在左侧导航菜单中单击&ldquo;计划任务&rdquo;，进入计划任务页面。</li>
+	<li>
+		单击&ldquo;新建任务&rdquo;按钮。</li>
+	<li>
+		设置定时备份任务的各项参数。</li>
+	<li>
+		单击&ldquo;确定&rdquo;按钮，在计划任务列表区可以查看任务信息。</li>
+</ol>
+<h3>
+	修改定时备份任务</h3>
+<ol>
+	<li>
+		在计划任务列表页，勾选要编辑的定时备份任务，单击&ldquo;编辑任务&rdquo;按钮。</li>
+	<li>
+		除了&ldquo;任务类型&rdquo;和&ldquo;云主机名称&rdquo;，其他参数都可以修改。<br />
+		<strong>注意：</strong><br />
+		&ldquo;保留份数&rdquo;，只允许调大，不允许调小。以防止调小保留份数时，无法保证整体的备份数量。</li>
+	<li>
+		修改完之后，单击&ldquo;确定&rdquo;按钮使参数生效。</li>
+</ol>
+
+      
+     </td>
+    </tr>
+   </table>
+  </div>
+  <!-- /content -->
+  <div class="dede_pages">
+   <ul class="pagelist">
+    
+   </ul>
+  </div>
+
+<center></center>
+  
+
+
+<!-- /footer -->
+
+</script>
+</body>
+</html>
